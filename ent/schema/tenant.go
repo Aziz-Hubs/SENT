@@ -53,6 +53,8 @@ func (Tenant) Edges() []ent.Edge {
 		edge.To("health_snapshots", HealthScoreSnapshot.Type),
 		edge.To("roadmaps", StrategicRoadmap.Type),
 		edge.To("service_rates", ServiceRate.Type),
+		edge.To("network_devices", NetworkDevice.Type),
+		edge.To("network_backups", NetworkBackup.Type),
 		edge.To("budget_forecasts", BudgetForecast.Type),
 		edge.To("employees", Employee.Type),
 		edge.To("compensation_agreements", CompensationAgreement.Type),

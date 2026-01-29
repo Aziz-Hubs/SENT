@@ -34,5 +34,6 @@ func (NetworkDevice) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("ports", NetworkPort.Type),
 		edge.To("backups", NetworkBackup.Type),
+		edge.From("tenant", Tenant.Type).Ref("network_devices").Unique(),
 	}
 }

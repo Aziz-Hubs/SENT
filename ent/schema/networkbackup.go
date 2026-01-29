@@ -28,5 +28,8 @@ func (NetworkBackup) Edges() []ent.Edge {
 			Ref("backups").
 			Unique().
 			Required(),
+		edge.From("tenant", Tenant.Type).
+			Ref("network_backups").
+			Unique(),
 	}
 }

@@ -1,0 +1,114 @@
+package agent
+
+import (
+	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+// Run starts the SENT agent.
+func Run() {
+	fmt.Println("[AGENT] Starting SENT pulse agent...")
+
+	// 1. Identify Agent (For MVP, generate or load UUID)
+	agentID := getAgentID()
+	log.Printf("[AGENT] Agent ID: %s", agentID)
+
+	// 2. Initialize Components
+	collector := NewCollector()
+	cache, err := NewLocalCache("agent_cache.db")
+	if err != nil {
+		log.Fatalf("[AGENT] Failed to initialize cache: %v", err)
+	}
+	defer cache.Close()
+
+	// 3. Connect to Real-time Hub
+	// TODO: Get token from backend or use static for MVP
+	client := NewPulseClient("ws://localhost:8000/connection/websocket", agentID, "")
+	if err := client.Connect(); err != nil {
+		log.Printf("[AGENT] Warning: Failed to connect to hub: %v. Data will be cached.", err)
+	}
+	defer client.Close()
+
+	// 4. Setup Control Handler
+	client.SubscribeControl(func(cmd string) {
+		log.Printf("[AGENT] Received remote command: %s", cmd)
+		// TODO: Implement Command Execution (Process Kill, etc.)
+	})
+
+	// 5. Setup Signal Handling
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	// 6. Main Ticker Loop
+	go func() {
+		ticker := time.NewTicker(5 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				// Collect
+				metrics, err := collector.GetMetrics()
+				if err != nil {
+					log.Printf("[AGENT] Error collecting metrics: %v", err)
+					continue
+				}
+				
+				// Cache
+				if err := cache.SaveTelemetry(metrics); err != nil {
+					log.Printf("[AGENT] Error caching telemetry: %v", err)
+				}
+
+				// Drain Cache
+				drainCache(cache, client)
+			}
+		}
+	}()
+
+	// Block until signal
+	<-sigChan
+	fmt.Println("[AGENT] Shutdown signal received.")
+}
+
+func getAgentID() string {
+	// For MVP: try reading from a local file, otherwise generate
+	idFile := ".agent_id"
+	data, err := os.ReadFile(idFile)
+	if err == nil {
+		return string(data)
+	}
+	id := uuid.New().String()
+	_ = os.WriteFile(idFile, []byte(id), 0644)
+	return id
+}
+
+func drainCache(cache *LocalCache, client *PulseClient) {
+	// Fetch pending records
+	metricsBatch, ids, err := cache.GetPending(50)
+	if err != nil {
+		return
+	}
+	if len(ids) == 0 {
+		return
+	}
+
+	successIds := []int64{}
+	for i, m := range metricsBatch {
+		if err := client.PublishTelemetry(m); err == nil {
+			successIds = append(successIds, ids[i])
+		} else {
+			// If we fail to publish one, stop draining for now
+			break
+		}
+	}
+
+	// Remove successfully sent records from local cache
+	if len(successIds) > 0 {
+		_ = cache.DeleteTelemetry(successIds)
+	}
+}
