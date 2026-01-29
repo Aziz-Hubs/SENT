@@ -14,7 +14,8 @@ import {
   Wallet,
   Package,
   Landmark,
-  ShieldAlert
+  ShieldAlert,
+  ShoppingCart
 } from "lucide-react"
 import { useAppStore } from "@/store/useAppStore"
 import { Dialog, DialogContent } from "@/components/ui/dialog"

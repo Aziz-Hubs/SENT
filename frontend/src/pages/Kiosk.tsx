@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { Product } from "@/lib/types"
 import { PageHeader } from "@/components/layout/PageHeader"
+import { Badge } from "@/components/ui/badge"
 
 // CartItem extends Product with sales-specific fields
 interface CartItem extends Product {
@@ -382,9 +383,6 @@ export function Kiosk() {
             </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  )
-}
     </div>
   )
 }

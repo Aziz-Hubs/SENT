@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { GetAccounts, CreateTransaction, ExportTrialBalance, ExportProfitLoss } from "../../wailsjs/go/capital/CapitalBridge"
+import { GetAccounts, CreateTransaction, ExportTrialBalance, ExportProfitLoss, GetTransactions, ApproveTransaction } from "../../wailsjs/go/capital/CapitalBridge"
 import { 
   Landmark, 
   Plus, 
@@ -18,7 +18,10 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   Users,
-  ChevronRight
+  ChevronRight,
+  Clock,
+  CheckCircle2,
+  XCircle
 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
@@ -26,7 +29,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
-import { Account, TransactionRequest } from "@/lib/types"
+import { Account, TransactionRequest, TransactionDTO } from "@/lib/types"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Skeleton } from "@/components/ui/skeleton"
 import { EmptyState } from "@/components/ui/EmptyState"
@@ -40,6 +43,7 @@ import { Badge } from "@/components/ui/badge"
  */
 export function Capital() {
   const [accounts, setAccounts] = useState<Account[]>([])
+  const [transactions, setTransactions] = useState<TransactionDTO[]>([])
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -56,6 +60,7 @@ export function Capital() {
   // Fetch accounts on mount
   useEffect(() => {
     fetchAccounts()
+    fetchTransactions()
   }, [])
 
   const fetchAccounts = async () => {
@@ -68,6 +73,26 @@ export function Capital() {
     } finally {
       setTimeout(() => setLoading(false), 600)
     }
+  }
+
+  const fetchTransactions = async () => {
+    try {
+      const res = await GetTransactions()
+      setTransactions(res || [])
+    } catch (err) {
+      toast.error("Failed to load transactions")
+    }
+  }
+
+  const handleApprove = async (id: number) => {
+      try {
+          const msg = await ApproveTransaction(id)
+          toast.success(msg)
+          fetchAccounts()
+          fetchTransactions()
+      } catch (err: any) {
+          toast.error("Approval failed: " + err)
+      }
   }
 
   const handleAccountClick = (account: Account) => {
