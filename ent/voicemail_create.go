@@ -62,6 +62,20 @@ func (_c *VoicemailCreate) SetNillableCreatedAt(v *time.Time) *VoicemailCreate {
 	return _c
 }
 
+// SetDuration sets the "duration" field.
+func (_c *VoicemailCreate) SetDuration(v int) *VoicemailCreate {
+	_c.mutation.SetDuration(v)
+	return _c
+}
+
+// SetNillableDuration sets the "duration" field if the given value is not nil.
+func (_c *VoicemailCreate) SetNillableDuration(v *int) *VoicemailCreate {
+	if v != nil {
+		_c.SetDuration(*v)
+	}
+	return _c
+}
+
 // SetReadAt sets the "read_at" field.
 func (_c *VoicemailCreate) SetReadAt(v time.Time) *VoicemailCreate {
 	_c.mutation.SetReadAt(v)
@@ -137,6 +151,10 @@ func (_c *VoicemailCreate) defaults() {
 		v := voicemail.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.Duration(); !ok {
+		v := voicemail.DefaultDuration
+		_c.mutation.SetDuration(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -149,6 +167,9 @@ func (_c *VoicemailCreate) check() error {
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Voicemail.created_at"`)}
+	}
+	if _, ok := _c.mutation.Duration(); !ok {
+		return &ValidationError{Name: "duration", err: errors.New(`ent: missing required field "Voicemail.duration"`)}
 	}
 	if len(_c.mutation.TenantIDs()) == 0 {
 		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "Voicemail.tenant"`)}
@@ -197,6 +218,10 @@ func (_c *VoicemailCreate) createSpec() (*Voicemail, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(voicemail.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.Duration(); ok {
+		_spec.SetField(voicemail.FieldDuration, field.TypeInt, value)
+		_node.Duration = value
 	}
 	if value, ok := _c.mutation.ReadAt(); ok {
 		_spec.SetField(voicemail.FieldReadAt, field.TypeTime, value)

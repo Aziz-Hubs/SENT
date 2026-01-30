@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"sent/ent/agent"
+	"sent/ent/jobexecution"
 	"sent/ent/tenant"
 	"time"
 
@@ -130,6 +131,21 @@ func (_c *AgentCreate) SetNillableTenantID(id *int) *AgentCreate {
 // SetTenant sets the "tenant" edge to the Tenant entity.
 func (_c *AgentCreate) SetTenant(v *Tenant) *AgentCreate {
 	return _c.SetTenantID(v.ID)
+}
+
+// AddJobExecutionIDs adds the "job_executions" edge to the JobExecution entity by IDs.
+func (_c *AgentCreate) AddJobExecutionIDs(ids ...int) *AgentCreate {
+	_c.mutation.AddJobExecutionIDs(ids...)
+	return _c
+}
+
+// AddJobExecutions adds the "job_executions" edges to the JobExecution entity.
+func (_c *AgentCreate) AddJobExecutions(v ...*JobExecution) *AgentCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddJobExecutionIDs(ids...)
 }
 
 // Mutation returns the AgentMutation object of the builder.
@@ -333,6 +349,22 @@ func (_c *AgentCreate) createSpec() (*Agent, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.tenant_agents = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.JobExecutionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   agent.JobExecutionsTable,
+			Columns: []string{agent.JobExecutionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(jobexecution.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

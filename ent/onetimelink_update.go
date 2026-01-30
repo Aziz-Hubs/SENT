@@ -18,8 +18,9 @@ import (
 // OneTimeLinkUpdate is the builder for updating OneTimeLink entities.
 type OneTimeLinkUpdate struct {
 	config
-	hooks    []Hook
-	mutation *OneTimeLinkMutation
+	hooks     []Hook
+	mutation  *OneTimeLinkMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the OneTimeLinkUpdate builder.
@@ -127,6 +128,12 @@ func (_u *OneTimeLinkUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *OneTimeLinkUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *OneTimeLinkUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *OneTimeLinkUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -151,6 +158,7 @@ func (_u *OneTimeLinkUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(onetimelink.FieldCreatedAt, field.TypeTime, value)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{onetimelink.Label}
@@ -166,9 +174,10 @@ func (_u *OneTimeLinkUpdate) sqlSave(ctx context.Context) (_node int, err error)
 // OneTimeLinkUpdateOne is the builder for updating a single OneTimeLink entity.
 type OneTimeLinkUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *OneTimeLinkMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *OneTimeLinkMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetToken sets the "token" field.
@@ -283,6 +292,12 @@ func (_u *OneTimeLinkUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *OneTimeLinkUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *OneTimeLinkUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *OneTimeLinkUpdateOne) sqlSave(ctx context.Context) (_node *OneTimeLink, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -324,6 +339,7 @@ func (_u *OneTimeLinkUpdateOne) sqlSave(ctx context.Context) (_node *OneTimeLink
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(onetimelink.FieldCreatedAt, field.TypeTime, value)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &OneTimeLink{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

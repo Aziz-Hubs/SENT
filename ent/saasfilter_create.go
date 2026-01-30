@@ -22,6 +22,12 @@ type SaaSFilterCreate struct {
 	hooks    []Hook
 }
 
+// SetName sets the "name" field.
+func (_c *SaaSFilterCreate) SetName(v string) *SaaSFilterCreate {
+	_c.mutation.SetName(v)
+	return _c
+}
+
 // SetDomainPattern sets the "domain_pattern" field.
 func (_c *SaaSFilterCreate) SetDomainPattern(v string) *SaaSFilterCreate {
 	_c.mutation.SetDomainPattern(v)
@@ -183,6 +189,14 @@ func (_c *SaaSFilterCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *SaaSFilterCreate) check() error {
+	if _, ok := _c.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "SaaSFilter.name"`)}
+	}
+	if v, ok := _c.mutation.Name(); ok {
+		if err := saasfilter.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "SaaSFilter.name": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.DomainPattern(); !ok {
 		return &ValidationError{Name: "domain_pattern", err: errors.New(`ent: missing required field "SaaSFilter.domain_pattern"`)}
 	}
@@ -237,6 +251,10 @@ func (_c *SaaSFilterCreate) createSpec() (*SaaSFilter, *sqlgraph.CreateSpec) {
 		_node = &SaaSFilter{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(saasfilter.Table, sqlgraph.NewFieldSpec(saasfilter.FieldID, field.TypeInt))
 	)
+	if value, ok := _c.mutation.Name(); ok {
+		_spec.SetField(saasfilter.FieldName, field.TypeString, value)
+		_node.Name = value
+	}
 	if value, ok := _c.mutation.DomainPattern(); ok {
 		_spec.SetField(saasfilter.FieldDomainPattern, field.TypeString, value)
 		_node.DomainPattern = value

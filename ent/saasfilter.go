@@ -19,6 +19,8 @@ type SaaSFilter struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
 	// DomainPattern holds the value of the "domain_pattern" field.
 	DomainPattern string `json:"domain_pattern,omitempty"`
 	// Action holds the value of the "action" field.
@@ -81,7 +83,7 @@ func (*SaaSFilter) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case saasfilter.FieldID:
 			values[i] = new(sql.NullInt64)
-		case saasfilter.FieldDomainPattern, saasfilter.FieldAction, saasfilter.FieldReason:
+		case saasfilter.FieldName, saasfilter.FieldDomainPattern, saasfilter.FieldAction, saasfilter.FieldReason:
 			values[i] = new(sql.NullString)
 		case saasfilter.FieldCreatedAt, saasfilter.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -110,6 +112,12 @@ func (_m *SaaSFilter) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
+		case saasfilter.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				_m.Name = value.String
+			}
 		case saasfilter.FieldDomainPattern:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field domain_pattern", values[i])
@@ -206,6 +214,9 @@ func (_m *SaaSFilter) String() string {
 	var builder strings.Builder
 	builder.WriteString("SaaSFilter(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("name=")
+	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
 	builder.WriteString("domain_pattern=")
 	builder.WriteString(_m.DomainPattern)
 	builder.WriteString(", ")

@@ -30,5 +30,9 @@ func (NetworkLink) Edges() []ent.Edge {
 		edge.To("target_port", NetworkPort.Type).
 			Unique().
 			Required(),
+		edge.From("tenant", Tenant.Type).
+			Ref("network_links").
+			Unique().
+			Required(),
 	}
 }

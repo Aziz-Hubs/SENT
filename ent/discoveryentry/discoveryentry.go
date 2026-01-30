@@ -19,6 +19,12 @@ const (
 	FieldHardwareID = "hardware_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldHostname holds the string denoting the hostname field in the database.
+	FieldHostname = "hostname"
+	// FieldIP holds the string denoting the ip field in the database.
+	FieldIP = "ip"
+	// FieldMAC holds the string denoting the mac field in the database.
+	FieldMAC = "mac"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
 	// FieldMetadata holds the string denoting the metadata field in the database.
@@ -45,6 +51,9 @@ var Columns = []string{
 	FieldID,
 	FieldHardwareID,
 	FieldName,
+	FieldHostname,
+	FieldIP,
+	FieldMAC,
 	FieldType,
 	FieldMetadata,
 	FieldStatus,
@@ -120,6 +129,21 @@ func ByHardwareID(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByHostname orders the results by the hostname field.
+func ByHostname(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHostname, opts...).ToFunc()
+}
+
+// ByIP orders the results by the ip field.
+func ByIP(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIP, opts...).ToFunc()
+}
+
+// ByMAC orders the results by the mac field.
+func ByMAC(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMAC, opts...).ToFunc()
 }
 
 // ByType orders the results by the type field.

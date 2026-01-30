@@ -20,8 +20,9 @@ import (
 // VoicemailUpdate is the builder for updating Voicemail entities.
 type VoicemailUpdate struct {
 	config
-	hooks    []Hook
-	mutation *VoicemailMutation
+	hooks     []Hook
+	mutation  *VoicemailMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the VoicemailUpdate builder.
@@ -89,6 +90,27 @@ func (_u *VoicemailUpdate) SetNillableCreatedAt(v *time.Time) *VoicemailUpdate {
 	if v != nil {
 		_u.SetCreatedAt(*v)
 	}
+	return _u
+}
+
+// SetDuration sets the "duration" field.
+func (_u *VoicemailUpdate) SetDuration(v int) *VoicemailUpdate {
+	_u.mutation.ResetDuration()
+	_u.mutation.SetDuration(v)
+	return _u
+}
+
+// SetNillableDuration sets the "duration" field if the given value is not nil.
+func (_u *VoicemailUpdate) SetNillableDuration(v *int) *VoicemailUpdate {
+	if v != nil {
+		_u.SetDuration(*v)
+	}
+	return _u
+}
+
+// AddDuration adds value to the "duration" field.
+func (_u *VoicemailUpdate) AddDuration(v int) *VoicemailUpdate {
+	_u.mutation.AddDuration(v)
 	return _u
 }
 
@@ -189,6 +211,12 @@ func (_u *VoicemailUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *VoicemailUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *VoicemailUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *VoicemailUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -215,6 +243,12 @@ func (_u *VoicemailUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(voicemail.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.Duration(); ok {
+		_spec.SetField(voicemail.FieldDuration, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDuration(); ok {
+		_spec.AddField(voicemail.FieldDuration, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ReadAt(); ok {
 		_spec.SetField(voicemail.FieldReadAt, field.TypeTime, value)
@@ -280,6 +314,7 @@ func (_u *VoicemailUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{voicemail.Label}
@@ -295,9 +330,10 @@ func (_u *VoicemailUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 // VoicemailUpdateOne is the builder for updating a single Voicemail entity.
 type VoicemailUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *VoicemailMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *VoicemailMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetCaller sets the "caller" field.
@@ -359,6 +395,27 @@ func (_u *VoicemailUpdateOne) SetNillableCreatedAt(v *time.Time) *VoicemailUpdat
 	if v != nil {
 		_u.SetCreatedAt(*v)
 	}
+	return _u
+}
+
+// SetDuration sets the "duration" field.
+func (_u *VoicemailUpdateOne) SetDuration(v int) *VoicemailUpdateOne {
+	_u.mutation.ResetDuration()
+	_u.mutation.SetDuration(v)
+	return _u
+}
+
+// SetNillableDuration sets the "duration" field if the given value is not nil.
+func (_u *VoicemailUpdateOne) SetNillableDuration(v *int) *VoicemailUpdateOne {
+	if v != nil {
+		_u.SetDuration(*v)
+	}
+	return _u
+}
+
+// AddDuration adds value to the "duration" field.
+func (_u *VoicemailUpdateOne) AddDuration(v int) *VoicemailUpdateOne {
+	_u.mutation.AddDuration(v)
 	return _u
 }
 
@@ -472,6 +529,12 @@ func (_u *VoicemailUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *VoicemailUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *VoicemailUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *VoicemailUpdateOne) sqlSave(ctx context.Context) (_node *Voicemail, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -515,6 +578,12 @@ func (_u *VoicemailUpdateOne) sqlSave(ctx context.Context) (_node *Voicemail, er
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(voicemail.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.Duration(); ok {
+		_spec.SetField(voicemail.FieldDuration, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDuration(); ok {
+		_spec.AddField(voicemail.FieldDuration, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ReadAt(); ok {
 		_spec.SetField(voicemail.FieldReadAt, field.TypeTime, value)
@@ -580,6 +649,7 @@ func (_u *VoicemailUpdateOne) sqlSave(ctx context.Context) (_node *Voicemail, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &Voicemail{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

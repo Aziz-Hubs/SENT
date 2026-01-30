@@ -48,10 +48,6 @@ func (s *ContractService) GenerateEmploymentContract(ctx context.Context, empID 
 		return "", fmt.Errorf("employee not found: %w", err)
 	}
 
-	tenantID := 1
-	if emp.Edges.Tenant != nil {
-		tenantID = emp.Edges.Tenant.ID
-	}
 
 	cfg := config.NewBuilder().Build()
 	m := maroto.New(cfg)
@@ -112,7 +108,7 @@ func (s *ContractService) GenerateEmploymentContract(ctx context.Context, empID 
 	fileName := fmt.Sprintf("contracts/contract_%s_%d.pdf", emp.EmployeeID, time.Now().Unix())
 	pdfBase64 := base64.StdEncoding.EncodeToString(document.GetBytes())
 	
-	if err := s.vault.SaveFile(fileName, pdfBase64, tenantID); err != nil {
+	if err := s.vault.SaveFile(fileName, pdfBase64); err != nil {
 		return "", fmt.Errorf("failed to save contract to vault: %w", err)
 	}
 

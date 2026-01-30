@@ -15,13 +15,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // RecurringInvoiceUpdate is the builder for updating RecurringInvoice entities.
 type RecurringInvoiceUpdate struct {
 	config
-	hooks    []Hook
-	mutation *RecurringInvoiceMutation
+	hooks     []Hook
+	mutation  *RecurringInvoiceMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the RecurringInvoiceUpdate builder.
@@ -45,23 +47,16 @@ func (_u *RecurringInvoiceUpdate) SetNillableDescription(v *string) *RecurringIn
 }
 
 // SetAmount sets the "amount" field.
-func (_u *RecurringInvoiceUpdate) SetAmount(v float64) *RecurringInvoiceUpdate {
-	_u.mutation.ResetAmount()
+func (_u *RecurringInvoiceUpdate) SetAmount(v decimal.Decimal) *RecurringInvoiceUpdate {
 	_u.mutation.SetAmount(v)
 	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (_u *RecurringInvoiceUpdate) SetNillableAmount(v *float64) *RecurringInvoiceUpdate {
+func (_u *RecurringInvoiceUpdate) SetNillableAmount(v *decimal.Decimal) *RecurringInvoiceUpdate {
 	if v != nil {
 		_u.SetAmount(*v)
 	}
-	return _u
-}
-
-// AddAmount adds value to the "amount" field.
-func (_u *RecurringInvoiceUpdate) AddAmount(v float64) *RecurringInvoiceUpdate {
-	_u.mutation.AddAmount(v)
 	return _u
 }
 
@@ -232,6 +227,12 @@ func (_u *RecurringInvoiceUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *RecurringInvoiceUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *RecurringInvoiceUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *RecurringInvoiceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -248,10 +249,7 @@ func (_u *RecurringInvoiceUpdate) sqlSave(ctx context.Context) (_node int, err e
 		_spec.SetField(recurringinvoice.FieldDescription, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Amount(); ok {
-		_spec.SetField(recurringinvoice.FieldAmount, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedAmount(); ok {
-		_spec.AddField(recurringinvoice.FieldAmount, field.TypeFloat64, value)
+		_spec.SetField(recurringinvoice.FieldAmount, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Currency(); ok {
 		_spec.SetField(recurringinvoice.FieldCurrency, field.TypeString, value)
@@ -332,6 +330,7 @@ func (_u *RecurringInvoiceUpdate) sqlSave(ctx context.Context) (_node int, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{recurringinvoice.Label}
@@ -347,9 +346,10 @@ func (_u *RecurringInvoiceUpdate) sqlSave(ctx context.Context) (_node int, err e
 // RecurringInvoiceUpdateOne is the builder for updating a single RecurringInvoice entity.
 type RecurringInvoiceUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *RecurringInvoiceMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *RecurringInvoiceMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetDescription sets the "description" field.
@@ -367,23 +367,16 @@ func (_u *RecurringInvoiceUpdateOne) SetNillableDescription(v *string) *Recurrin
 }
 
 // SetAmount sets the "amount" field.
-func (_u *RecurringInvoiceUpdateOne) SetAmount(v float64) *RecurringInvoiceUpdateOne {
-	_u.mutation.ResetAmount()
+func (_u *RecurringInvoiceUpdateOne) SetAmount(v decimal.Decimal) *RecurringInvoiceUpdateOne {
 	_u.mutation.SetAmount(v)
 	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (_u *RecurringInvoiceUpdateOne) SetNillableAmount(v *float64) *RecurringInvoiceUpdateOne {
+func (_u *RecurringInvoiceUpdateOne) SetNillableAmount(v *decimal.Decimal) *RecurringInvoiceUpdateOne {
 	if v != nil {
 		_u.SetAmount(*v)
 	}
-	return _u
-}
-
-// AddAmount adds value to the "amount" field.
-func (_u *RecurringInvoiceUpdateOne) AddAmount(v float64) *RecurringInvoiceUpdateOne {
-	_u.mutation.AddAmount(v)
 	return _u
 }
 
@@ -567,6 +560,12 @@ func (_u *RecurringInvoiceUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *RecurringInvoiceUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *RecurringInvoiceUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *RecurringInvoiceUpdateOne) sqlSave(ctx context.Context) (_node *RecurringInvoice, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -600,10 +599,7 @@ func (_u *RecurringInvoiceUpdateOne) sqlSave(ctx context.Context) (_node *Recurr
 		_spec.SetField(recurringinvoice.FieldDescription, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Amount(); ok {
-		_spec.SetField(recurringinvoice.FieldAmount, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedAmount(); ok {
-		_spec.AddField(recurringinvoice.FieldAmount, field.TypeFloat64, value)
+		_spec.SetField(recurringinvoice.FieldAmount, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Currency(); ok {
 		_spec.SetField(recurringinvoice.FieldCurrency, field.TypeString, value)
@@ -684,6 +680,7 @@ func (_u *RecurringInvoiceUpdateOne) sqlSave(ctx context.Context) (_node *Recurr
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &RecurringInvoice{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

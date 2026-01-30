@@ -22,6 +22,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// EdgeDevice holds the string denoting the device edge name in mutations.
 	EdgeDevice = "device"
+	// EdgeTenant holds the string denoting the tenant edge name in mutations.
+	EdgeTenant = "tenant"
 	// Table holds the table name of the networkbackup in the database.
 	Table = "network_backups"
 	// DeviceTable is the table that holds the device relation/edge.
@@ -31,6 +33,13 @@ const (
 	DeviceInverseTable = "network_devices"
 	// DeviceColumn is the table column denoting the device relation/edge.
 	DeviceColumn = "network_device_backups"
+	// TenantTable is the table that holds the tenant relation/edge.
+	TenantTable = "network_backups"
+	// TenantInverseTable is the table name for the Tenant entity.
+	// It exists in this package in order to avoid circular dependency with the "tenant" package.
+	TenantInverseTable = "tenants"
+	// TenantColumn is the table column denoting the tenant relation/edge.
+	TenantColumn = "tenant_network_backups"
 )
 
 // Columns holds all SQL columns for networkbackup fields.
@@ -45,6 +54,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"network_device_backups",
+	"tenant_network_backups",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -96,10 +106,24 @@ func ByDeviceField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newDeviceStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByTenantField orders the results by tenant field.
+func ByTenantField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTenantStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newDeviceStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(DeviceInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, DeviceTable, DeviceColumn),
+	)
+}
+func newTenantStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TenantInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, TenantTable, TenantColumn),
 	)
 }

@@ -20,13 +20,28 @@ import (
 // SaaSFilterUpdate is the builder for updating SaaSFilter entities.
 type SaaSFilterUpdate struct {
 	config
-	hooks    []Hook
-	mutation *SaaSFilterMutation
+	hooks     []Hook
+	mutation  *SaaSFilterMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the SaaSFilterUpdate builder.
 func (_u *SaaSFilterUpdate) Where(ps ...predicate.SaaSFilter) *SaaSFilterUpdate {
 	_u.mutation.Where(ps...)
+	return _u
+}
+
+// SetName sets the "name" field.
+func (_u *SaaSFilterUpdate) SetName(v string) *SaaSFilterUpdate {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *SaaSFilterUpdate) SetNillableName(v *string) *SaaSFilterUpdate {
+	if v != nil {
+		_u.SetName(*v)
+	}
 	return _u
 }
 
@@ -197,6 +212,11 @@ func (_u *SaaSFilterUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *SaaSFilterUpdate) check() error {
+	if v, ok := _u.mutation.Name(); ok {
+		if err := saasfilter.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "SaaSFilter.name": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.DomainPattern(); ok {
 		if err := saasfilter.DomainPatternValidator(v); err != nil {
 			return &ValidationError{Name: "domain_pattern", err: fmt.Errorf(`ent: validator failed for field "SaaSFilter.domain_pattern": %w`, err)}
@@ -213,6 +233,12 @@ func (_u *SaaSFilterUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *SaaSFilterUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SaaSFilterUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *SaaSFilterUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -224,6 +250,9 @@ func (_u *SaaSFilterUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(saasfilter.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.DomainPattern(); ok {
 		_spec.SetField(saasfilter.FieldDomainPattern, field.TypeString, value)
@@ -304,6 +333,7 @@ func (_u *SaaSFilterUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{saasfilter.Label}
@@ -319,9 +349,24 @@ func (_u *SaaSFilterUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 // SaaSFilterUpdateOne is the builder for updating a single SaaSFilter entity.
 type SaaSFilterUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *SaaSFilterMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *SaaSFilterMutation
+	modifiers []func(*sql.UpdateBuilder)
+}
+
+// SetName sets the "name" field.
+func (_u *SaaSFilterUpdateOne) SetName(v string) *SaaSFilterUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *SaaSFilterUpdateOne) SetNillableName(v *string) *SaaSFilterUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
+	}
+	return _u
 }
 
 // SetDomainPattern sets the "domain_pattern" field.
@@ -504,6 +549,11 @@ func (_u *SaaSFilterUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *SaaSFilterUpdateOne) check() error {
+	if v, ok := _u.mutation.Name(); ok {
+		if err := saasfilter.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "SaaSFilter.name": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.DomainPattern(); ok {
 		if err := saasfilter.DomainPatternValidator(v); err != nil {
 			return &ValidationError{Name: "domain_pattern", err: fmt.Errorf(`ent: validator failed for field "SaaSFilter.domain_pattern": %w`, err)}
@@ -518,6 +568,12 @@ func (_u *SaaSFilterUpdateOne) check() error {
 		return errors.New(`ent: clearing a required unique edge "SaaSFilter.tenant"`)
 	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *SaaSFilterUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SaaSFilterUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *SaaSFilterUpdateOne) sqlSave(ctx context.Context) (_node *SaaSFilter, err error) {
@@ -548,6 +604,9 @@ func (_u *SaaSFilterUpdateOne) sqlSave(ctx context.Context) (_node *SaaSFilter, 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(saasfilter.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.DomainPattern(); ok {
 		_spec.SetField(saasfilter.FieldDomainPattern, field.TypeString, value)
@@ -628,6 +687,7 @@ func (_u *SaaSFilterUpdateOne) sqlSave(ctx context.Context) (_node *SaaSFilter, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &SaaSFilter{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

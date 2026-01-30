@@ -7,6 +7,10 @@ import (
 	"sent/ent/user"
 )
 
+const (
+	RoleAdmin = "admin"
+)
+
 // Guard enforces role-based and permission-based access control.
 // It verifies if the user (identified by ZitadelID) exists and holds the required permission.
 //
@@ -16,6 +20,10 @@ import (
 // @param permissionCode - The required permission string (e.g., "account:read").
 // @returns nil if authorized, or an error if forbidden/not found.
 func Guard(ctx context.Context, db *ent.Client, zitadelID string, permissionCode string) error {
+	if zitadelID == "" {
+		return fmt.Errorf("unauthorized: missing identity")
+	}
+
 	// 1. Fetch user and their permissions
 	u, err := db.User.Query().
 		Where(user.ZitadelID(zitadelID)).
@@ -24,18 +32,20 @@ func Guard(ctx context.Context, db *ent.Client, zitadelID string, permissionCode
 	
 	if err != nil {
 		if ent.IsNotFound(err) {
-			return fmt.Errorf("unauthorized: user profile not found in system")
+			return fmt.Errorf("unauthorized: user profile not found for ID %s", zitadelID)
 		}
 		return fmt.Errorf("internal auth error: %w", err)
 	}
 
 	// 2. Admin Superuser Bypass
-	// TODO: Replace string literal "admin" with a constant or enum.
-	if u.Role == "admin" {
+	// We check for the specific RoleAdmin constant.
+	if u.Role == RoleAdmin {
 		return nil
 	}
 
 	// 3. Check for specific permission
+	// Note: u.Edges.Permissions is guaranteed to be non-nil by WithPermissions() 
+	// even if the user has no permissions (it will be an empty slice).
 	for _, p := range u.Edges.Permissions {
 		if p.Code == permissionCode {
 			return nil

@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 // ID filters vertices based on their ID field.
@@ -66,7 +67,7 @@ func Description(v string) predicate.StrategicRoadmap {
 }
 
 // EstimatedCost applies equality check predicate on the "estimated_cost" field. It's identical to EstimatedCostEQ.
-func EstimatedCost(v float64) predicate.StrategicRoadmap {
+func EstimatedCost(v decimal.Decimal) predicate.StrategicRoadmap {
 	return predicate.StrategicRoadmap(sql.FieldEQ(FieldEstimatedCost, v))
 }
 
@@ -271,42 +272,42 @@ func StatusNotIn(vs ...Status) predicate.StrategicRoadmap {
 }
 
 // EstimatedCostEQ applies the EQ predicate on the "estimated_cost" field.
-func EstimatedCostEQ(v float64) predicate.StrategicRoadmap {
+func EstimatedCostEQ(v decimal.Decimal) predicate.StrategicRoadmap {
 	return predicate.StrategicRoadmap(sql.FieldEQ(FieldEstimatedCost, v))
 }
 
 // EstimatedCostNEQ applies the NEQ predicate on the "estimated_cost" field.
-func EstimatedCostNEQ(v float64) predicate.StrategicRoadmap {
+func EstimatedCostNEQ(v decimal.Decimal) predicate.StrategicRoadmap {
 	return predicate.StrategicRoadmap(sql.FieldNEQ(FieldEstimatedCost, v))
 }
 
 // EstimatedCostIn applies the In predicate on the "estimated_cost" field.
-func EstimatedCostIn(vs ...float64) predicate.StrategicRoadmap {
+func EstimatedCostIn(vs ...decimal.Decimal) predicate.StrategicRoadmap {
 	return predicate.StrategicRoadmap(sql.FieldIn(FieldEstimatedCost, vs...))
 }
 
 // EstimatedCostNotIn applies the NotIn predicate on the "estimated_cost" field.
-func EstimatedCostNotIn(vs ...float64) predicate.StrategicRoadmap {
+func EstimatedCostNotIn(vs ...decimal.Decimal) predicate.StrategicRoadmap {
 	return predicate.StrategicRoadmap(sql.FieldNotIn(FieldEstimatedCost, vs...))
 }
 
 // EstimatedCostGT applies the GT predicate on the "estimated_cost" field.
-func EstimatedCostGT(v float64) predicate.StrategicRoadmap {
+func EstimatedCostGT(v decimal.Decimal) predicate.StrategicRoadmap {
 	return predicate.StrategicRoadmap(sql.FieldGT(FieldEstimatedCost, v))
 }
 
 // EstimatedCostGTE applies the GTE predicate on the "estimated_cost" field.
-func EstimatedCostGTE(v float64) predicate.StrategicRoadmap {
+func EstimatedCostGTE(v decimal.Decimal) predicate.StrategicRoadmap {
 	return predicate.StrategicRoadmap(sql.FieldGTE(FieldEstimatedCost, v))
 }
 
 // EstimatedCostLT applies the LT predicate on the "estimated_cost" field.
-func EstimatedCostLT(v float64) predicate.StrategicRoadmap {
+func EstimatedCostLT(v decimal.Decimal) predicate.StrategicRoadmap {
 	return predicate.StrategicRoadmap(sql.FieldLT(FieldEstimatedCost, v))
 }
 
 // EstimatedCostLTE applies the LTE predicate on the "estimated_cost" field.
-func EstimatedCostLTE(v float64) predicate.StrategicRoadmap {
+func EstimatedCostLTE(v decimal.Decimal) predicate.StrategicRoadmap {
 	return predicate.StrategicRoadmap(sql.FieldLTE(FieldEstimatedCost, v))
 }
 

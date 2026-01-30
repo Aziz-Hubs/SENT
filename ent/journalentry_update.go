@@ -17,13 +17,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // JournalEntryUpdate is the builder for updating JournalEntry entities.
 type JournalEntryUpdate struct {
 	config
-	hooks    []Hook
-	mutation *JournalEntryMutation
+	hooks     []Hook
+	mutation  *JournalEntryMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the JournalEntryUpdate builder.
@@ -33,23 +35,16 @@ func (_u *JournalEntryUpdate) Where(ps ...predicate.JournalEntry) *JournalEntryU
 }
 
 // SetAmount sets the "amount" field.
-func (_u *JournalEntryUpdate) SetAmount(v float64) *JournalEntryUpdate {
-	_u.mutation.ResetAmount()
+func (_u *JournalEntryUpdate) SetAmount(v decimal.Decimal) *JournalEntryUpdate {
 	_u.mutation.SetAmount(v)
 	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (_u *JournalEntryUpdate) SetNillableAmount(v *float64) *JournalEntryUpdate {
+func (_u *JournalEntryUpdate) SetNillableAmount(v *decimal.Decimal) *JournalEntryUpdate {
 	if v != nil {
 		_u.SetAmount(*v)
 	}
-	return _u
-}
-
-// AddAmount adds value to the "amount" field.
-func (_u *JournalEntryUpdate) AddAmount(v float64) *JournalEntryUpdate {
-	_u.mutation.AddAmount(v)
 	return _u
 }
 
@@ -258,6 +253,12 @@ func (_u *JournalEntryUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *JournalEntryUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *JournalEntryUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *JournalEntryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -271,10 +272,7 @@ func (_u *JournalEntryUpdate) sqlSave(ctx context.Context) (_node int, err error
 		}
 	}
 	if value, ok := _u.mutation.Amount(); ok {
-		_spec.SetField(journalentry.FieldAmount, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedAmount(); ok {
-		_spec.AddField(journalentry.FieldAmount, field.TypeFloat64, value)
+		_spec.SetField(journalentry.FieldAmount, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Direction(); ok {
 		_spec.SetField(journalentry.FieldDirection, field.TypeEnum, value)
@@ -407,6 +405,7 @@ func (_u *JournalEntryUpdate) sqlSave(ctx context.Context) (_node int, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{journalentry.Label}
@@ -422,29 +421,23 @@ func (_u *JournalEntryUpdate) sqlSave(ctx context.Context) (_node int, err error
 // JournalEntryUpdateOne is the builder for updating a single JournalEntry entity.
 type JournalEntryUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *JournalEntryMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *JournalEntryMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetAmount sets the "amount" field.
-func (_u *JournalEntryUpdateOne) SetAmount(v float64) *JournalEntryUpdateOne {
-	_u.mutation.ResetAmount()
+func (_u *JournalEntryUpdateOne) SetAmount(v decimal.Decimal) *JournalEntryUpdateOne {
 	_u.mutation.SetAmount(v)
 	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (_u *JournalEntryUpdateOne) SetNillableAmount(v *float64) *JournalEntryUpdateOne {
+func (_u *JournalEntryUpdateOne) SetNillableAmount(v *decimal.Decimal) *JournalEntryUpdateOne {
 	if v != nil {
 		_u.SetAmount(*v)
 	}
-	return _u
-}
-
-// AddAmount adds value to the "amount" field.
-func (_u *JournalEntryUpdateOne) AddAmount(v float64) *JournalEntryUpdateOne {
-	_u.mutation.AddAmount(v)
 	return _u
 }
 
@@ -666,6 +659,12 @@ func (_u *JournalEntryUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *JournalEntryUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *JournalEntryUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *JournalEntryUpdateOne) sqlSave(ctx context.Context) (_node *JournalEntry, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -696,10 +695,7 @@ func (_u *JournalEntryUpdateOne) sqlSave(ctx context.Context) (_node *JournalEnt
 		}
 	}
 	if value, ok := _u.mutation.Amount(); ok {
-		_spec.SetField(journalentry.FieldAmount, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedAmount(); ok {
-		_spec.AddField(journalentry.FieldAmount, field.TypeFloat64, value)
+		_spec.SetField(journalentry.FieldAmount, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Direction(); ok {
 		_spec.SetField(journalentry.FieldDirection, field.TypeEnum, value)
@@ -832,6 +828,7 @@ func (_u *JournalEntryUpdateOne) sqlSave(ctx context.Context) (_node *JournalEnt
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &JournalEntry{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

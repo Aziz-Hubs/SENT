@@ -10,6 +10,7 @@ import (
 	"sent/ent/account"
 	"sent/ent/agent"
 	"sent/ent/asset"
+	"sent/ent/assettype"
 	"sent/ent/auditlog"
 	"sent/ent/budgetforecast"
 	"sent/ent/calllog"
@@ -17,25 +18,45 @@ import (
 	"sent/ent/compensationagreement"
 	"sent/ent/contract"
 	"sent/ent/credential"
+	"sent/ent/department"
+	"sent/ent/detectionevent"
 	"sent/ent/discoveryentry"
 	"sent/ent/employee"
+	"sent/ent/goal"
 	"sent/ent/healthscoresnapshot"
 	"sent/ent/inventoryreservation"
 	"sent/ent/ivrflow"
+	"sent/ent/job"
 	"sent/ent/journalentry"
 	"sent/ent/ledgerentry"
+	"sent/ent/networkbackup"
+	"sent/ent/networkdevice"
+	"sent/ent/networklink"
+	"sent/ent/networkport"
+	"sent/ent/nexusaudit"
 	"sent/ent/onetimelink"
+	"sent/ent/performancereview"
+	"sent/ent/permission"
 	"sent/ent/predicate"
 	"sent/ent/product"
+	"sent/ent/recording"
 	"sent/ent/recurringinvoice"
+	"sent/ent/reviewcycle"
 	"sent/ent/saasapp"
 	"sent/ent/saasfilter"
+	"sent/ent/saasidentity"
+	"sent/ent/saasusage"
+	"sent/ent/script"
 	"sent/ent/servicerate"
 	"sent/ent/sop"
 	"sent/ent/stockmovement"
 	"sent/ent/strategicroadmap"
+	"sent/ent/successionmap"
 	"sent/ent/tenant"
 	"sent/ent/ticket"
+	"sent/ent/timeoffbalance"
+	"sent/ent/timeoffpolicy"
+	"sent/ent/timeoffrequest"
 	"sent/ent/transaction"
 	"sent/ent/user"
 	"sent/ent/vaultitem"
@@ -80,6 +101,8 @@ type TenantQuery struct {
 	withHealthSnapshots        *HealthScoreSnapshotQuery
 	withRoadmaps               *StrategicRoadmapQuery
 	withServiceRates           *ServiceRateQuery
+	withNetworkDevices         *NetworkDeviceQuery
+	withNetworkBackups         *NetworkBackupQuery
 	withBudgetForecasts        *BudgetForecastQuery
 	withEmployees              *EmployeeQuery
 	withCompensationAgreements *CompensationAgreementQuery
@@ -87,8 +110,28 @@ type TenantQuery struct {
 	withJournalEntries         *JournalEntryQuery
 	withRecurringInvoices      *RecurringInvoiceQuery
 	withInventoryReservations  *InventoryReservationQuery
+	withDepartments            *DepartmentQuery
+	withPermissions            *PermissionQuery
+	withAssetTypes             *AssetTypeQuery
+	withDetectionEvents        *DetectionEventQuery
+	withSaasIdentities         *SaaSIdentityQuery
+	withSaasUsages             *SaaSUsageQuery
+	withRecordings             *RecordingQuery
+	withNetworkLinks           *NetworkLinkQuery
+	withNetworkPorts           *NetworkPortQuery
+	withNexusAudits            *NexusAuditQuery
+	withSuccessionMaps         *SuccessionMapQuery
 	withCustomerAccount        *AccountQuery
+	withScripts                *ScriptQuery
+	withJobs                   *JobQuery
+	withTimeOffRequests        *TimeOffRequestQuery
+	withTimeOffPolicies        *TimeOffPolicyQuery
+	withTimeOffBalances        *TimeOffBalanceQuery
+	withReviewCycles           *ReviewCycleQuery
+	withPerformanceReviews     *PerformanceReviewQuery
+	withGoals                  *GoalQuery
 	withFKs                    bool
+	modifiers                  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -697,6 +740,50 @@ func (_q *TenantQuery) QueryServiceRates() *ServiceRateQuery {
 	return query
 }
 
+// QueryNetworkDevices chains the current query on the "network_devices" edge.
+func (_q *TenantQuery) QueryNetworkDevices() *NetworkDeviceQuery {
+	query := (&NetworkDeviceClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(networkdevice.Table, networkdevice.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.NetworkDevicesTable, tenant.NetworkDevicesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryNetworkBackups chains the current query on the "network_backups" edge.
+func (_q *TenantQuery) QueryNetworkBackups() *NetworkBackupQuery {
+	query := (&NetworkBackupClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(networkbackup.Table, networkbackup.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.NetworkBackupsTable, tenant.NetworkBackupsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryBudgetForecasts chains the current query on the "budget_forecasts" edge.
 func (_q *TenantQuery) QueryBudgetForecasts() *BudgetForecastQuery {
 	query := (&BudgetForecastClient{config: _q.config}).Query()
@@ -851,6 +938,248 @@ func (_q *TenantQuery) QueryInventoryReservations() *InventoryReservationQuery {
 	return query
 }
 
+// QueryDepartments chains the current query on the "departments" edge.
+func (_q *TenantQuery) QueryDepartments() *DepartmentQuery {
+	query := (&DepartmentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(department.Table, department.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.DepartmentsTable, tenant.DepartmentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPermissions chains the current query on the "permissions" edge.
+func (_q *TenantQuery) QueryPermissions() *PermissionQuery {
+	query := (&PermissionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(permission.Table, permission.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.PermissionsTable, tenant.PermissionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAssetTypes chains the current query on the "asset_types" edge.
+func (_q *TenantQuery) QueryAssetTypes() *AssetTypeQuery {
+	query := (&AssetTypeClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(assettype.Table, assettype.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.AssetTypesTable, tenant.AssetTypesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDetectionEvents chains the current query on the "detection_events" edge.
+func (_q *TenantQuery) QueryDetectionEvents() *DetectionEventQuery {
+	query := (&DetectionEventClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(detectionevent.Table, detectionevent.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.DetectionEventsTable, tenant.DetectionEventsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySaasIdentities chains the current query on the "saas_identities" edge.
+func (_q *TenantQuery) QuerySaasIdentities() *SaaSIdentityQuery {
+	query := (&SaaSIdentityClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(saasidentity.Table, saasidentity.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.SaasIdentitiesTable, tenant.SaasIdentitiesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySaasUsages chains the current query on the "saas_usages" edge.
+func (_q *TenantQuery) QuerySaasUsages() *SaaSUsageQuery {
+	query := (&SaaSUsageClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(saasusage.Table, saasusage.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.SaasUsagesTable, tenant.SaasUsagesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRecordings chains the current query on the "recordings" edge.
+func (_q *TenantQuery) QueryRecordings() *RecordingQuery {
+	query := (&RecordingClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(recording.Table, recording.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.RecordingsTable, tenant.RecordingsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryNetworkLinks chains the current query on the "network_links" edge.
+func (_q *TenantQuery) QueryNetworkLinks() *NetworkLinkQuery {
+	query := (&NetworkLinkClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(networklink.Table, networklink.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.NetworkLinksTable, tenant.NetworkLinksColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryNetworkPorts chains the current query on the "network_ports" edge.
+func (_q *TenantQuery) QueryNetworkPorts() *NetworkPortQuery {
+	query := (&NetworkPortClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(networkport.Table, networkport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.NetworkPortsTable, tenant.NetworkPortsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryNexusAudits chains the current query on the "nexus_audits" edge.
+func (_q *TenantQuery) QueryNexusAudits() *NexusAuditQuery {
+	query := (&NexusAuditClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(nexusaudit.Table, nexusaudit.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.NexusAuditsTable, tenant.NexusAuditsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySuccessionMaps chains the current query on the "succession_maps" edge.
+func (_q *TenantQuery) QuerySuccessionMaps() *SuccessionMapQuery {
+	query := (&SuccessionMapClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(successionmap.Table, successionmap.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.SuccessionMapsTable, tenant.SuccessionMapsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryCustomerAccount chains the current query on the "customer_account" edge.
 func (_q *TenantQuery) QueryCustomerAccount() *AccountQuery {
 	query := (&AccountClient{config: _q.config}).Query()
@@ -866,6 +1195,182 @@ func (_q *TenantQuery) QueryCustomerAccount() *AccountQuery {
 			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
 			sqlgraph.To(account.Table, account.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, tenant.CustomerAccountTable, tenant.CustomerAccountColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryScripts chains the current query on the "scripts" edge.
+func (_q *TenantQuery) QueryScripts() *ScriptQuery {
+	query := (&ScriptClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(script.Table, script.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.ScriptsTable, tenant.ScriptsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryJobs chains the current query on the "jobs" edge.
+func (_q *TenantQuery) QueryJobs() *JobQuery {
+	query := (&JobClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(job.Table, job.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.JobsTable, tenant.JobsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTimeOffRequests chains the current query on the "time_off_requests" edge.
+func (_q *TenantQuery) QueryTimeOffRequests() *TimeOffRequestQuery {
+	query := (&TimeOffRequestClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(timeoffrequest.Table, timeoffrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.TimeOffRequestsTable, tenant.TimeOffRequestsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTimeOffPolicies chains the current query on the "time_off_policies" edge.
+func (_q *TenantQuery) QueryTimeOffPolicies() *TimeOffPolicyQuery {
+	query := (&TimeOffPolicyClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(timeoffpolicy.Table, timeoffpolicy.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.TimeOffPoliciesTable, tenant.TimeOffPoliciesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTimeOffBalances chains the current query on the "time_off_balances" edge.
+func (_q *TenantQuery) QueryTimeOffBalances() *TimeOffBalanceQuery {
+	query := (&TimeOffBalanceClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(timeoffbalance.Table, timeoffbalance.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.TimeOffBalancesTable, tenant.TimeOffBalancesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryReviewCycles chains the current query on the "review_cycles" edge.
+func (_q *TenantQuery) QueryReviewCycles() *ReviewCycleQuery {
+	query := (&ReviewCycleClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(reviewcycle.Table, reviewcycle.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.ReviewCyclesTable, tenant.ReviewCyclesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPerformanceReviews chains the current query on the "performance_reviews" edge.
+func (_q *TenantQuery) QueryPerformanceReviews() *PerformanceReviewQuery {
+	query := (&PerformanceReviewClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(performancereview.Table, performancereview.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.PerformanceReviewsTable, tenant.PerformanceReviewsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryGoals chains the current query on the "goals" edge.
+func (_q *TenantQuery) QueryGoals() *GoalQuery {
+	query := (&GoalClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(goal.Table, goal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.GoalsTable, tenant.GoalsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -1091,6 +1596,8 @@ func (_q *TenantQuery) Clone() *TenantQuery {
 		withHealthSnapshots:        _q.withHealthSnapshots.Clone(),
 		withRoadmaps:               _q.withRoadmaps.Clone(),
 		withServiceRates:           _q.withServiceRates.Clone(),
+		withNetworkDevices:         _q.withNetworkDevices.Clone(),
+		withNetworkBackups:         _q.withNetworkBackups.Clone(),
 		withBudgetForecasts:        _q.withBudgetForecasts.Clone(),
 		withEmployees:              _q.withEmployees.Clone(),
 		withCompensationAgreements: _q.withCompensationAgreements.Clone(),
@@ -1098,10 +1605,30 @@ func (_q *TenantQuery) Clone() *TenantQuery {
 		withJournalEntries:         _q.withJournalEntries.Clone(),
 		withRecurringInvoices:      _q.withRecurringInvoices.Clone(),
 		withInventoryReservations:  _q.withInventoryReservations.Clone(),
+		withDepartments:            _q.withDepartments.Clone(),
+		withPermissions:            _q.withPermissions.Clone(),
+		withAssetTypes:             _q.withAssetTypes.Clone(),
+		withDetectionEvents:        _q.withDetectionEvents.Clone(),
+		withSaasIdentities:         _q.withSaasIdentities.Clone(),
+		withSaasUsages:             _q.withSaasUsages.Clone(),
+		withRecordings:             _q.withRecordings.Clone(),
+		withNetworkLinks:           _q.withNetworkLinks.Clone(),
+		withNetworkPorts:           _q.withNetworkPorts.Clone(),
+		withNexusAudits:            _q.withNexusAudits.Clone(),
+		withSuccessionMaps:         _q.withSuccessionMaps.Clone(),
 		withCustomerAccount:        _q.withCustomerAccount.Clone(),
+		withScripts:                _q.withScripts.Clone(),
+		withJobs:                   _q.withJobs.Clone(),
+		withTimeOffRequests:        _q.withTimeOffRequests.Clone(),
+		withTimeOffPolicies:        _q.withTimeOffPolicies.Clone(),
+		withTimeOffBalances:        _q.withTimeOffBalances.Clone(),
+		withReviewCycles:           _q.withReviewCycles.Clone(),
+		withPerformanceReviews:     _q.withPerformanceReviews.Clone(),
+		withGoals:                  _q.withGoals.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -1391,6 +1918,28 @@ func (_q *TenantQuery) WithServiceRates(opts ...func(*ServiceRateQuery)) *Tenant
 	return _q
 }
 
+// WithNetworkDevices tells the query-builder to eager-load the nodes that are connected to
+// the "network_devices" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithNetworkDevices(opts ...func(*NetworkDeviceQuery)) *TenantQuery {
+	query := (&NetworkDeviceClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withNetworkDevices = query
+	return _q
+}
+
+// WithNetworkBackups tells the query-builder to eager-load the nodes that are connected to
+// the "network_backups" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithNetworkBackups(opts ...func(*NetworkBackupQuery)) *TenantQuery {
+	query := (&NetworkBackupClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withNetworkBackups = query
+	return _q
+}
+
 // WithBudgetForecasts tells the query-builder to eager-load the nodes that are connected to
 // the "budget_forecasts" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TenantQuery) WithBudgetForecasts(opts ...func(*BudgetForecastQuery)) *TenantQuery {
@@ -1468,6 +2017,127 @@ func (_q *TenantQuery) WithInventoryReservations(opts ...func(*InventoryReservat
 	return _q
 }
 
+// WithDepartments tells the query-builder to eager-load the nodes that are connected to
+// the "departments" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithDepartments(opts ...func(*DepartmentQuery)) *TenantQuery {
+	query := (&DepartmentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withDepartments = query
+	return _q
+}
+
+// WithPermissions tells the query-builder to eager-load the nodes that are connected to
+// the "permissions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithPermissions(opts ...func(*PermissionQuery)) *TenantQuery {
+	query := (&PermissionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPermissions = query
+	return _q
+}
+
+// WithAssetTypes tells the query-builder to eager-load the nodes that are connected to
+// the "asset_types" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithAssetTypes(opts ...func(*AssetTypeQuery)) *TenantQuery {
+	query := (&AssetTypeClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withAssetTypes = query
+	return _q
+}
+
+// WithDetectionEvents tells the query-builder to eager-load the nodes that are connected to
+// the "detection_events" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithDetectionEvents(opts ...func(*DetectionEventQuery)) *TenantQuery {
+	query := (&DetectionEventClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withDetectionEvents = query
+	return _q
+}
+
+// WithSaasIdentities tells the query-builder to eager-load the nodes that are connected to
+// the "saas_identities" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithSaasIdentities(opts ...func(*SaaSIdentityQuery)) *TenantQuery {
+	query := (&SaaSIdentityClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSaasIdentities = query
+	return _q
+}
+
+// WithSaasUsages tells the query-builder to eager-load the nodes that are connected to
+// the "saas_usages" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithSaasUsages(opts ...func(*SaaSUsageQuery)) *TenantQuery {
+	query := (&SaaSUsageClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSaasUsages = query
+	return _q
+}
+
+// WithRecordings tells the query-builder to eager-load the nodes that are connected to
+// the "recordings" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithRecordings(opts ...func(*RecordingQuery)) *TenantQuery {
+	query := (&RecordingClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withRecordings = query
+	return _q
+}
+
+// WithNetworkLinks tells the query-builder to eager-load the nodes that are connected to
+// the "network_links" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithNetworkLinks(opts ...func(*NetworkLinkQuery)) *TenantQuery {
+	query := (&NetworkLinkClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withNetworkLinks = query
+	return _q
+}
+
+// WithNetworkPorts tells the query-builder to eager-load the nodes that are connected to
+// the "network_ports" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithNetworkPorts(opts ...func(*NetworkPortQuery)) *TenantQuery {
+	query := (&NetworkPortClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withNetworkPorts = query
+	return _q
+}
+
+// WithNexusAudits tells the query-builder to eager-load the nodes that are connected to
+// the "nexus_audits" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithNexusAudits(opts ...func(*NexusAuditQuery)) *TenantQuery {
+	query := (&NexusAuditClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withNexusAudits = query
+	return _q
+}
+
+// WithSuccessionMaps tells the query-builder to eager-load the nodes that are connected to
+// the "succession_maps" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithSuccessionMaps(opts ...func(*SuccessionMapQuery)) *TenantQuery {
+	query := (&SuccessionMapClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSuccessionMaps = query
+	return _q
+}
+
 // WithCustomerAccount tells the query-builder to eager-load the nodes that are connected to
 // the "customer_account" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TenantQuery) WithCustomerAccount(opts ...func(*AccountQuery)) *TenantQuery {
@@ -1476,6 +2146,94 @@ func (_q *TenantQuery) WithCustomerAccount(opts ...func(*AccountQuery)) *TenantQ
 		opt(query)
 	}
 	_q.withCustomerAccount = query
+	return _q
+}
+
+// WithScripts tells the query-builder to eager-load the nodes that are connected to
+// the "scripts" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithScripts(opts ...func(*ScriptQuery)) *TenantQuery {
+	query := (&ScriptClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withScripts = query
+	return _q
+}
+
+// WithJobs tells the query-builder to eager-load the nodes that are connected to
+// the "jobs" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithJobs(opts ...func(*JobQuery)) *TenantQuery {
+	query := (&JobClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withJobs = query
+	return _q
+}
+
+// WithTimeOffRequests tells the query-builder to eager-load the nodes that are connected to
+// the "time_off_requests" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithTimeOffRequests(opts ...func(*TimeOffRequestQuery)) *TenantQuery {
+	query := (&TimeOffRequestClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTimeOffRequests = query
+	return _q
+}
+
+// WithTimeOffPolicies tells the query-builder to eager-load the nodes that are connected to
+// the "time_off_policies" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithTimeOffPolicies(opts ...func(*TimeOffPolicyQuery)) *TenantQuery {
+	query := (&TimeOffPolicyClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTimeOffPolicies = query
+	return _q
+}
+
+// WithTimeOffBalances tells the query-builder to eager-load the nodes that are connected to
+// the "time_off_balances" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithTimeOffBalances(opts ...func(*TimeOffBalanceQuery)) *TenantQuery {
+	query := (&TimeOffBalanceClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTimeOffBalances = query
+	return _q
+}
+
+// WithReviewCycles tells the query-builder to eager-load the nodes that are connected to
+// the "review_cycles" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithReviewCycles(opts ...func(*ReviewCycleQuery)) *TenantQuery {
+	query := (&ReviewCycleClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withReviewCycles = query
+	return _q
+}
+
+// WithPerformanceReviews tells the query-builder to eager-load the nodes that are connected to
+// the "performance_reviews" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithPerformanceReviews(opts ...func(*PerformanceReviewQuery)) *TenantQuery {
+	query := (&PerformanceReviewClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPerformanceReviews = query
+	return _q
+}
+
+// WithGoals tells the query-builder to eager-load the nodes that are connected to
+// the "goals" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithGoals(opts ...func(*GoalQuery)) *TenantQuery {
+	query := (&GoalClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withGoals = query
 	return _q
 }
 
@@ -1558,7 +2316,7 @@ func (_q *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 		nodes       = []*Tenant{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [34]bool{
+		loadedTypes = [55]bool{
 			_q.withParent != nil,
 			_q.withChildren != nil,
 			_q.withUsers != nil,
@@ -1585,6 +2343,8 @@ func (_q *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 			_q.withHealthSnapshots != nil,
 			_q.withRoadmaps != nil,
 			_q.withServiceRates != nil,
+			_q.withNetworkDevices != nil,
+			_q.withNetworkBackups != nil,
 			_q.withBudgetForecasts != nil,
 			_q.withEmployees != nil,
 			_q.withCompensationAgreements != nil,
@@ -1592,7 +2352,26 @@ func (_q *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 			_q.withJournalEntries != nil,
 			_q.withRecurringInvoices != nil,
 			_q.withInventoryReservations != nil,
+			_q.withDepartments != nil,
+			_q.withPermissions != nil,
+			_q.withAssetTypes != nil,
+			_q.withDetectionEvents != nil,
+			_q.withSaasIdentities != nil,
+			_q.withSaasUsages != nil,
+			_q.withRecordings != nil,
+			_q.withNetworkLinks != nil,
+			_q.withNetworkPorts != nil,
+			_q.withNexusAudits != nil,
+			_q.withSuccessionMaps != nil,
 			_q.withCustomerAccount != nil,
+			_q.withScripts != nil,
+			_q.withJobs != nil,
+			_q.withTimeOffRequests != nil,
+			_q.withTimeOffPolicies != nil,
+			_q.withTimeOffBalances != nil,
+			_q.withReviewCycles != nil,
+			_q.withPerformanceReviews != nil,
+			_q.withGoals != nil,
 		}
 	)
 	if _q.withParent != nil || _q.withCustomerAccount != nil {
@@ -1609,6 +2388,9 @@ func (_q *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -1800,6 +2582,20 @@ func (_q *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 			return nil, err
 		}
 	}
+	if query := _q.withNetworkDevices; query != nil {
+		if err := _q.loadNetworkDevices(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.NetworkDevices = []*NetworkDevice{} },
+			func(n *Tenant, e *NetworkDevice) { n.Edges.NetworkDevices = append(n.Edges.NetworkDevices, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withNetworkBackups; query != nil {
+		if err := _q.loadNetworkBackups(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.NetworkBackups = []*NetworkBackup{} },
+			func(n *Tenant, e *NetworkBackup) { n.Edges.NetworkBackups = append(n.Edges.NetworkBackups, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := _q.withBudgetForecasts; query != nil {
 		if err := _q.loadBudgetForecasts(ctx, query, nodes,
 			func(n *Tenant) { n.Edges.BudgetForecasts = []*BudgetForecast{} },
@@ -1853,9 +2649,144 @@ func (_q *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 			return nil, err
 		}
 	}
+	if query := _q.withDepartments; query != nil {
+		if err := _q.loadDepartments(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Departments = []*Department{} },
+			func(n *Tenant, e *Department) { n.Edges.Departments = append(n.Edges.Departments, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withPermissions; query != nil {
+		if err := _q.loadPermissions(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Permissions = []*Permission{} },
+			func(n *Tenant, e *Permission) { n.Edges.Permissions = append(n.Edges.Permissions, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withAssetTypes; query != nil {
+		if err := _q.loadAssetTypes(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.AssetTypes = []*AssetType{} },
+			func(n *Tenant, e *AssetType) { n.Edges.AssetTypes = append(n.Edges.AssetTypes, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withDetectionEvents; query != nil {
+		if err := _q.loadDetectionEvents(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.DetectionEvents = []*DetectionEvent{} },
+			func(n *Tenant, e *DetectionEvent) { n.Edges.DetectionEvents = append(n.Edges.DetectionEvents, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSaasIdentities; query != nil {
+		if err := _q.loadSaasIdentities(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.SaasIdentities = []*SaaSIdentity{} },
+			func(n *Tenant, e *SaaSIdentity) { n.Edges.SaasIdentities = append(n.Edges.SaasIdentities, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSaasUsages; query != nil {
+		if err := _q.loadSaasUsages(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.SaasUsages = []*SaaSUsage{} },
+			func(n *Tenant, e *SaaSUsage) { n.Edges.SaasUsages = append(n.Edges.SaasUsages, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withRecordings; query != nil {
+		if err := _q.loadRecordings(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Recordings = []*Recording{} },
+			func(n *Tenant, e *Recording) { n.Edges.Recordings = append(n.Edges.Recordings, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withNetworkLinks; query != nil {
+		if err := _q.loadNetworkLinks(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.NetworkLinks = []*NetworkLink{} },
+			func(n *Tenant, e *NetworkLink) { n.Edges.NetworkLinks = append(n.Edges.NetworkLinks, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withNetworkPorts; query != nil {
+		if err := _q.loadNetworkPorts(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.NetworkPorts = []*NetworkPort{} },
+			func(n *Tenant, e *NetworkPort) { n.Edges.NetworkPorts = append(n.Edges.NetworkPorts, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withNexusAudits; query != nil {
+		if err := _q.loadNexusAudits(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.NexusAudits = []*NexusAudit{} },
+			func(n *Tenant, e *NexusAudit) { n.Edges.NexusAudits = append(n.Edges.NexusAudits, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSuccessionMaps; query != nil {
+		if err := _q.loadSuccessionMaps(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.SuccessionMaps = []*SuccessionMap{} },
+			func(n *Tenant, e *SuccessionMap) { n.Edges.SuccessionMaps = append(n.Edges.SuccessionMaps, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := _q.withCustomerAccount; query != nil {
 		if err := _q.loadCustomerAccount(ctx, query, nodes, nil,
 			func(n *Tenant, e *Account) { n.Edges.CustomerAccount = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withScripts; query != nil {
+		if err := _q.loadScripts(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Scripts = []*Script{} },
+			func(n *Tenant, e *Script) { n.Edges.Scripts = append(n.Edges.Scripts, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withJobs; query != nil {
+		if err := _q.loadJobs(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Jobs = []*Job{} },
+			func(n *Tenant, e *Job) { n.Edges.Jobs = append(n.Edges.Jobs, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTimeOffRequests; query != nil {
+		if err := _q.loadTimeOffRequests(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.TimeOffRequests = []*TimeOffRequest{} },
+			func(n *Tenant, e *TimeOffRequest) { n.Edges.TimeOffRequests = append(n.Edges.TimeOffRequests, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTimeOffPolicies; query != nil {
+		if err := _q.loadTimeOffPolicies(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.TimeOffPolicies = []*TimeOffPolicy{} },
+			func(n *Tenant, e *TimeOffPolicy) { n.Edges.TimeOffPolicies = append(n.Edges.TimeOffPolicies, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTimeOffBalances; query != nil {
+		if err := _q.loadTimeOffBalances(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.TimeOffBalances = []*TimeOffBalance{} },
+			func(n *Tenant, e *TimeOffBalance) { n.Edges.TimeOffBalances = append(n.Edges.TimeOffBalances, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withReviewCycles; query != nil {
+		if err := _q.loadReviewCycles(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.ReviewCycles = []*ReviewCycle{} },
+			func(n *Tenant, e *ReviewCycle) { n.Edges.ReviewCycles = append(n.Edges.ReviewCycles, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withPerformanceReviews; query != nil {
+		if err := _q.loadPerformanceReviews(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.PerformanceReviews = []*PerformanceReview{} },
+			func(n *Tenant, e *PerformanceReview) {
+				n.Edges.PerformanceReviews = append(n.Edges.PerformanceReviews, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withGoals; query != nil {
+		if err := _q.loadGoals(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Goals = []*Goal{} },
+			func(n *Tenant, e *Goal) { n.Edges.Goals = append(n.Edges.Goals, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -2669,6 +3600,68 @@ func (_q *TenantQuery) loadServiceRates(ctx context.Context, query *ServiceRateQ
 	}
 	return nil
 }
+func (_q *TenantQuery) loadNetworkDevices(ctx context.Context, query *NetworkDeviceQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *NetworkDevice)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.NetworkDevice(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.NetworkDevicesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_network_devices
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_network_devices" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_network_devices" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadNetworkBackups(ctx context.Context, query *NetworkBackupQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *NetworkBackup)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.NetworkBackup(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.NetworkBackupsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_network_backups
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_network_backups" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_network_backups" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 func (_q *TenantQuery) loadBudgetForecasts(ctx context.Context, query *BudgetForecastQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *BudgetForecast)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Tenant)
@@ -2886,6 +3879,347 @@ func (_q *TenantQuery) loadInventoryReservations(ctx context.Context, query *Inv
 	}
 	return nil
 }
+func (_q *TenantQuery) loadDepartments(ctx context.Context, query *DepartmentQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Department)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Department(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.DepartmentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_departments
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_departments" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_departments" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadPermissions(ctx context.Context, query *PermissionQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Permission)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Permission(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.PermissionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_permissions
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_permissions" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_permissions" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadAssetTypes(ctx context.Context, query *AssetTypeQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *AssetType)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.AssetType(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.AssetTypesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_asset_types
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_asset_types" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_asset_types" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadDetectionEvents(ctx context.Context, query *DetectionEventQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *DetectionEvent)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.DetectionEvent(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.DetectionEventsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_detection_events
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_detection_events" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_detection_events" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadSaasIdentities(ctx context.Context, query *SaaSIdentityQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *SaaSIdentity)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.SaaSIdentity(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.SaasIdentitiesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_saas_identities
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_saas_identities" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_saas_identities" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadSaasUsages(ctx context.Context, query *SaaSUsageQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *SaaSUsage)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.SaaSUsage(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.SaasUsagesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_saas_usages
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_saas_usages" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_saas_usages" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadRecordings(ctx context.Context, query *RecordingQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Recording)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Recording(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.RecordingsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_recordings
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_recordings" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_recordings" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadNetworkLinks(ctx context.Context, query *NetworkLinkQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *NetworkLink)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.NetworkLink(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.NetworkLinksColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_network_links
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_network_links" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_network_links" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadNetworkPorts(ctx context.Context, query *NetworkPortQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *NetworkPort)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.NetworkPort(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.NetworkPortsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_network_ports
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_network_ports" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_network_ports" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadNexusAudits(ctx context.Context, query *NexusAuditQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *NexusAudit)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.NexusAudit(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.NexusAuditsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_nexus_audits
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_nexus_audits" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_nexus_audits" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadSuccessionMaps(ctx context.Context, query *SuccessionMapQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *SuccessionMap)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.SuccessionMap(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.SuccessionMapsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_succession_maps
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_succession_maps" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_succession_maps" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 func (_q *TenantQuery) loadCustomerAccount(ctx context.Context, query *AccountQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Account)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Tenant)
@@ -2918,9 +4252,260 @@ func (_q *TenantQuery) loadCustomerAccount(ctx context.Context, query *AccountQu
 	}
 	return nil
 }
+func (_q *TenantQuery) loadScripts(ctx context.Context, query *ScriptQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Script)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Script(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.ScriptsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_scripts
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_scripts" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_scripts" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadJobs(ctx context.Context, query *JobQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Job)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Job(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.JobsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_jobs
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_jobs" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_jobs" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadTimeOffRequests(ctx context.Context, query *TimeOffRequestQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *TimeOffRequest)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.TimeOffRequest(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.TimeOffRequestsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_time_off_requests
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_time_off_requests" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_time_off_requests" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadTimeOffPolicies(ctx context.Context, query *TimeOffPolicyQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *TimeOffPolicy)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.TimeOffPolicy(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.TimeOffPoliciesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_time_off_policies
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_time_off_policies" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_time_off_policies" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadTimeOffBalances(ctx context.Context, query *TimeOffBalanceQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *TimeOffBalance)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.TimeOffBalance(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.TimeOffBalancesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_time_off_balances
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_time_off_balances" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_time_off_balances" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadReviewCycles(ctx context.Context, query *ReviewCycleQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *ReviewCycle)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.ReviewCycle(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.ReviewCyclesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_review_cycles
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_review_cycles" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_review_cycles" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadPerformanceReviews(ctx context.Context, query *PerformanceReviewQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *PerformanceReview)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.PerformanceReview(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.PerformanceReviewsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_performance_reviews
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_performance_reviews" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_performance_reviews" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadGoals(ctx context.Context, query *GoalQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Goal)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Goal(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.GoalsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_goals
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_goals" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_goals" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 
 func (_q *TenantQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -2983,6 +4568,9 @@ func (_q *TenantQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -2998,6 +4586,12 @@ func (_q *TenantQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *TenantQuery) Modify(modifiers ...func(s *sql.Selector)) *TenantSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // TenantGroupBy is the group-by builder for Tenant entities.
@@ -3088,4 +4682,10 @@ func (_s *TenantSelect) sqlScan(ctx context.Context, root *TenantQuery, v any) e
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *TenantSelect) Modify(modifiers ...func(s *sql.Selector)) *TenantSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

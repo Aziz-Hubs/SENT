@@ -5,6 +5,7 @@ package servicerate
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 const (
@@ -59,6 +60,11 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultRate holds the default value on creation for the "rate" field.
+	DefaultRate decimal.Decimal
+)
 
 // OrderOption defines the ordering options for the ServiceRate queries.
 type OrderOption func(*sql.Selector)

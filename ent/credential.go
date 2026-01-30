@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"sent/ent/asset"
 	"sent/ent/credential"
@@ -27,6 +28,8 @@ type Credential struct {
 	PasswordEncrypted []byte `json:"password_encrypted,omitempty"`
 	// LastRevealedAt holds the value of the "last_revealed_at" field.
 	LastRevealedAt time.Time `json:"last_revealed_at,omitempty"`
+	// Metadata holds the value of the "metadata" field.
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -86,7 +89,7 @@ func (*Credential) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case credential.FieldPasswordEncrypted:
+		case credential.FieldPasswordEncrypted, credential.FieldMetadata:
 			values[i] = new([]byte)
 		case credential.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -142,6 +145,14 @@ func (_m *Credential) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field last_revealed_at", values[i])
 			} else if value.Valid {
 				_m.LastRevealedAt = value.Time
+			}
+		case credential.FieldMetadata:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field metadata", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Metadata); err != nil {
+					return fmt.Errorf("unmarshal field metadata: %w", err)
+				}
 			}
 		case credential.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -225,6 +236,9 @@ func (_m *Credential) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("last_revealed_at=")
 	builder.WriteString(_m.LastRevealedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("metadata=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

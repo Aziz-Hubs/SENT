@@ -14,13 +14,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // BudgetForecastUpdate is the builder for updating BudgetForecast entities.
 type BudgetForecastUpdate struct {
 	config
-	hooks    []Hook
-	mutation *BudgetForecastMutation
+	hooks     []Hook
+	mutation  *BudgetForecastMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the BudgetForecastUpdate builder.
@@ -72,44 +74,30 @@ func (_u *BudgetForecastUpdate) AddMonth(v int) *BudgetForecastUpdate {
 }
 
 // SetProjectedAmount sets the "projected_amount" field.
-func (_u *BudgetForecastUpdate) SetProjectedAmount(v float64) *BudgetForecastUpdate {
-	_u.mutation.ResetProjectedAmount()
+func (_u *BudgetForecastUpdate) SetProjectedAmount(v decimal.Decimal) *BudgetForecastUpdate {
 	_u.mutation.SetProjectedAmount(v)
 	return _u
 }
 
 // SetNillableProjectedAmount sets the "projected_amount" field if the given value is not nil.
-func (_u *BudgetForecastUpdate) SetNillableProjectedAmount(v *float64) *BudgetForecastUpdate {
+func (_u *BudgetForecastUpdate) SetNillableProjectedAmount(v *decimal.Decimal) *BudgetForecastUpdate {
 	if v != nil {
 		_u.SetProjectedAmount(*v)
 	}
 	return _u
 }
 
-// AddProjectedAmount adds value to the "projected_amount" field.
-func (_u *BudgetForecastUpdate) AddProjectedAmount(v float64) *BudgetForecastUpdate {
-	_u.mutation.AddProjectedAmount(v)
-	return _u
-}
-
 // SetActualSpent sets the "actual_spent" field.
-func (_u *BudgetForecastUpdate) SetActualSpent(v float64) *BudgetForecastUpdate {
-	_u.mutation.ResetActualSpent()
+func (_u *BudgetForecastUpdate) SetActualSpent(v decimal.Decimal) *BudgetForecastUpdate {
 	_u.mutation.SetActualSpent(v)
 	return _u
 }
 
 // SetNillableActualSpent sets the "actual_spent" field if the given value is not nil.
-func (_u *BudgetForecastUpdate) SetNillableActualSpent(v *float64) *BudgetForecastUpdate {
+func (_u *BudgetForecastUpdate) SetNillableActualSpent(v *decimal.Decimal) *BudgetForecastUpdate {
 	if v != nil {
 		_u.SetActualSpent(*v)
 	}
-	return _u
-}
-
-// AddActualSpent adds value to the "actual_spent" field.
-func (_u *BudgetForecastUpdate) AddActualSpent(v float64) *BudgetForecastUpdate {
-	_u.mutation.AddActualSpent(v)
 	return _u
 }
 
@@ -196,6 +184,12 @@ func (_u *BudgetForecastUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *BudgetForecastUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *BudgetForecastUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *BudgetForecastUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -221,16 +215,10 @@ func (_u *BudgetForecastUpdate) sqlSave(ctx context.Context) (_node int, err err
 		_spec.AddField(budgetforecast.FieldMonth, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ProjectedAmount(); ok {
-		_spec.SetField(budgetforecast.FieldProjectedAmount, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedProjectedAmount(); ok {
-		_spec.AddField(budgetforecast.FieldProjectedAmount, field.TypeFloat64, value)
+		_spec.SetField(budgetforecast.FieldProjectedAmount, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.ActualSpent(); ok {
-		_spec.SetField(budgetforecast.FieldActualSpent, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedActualSpent(); ok {
-		_spec.AddField(budgetforecast.FieldActualSpent, field.TypeFloat64, value)
+		_spec.SetField(budgetforecast.FieldActualSpent, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.ForecastData(); ok {
 		_spec.SetField(budgetforecast.FieldForecastData, field.TypeJSON, value)
@@ -270,6 +258,7 @@ func (_u *BudgetForecastUpdate) sqlSave(ctx context.Context) (_node int, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{budgetforecast.Label}
@@ -285,9 +274,10 @@ func (_u *BudgetForecastUpdate) sqlSave(ctx context.Context) (_node int, err err
 // BudgetForecastUpdateOne is the builder for updating a single BudgetForecast entity.
 type BudgetForecastUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *BudgetForecastMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *BudgetForecastMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetYear sets the "year" field.
@@ -333,44 +323,30 @@ func (_u *BudgetForecastUpdateOne) AddMonth(v int) *BudgetForecastUpdateOne {
 }
 
 // SetProjectedAmount sets the "projected_amount" field.
-func (_u *BudgetForecastUpdateOne) SetProjectedAmount(v float64) *BudgetForecastUpdateOne {
-	_u.mutation.ResetProjectedAmount()
+func (_u *BudgetForecastUpdateOne) SetProjectedAmount(v decimal.Decimal) *BudgetForecastUpdateOne {
 	_u.mutation.SetProjectedAmount(v)
 	return _u
 }
 
 // SetNillableProjectedAmount sets the "projected_amount" field if the given value is not nil.
-func (_u *BudgetForecastUpdateOne) SetNillableProjectedAmount(v *float64) *BudgetForecastUpdateOne {
+func (_u *BudgetForecastUpdateOne) SetNillableProjectedAmount(v *decimal.Decimal) *BudgetForecastUpdateOne {
 	if v != nil {
 		_u.SetProjectedAmount(*v)
 	}
 	return _u
 }
 
-// AddProjectedAmount adds value to the "projected_amount" field.
-func (_u *BudgetForecastUpdateOne) AddProjectedAmount(v float64) *BudgetForecastUpdateOne {
-	_u.mutation.AddProjectedAmount(v)
-	return _u
-}
-
 // SetActualSpent sets the "actual_spent" field.
-func (_u *BudgetForecastUpdateOne) SetActualSpent(v float64) *BudgetForecastUpdateOne {
-	_u.mutation.ResetActualSpent()
+func (_u *BudgetForecastUpdateOne) SetActualSpent(v decimal.Decimal) *BudgetForecastUpdateOne {
 	_u.mutation.SetActualSpent(v)
 	return _u
 }
 
 // SetNillableActualSpent sets the "actual_spent" field if the given value is not nil.
-func (_u *BudgetForecastUpdateOne) SetNillableActualSpent(v *float64) *BudgetForecastUpdateOne {
+func (_u *BudgetForecastUpdateOne) SetNillableActualSpent(v *decimal.Decimal) *BudgetForecastUpdateOne {
 	if v != nil {
 		_u.SetActualSpent(*v)
 	}
-	return _u
-}
-
-// AddActualSpent adds value to the "actual_spent" field.
-func (_u *BudgetForecastUpdateOne) AddActualSpent(v float64) *BudgetForecastUpdateOne {
-	_u.mutation.AddActualSpent(v)
 	return _u
 }
 
@@ -470,6 +446,12 @@ func (_u *BudgetForecastUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *BudgetForecastUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *BudgetForecastUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *BudgetForecastUpdateOne) sqlSave(ctx context.Context) (_node *BudgetForecast, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -512,16 +494,10 @@ func (_u *BudgetForecastUpdateOne) sqlSave(ctx context.Context) (_node *BudgetFo
 		_spec.AddField(budgetforecast.FieldMonth, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ProjectedAmount(); ok {
-		_spec.SetField(budgetforecast.FieldProjectedAmount, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedProjectedAmount(); ok {
-		_spec.AddField(budgetforecast.FieldProjectedAmount, field.TypeFloat64, value)
+		_spec.SetField(budgetforecast.FieldProjectedAmount, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.ActualSpent(); ok {
-		_spec.SetField(budgetforecast.FieldActualSpent, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedActualSpent(); ok {
-		_spec.AddField(budgetforecast.FieldActualSpent, field.TypeFloat64, value)
+		_spec.SetField(budgetforecast.FieldActualSpent, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.ForecastData(); ok {
 		_spec.SetField(budgetforecast.FieldForecastData, field.TypeJSON, value)
@@ -561,6 +537,7 @@ func (_u *BudgetForecastUpdateOne) sqlSave(ctx context.Context) (_node *BudgetFo
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &BudgetForecast{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

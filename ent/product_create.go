@@ -15,6 +15,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // ProductCreate is the builder for creating a Product entity.
@@ -51,13 +52,13 @@ func (_c *ProductCreate) SetNillableDescription(v *string) *ProductCreate {
 }
 
 // SetUnitCost sets the "unit_cost" field.
-func (_c *ProductCreate) SetUnitCost(v float64) *ProductCreate {
+func (_c *ProductCreate) SetUnitCost(v decimal.Decimal) *ProductCreate {
 	_c.mutation.SetUnitCost(v)
 	return _c
 }
 
 // SetNillableUnitCost sets the "unit_cost" field if the given value is not nil.
-func (_c *ProductCreate) SetNillableUnitCost(v *float64) *ProductCreate {
+func (_c *ProductCreate) SetNillableUnitCost(v *decimal.Decimal) *ProductCreate {
 	if v != nil {
 		_c.SetUnitCost(*v)
 	}
@@ -65,13 +66,13 @@ func (_c *ProductCreate) SetNillableUnitCost(v *float64) *ProductCreate {
 }
 
 // SetQuantity sets the "quantity" field.
-func (_c *ProductCreate) SetQuantity(v float64) *ProductCreate {
+func (_c *ProductCreate) SetQuantity(v decimal.Decimal) *ProductCreate {
 	_c.mutation.SetQuantity(v)
 	return _c
 }
 
 // SetNillableQuantity sets the "quantity" field if the given value is not nil.
-func (_c *ProductCreate) SetNillableQuantity(v *float64) *ProductCreate {
+func (_c *ProductCreate) SetNillableQuantity(v *decimal.Decimal) *ProductCreate {
 	if v != nil {
 		_c.SetQuantity(*v)
 	}
@@ -287,11 +288,11 @@ func (_c *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 		_node.Description = value
 	}
 	if value, ok := _c.mutation.UnitCost(); ok {
-		_spec.SetField(product.FieldUnitCost, field.TypeFloat64, value)
+		_spec.SetField(product.FieldUnitCost, field.TypeOther, value)
 		_node.UnitCost = value
 	}
 	if value, ok := _c.mutation.Quantity(); ok {
-		_spec.SetField(product.FieldQuantity, field.TypeFloat64, value)
+		_spec.SetField(product.FieldQuantity, field.TypeOther, value)
 		_node.Quantity = value
 	}
 	if value, ok := _c.mutation.Attributes(); ok {

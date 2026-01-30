@@ -10,18 +10,19 @@ import (
 	"sent/ent/product"
 	"sent/ent/stockmovement"
 	"sent/ent/tenant"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // StockMovementUpdate is the builder for updating StockMovement entities.
 type StockMovementUpdate struct {
 	config
-	hooks    []Hook
-	mutation *StockMovementMutation
+	hooks     []Hook
+	mutation  *StockMovementMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the StockMovementUpdate builder.
@@ -31,23 +32,16 @@ func (_u *StockMovementUpdate) Where(ps ...predicate.StockMovement) *StockMoveme
 }
 
 // SetQuantity sets the "quantity" field.
-func (_u *StockMovementUpdate) SetQuantity(v float64) *StockMovementUpdate {
-	_u.mutation.ResetQuantity()
+func (_u *StockMovementUpdate) SetQuantity(v decimal.Decimal) *StockMovementUpdate {
 	_u.mutation.SetQuantity(v)
 	return _u
 }
 
 // SetNillableQuantity sets the "quantity" field if the given value is not nil.
-func (_u *StockMovementUpdate) SetNillableQuantity(v *float64) *StockMovementUpdate {
+func (_u *StockMovementUpdate) SetNillableQuantity(v *decimal.Decimal) *StockMovementUpdate {
 	if v != nil {
 		_u.SetQuantity(*v)
 	}
-	return _u
-}
-
-// AddQuantity adds value to the "quantity" field.
-func (_u *StockMovementUpdate) AddQuantity(v float64) *StockMovementUpdate {
-	_u.mutation.AddQuantity(v)
 	return _u
 }
 
@@ -86,23 +80,16 @@ func (_u *StockMovementUpdate) ClearReason() *StockMovementUpdate {
 }
 
 // SetUnitCost sets the "unit_cost" field.
-func (_u *StockMovementUpdate) SetUnitCost(v float64) *StockMovementUpdate {
-	_u.mutation.ResetUnitCost()
+func (_u *StockMovementUpdate) SetUnitCost(v decimal.Decimal) *StockMovementUpdate {
 	_u.mutation.SetUnitCost(v)
 	return _u
 }
 
 // SetNillableUnitCost sets the "unit_cost" field if the given value is not nil.
-func (_u *StockMovementUpdate) SetNillableUnitCost(v *float64) *StockMovementUpdate {
+func (_u *StockMovementUpdate) SetNillableUnitCost(v *decimal.Decimal) *StockMovementUpdate {
 	if v != nil {
 		_u.SetUnitCost(*v)
 	}
-	return _u
-}
-
-// AddUnitCost adds value to the "unit_cost" field.
-func (_u *StockMovementUpdate) AddUnitCost(v float64) *StockMovementUpdate {
-	_u.mutation.AddUnitCost(v)
 	return _u
 }
 
@@ -113,23 +100,16 @@ func (_u *StockMovementUpdate) ClearUnitCost() *StockMovementUpdate {
 }
 
 // SetRemainingQuantity sets the "remaining_quantity" field.
-func (_u *StockMovementUpdate) SetRemainingQuantity(v float64) *StockMovementUpdate {
-	_u.mutation.ResetRemainingQuantity()
+func (_u *StockMovementUpdate) SetRemainingQuantity(v decimal.Decimal) *StockMovementUpdate {
 	_u.mutation.SetRemainingQuantity(v)
 	return _u
 }
 
 // SetNillableRemainingQuantity sets the "remaining_quantity" field if the given value is not nil.
-func (_u *StockMovementUpdate) SetNillableRemainingQuantity(v *float64) *StockMovementUpdate {
+func (_u *StockMovementUpdate) SetNillableRemainingQuantity(v *decimal.Decimal) *StockMovementUpdate {
 	if v != nil {
 		_u.SetRemainingQuantity(*v)
 	}
-	return _u
-}
-
-// AddRemainingQuantity adds value to the "remaining_quantity" field.
-func (_u *StockMovementUpdate) AddRemainingQuantity(v float64) *StockMovementUpdate {
-	_u.mutation.AddRemainingQuantity(v)
 	return _u
 }
 
@@ -140,23 +120,16 @@ func (_u *StockMovementUpdate) ClearRemainingQuantity() *StockMovementUpdate {
 }
 
 // SetCalculatedCogs sets the "calculated_cogs" field.
-func (_u *StockMovementUpdate) SetCalculatedCogs(v float64) *StockMovementUpdate {
-	_u.mutation.ResetCalculatedCogs()
+func (_u *StockMovementUpdate) SetCalculatedCogs(v decimal.Decimal) *StockMovementUpdate {
 	_u.mutation.SetCalculatedCogs(v)
 	return _u
 }
 
 // SetNillableCalculatedCogs sets the "calculated_cogs" field if the given value is not nil.
-func (_u *StockMovementUpdate) SetNillableCalculatedCogs(v *float64) *StockMovementUpdate {
+func (_u *StockMovementUpdate) SetNillableCalculatedCogs(v *decimal.Decimal) *StockMovementUpdate {
 	if v != nil {
 		_u.SetCalculatedCogs(*v)
 	}
-	return _u
-}
-
-// AddCalculatedCogs adds value to the "calculated_cogs" field.
-func (_u *StockMovementUpdate) AddCalculatedCogs(v float64) *StockMovementUpdate {
-	_u.mutation.AddCalculatedCogs(v)
 	return _u
 }
 
@@ -175,20 +148,6 @@ func (_u *StockMovementUpdate) SetMetadata(v map[string]interface{}) *StockMovem
 // ClearMetadata clears the value of the "metadata" field.
 func (_u *StockMovementUpdate) ClearMetadata() *StockMovementUpdate {
 	_u.mutation.ClearMetadata()
-	return _u
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (_u *StockMovementUpdate) SetCreatedAt(v time.Time) *StockMovementUpdate {
-	_u.mutation.SetCreatedAt(v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *StockMovementUpdate) SetNillableCreatedAt(v *time.Time) *StockMovementUpdate {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
 	return _u
 }
 
@@ -274,6 +233,12 @@ func (_u *StockMovementUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *StockMovementUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *StockMovementUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *StockMovementUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -287,10 +252,7 @@ func (_u *StockMovementUpdate) sqlSave(ctx context.Context) (_node int, err erro
 		}
 	}
 	if value, ok := _u.mutation.Quantity(); ok {
-		_spec.SetField(stockmovement.FieldQuantity, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedQuantity(); ok {
-		_spec.AddField(stockmovement.FieldQuantity, field.TypeFloat64, value)
+		_spec.SetField(stockmovement.FieldQuantity, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.MovementType(); ok {
 		_spec.SetField(stockmovement.FieldMovementType, field.TypeEnum, value)
@@ -302,40 +264,28 @@ func (_u *StockMovementUpdate) sqlSave(ctx context.Context) (_node int, err erro
 		_spec.ClearField(stockmovement.FieldReason, field.TypeString)
 	}
 	if value, ok := _u.mutation.UnitCost(); ok {
-		_spec.SetField(stockmovement.FieldUnitCost, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedUnitCost(); ok {
-		_spec.AddField(stockmovement.FieldUnitCost, field.TypeFloat64, value)
+		_spec.SetField(stockmovement.FieldUnitCost, field.TypeOther, value)
 	}
 	if _u.mutation.UnitCostCleared() {
-		_spec.ClearField(stockmovement.FieldUnitCost, field.TypeFloat64)
+		_spec.ClearField(stockmovement.FieldUnitCost, field.TypeOther)
 	}
 	if value, ok := _u.mutation.RemainingQuantity(); ok {
-		_spec.SetField(stockmovement.FieldRemainingQuantity, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedRemainingQuantity(); ok {
-		_spec.AddField(stockmovement.FieldRemainingQuantity, field.TypeFloat64, value)
+		_spec.SetField(stockmovement.FieldRemainingQuantity, field.TypeOther, value)
 	}
 	if _u.mutation.RemainingQuantityCleared() {
-		_spec.ClearField(stockmovement.FieldRemainingQuantity, field.TypeFloat64)
+		_spec.ClearField(stockmovement.FieldRemainingQuantity, field.TypeOther)
 	}
 	if value, ok := _u.mutation.CalculatedCogs(); ok {
-		_spec.SetField(stockmovement.FieldCalculatedCogs, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedCalculatedCogs(); ok {
-		_spec.AddField(stockmovement.FieldCalculatedCogs, field.TypeFloat64, value)
+		_spec.SetField(stockmovement.FieldCalculatedCogs, field.TypeOther, value)
 	}
 	if _u.mutation.CalculatedCogsCleared() {
-		_spec.ClearField(stockmovement.FieldCalculatedCogs, field.TypeFloat64)
+		_spec.ClearField(stockmovement.FieldCalculatedCogs, field.TypeOther)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(stockmovement.FieldMetadata, field.TypeJSON, value)
 	}
 	if _u.mutation.MetadataCleared() {
 		_spec.ClearField(stockmovement.FieldMetadata, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(stockmovement.FieldCreatedAt, field.TypeTime, value)
 	}
 	if _u.mutation.ProductCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -395,6 +345,7 @@ func (_u *StockMovementUpdate) sqlSave(ctx context.Context) (_node int, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{stockmovement.Label}
@@ -410,29 +361,23 @@ func (_u *StockMovementUpdate) sqlSave(ctx context.Context) (_node int, err erro
 // StockMovementUpdateOne is the builder for updating a single StockMovement entity.
 type StockMovementUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *StockMovementMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *StockMovementMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetQuantity sets the "quantity" field.
-func (_u *StockMovementUpdateOne) SetQuantity(v float64) *StockMovementUpdateOne {
-	_u.mutation.ResetQuantity()
+func (_u *StockMovementUpdateOne) SetQuantity(v decimal.Decimal) *StockMovementUpdateOne {
 	_u.mutation.SetQuantity(v)
 	return _u
 }
 
 // SetNillableQuantity sets the "quantity" field if the given value is not nil.
-func (_u *StockMovementUpdateOne) SetNillableQuantity(v *float64) *StockMovementUpdateOne {
+func (_u *StockMovementUpdateOne) SetNillableQuantity(v *decimal.Decimal) *StockMovementUpdateOne {
 	if v != nil {
 		_u.SetQuantity(*v)
 	}
-	return _u
-}
-
-// AddQuantity adds value to the "quantity" field.
-func (_u *StockMovementUpdateOne) AddQuantity(v float64) *StockMovementUpdateOne {
-	_u.mutation.AddQuantity(v)
 	return _u
 }
 
@@ -471,23 +416,16 @@ func (_u *StockMovementUpdateOne) ClearReason() *StockMovementUpdateOne {
 }
 
 // SetUnitCost sets the "unit_cost" field.
-func (_u *StockMovementUpdateOne) SetUnitCost(v float64) *StockMovementUpdateOne {
-	_u.mutation.ResetUnitCost()
+func (_u *StockMovementUpdateOne) SetUnitCost(v decimal.Decimal) *StockMovementUpdateOne {
 	_u.mutation.SetUnitCost(v)
 	return _u
 }
 
 // SetNillableUnitCost sets the "unit_cost" field if the given value is not nil.
-func (_u *StockMovementUpdateOne) SetNillableUnitCost(v *float64) *StockMovementUpdateOne {
+func (_u *StockMovementUpdateOne) SetNillableUnitCost(v *decimal.Decimal) *StockMovementUpdateOne {
 	if v != nil {
 		_u.SetUnitCost(*v)
 	}
-	return _u
-}
-
-// AddUnitCost adds value to the "unit_cost" field.
-func (_u *StockMovementUpdateOne) AddUnitCost(v float64) *StockMovementUpdateOne {
-	_u.mutation.AddUnitCost(v)
 	return _u
 }
 
@@ -498,23 +436,16 @@ func (_u *StockMovementUpdateOne) ClearUnitCost() *StockMovementUpdateOne {
 }
 
 // SetRemainingQuantity sets the "remaining_quantity" field.
-func (_u *StockMovementUpdateOne) SetRemainingQuantity(v float64) *StockMovementUpdateOne {
-	_u.mutation.ResetRemainingQuantity()
+func (_u *StockMovementUpdateOne) SetRemainingQuantity(v decimal.Decimal) *StockMovementUpdateOne {
 	_u.mutation.SetRemainingQuantity(v)
 	return _u
 }
 
 // SetNillableRemainingQuantity sets the "remaining_quantity" field if the given value is not nil.
-func (_u *StockMovementUpdateOne) SetNillableRemainingQuantity(v *float64) *StockMovementUpdateOne {
+func (_u *StockMovementUpdateOne) SetNillableRemainingQuantity(v *decimal.Decimal) *StockMovementUpdateOne {
 	if v != nil {
 		_u.SetRemainingQuantity(*v)
 	}
-	return _u
-}
-
-// AddRemainingQuantity adds value to the "remaining_quantity" field.
-func (_u *StockMovementUpdateOne) AddRemainingQuantity(v float64) *StockMovementUpdateOne {
-	_u.mutation.AddRemainingQuantity(v)
 	return _u
 }
 
@@ -525,23 +456,16 @@ func (_u *StockMovementUpdateOne) ClearRemainingQuantity() *StockMovementUpdateO
 }
 
 // SetCalculatedCogs sets the "calculated_cogs" field.
-func (_u *StockMovementUpdateOne) SetCalculatedCogs(v float64) *StockMovementUpdateOne {
-	_u.mutation.ResetCalculatedCogs()
+func (_u *StockMovementUpdateOne) SetCalculatedCogs(v decimal.Decimal) *StockMovementUpdateOne {
 	_u.mutation.SetCalculatedCogs(v)
 	return _u
 }
 
 // SetNillableCalculatedCogs sets the "calculated_cogs" field if the given value is not nil.
-func (_u *StockMovementUpdateOne) SetNillableCalculatedCogs(v *float64) *StockMovementUpdateOne {
+func (_u *StockMovementUpdateOne) SetNillableCalculatedCogs(v *decimal.Decimal) *StockMovementUpdateOne {
 	if v != nil {
 		_u.SetCalculatedCogs(*v)
 	}
-	return _u
-}
-
-// AddCalculatedCogs adds value to the "calculated_cogs" field.
-func (_u *StockMovementUpdateOne) AddCalculatedCogs(v float64) *StockMovementUpdateOne {
-	_u.mutation.AddCalculatedCogs(v)
 	return _u
 }
 
@@ -560,20 +484,6 @@ func (_u *StockMovementUpdateOne) SetMetadata(v map[string]interface{}) *StockMo
 // ClearMetadata clears the value of the "metadata" field.
 func (_u *StockMovementUpdateOne) ClearMetadata() *StockMovementUpdateOne {
 	_u.mutation.ClearMetadata()
-	return _u
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (_u *StockMovementUpdateOne) SetCreatedAt(v time.Time) *StockMovementUpdateOne {
-	_u.mutation.SetCreatedAt(v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *StockMovementUpdateOne) SetNillableCreatedAt(v *time.Time) *StockMovementUpdateOne {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
 	return _u
 }
 
@@ -672,6 +582,12 @@ func (_u *StockMovementUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *StockMovementUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *StockMovementUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *StockMovementUpdateOne) sqlSave(ctx context.Context) (_node *StockMovement, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -702,10 +618,7 @@ func (_u *StockMovementUpdateOne) sqlSave(ctx context.Context) (_node *StockMove
 		}
 	}
 	if value, ok := _u.mutation.Quantity(); ok {
-		_spec.SetField(stockmovement.FieldQuantity, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedQuantity(); ok {
-		_spec.AddField(stockmovement.FieldQuantity, field.TypeFloat64, value)
+		_spec.SetField(stockmovement.FieldQuantity, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.MovementType(); ok {
 		_spec.SetField(stockmovement.FieldMovementType, field.TypeEnum, value)
@@ -717,40 +630,28 @@ func (_u *StockMovementUpdateOne) sqlSave(ctx context.Context) (_node *StockMove
 		_spec.ClearField(stockmovement.FieldReason, field.TypeString)
 	}
 	if value, ok := _u.mutation.UnitCost(); ok {
-		_spec.SetField(stockmovement.FieldUnitCost, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedUnitCost(); ok {
-		_spec.AddField(stockmovement.FieldUnitCost, field.TypeFloat64, value)
+		_spec.SetField(stockmovement.FieldUnitCost, field.TypeOther, value)
 	}
 	if _u.mutation.UnitCostCleared() {
-		_spec.ClearField(stockmovement.FieldUnitCost, field.TypeFloat64)
+		_spec.ClearField(stockmovement.FieldUnitCost, field.TypeOther)
 	}
 	if value, ok := _u.mutation.RemainingQuantity(); ok {
-		_spec.SetField(stockmovement.FieldRemainingQuantity, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedRemainingQuantity(); ok {
-		_spec.AddField(stockmovement.FieldRemainingQuantity, field.TypeFloat64, value)
+		_spec.SetField(stockmovement.FieldRemainingQuantity, field.TypeOther, value)
 	}
 	if _u.mutation.RemainingQuantityCleared() {
-		_spec.ClearField(stockmovement.FieldRemainingQuantity, field.TypeFloat64)
+		_spec.ClearField(stockmovement.FieldRemainingQuantity, field.TypeOther)
 	}
 	if value, ok := _u.mutation.CalculatedCogs(); ok {
-		_spec.SetField(stockmovement.FieldCalculatedCogs, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedCalculatedCogs(); ok {
-		_spec.AddField(stockmovement.FieldCalculatedCogs, field.TypeFloat64, value)
+		_spec.SetField(stockmovement.FieldCalculatedCogs, field.TypeOther, value)
 	}
 	if _u.mutation.CalculatedCogsCleared() {
-		_spec.ClearField(stockmovement.FieldCalculatedCogs, field.TypeFloat64)
+		_spec.ClearField(stockmovement.FieldCalculatedCogs, field.TypeOther)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(stockmovement.FieldMetadata, field.TypeJSON, value)
 	}
 	if _u.mutation.MetadataCleared() {
 		_spec.ClearField(stockmovement.FieldMetadata, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(stockmovement.FieldCreatedAt, field.TypeTime, value)
 	}
 	if _u.mutation.ProductCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -810,6 +711,7 @@ func (_u *StockMovementUpdateOne) sqlSave(ctx context.Context) (_node *StockMove
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &StockMovement{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

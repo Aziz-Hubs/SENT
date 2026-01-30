@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sent/ent/camera"
 	"sent/ent/recording"
+	"sent/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -86,6 +87,17 @@ func (_c *RecordingCreate) SetCamera(v *Camera) *RecordingCreate {
 	return _c.SetCameraID(v.ID)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_c *RecordingCreate) SetTenantID(id int) *RecordingCreate {
+	_c.mutation.SetTenantID(id)
+	return _c
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_c *RecordingCreate) SetTenant(v *Tenant) *RecordingCreate {
+	return _c.SetTenantID(v.ID)
+}
+
 // Mutation returns the RecordingMutation object of the builder.
 func (_c *RecordingCreate) Mutation() *RecordingMutation {
 	return _c.mutation
@@ -140,6 +152,9 @@ func (_c *RecordingCreate) check() error {
 	}
 	if len(_c.mutation.CameraIDs()) == 0 {
 		return &ValidationError{Name: "camera", err: errors.New(`ent: missing required edge "Recording.camera"`)}
+	}
+	if len(_c.mutation.TenantIDs()) == 0 {
+		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "Recording.tenant"`)}
 	}
 	return nil
 }
@@ -202,6 +217,23 @@ func (_c *RecordingCreate) createSpec() (*Recording, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.camera_recordings = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   recording.TenantTable,
+			Columns: []string{recording.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.tenant_recordings = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

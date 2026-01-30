@@ -1,0 +1,8 @@
+Steps:
+  ResetAdmin:
+    instanceName: "SENT"
+    org:
+      name: "ZITADEL"
+      user:
+        userName: "zitadel-admin"
+        password: "Password123!"

@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 const (
@@ -101,7 +102,7 @@ func ValidColumn(column string) bool {
 
 var (
 	// DefaultBalance holds the default value on creation for the "balance" field.
-	DefaultBalance float64
+	DefaultBalance decimal.Decimal
 	// DefaultIsIntercompany holds the default value on creation for the "is_intercompany" field.
 	DefaultIsIntercompany bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.

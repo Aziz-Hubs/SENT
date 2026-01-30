@@ -53,6 +53,40 @@ func (_c *VaultItemCreate) SetHash(v string) *VaultItemCreate {
 	return _c
 }
 
+// SetFileType sets the "file_type" field.
+func (_c *VaultItemCreate) SetFileType(v string) *VaultItemCreate {
+	_c.mutation.SetFileType(v)
+	return _c
+}
+
+// SetNillableFileType sets the "file_type" field if the given value is not nil.
+func (_c *VaultItemCreate) SetNillableFileType(v *string) *VaultItemCreate {
+	if v != nil {
+		_c.SetFileType(*v)
+	}
+	return _c
+}
+
+// SetEncrypted sets the "encrypted" field.
+func (_c *VaultItemCreate) SetEncrypted(v bool) *VaultItemCreate {
+	_c.mutation.SetEncrypted(v)
+	return _c
+}
+
+// SetNillableEncrypted sets the "encrypted" field if the given value is not nil.
+func (_c *VaultItemCreate) SetNillableEncrypted(v *bool) *VaultItemCreate {
+	if v != nil {
+		_c.SetEncrypted(*v)
+	}
+	return _c
+}
+
+// SetMetadata sets the "metadata" field.
+func (_c *VaultItemCreate) SetMetadata(v map[string]interface{}) *VaultItemCreate {
+	_c.mutation.SetMetadata(v)
+	return _c
+}
+
 // SetContent sets the "content" field.
 func (_c *VaultItemCreate) SetContent(v string) *VaultItemCreate {
 	_c.mutation.SetContent(v)
@@ -159,6 +193,10 @@ func (_c *VaultItemCreate) defaults() {
 		v := vaultitem.DefaultSize
 		_c.mutation.SetSize(v)
 	}
+	if _, ok := _c.mutation.Encrypted(); !ok {
+		v := vaultitem.DefaultEncrypted
+		_c.mutation.SetEncrypted(v)
+	}
 	if _, ok := _c.mutation.IsDir(); !ok {
 		v := vaultitem.DefaultIsDir
 		_c.mutation.SetIsDir(v)
@@ -201,6 +239,9 @@ func (_c *VaultItemCreate) check() error {
 		if err := vaultitem.HashValidator(v); err != nil {
 			return &ValidationError{Name: "hash", err: fmt.Errorf(`ent: validator failed for field "VaultItem.hash": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.Encrypted(); !ok {
+		return &ValidationError{Name: "encrypted", err: errors.New(`ent: missing required field "VaultItem.encrypted"`)}
 	}
 	if _, ok := _c.mutation.IsDir(); !ok {
 		return &ValidationError{Name: "is_dir", err: errors.New(`ent: missing required field "VaultItem.is_dir"`)}
@@ -255,6 +296,18 @@ func (_c *VaultItemCreate) createSpec() (*VaultItem, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Hash(); ok {
 		_spec.SetField(vaultitem.FieldHash, field.TypeString, value)
 		_node.Hash = value
+	}
+	if value, ok := _c.mutation.FileType(); ok {
+		_spec.SetField(vaultitem.FieldFileType, field.TypeString, value)
+		_node.FileType = value
+	}
+	if value, ok := _c.mutation.Encrypted(); ok {
+		_spec.SetField(vaultitem.FieldEncrypted, field.TypeBool, value)
+		_node.Encrypted = value
+	}
+	if value, ok := _c.mutation.Metadata(); ok {
+		_spec.SetField(vaultitem.FieldMetadata, field.TypeJSON, value)
+		_node.Metadata = value
 	}
 	if value, ok := _c.mutation.Content(); ok {
 		_spec.SetField(vaultitem.FieldContent, field.TypeString, value)

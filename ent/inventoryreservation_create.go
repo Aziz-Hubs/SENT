@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // InventoryReservationCreate is the builder for creating a InventoryReservation entity.
@@ -23,8 +24,16 @@ type InventoryReservationCreate struct {
 }
 
 // SetQuantity sets the "quantity" field.
-func (_c *InventoryReservationCreate) SetQuantity(v float64) *InventoryReservationCreate {
+func (_c *InventoryReservationCreate) SetQuantity(v decimal.Decimal) *InventoryReservationCreate {
 	_c.mutation.SetQuantity(v)
+	return _c
+}
+
+// SetNillableQuantity sets the "quantity" field if the given value is not nil.
+func (_c *InventoryReservationCreate) SetNillableQuantity(v *decimal.Decimal) *InventoryReservationCreate {
+	if v != nil {
+		_c.SetQuantity(*v)
+	}
 	return _c
 }
 
@@ -119,6 +128,10 @@ func (_c *InventoryReservationCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *InventoryReservationCreate) defaults() {
+	if _, ok := _c.mutation.Quantity(); !ok {
+		v := inventoryreservation.DefaultQuantity
+		_c.mutation.SetQuantity(v)
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := inventoryreservation.DefaultStatus
 		_c.mutation.SetStatus(v)
@@ -181,7 +194,7 @@ func (_c *InventoryReservationCreate) createSpec() (*InventoryReservation, *sqlg
 		_spec = sqlgraph.NewCreateSpec(inventoryreservation.Table, sqlgraph.NewFieldSpec(inventoryreservation.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.Quantity(); ok {
-		_spec.SetField(inventoryreservation.FieldQuantity, field.TypeFloat64, value)
+		_spec.SetField(inventoryreservation.FieldQuantity, field.TypeOther, value)
 		_node.Quantity = value
 	}
 	if value, ok := _c.mutation.ExpiresAt(); ok {

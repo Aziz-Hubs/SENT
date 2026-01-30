@@ -1,0 +1,12 @@
+{
+  "name": "sent",
+  "outputfilename": "sent",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:server_url": "http://localhost:5173",
+  "author": {
+    "name": "SENT LLC",
+    "email": "admin@sent.jo"
+  }
+}

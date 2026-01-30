@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // Product is the model entity for the Product schema.
@@ -27,9 +28,9 @@ type Product struct {
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
 	// UnitCost holds the value of the "unit_cost" field.
-	UnitCost float64 `json:"unit_cost,omitempty"`
+	UnitCost decimal.Decimal `json:"unit_cost,omitempty"`
 	// Quantity holds the value of the "quantity" field.
-	Quantity float64 `json:"quantity,omitempty"`
+	Quantity decimal.Decimal `json:"quantity,omitempty"`
 	// Attributes holds the value of the "attributes" field.
 	Attributes map[string]interface{} `json:"attributes,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -107,7 +108,7 @@ func (*Product) scanValues(columns []string) ([]any, error) {
 		case product.FieldAttributes:
 			values[i] = new([]byte)
 		case product.FieldUnitCost, product.FieldQuantity:
-			values[i] = new(sql.NullFloat64)
+			values[i] = new(decimal.Decimal)
 		case product.FieldID:
 			values[i] = new(sql.NullInt64)
 		case product.FieldSku, product.FieldName, product.FieldDescription:
@@ -158,16 +159,16 @@ func (_m *Product) assignValues(columns []string, values []any) error {
 				_m.Description = value.String
 			}
 		case product.FieldUnitCost:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field unit_cost", values[i])
-			} else if value.Valid {
-				_m.UnitCost = value.Float64
+			} else if value != nil {
+				_m.UnitCost = *value
 			}
 		case product.FieldQuantity:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field quantity", values[i])
-			} else if value.Valid {
-				_m.Quantity = value.Float64
+			} else if value != nil {
+				_m.Quantity = *value
 			}
 		case product.FieldAttributes:
 			if value, ok := values[i].(*[]byte); !ok {

@@ -17,13 +17,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // AccountUpdate is the builder for updating Account entities.
 type AccountUpdate struct {
 	config
-	hooks    []Hook
-	mutation *AccountMutation
+	hooks     []Hook
+	mutation  *AccountMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the AccountUpdate builder.
@@ -75,23 +77,16 @@ func (_u *AccountUpdate) SetNillableType(v *account.Type) *AccountUpdate {
 }
 
 // SetBalance sets the "balance" field.
-func (_u *AccountUpdate) SetBalance(v float64) *AccountUpdate {
-	_u.mutation.ResetBalance()
+func (_u *AccountUpdate) SetBalance(v decimal.Decimal) *AccountUpdate {
 	_u.mutation.SetBalance(v)
 	return _u
 }
 
 // SetNillableBalance sets the "balance" field if the given value is not nil.
-func (_u *AccountUpdate) SetNillableBalance(v *float64) *AccountUpdate {
+func (_u *AccountUpdate) SetNillableBalance(v *decimal.Decimal) *AccountUpdate {
 	if v != nil {
 		_u.SetBalance(*v)
 	}
-	return _u
-}
-
-// AddBalance adds value to the "balance" field.
-func (_u *AccountUpdate) AddBalance(v float64) *AccountUpdate {
-	_u.mutation.AddBalance(v)
 	return _u
 }
 
@@ -293,6 +288,12 @@ func (_u *AccountUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *AccountUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AccountUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -315,10 +316,7 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(account.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.Balance(); ok {
-		_spec.SetField(account.FieldBalance, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedBalance(); ok {
-		_spec.AddField(account.FieldBalance, field.TypeFloat64, value)
+		_spec.SetField(account.FieldBalance, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.IsIntercompany(); ok {
 		_spec.SetField(account.FieldIsIntercompany, field.TypeBool, value)
@@ -490,6 +488,7 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{account.Label}
@@ -505,9 +504,10 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 // AccountUpdateOne is the builder for updating a single Account entity.
 type AccountUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *AccountMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *AccountMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetName sets the "name" field.
@@ -553,23 +553,16 @@ func (_u *AccountUpdateOne) SetNillableType(v *account.Type) *AccountUpdateOne {
 }
 
 // SetBalance sets the "balance" field.
-func (_u *AccountUpdateOne) SetBalance(v float64) *AccountUpdateOne {
-	_u.mutation.ResetBalance()
+func (_u *AccountUpdateOne) SetBalance(v decimal.Decimal) *AccountUpdateOne {
 	_u.mutation.SetBalance(v)
 	return _u
 }
 
 // SetNillableBalance sets the "balance" field if the given value is not nil.
-func (_u *AccountUpdateOne) SetNillableBalance(v *float64) *AccountUpdateOne {
+func (_u *AccountUpdateOne) SetNillableBalance(v *decimal.Decimal) *AccountUpdateOne {
 	if v != nil {
 		_u.SetBalance(*v)
 	}
-	return _u
-}
-
-// AddBalance adds value to the "balance" field.
-func (_u *AccountUpdateOne) AddBalance(v float64) *AccountUpdateOne {
-	_u.mutation.AddBalance(v)
 	return _u
 }
 
@@ -784,6 +777,12 @@ func (_u *AccountUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *AccountUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AccountUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -823,10 +822,7 @@ func (_u *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err er
 		_spec.SetField(account.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.Balance(); ok {
-		_spec.SetField(account.FieldBalance, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedBalance(); ok {
-		_spec.AddField(account.FieldBalance, field.TypeFloat64, value)
+		_spec.SetField(account.FieldBalance, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.IsIntercompany(); ok {
 		_spec.SetField(account.FieldIsIntercompany, field.TypeBool, value)
@@ -998,6 +994,7 @@ func (_u *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &Account{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

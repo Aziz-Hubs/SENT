@@ -26,9 +26,12 @@ import (
 	"sent/ent/detectionevent"
 	"sent/ent/discoveryentry"
 	"sent/ent/employee"
+	"sent/ent/goal"
 	"sent/ent/healthscoresnapshot"
 	"sent/ent/inventoryreservation"
 	"sent/ent/ivrflow"
+	"sent/ent/job"
+	"sent/ent/jobexecution"
 	"sent/ent/journalentry"
 	"sent/ent/ledgerentry"
 	"sent/ent/networkbackup"
@@ -37,15 +40,18 @@ import (
 	"sent/ent/networkport"
 	"sent/ent/nexusaudit"
 	"sent/ent/onetimelink"
+	"sent/ent/performancereview"
 	"sent/ent/permission"
 	"sent/ent/product"
 	"sent/ent/recording"
 	"sent/ent/recurringinvoice"
 	"sent/ent/remediationstep"
+	"sent/ent/reviewcycle"
 	"sent/ent/saasapp"
 	"sent/ent/saasfilter"
 	"sent/ent/saasidentity"
 	"sent/ent/saasusage"
+	"sent/ent/script"
 	"sent/ent/servicerate"
 	"sent/ent/sop"
 	"sent/ent/stockmovement"
@@ -54,6 +60,9 @@ import (
 	"sent/ent/tenant"
 	"sent/ent/ticket"
 	"sent/ent/timeentry"
+	"sent/ent/timeoffbalance"
+	"sent/ent/timeoffpolicy"
+	"sent/ent/timeoffrequest"
 	"sent/ent/transaction"
 	"sent/ent/user"
 	"sent/ent/vaultitem"
@@ -100,12 +109,18 @@ type Client struct {
 	DiscoveryEntry *DiscoveryEntryClient
 	// Employee is the client for interacting with the Employee builders.
 	Employee *EmployeeClient
+	// Goal is the client for interacting with the Goal builders.
+	Goal *GoalClient
 	// HealthScoreSnapshot is the client for interacting with the HealthScoreSnapshot builders.
 	HealthScoreSnapshot *HealthScoreSnapshotClient
 	// IVRFlow is the client for interacting with the IVRFlow builders.
 	IVRFlow *IVRFlowClient
 	// InventoryReservation is the client for interacting with the InventoryReservation builders.
 	InventoryReservation *InventoryReservationClient
+	// Job is the client for interacting with the Job builders.
+	Job *JobClient
+	// JobExecution is the client for interacting with the JobExecution builders.
+	JobExecution *JobExecutionClient
 	// JournalEntry is the client for interacting with the JournalEntry builders.
 	JournalEntry *JournalEntryClient
 	// LedgerEntry is the client for interacting with the LedgerEntry builders.
@@ -122,6 +137,8 @@ type Client struct {
 	NexusAudit *NexusAuditClient
 	// OneTimeLink is the client for interacting with the OneTimeLink builders.
 	OneTimeLink *OneTimeLinkClient
+	// PerformanceReview is the client for interacting with the PerformanceReview builders.
+	PerformanceReview *PerformanceReviewClient
 	// Permission is the client for interacting with the Permission builders.
 	Permission *PermissionClient
 	// Product is the client for interacting with the Product builders.
@@ -132,6 +149,8 @@ type Client struct {
 	RecurringInvoice *RecurringInvoiceClient
 	// RemediationStep is the client for interacting with the RemediationStep builders.
 	RemediationStep *RemediationStepClient
+	// ReviewCycle is the client for interacting with the ReviewCycle builders.
+	ReviewCycle *ReviewCycleClient
 	// SOP is the client for interacting with the SOP builders.
 	SOP *SOPClient
 	// SaaSApp is the client for interacting with the SaaSApp builders.
@@ -142,6 +161,8 @@ type Client struct {
 	SaaSIdentity *SaaSIdentityClient
 	// SaaSUsage is the client for interacting with the SaaSUsage builders.
 	SaaSUsage *SaaSUsageClient
+	// Script is the client for interacting with the Script builders.
+	Script *ScriptClient
 	// ServiceRate is the client for interacting with the ServiceRate builders.
 	ServiceRate *ServiceRateClient
 	// StockMovement is the client for interacting with the StockMovement builders.
@@ -156,6 +177,12 @@ type Client struct {
 	Ticket *TicketClient
 	// TimeEntry is the client for interacting with the TimeEntry builders.
 	TimeEntry *TimeEntryClient
+	// TimeOffBalance is the client for interacting with the TimeOffBalance builders.
+	TimeOffBalance *TimeOffBalanceClient
+	// TimeOffPolicy is the client for interacting with the TimeOffPolicy builders.
+	TimeOffPolicy *TimeOffPolicyClient
+	// TimeOffRequest is the client for interacting with the TimeOffRequest builders.
+	TimeOffRequest *TimeOffRequestClient
 	// Transaction is the client for interacting with the Transaction builders.
 	Transaction *TransactionClient
 	// User is the client for interacting with the User builders.
@@ -190,9 +217,12 @@ func (c *Client) init() {
 	c.DetectionEvent = NewDetectionEventClient(c.config)
 	c.DiscoveryEntry = NewDiscoveryEntryClient(c.config)
 	c.Employee = NewEmployeeClient(c.config)
+	c.Goal = NewGoalClient(c.config)
 	c.HealthScoreSnapshot = NewHealthScoreSnapshotClient(c.config)
 	c.IVRFlow = NewIVRFlowClient(c.config)
 	c.InventoryReservation = NewInventoryReservationClient(c.config)
+	c.Job = NewJobClient(c.config)
+	c.JobExecution = NewJobExecutionClient(c.config)
 	c.JournalEntry = NewJournalEntryClient(c.config)
 	c.LedgerEntry = NewLedgerEntryClient(c.config)
 	c.NetworkBackup = NewNetworkBackupClient(c.config)
@@ -201,16 +231,19 @@ func (c *Client) init() {
 	c.NetworkPort = NewNetworkPortClient(c.config)
 	c.NexusAudit = NewNexusAuditClient(c.config)
 	c.OneTimeLink = NewOneTimeLinkClient(c.config)
+	c.PerformanceReview = NewPerformanceReviewClient(c.config)
 	c.Permission = NewPermissionClient(c.config)
 	c.Product = NewProductClient(c.config)
 	c.Recording = NewRecordingClient(c.config)
 	c.RecurringInvoice = NewRecurringInvoiceClient(c.config)
 	c.RemediationStep = NewRemediationStepClient(c.config)
+	c.ReviewCycle = NewReviewCycleClient(c.config)
 	c.SOP = NewSOPClient(c.config)
 	c.SaaSApp = NewSaaSAppClient(c.config)
 	c.SaaSFilter = NewSaaSFilterClient(c.config)
 	c.SaaSIdentity = NewSaaSIdentityClient(c.config)
 	c.SaaSUsage = NewSaaSUsageClient(c.config)
+	c.Script = NewScriptClient(c.config)
 	c.ServiceRate = NewServiceRateClient(c.config)
 	c.StockMovement = NewStockMovementClient(c.config)
 	c.StrategicRoadmap = NewStrategicRoadmapClient(c.config)
@@ -218,6 +251,9 @@ func (c *Client) init() {
 	c.Tenant = NewTenantClient(c.config)
 	c.Ticket = NewTicketClient(c.config)
 	c.TimeEntry = NewTimeEntryClient(c.config)
+	c.TimeOffBalance = NewTimeOffBalanceClient(c.config)
+	c.TimeOffPolicy = NewTimeOffPolicyClient(c.config)
+	c.TimeOffRequest = NewTimeOffRequestClient(c.config)
 	c.Transaction = NewTransactionClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.VaultItem = NewVaultItemClient(c.config)
@@ -329,9 +365,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		DetectionEvent:        NewDetectionEventClient(cfg),
 		DiscoveryEntry:        NewDiscoveryEntryClient(cfg),
 		Employee:              NewEmployeeClient(cfg),
+		Goal:                  NewGoalClient(cfg),
 		HealthScoreSnapshot:   NewHealthScoreSnapshotClient(cfg),
 		IVRFlow:               NewIVRFlowClient(cfg),
 		InventoryReservation:  NewInventoryReservationClient(cfg),
+		Job:                   NewJobClient(cfg),
+		JobExecution:          NewJobExecutionClient(cfg),
 		JournalEntry:          NewJournalEntryClient(cfg),
 		LedgerEntry:           NewLedgerEntryClient(cfg),
 		NetworkBackup:         NewNetworkBackupClient(cfg),
@@ -340,16 +379,19 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		NetworkPort:           NewNetworkPortClient(cfg),
 		NexusAudit:            NewNexusAuditClient(cfg),
 		OneTimeLink:           NewOneTimeLinkClient(cfg),
+		PerformanceReview:     NewPerformanceReviewClient(cfg),
 		Permission:            NewPermissionClient(cfg),
 		Product:               NewProductClient(cfg),
 		Recording:             NewRecordingClient(cfg),
 		RecurringInvoice:      NewRecurringInvoiceClient(cfg),
 		RemediationStep:       NewRemediationStepClient(cfg),
+		ReviewCycle:           NewReviewCycleClient(cfg),
 		SOP:                   NewSOPClient(cfg),
 		SaaSApp:               NewSaaSAppClient(cfg),
 		SaaSFilter:            NewSaaSFilterClient(cfg),
 		SaaSIdentity:          NewSaaSIdentityClient(cfg),
 		SaaSUsage:             NewSaaSUsageClient(cfg),
+		Script:                NewScriptClient(cfg),
 		ServiceRate:           NewServiceRateClient(cfg),
 		StockMovement:         NewStockMovementClient(cfg),
 		StrategicRoadmap:      NewStrategicRoadmapClient(cfg),
@@ -357,6 +399,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Tenant:                NewTenantClient(cfg),
 		Ticket:                NewTicketClient(cfg),
 		TimeEntry:             NewTimeEntryClient(cfg),
+		TimeOffBalance:        NewTimeOffBalanceClient(cfg),
+		TimeOffPolicy:         NewTimeOffPolicyClient(cfg),
+		TimeOffRequest:        NewTimeOffRequestClient(cfg),
 		Transaction:           NewTransactionClient(cfg),
 		User:                  NewUserClient(cfg),
 		VaultItem:             NewVaultItemClient(cfg),
@@ -395,9 +440,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		DetectionEvent:        NewDetectionEventClient(cfg),
 		DiscoveryEntry:        NewDiscoveryEntryClient(cfg),
 		Employee:              NewEmployeeClient(cfg),
+		Goal:                  NewGoalClient(cfg),
 		HealthScoreSnapshot:   NewHealthScoreSnapshotClient(cfg),
 		IVRFlow:               NewIVRFlowClient(cfg),
 		InventoryReservation:  NewInventoryReservationClient(cfg),
+		Job:                   NewJobClient(cfg),
+		JobExecution:          NewJobExecutionClient(cfg),
 		JournalEntry:          NewJournalEntryClient(cfg),
 		LedgerEntry:           NewLedgerEntryClient(cfg),
 		NetworkBackup:         NewNetworkBackupClient(cfg),
@@ -406,16 +454,19 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		NetworkPort:           NewNetworkPortClient(cfg),
 		NexusAudit:            NewNexusAuditClient(cfg),
 		OneTimeLink:           NewOneTimeLinkClient(cfg),
+		PerformanceReview:     NewPerformanceReviewClient(cfg),
 		Permission:            NewPermissionClient(cfg),
 		Product:               NewProductClient(cfg),
 		Recording:             NewRecordingClient(cfg),
 		RecurringInvoice:      NewRecurringInvoiceClient(cfg),
 		RemediationStep:       NewRemediationStepClient(cfg),
+		ReviewCycle:           NewReviewCycleClient(cfg),
 		SOP:                   NewSOPClient(cfg),
 		SaaSApp:               NewSaaSAppClient(cfg),
 		SaaSFilter:            NewSaaSFilterClient(cfg),
 		SaaSIdentity:          NewSaaSIdentityClient(cfg),
 		SaaSUsage:             NewSaaSUsageClient(cfg),
+		Script:                NewScriptClient(cfg),
 		ServiceRate:           NewServiceRateClient(cfg),
 		StockMovement:         NewStockMovementClient(cfg),
 		StrategicRoadmap:      NewStrategicRoadmapClient(cfg),
@@ -423,6 +474,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Tenant:                NewTenantClient(cfg),
 		Ticket:                NewTicketClient(cfg),
 		TimeEntry:             NewTimeEntryClient(cfg),
+		TimeOffBalance:        NewTimeOffBalanceClient(cfg),
+		TimeOffPolicy:         NewTimeOffPolicyClient(cfg),
+		TimeOffRequest:        NewTimeOffRequestClient(cfg),
 		Transaction:           NewTransactionClient(cfg),
 		User:                  NewUserClient(cfg),
 		VaultItem:             NewVaultItemClient(cfg),
@@ -458,14 +512,16 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Account, c.Agent, c.Asset, c.AssetType, c.AuditLog, c.BudgetForecast,
 		c.CallLog, c.Camera, c.CompensationAgreement, c.Contract, c.Credential,
-		c.Department, c.DetectionEvent, c.DiscoveryEntry, c.Employee,
-		c.HealthScoreSnapshot, c.IVRFlow, c.InventoryReservation, c.JournalEntry,
-		c.LedgerEntry, c.NetworkBackup, c.NetworkDevice, c.NetworkLink, c.NetworkPort,
-		c.NexusAudit, c.OneTimeLink, c.Permission, c.Product, c.Recording,
-		c.RecurringInvoice, c.RemediationStep, c.SOP, c.SaaSApp, c.SaaSFilter,
-		c.SaaSIdentity, c.SaaSUsage, c.ServiceRate, c.StockMovement,
+		c.Department, c.DetectionEvent, c.DiscoveryEntry, c.Employee, c.Goal,
+		c.HealthScoreSnapshot, c.IVRFlow, c.InventoryReservation, c.Job,
+		c.JobExecution, c.JournalEntry, c.LedgerEntry, c.NetworkBackup,
+		c.NetworkDevice, c.NetworkLink, c.NetworkPort, c.NexusAudit, c.OneTimeLink,
+		c.PerformanceReview, c.Permission, c.Product, c.Recording, c.RecurringInvoice,
+		c.RemediationStep, c.ReviewCycle, c.SOP, c.SaaSApp, c.SaaSFilter,
+		c.SaaSIdentity, c.SaaSUsage, c.Script, c.ServiceRate, c.StockMovement,
 		c.StrategicRoadmap, c.SuccessionMap, c.Tenant, c.Ticket, c.TimeEntry,
-		c.Transaction, c.User, c.VaultItem, c.Voicemail,
+		c.TimeOffBalance, c.TimeOffPolicy, c.TimeOffRequest, c.Transaction, c.User,
+		c.VaultItem, c.Voicemail,
 	} {
 		n.Use(hooks...)
 	}
@@ -477,14 +533,16 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Account, c.Agent, c.Asset, c.AssetType, c.AuditLog, c.BudgetForecast,
 		c.CallLog, c.Camera, c.CompensationAgreement, c.Contract, c.Credential,
-		c.Department, c.DetectionEvent, c.DiscoveryEntry, c.Employee,
-		c.HealthScoreSnapshot, c.IVRFlow, c.InventoryReservation, c.JournalEntry,
-		c.LedgerEntry, c.NetworkBackup, c.NetworkDevice, c.NetworkLink, c.NetworkPort,
-		c.NexusAudit, c.OneTimeLink, c.Permission, c.Product, c.Recording,
-		c.RecurringInvoice, c.RemediationStep, c.SOP, c.SaaSApp, c.SaaSFilter,
-		c.SaaSIdentity, c.SaaSUsage, c.ServiceRate, c.StockMovement,
+		c.Department, c.DetectionEvent, c.DiscoveryEntry, c.Employee, c.Goal,
+		c.HealthScoreSnapshot, c.IVRFlow, c.InventoryReservation, c.Job,
+		c.JobExecution, c.JournalEntry, c.LedgerEntry, c.NetworkBackup,
+		c.NetworkDevice, c.NetworkLink, c.NetworkPort, c.NexusAudit, c.OneTimeLink,
+		c.PerformanceReview, c.Permission, c.Product, c.Recording, c.RecurringInvoice,
+		c.RemediationStep, c.ReviewCycle, c.SOP, c.SaaSApp, c.SaaSFilter,
+		c.SaaSIdentity, c.SaaSUsage, c.Script, c.ServiceRate, c.StockMovement,
 		c.StrategicRoadmap, c.SuccessionMap, c.Tenant, c.Ticket, c.TimeEntry,
-		c.Transaction, c.User, c.VaultItem, c.Voicemail,
+		c.TimeOffBalance, c.TimeOffPolicy, c.TimeOffRequest, c.Transaction, c.User,
+		c.VaultItem, c.Voicemail,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -523,12 +581,18 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.DiscoveryEntry.mutate(ctx, m)
 	case *EmployeeMutation:
 		return c.Employee.mutate(ctx, m)
+	case *GoalMutation:
+		return c.Goal.mutate(ctx, m)
 	case *HealthScoreSnapshotMutation:
 		return c.HealthScoreSnapshot.mutate(ctx, m)
 	case *IVRFlowMutation:
 		return c.IVRFlow.mutate(ctx, m)
 	case *InventoryReservationMutation:
 		return c.InventoryReservation.mutate(ctx, m)
+	case *JobMutation:
+		return c.Job.mutate(ctx, m)
+	case *JobExecutionMutation:
+		return c.JobExecution.mutate(ctx, m)
 	case *JournalEntryMutation:
 		return c.JournalEntry.mutate(ctx, m)
 	case *LedgerEntryMutation:
@@ -545,6 +609,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.NexusAudit.mutate(ctx, m)
 	case *OneTimeLinkMutation:
 		return c.OneTimeLink.mutate(ctx, m)
+	case *PerformanceReviewMutation:
+		return c.PerformanceReview.mutate(ctx, m)
 	case *PermissionMutation:
 		return c.Permission.mutate(ctx, m)
 	case *ProductMutation:
@@ -555,6 +621,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.RecurringInvoice.mutate(ctx, m)
 	case *RemediationStepMutation:
 		return c.RemediationStep.mutate(ctx, m)
+	case *ReviewCycleMutation:
+		return c.ReviewCycle.mutate(ctx, m)
 	case *SOPMutation:
 		return c.SOP.mutate(ctx, m)
 	case *SaaSAppMutation:
@@ -565,6 +633,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.SaaSIdentity.mutate(ctx, m)
 	case *SaaSUsageMutation:
 		return c.SaaSUsage.mutate(ctx, m)
+	case *ScriptMutation:
+		return c.Script.mutate(ctx, m)
 	case *ServiceRateMutation:
 		return c.ServiceRate.mutate(ctx, m)
 	case *StockMovementMutation:
@@ -579,6 +649,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Ticket.mutate(ctx, m)
 	case *TimeEntryMutation:
 		return c.TimeEntry.mutate(ctx, m)
+	case *TimeOffBalanceMutation:
+		return c.TimeOffBalance.mutate(ctx, m)
+	case *TimeOffPolicyMutation:
+		return c.TimeOffPolicy.mutate(ctx, m)
+	case *TimeOffRequestMutation:
+		return c.TimeOffRequest.mutate(ctx, m)
 	case *TransactionMutation:
 		return c.Transaction.mutate(ctx, m)
 	case *UserMutation:
@@ -906,6 +982,22 @@ func (c *AgentClient) QueryTenant(_m *Agent) *TenantQuery {
 			sqlgraph.From(agent.Table, agent.FieldID, id),
 			sqlgraph.To(tenant.Table, tenant.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, agent.TenantTable, agent.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryJobExecutions queries the job_executions edge of a Agent.
+func (c *AgentClient) QueryJobExecutions(_m *Agent) *JobExecutionQuery {
+	query := (&JobExecutionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(agent.Table, agent.FieldID, id),
+			sqlgraph.To(jobexecution.Table, jobexecution.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, agent.JobExecutionsTable, agent.JobExecutionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1364,6 +1456,22 @@ func (c *AssetTypeClient) QueryAssets(_m *AssetType) *AssetQuery {
 			sqlgraph.From(assettype.Table, assettype.FieldID, id),
 			sqlgraph.To(asset.Table, asset.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, assettype.AssetsTable, assettype.AssetsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTenant queries the tenant edge of a AssetType.
+func (c *AssetTypeClient) QueryTenant(_m *AssetType) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(assettype.Table, assettype.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, assettype.TenantTable, assettype.TenantColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2707,6 +2815,22 @@ func (c *DepartmentClient) QueryHead(_m *Department) *EmployeeQuery {
 	return query
 }
 
+// QueryTenant queries the tenant edge of a Department.
+func (c *DepartmentClient) QueryTenant(_m *Department) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(department.Table, department.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, department.TenantTable, department.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DepartmentClient) Hooks() []Hook {
 	return c.hooks.Department
@@ -2849,6 +2973,22 @@ func (c *DetectionEventClient) QueryCamera(_m *DetectionEvent) *CameraQuery {
 			sqlgraph.From(detectionevent.Table, detectionevent.FieldID, id),
 			sqlgraph.To(camera.Table, camera.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, detectionevent.CameraTable, detectionevent.CameraColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTenant queries the tenant edge of a DetectionEvent.
+func (c *DetectionEventClient) QueryTenant(_m *DetectionEvent) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(detectionevent.Table, detectionevent.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, detectionevent.TenantTable, detectionevent.TenantColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -3266,6 +3406,102 @@ func (c *EmployeeClient) QueryExpenseAccount(_m *Employee) *AccountQuery {
 	return query
 }
 
+// QueryTimeOffRequests queries the time_off_requests edge of a Employee.
+func (c *EmployeeClient) QueryTimeOffRequests(_m *Employee) *TimeOffRequestQuery {
+	query := (&TimeOffRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, id),
+			sqlgraph.To(timeoffrequest.Table, timeoffrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.TimeOffRequestsTable, employee.TimeOffRequestsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryApprovedTimeOff queries the approved_time_off edge of a Employee.
+func (c *EmployeeClient) QueryApprovedTimeOff(_m *Employee) *TimeOffRequestQuery {
+	query := (&TimeOffRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, id),
+			sqlgraph.To(timeoffrequest.Table, timeoffrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.ApprovedTimeOffTable, employee.ApprovedTimeOffColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTimeOffBalances queries the time_off_balances edge of a Employee.
+func (c *EmployeeClient) QueryTimeOffBalances(_m *Employee) *TimeOffBalanceQuery {
+	query := (&TimeOffBalanceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, id),
+			sqlgraph.To(timeoffbalance.Table, timeoffbalance.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.TimeOffBalancesTable, employee.TimeOffBalancesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPerformanceReviews queries the performance_reviews edge of a Employee.
+func (c *EmployeeClient) QueryPerformanceReviews(_m *Employee) *PerformanceReviewQuery {
+	query := (&PerformanceReviewClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, id),
+			sqlgraph.To(performancereview.Table, performancereview.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.PerformanceReviewsTable, employee.PerformanceReviewsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryConductedReviews queries the conducted_reviews edge of a Employee.
+func (c *EmployeeClient) QueryConductedReviews(_m *Employee) *PerformanceReviewQuery {
+	query := (&PerformanceReviewClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, id),
+			sqlgraph.To(performancereview.Table, performancereview.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.ConductedReviewsTable, employee.ConductedReviewsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGoals queries the goals edge of a Employee.
+func (c *EmployeeClient) QueryGoals(_m *Employee) *GoalQuery {
+	query := (&GoalClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, id),
+			sqlgraph.To(goal.Table, goal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.GoalsTable, employee.GoalsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *EmployeeClient) Hooks() []Hook {
 	return c.hooks.Employee
@@ -3288,6 +3524,171 @@ func (c *EmployeeClient) mutate(ctx context.Context, m *EmployeeMutation) (Value
 		return (&EmployeeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Employee mutation op: %q", m.Op())
+	}
+}
+
+// GoalClient is a client for the Goal schema.
+type GoalClient struct {
+	config
+}
+
+// NewGoalClient returns a client for the Goal from the given config.
+func NewGoalClient(c config) *GoalClient {
+	return &GoalClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `goal.Hooks(f(g(h())))`.
+func (c *GoalClient) Use(hooks ...Hook) {
+	c.hooks.Goal = append(c.hooks.Goal, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `goal.Intercept(f(g(h())))`.
+func (c *GoalClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Goal = append(c.inters.Goal, interceptors...)
+}
+
+// Create returns a builder for creating a Goal entity.
+func (c *GoalClient) Create() *GoalCreate {
+	mutation := newGoalMutation(c.config, OpCreate)
+	return &GoalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Goal entities.
+func (c *GoalClient) CreateBulk(builders ...*GoalCreate) *GoalCreateBulk {
+	return &GoalCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *GoalClient) MapCreateBulk(slice any, setFunc func(*GoalCreate, int)) *GoalCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &GoalCreateBulk{err: fmt.Errorf("calling to GoalClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*GoalCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &GoalCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Goal.
+func (c *GoalClient) Update() *GoalUpdate {
+	mutation := newGoalMutation(c.config, OpUpdate)
+	return &GoalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GoalClient) UpdateOne(_m *Goal) *GoalUpdateOne {
+	mutation := newGoalMutation(c.config, OpUpdateOne, withGoal(_m))
+	return &GoalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GoalClient) UpdateOneID(id int) *GoalUpdateOne {
+	mutation := newGoalMutation(c.config, OpUpdateOne, withGoalID(id))
+	return &GoalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Goal.
+func (c *GoalClient) Delete() *GoalDelete {
+	mutation := newGoalMutation(c.config, OpDelete)
+	return &GoalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *GoalClient) DeleteOne(_m *Goal) *GoalDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *GoalClient) DeleteOneID(id int) *GoalDeleteOne {
+	builder := c.Delete().Where(goal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GoalDeleteOne{builder}
+}
+
+// Query returns a query builder for Goal.
+func (c *GoalClient) Query() *GoalQuery {
+	return &GoalQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeGoal},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Goal entity by its id.
+func (c *GoalClient) Get(ctx context.Context, id int) (*Goal, error) {
+	return c.Query().Where(goal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GoalClient) GetX(ctx context.Context, id int) *Goal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTenant queries the tenant edge of a Goal.
+func (c *GoalClient) QueryTenant(_m *Goal) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(goal.Table, goal.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, goal.TenantTable, goal.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEmployee queries the employee edge of a Goal.
+func (c *GoalClient) QueryEmployee(_m *Goal) *EmployeeQuery {
+	query := (&EmployeeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(goal.Table, goal.FieldID, id),
+			sqlgraph.To(employee.Table, employee.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, goal.EmployeeTable, goal.EmployeeColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *GoalClient) Hooks() []Hook {
+	return c.hooks.Goal
+}
+
+// Interceptors returns the client interceptors.
+func (c *GoalClient) Interceptors() []Interceptor {
+	return c.inters.Goal
+}
+
+func (c *GoalClient) mutate(ctx context.Context, m *GoalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GoalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GoalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GoalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GoalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Goal mutation op: %q", m.Op())
 	}
 }
 
@@ -3751,6 +4152,352 @@ func (c *InventoryReservationClient) mutate(ctx context.Context, m *InventoryRes
 		return (&InventoryReservationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown InventoryReservation mutation op: %q", m.Op())
+	}
+}
+
+// JobClient is a client for the Job schema.
+type JobClient struct {
+	config
+}
+
+// NewJobClient returns a client for the Job from the given config.
+func NewJobClient(c config) *JobClient {
+	return &JobClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `job.Hooks(f(g(h())))`.
+func (c *JobClient) Use(hooks ...Hook) {
+	c.hooks.Job = append(c.hooks.Job, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `job.Intercept(f(g(h())))`.
+func (c *JobClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Job = append(c.inters.Job, interceptors...)
+}
+
+// Create returns a builder for creating a Job entity.
+func (c *JobClient) Create() *JobCreate {
+	mutation := newJobMutation(c.config, OpCreate)
+	return &JobCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Job entities.
+func (c *JobClient) CreateBulk(builders ...*JobCreate) *JobCreateBulk {
+	return &JobCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *JobClient) MapCreateBulk(slice any, setFunc func(*JobCreate, int)) *JobCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &JobCreateBulk{err: fmt.Errorf("calling to JobClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*JobCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &JobCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Job.
+func (c *JobClient) Update() *JobUpdate {
+	mutation := newJobMutation(c.config, OpUpdate)
+	return &JobUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *JobClient) UpdateOne(_m *Job) *JobUpdateOne {
+	mutation := newJobMutation(c.config, OpUpdateOne, withJob(_m))
+	return &JobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *JobClient) UpdateOneID(id int) *JobUpdateOne {
+	mutation := newJobMutation(c.config, OpUpdateOne, withJobID(id))
+	return &JobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Job.
+func (c *JobClient) Delete() *JobDelete {
+	mutation := newJobMutation(c.config, OpDelete)
+	return &JobDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *JobClient) DeleteOne(_m *Job) *JobDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *JobClient) DeleteOneID(id int) *JobDeleteOne {
+	builder := c.Delete().Where(job.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &JobDeleteOne{builder}
+}
+
+// Query returns a query builder for Job.
+func (c *JobClient) Query() *JobQuery {
+	return &JobQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeJob},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Job entity by its id.
+func (c *JobClient) Get(ctx context.Context, id int) (*Job, error) {
+	return c.Query().Where(job.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *JobClient) GetX(ctx context.Context, id int) *Job {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTenant queries the tenant edge of a Job.
+func (c *JobClient) QueryTenant(_m *Job) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(job.Table, job.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, job.TenantTable, job.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryScript queries the script edge of a Job.
+func (c *JobClient) QueryScript(_m *Job) *ScriptQuery {
+	query := (&ScriptClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(job.Table, job.FieldID, id),
+			sqlgraph.To(script.Table, script.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, job.ScriptTable, job.ScriptColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryExecutions queries the executions edge of a Job.
+func (c *JobClient) QueryExecutions(_m *Job) *JobExecutionQuery {
+	query := (&JobExecutionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(job.Table, job.FieldID, id),
+			sqlgraph.To(jobexecution.Table, jobexecution.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, job.ExecutionsTable, job.ExecutionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *JobClient) Hooks() []Hook {
+	return c.hooks.Job
+}
+
+// Interceptors returns the client interceptors.
+func (c *JobClient) Interceptors() []Interceptor {
+	return c.inters.Job
+}
+
+func (c *JobClient) mutate(ctx context.Context, m *JobMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&JobCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&JobUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&JobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&JobDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Job mutation op: %q", m.Op())
+	}
+}
+
+// JobExecutionClient is a client for the JobExecution schema.
+type JobExecutionClient struct {
+	config
+}
+
+// NewJobExecutionClient returns a client for the JobExecution from the given config.
+func NewJobExecutionClient(c config) *JobExecutionClient {
+	return &JobExecutionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `jobexecution.Hooks(f(g(h())))`.
+func (c *JobExecutionClient) Use(hooks ...Hook) {
+	c.hooks.JobExecution = append(c.hooks.JobExecution, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `jobexecution.Intercept(f(g(h())))`.
+func (c *JobExecutionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.JobExecution = append(c.inters.JobExecution, interceptors...)
+}
+
+// Create returns a builder for creating a JobExecution entity.
+func (c *JobExecutionClient) Create() *JobExecutionCreate {
+	mutation := newJobExecutionMutation(c.config, OpCreate)
+	return &JobExecutionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of JobExecution entities.
+func (c *JobExecutionClient) CreateBulk(builders ...*JobExecutionCreate) *JobExecutionCreateBulk {
+	return &JobExecutionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *JobExecutionClient) MapCreateBulk(slice any, setFunc func(*JobExecutionCreate, int)) *JobExecutionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &JobExecutionCreateBulk{err: fmt.Errorf("calling to JobExecutionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*JobExecutionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &JobExecutionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for JobExecution.
+func (c *JobExecutionClient) Update() *JobExecutionUpdate {
+	mutation := newJobExecutionMutation(c.config, OpUpdate)
+	return &JobExecutionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *JobExecutionClient) UpdateOne(_m *JobExecution) *JobExecutionUpdateOne {
+	mutation := newJobExecutionMutation(c.config, OpUpdateOne, withJobExecution(_m))
+	return &JobExecutionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *JobExecutionClient) UpdateOneID(id int) *JobExecutionUpdateOne {
+	mutation := newJobExecutionMutation(c.config, OpUpdateOne, withJobExecutionID(id))
+	return &JobExecutionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for JobExecution.
+func (c *JobExecutionClient) Delete() *JobExecutionDelete {
+	mutation := newJobExecutionMutation(c.config, OpDelete)
+	return &JobExecutionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *JobExecutionClient) DeleteOne(_m *JobExecution) *JobExecutionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *JobExecutionClient) DeleteOneID(id int) *JobExecutionDeleteOne {
+	builder := c.Delete().Where(jobexecution.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &JobExecutionDeleteOne{builder}
+}
+
+// Query returns a query builder for JobExecution.
+func (c *JobExecutionClient) Query() *JobExecutionQuery {
+	return &JobExecutionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeJobExecution},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a JobExecution entity by its id.
+func (c *JobExecutionClient) Get(ctx context.Context, id int) (*JobExecution, error) {
+	return c.Query().Where(jobexecution.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *JobExecutionClient) GetX(ctx context.Context, id int) *JobExecution {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryJob queries the job edge of a JobExecution.
+func (c *JobExecutionClient) QueryJob(_m *JobExecution) *JobQuery {
+	query := (&JobClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(jobexecution.Table, jobexecution.FieldID, id),
+			sqlgraph.To(job.Table, job.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, jobexecution.JobTable, jobexecution.JobColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAgent queries the agent edge of a JobExecution.
+func (c *JobExecutionClient) QueryAgent(_m *JobExecution) *AgentQuery {
+	query := (&AgentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(jobexecution.Table, jobexecution.FieldID, id),
+			sqlgraph.To(agent.Table, agent.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, jobexecution.AgentTable, jobexecution.AgentColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *JobExecutionClient) Hooks() []Hook {
+	return c.hooks.JobExecution
+}
+
+// Interceptors returns the client interceptors.
+func (c *JobExecutionClient) Interceptors() []Interceptor {
+	return c.inters.JobExecution
+}
+
+func (c *JobExecutionClient) mutate(ctx context.Context, m *JobExecutionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&JobExecutionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&JobExecutionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&JobExecutionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&JobExecutionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown JobExecution mutation op: %q", m.Op())
 	}
 }
 
@@ -4256,6 +5003,22 @@ func (c *NetworkBackupClient) QueryDevice(_m *NetworkBackup) *NetworkDeviceQuery
 	return query
 }
 
+// QueryTenant queries the tenant edge of a NetworkBackup.
+func (c *NetworkBackupClient) QueryTenant(_m *NetworkBackup) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(networkbackup.Table, networkbackup.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, networkbackup.TenantTable, networkbackup.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *NetworkBackupClient) Hooks() []Hook {
 	return c.hooks.NetworkBackup
@@ -4414,6 +5177,22 @@ func (c *NetworkDeviceClient) QueryBackups(_m *NetworkDevice) *NetworkBackupQuer
 			sqlgraph.From(networkdevice.Table, networkdevice.FieldID, id),
 			sqlgraph.To(networkbackup.Table, networkbackup.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, networkdevice.BackupsTable, networkdevice.BackupsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTenant queries the tenant edge of a NetworkDevice.
+func (c *NetworkDeviceClient) QueryTenant(_m *NetworkDevice) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(networkdevice.Table, networkdevice.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, networkdevice.TenantTable, networkdevice.TenantColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -4586,6 +5365,22 @@ func (c *NetworkLinkClient) QueryTargetPort(_m *NetworkLink) *NetworkPortQuery {
 	return query
 }
 
+// QueryTenant queries the tenant edge of a NetworkLink.
+func (c *NetworkLinkClient) QueryTenant(_m *NetworkLink) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(networklink.Table, networklink.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, networklink.TenantTable, networklink.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *NetworkLinkClient) Hooks() []Hook {
 	return c.hooks.NetworkLink
@@ -4751,6 +5546,22 @@ func (c *NetworkPortClient) QueryConnectedTo(_m *NetworkPort) *NetworkLinkQuery 
 	return query
 }
 
+// QueryTenant queries the tenant edge of a NetworkPort.
+func (c *NetworkPortClient) QueryTenant(_m *NetworkPort) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(networkport.Table, networkport.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, networkport.TenantTable, networkport.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *NetworkPortClient) Hooks() []Hook {
 	return c.hooks.NetworkPort
@@ -4882,6 +5693,22 @@ func (c *NexusAuditClient) GetX(ctx context.Context, id int) *NexusAudit {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryTenant queries the tenant edge of a NexusAudit.
+func (c *NexusAuditClient) QueryTenant(_m *NexusAudit) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nexusaudit.Table, nexusaudit.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, nexusaudit.TenantTable, nexusaudit.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -5074,6 +5901,203 @@ func (c *OneTimeLinkClient) mutate(ctx context.Context, m *OneTimeLinkMutation) 
 	}
 }
 
+// PerformanceReviewClient is a client for the PerformanceReview schema.
+type PerformanceReviewClient struct {
+	config
+}
+
+// NewPerformanceReviewClient returns a client for the PerformanceReview from the given config.
+func NewPerformanceReviewClient(c config) *PerformanceReviewClient {
+	return &PerformanceReviewClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `performancereview.Hooks(f(g(h())))`.
+func (c *PerformanceReviewClient) Use(hooks ...Hook) {
+	c.hooks.PerformanceReview = append(c.hooks.PerformanceReview, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `performancereview.Intercept(f(g(h())))`.
+func (c *PerformanceReviewClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PerformanceReview = append(c.inters.PerformanceReview, interceptors...)
+}
+
+// Create returns a builder for creating a PerformanceReview entity.
+func (c *PerformanceReviewClient) Create() *PerformanceReviewCreate {
+	mutation := newPerformanceReviewMutation(c.config, OpCreate)
+	return &PerformanceReviewCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PerformanceReview entities.
+func (c *PerformanceReviewClient) CreateBulk(builders ...*PerformanceReviewCreate) *PerformanceReviewCreateBulk {
+	return &PerformanceReviewCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PerformanceReviewClient) MapCreateBulk(slice any, setFunc func(*PerformanceReviewCreate, int)) *PerformanceReviewCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PerformanceReviewCreateBulk{err: fmt.Errorf("calling to PerformanceReviewClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PerformanceReviewCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PerformanceReviewCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PerformanceReview.
+func (c *PerformanceReviewClient) Update() *PerformanceReviewUpdate {
+	mutation := newPerformanceReviewMutation(c.config, OpUpdate)
+	return &PerformanceReviewUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PerformanceReviewClient) UpdateOne(_m *PerformanceReview) *PerformanceReviewUpdateOne {
+	mutation := newPerformanceReviewMutation(c.config, OpUpdateOne, withPerformanceReview(_m))
+	return &PerformanceReviewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PerformanceReviewClient) UpdateOneID(id int) *PerformanceReviewUpdateOne {
+	mutation := newPerformanceReviewMutation(c.config, OpUpdateOne, withPerformanceReviewID(id))
+	return &PerformanceReviewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PerformanceReview.
+func (c *PerformanceReviewClient) Delete() *PerformanceReviewDelete {
+	mutation := newPerformanceReviewMutation(c.config, OpDelete)
+	return &PerformanceReviewDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PerformanceReviewClient) DeleteOne(_m *PerformanceReview) *PerformanceReviewDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PerformanceReviewClient) DeleteOneID(id int) *PerformanceReviewDeleteOne {
+	builder := c.Delete().Where(performancereview.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PerformanceReviewDeleteOne{builder}
+}
+
+// Query returns a query builder for PerformanceReview.
+func (c *PerformanceReviewClient) Query() *PerformanceReviewQuery {
+	return &PerformanceReviewQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePerformanceReview},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PerformanceReview entity by its id.
+func (c *PerformanceReviewClient) Get(ctx context.Context, id int) (*PerformanceReview, error) {
+	return c.Query().Where(performancereview.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PerformanceReviewClient) GetX(ctx context.Context, id int) *PerformanceReview {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTenant queries the tenant edge of a PerformanceReview.
+func (c *PerformanceReviewClient) QueryTenant(_m *PerformanceReview) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(performancereview.Table, performancereview.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, performancereview.TenantTable, performancereview.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEmployee queries the employee edge of a PerformanceReview.
+func (c *PerformanceReviewClient) QueryEmployee(_m *PerformanceReview) *EmployeeQuery {
+	query := (&EmployeeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(performancereview.Table, performancereview.FieldID, id),
+			sqlgraph.To(employee.Table, employee.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, performancereview.EmployeeTable, performancereview.EmployeeColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReviewer queries the reviewer edge of a PerformanceReview.
+func (c *PerformanceReviewClient) QueryReviewer(_m *PerformanceReview) *EmployeeQuery {
+	query := (&EmployeeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(performancereview.Table, performancereview.FieldID, id),
+			sqlgraph.To(employee.Table, employee.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, performancereview.ReviewerTable, performancereview.ReviewerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCycle queries the cycle edge of a PerformanceReview.
+func (c *PerformanceReviewClient) QueryCycle(_m *PerformanceReview) *ReviewCycleQuery {
+	query := (&ReviewCycleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(performancereview.Table, performancereview.FieldID, id),
+			sqlgraph.To(reviewcycle.Table, reviewcycle.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, performancereview.CycleTable, performancereview.CycleColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PerformanceReviewClient) Hooks() []Hook {
+	return c.hooks.PerformanceReview
+}
+
+// Interceptors returns the client interceptors.
+func (c *PerformanceReviewClient) Interceptors() []Interceptor {
+	return c.inters.PerformanceReview
+}
+
+func (c *PerformanceReviewClient) mutate(ctx context.Context, m *PerformanceReviewMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PerformanceReviewCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PerformanceReviewUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PerformanceReviewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PerformanceReviewDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PerformanceReview mutation op: %q", m.Op())
+	}
+}
+
 // PermissionClient is a client for the Permission schema.
 type PermissionClient struct {
 	config
@@ -5191,6 +6215,22 @@ func (c *PermissionClient) QueryUsers(_m *Permission) *UserQuery {
 			sqlgraph.From(permission.Table, permission.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, permission.UsersTable, permission.UsersPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTenant queries the tenant edge of a Permission.
+func (c *PermissionClient) QueryTenant(_m *Permission) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(permission.Table, permission.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, permission.TenantTable, permission.TenantColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -5544,6 +6584,22 @@ func (c *RecordingClient) QueryCamera(_m *Recording) *CameraQuery {
 	return query
 }
 
+// QueryTenant queries the tenant edge of a Recording.
+func (c *RecordingClient) QueryTenant(_m *Recording) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(recording.Table, recording.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, recording.TenantTable, recording.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *RecordingClient) Hooks() []Hook {
 	return c.hooks.Recording
@@ -5880,6 +6936,171 @@ func (c *RemediationStepClient) mutate(ctx context.Context, m *RemediationStepMu
 		return (&RemediationStepDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown RemediationStep mutation op: %q", m.Op())
+	}
+}
+
+// ReviewCycleClient is a client for the ReviewCycle schema.
+type ReviewCycleClient struct {
+	config
+}
+
+// NewReviewCycleClient returns a client for the ReviewCycle from the given config.
+func NewReviewCycleClient(c config) *ReviewCycleClient {
+	return &ReviewCycleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `reviewcycle.Hooks(f(g(h())))`.
+func (c *ReviewCycleClient) Use(hooks ...Hook) {
+	c.hooks.ReviewCycle = append(c.hooks.ReviewCycle, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `reviewcycle.Intercept(f(g(h())))`.
+func (c *ReviewCycleClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ReviewCycle = append(c.inters.ReviewCycle, interceptors...)
+}
+
+// Create returns a builder for creating a ReviewCycle entity.
+func (c *ReviewCycleClient) Create() *ReviewCycleCreate {
+	mutation := newReviewCycleMutation(c.config, OpCreate)
+	return &ReviewCycleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ReviewCycle entities.
+func (c *ReviewCycleClient) CreateBulk(builders ...*ReviewCycleCreate) *ReviewCycleCreateBulk {
+	return &ReviewCycleCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ReviewCycleClient) MapCreateBulk(slice any, setFunc func(*ReviewCycleCreate, int)) *ReviewCycleCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ReviewCycleCreateBulk{err: fmt.Errorf("calling to ReviewCycleClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ReviewCycleCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ReviewCycleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ReviewCycle.
+func (c *ReviewCycleClient) Update() *ReviewCycleUpdate {
+	mutation := newReviewCycleMutation(c.config, OpUpdate)
+	return &ReviewCycleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ReviewCycleClient) UpdateOne(_m *ReviewCycle) *ReviewCycleUpdateOne {
+	mutation := newReviewCycleMutation(c.config, OpUpdateOne, withReviewCycle(_m))
+	return &ReviewCycleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ReviewCycleClient) UpdateOneID(id int) *ReviewCycleUpdateOne {
+	mutation := newReviewCycleMutation(c.config, OpUpdateOne, withReviewCycleID(id))
+	return &ReviewCycleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ReviewCycle.
+func (c *ReviewCycleClient) Delete() *ReviewCycleDelete {
+	mutation := newReviewCycleMutation(c.config, OpDelete)
+	return &ReviewCycleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ReviewCycleClient) DeleteOne(_m *ReviewCycle) *ReviewCycleDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ReviewCycleClient) DeleteOneID(id int) *ReviewCycleDeleteOne {
+	builder := c.Delete().Where(reviewcycle.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ReviewCycleDeleteOne{builder}
+}
+
+// Query returns a query builder for ReviewCycle.
+func (c *ReviewCycleClient) Query() *ReviewCycleQuery {
+	return &ReviewCycleQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeReviewCycle},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ReviewCycle entity by its id.
+func (c *ReviewCycleClient) Get(ctx context.Context, id int) (*ReviewCycle, error) {
+	return c.Query().Where(reviewcycle.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ReviewCycleClient) GetX(ctx context.Context, id int) *ReviewCycle {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTenant queries the tenant edge of a ReviewCycle.
+func (c *ReviewCycleClient) QueryTenant(_m *ReviewCycle) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(reviewcycle.Table, reviewcycle.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, reviewcycle.TenantTable, reviewcycle.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReviews queries the reviews edge of a ReviewCycle.
+func (c *ReviewCycleClient) QueryReviews(_m *ReviewCycle) *PerformanceReviewQuery {
+	query := (&PerformanceReviewClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(reviewcycle.Table, reviewcycle.FieldID, id),
+			sqlgraph.To(performancereview.Table, performancereview.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, reviewcycle.ReviewsTable, reviewcycle.ReviewsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ReviewCycleClient) Hooks() []Hook {
+	return c.hooks.ReviewCycle
+}
+
+// Interceptors returns the client interceptors.
+func (c *ReviewCycleClient) Interceptors() []Interceptor {
+	return c.inters.ReviewCycle
+}
+
+func (c *ReviewCycleClient) mutate(ctx context.Context, m *ReviewCycleMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ReviewCycleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ReviewCycleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ReviewCycleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ReviewCycleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ReviewCycle mutation op: %q", m.Op())
 	}
 }
 
@@ -6566,6 +7787,22 @@ func (c *SaaSIdentityClient) QueryUsages(_m *SaaSIdentity) *SaaSUsageQuery {
 	return query
 }
 
+// QueryTenant queries the tenant edge of a SaaSIdentity.
+func (c *SaaSIdentityClient) QueryTenant(_m *SaaSIdentity) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(saasidentity.Table, saasidentity.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, saasidentity.TenantTable, saasidentity.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *SaaSIdentityClient) Hooks() []Hook {
 	return c.hooks.SaaSIdentity
@@ -6715,6 +7952,22 @@ func (c *SaaSUsageClient) QueryIdentity(_m *SaaSUsage) *SaaSIdentityQuery {
 	return query
 }
 
+// QueryTenant queries the tenant edge of a SaaSUsage.
+func (c *SaaSUsageClient) QueryTenant(_m *SaaSUsage) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(saasusage.Table, saasusage.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, saasusage.TenantTable, saasusage.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *SaaSUsageClient) Hooks() []Hook {
 	return c.hooks.SaaSUsage
@@ -6737,6 +7990,171 @@ func (c *SaaSUsageClient) mutate(ctx context.Context, m *SaaSUsageMutation) (Val
 		return (&SaaSUsageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown SaaSUsage mutation op: %q", m.Op())
+	}
+}
+
+// ScriptClient is a client for the Script schema.
+type ScriptClient struct {
+	config
+}
+
+// NewScriptClient returns a client for the Script from the given config.
+func NewScriptClient(c config) *ScriptClient {
+	return &ScriptClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `script.Hooks(f(g(h())))`.
+func (c *ScriptClient) Use(hooks ...Hook) {
+	c.hooks.Script = append(c.hooks.Script, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `script.Intercept(f(g(h())))`.
+func (c *ScriptClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Script = append(c.inters.Script, interceptors...)
+}
+
+// Create returns a builder for creating a Script entity.
+func (c *ScriptClient) Create() *ScriptCreate {
+	mutation := newScriptMutation(c.config, OpCreate)
+	return &ScriptCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Script entities.
+func (c *ScriptClient) CreateBulk(builders ...*ScriptCreate) *ScriptCreateBulk {
+	return &ScriptCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ScriptClient) MapCreateBulk(slice any, setFunc func(*ScriptCreate, int)) *ScriptCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ScriptCreateBulk{err: fmt.Errorf("calling to ScriptClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ScriptCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ScriptCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Script.
+func (c *ScriptClient) Update() *ScriptUpdate {
+	mutation := newScriptMutation(c.config, OpUpdate)
+	return &ScriptUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ScriptClient) UpdateOne(_m *Script) *ScriptUpdateOne {
+	mutation := newScriptMutation(c.config, OpUpdateOne, withScript(_m))
+	return &ScriptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ScriptClient) UpdateOneID(id int) *ScriptUpdateOne {
+	mutation := newScriptMutation(c.config, OpUpdateOne, withScriptID(id))
+	return &ScriptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Script.
+func (c *ScriptClient) Delete() *ScriptDelete {
+	mutation := newScriptMutation(c.config, OpDelete)
+	return &ScriptDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ScriptClient) DeleteOne(_m *Script) *ScriptDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ScriptClient) DeleteOneID(id int) *ScriptDeleteOne {
+	builder := c.Delete().Where(script.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ScriptDeleteOne{builder}
+}
+
+// Query returns a query builder for Script.
+func (c *ScriptClient) Query() *ScriptQuery {
+	return &ScriptQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeScript},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Script entity by its id.
+func (c *ScriptClient) Get(ctx context.Context, id int) (*Script, error) {
+	return c.Query().Where(script.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ScriptClient) GetX(ctx context.Context, id int) *Script {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTenant queries the tenant edge of a Script.
+func (c *ScriptClient) QueryTenant(_m *Script) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(script.Table, script.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, script.TenantTable, script.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryJobs queries the jobs edge of a Script.
+func (c *ScriptClient) QueryJobs(_m *Script) *JobQuery {
+	query := (&JobClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(script.Table, script.FieldID, id),
+			sqlgraph.To(job.Table, job.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, script.JobsTable, script.JobsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ScriptClient) Hooks() []Hook {
+	return c.hooks.Script
+}
+
+// Interceptors returns the client interceptors.
+func (c *ScriptClient) Interceptors() []Interceptor {
+	return c.inters.Script
+}
+
+func (c *ScriptClient) mutate(ctx context.Context, m *ScriptMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ScriptCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ScriptUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ScriptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ScriptDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Script mutation op: %q", m.Op())
 	}
 }
 
@@ -7343,6 +8761,22 @@ func (c *SuccessionMapClient) QueryBackupCandidate(_m *SuccessionMap) *EmployeeQ
 	return query
 }
 
+// QueryTenant queries the tenant edge of a SuccessionMap.
+func (c *SuccessionMapClient) QueryTenant(_m *SuccessionMap) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(successionmap.Table, successionmap.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, successionmap.TenantTable, successionmap.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *SuccessionMapClient) Hooks() []Hook {
 	return c.hooks.SuccessionMap
@@ -7892,6 +9326,38 @@ func (c *TenantClient) QueryServiceRates(_m *Tenant) *ServiceRateQuery {
 	return query
 }
 
+// QueryNetworkDevices queries the network_devices edge of a Tenant.
+func (c *TenantClient) QueryNetworkDevices(_m *Tenant) *NetworkDeviceQuery {
+	query := (&NetworkDeviceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(networkdevice.Table, networkdevice.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.NetworkDevicesTable, tenant.NetworkDevicesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryNetworkBackups queries the network_backups edge of a Tenant.
+func (c *TenantClient) QueryNetworkBackups(_m *Tenant) *NetworkBackupQuery {
+	query := (&NetworkBackupClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(networkbackup.Table, networkbackup.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.NetworkBackupsTable, tenant.NetworkBackupsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryBudgetForecasts queries the budget_forecasts edge of a Tenant.
 func (c *TenantClient) QueryBudgetForecasts(_m *Tenant) *BudgetForecastQuery {
 	query := (&BudgetForecastClient{config: c.config}).Query()
@@ -8004,6 +9470,182 @@ func (c *TenantClient) QueryInventoryReservations(_m *Tenant) *InventoryReservat
 	return query
 }
 
+// QueryDepartments queries the departments edge of a Tenant.
+func (c *TenantClient) QueryDepartments(_m *Tenant) *DepartmentQuery {
+	query := (&DepartmentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(department.Table, department.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.DepartmentsTable, tenant.DepartmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPermissions queries the permissions edge of a Tenant.
+func (c *TenantClient) QueryPermissions(_m *Tenant) *PermissionQuery {
+	query := (&PermissionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(permission.Table, permission.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.PermissionsTable, tenant.PermissionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAssetTypes queries the asset_types edge of a Tenant.
+func (c *TenantClient) QueryAssetTypes(_m *Tenant) *AssetTypeQuery {
+	query := (&AssetTypeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(assettype.Table, assettype.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.AssetTypesTable, tenant.AssetTypesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDetectionEvents queries the detection_events edge of a Tenant.
+func (c *TenantClient) QueryDetectionEvents(_m *Tenant) *DetectionEventQuery {
+	query := (&DetectionEventClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(detectionevent.Table, detectionevent.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.DetectionEventsTable, tenant.DetectionEventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySaasIdentities queries the saas_identities edge of a Tenant.
+func (c *TenantClient) QuerySaasIdentities(_m *Tenant) *SaaSIdentityQuery {
+	query := (&SaaSIdentityClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(saasidentity.Table, saasidentity.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.SaasIdentitiesTable, tenant.SaasIdentitiesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySaasUsages queries the saas_usages edge of a Tenant.
+func (c *TenantClient) QuerySaasUsages(_m *Tenant) *SaaSUsageQuery {
+	query := (&SaaSUsageClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(saasusage.Table, saasusage.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.SaasUsagesTable, tenant.SaasUsagesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRecordings queries the recordings edge of a Tenant.
+func (c *TenantClient) QueryRecordings(_m *Tenant) *RecordingQuery {
+	query := (&RecordingClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(recording.Table, recording.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.RecordingsTable, tenant.RecordingsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryNetworkLinks queries the network_links edge of a Tenant.
+func (c *TenantClient) QueryNetworkLinks(_m *Tenant) *NetworkLinkQuery {
+	query := (&NetworkLinkClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(networklink.Table, networklink.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.NetworkLinksTable, tenant.NetworkLinksColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryNetworkPorts queries the network_ports edge of a Tenant.
+func (c *TenantClient) QueryNetworkPorts(_m *Tenant) *NetworkPortQuery {
+	query := (&NetworkPortClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(networkport.Table, networkport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.NetworkPortsTable, tenant.NetworkPortsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryNexusAudits queries the nexus_audits edge of a Tenant.
+func (c *TenantClient) QueryNexusAudits(_m *Tenant) *NexusAuditQuery {
+	query := (&NexusAuditClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(nexusaudit.Table, nexusaudit.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.NexusAuditsTable, tenant.NexusAuditsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySuccessionMaps queries the succession_maps edge of a Tenant.
+func (c *TenantClient) QuerySuccessionMaps(_m *Tenant) *SuccessionMapQuery {
+	query := (&SuccessionMapClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(successionmap.Table, successionmap.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.SuccessionMapsTable, tenant.SuccessionMapsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryCustomerAccount queries the customer_account edge of a Tenant.
 func (c *TenantClient) QueryCustomerAccount(_m *Tenant) *AccountQuery {
 	query := (&AccountClient{config: c.config}).Query()
@@ -8013,6 +9655,134 @@ func (c *TenantClient) QueryCustomerAccount(_m *Tenant) *AccountQuery {
 			sqlgraph.From(tenant.Table, tenant.FieldID, id),
 			sqlgraph.To(account.Table, account.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, tenant.CustomerAccountTable, tenant.CustomerAccountColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryScripts queries the scripts edge of a Tenant.
+func (c *TenantClient) QueryScripts(_m *Tenant) *ScriptQuery {
+	query := (&ScriptClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(script.Table, script.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.ScriptsTable, tenant.ScriptsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryJobs queries the jobs edge of a Tenant.
+func (c *TenantClient) QueryJobs(_m *Tenant) *JobQuery {
+	query := (&JobClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(job.Table, job.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.JobsTable, tenant.JobsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTimeOffRequests queries the time_off_requests edge of a Tenant.
+func (c *TenantClient) QueryTimeOffRequests(_m *Tenant) *TimeOffRequestQuery {
+	query := (&TimeOffRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(timeoffrequest.Table, timeoffrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.TimeOffRequestsTable, tenant.TimeOffRequestsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTimeOffPolicies queries the time_off_policies edge of a Tenant.
+func (c *TenantClient) QueryTimeOffPolicies(_m *Tenant) *TimeOffPolicyQuery {
+	query := (&TimeOffPolicyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(timeoffpolicy.Table, timeoffpolicy.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.TimeOffPoliciesTable, tenant.TimeOffPoliciesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTimeOffBalances queries the time_off_balances edge of a Tenant.
+func (c *TenantClient) QueryTimeOffBalances(_m *Tenant) *TimeOffBalanceQuery {
+	query := (&TimeOffBalanceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(timeoffbalance.Table, timeoffbalance.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.TimeOffBalancesTable, tenant.TimeOffBalancesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReviewCycles queries the review_cycles edge of a Tenant.
+func (c *TenantClient) QueryReviewCycles(_m *Tenant) *ReviewCycleQuery {
+	query := (&ReviewCycleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(reviewcycle.Table, reviewcycle.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.ReviewCyclesTable, tenant.ReviewCyclesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPerformanceReviews queries the performance_reviews edge of a Tenant.
+func (c *TenantClient) QueryPerformanceReviews(_m *Tenant) *PerformanceReviewQuery {
+	query := (&PerformanceReviewClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(performancereview.Table, performancereview.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.PerformanceReviewsTable, tenant.PerformanceReviewsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGoals queries the goals edge of a Tenant.
+func (c *TenantClient) QueryGoals(_m *Tenant) *GoalQuery {
+	query := (&GoalClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(goal.Table, goal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.GoalsTable, tenant.GoalsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -8436,6 +10206,533 @@ func (c *TimeEntryClient) mutate(ctx context.Context, m *TimeEntryMutation) (Val
 		return (&TimeEntryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown TimeEntry mutation op: %q", m.Op())
+	}
+}
+
+// TimeOffBalanceClient is a client for the TimeOffBalance schema.
+type TimeOffBalanceClient struct {
+	config
+}
+
+// NewTimeOffBalanceClient returns a client for the TimeOffBalance from the given config.
+func NewTimeOffBalanceClient(c config) *TimeOffBalanceClient {
+	return &TimeOffBalanceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `timeoffbalance.Hooks(f(g(h())))`.
+func (c *TimeOffBalanceClient) Use(hooks ...Hook) {
+	c.hooks.TimeOffBalance = append(c.hooks.TimeOffBalance, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `timeoffbalance.Intercept(f(g(h())))`.
+func (c *TimeOffBalanceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TimeOffBalance = append(c.inters.TimeOffBalance, interceptors...)
+}
+
+// Create returns a builder for creating a TimeOffBalance entity.
+func (c *TimeOffBalanceClient) Create() *TimeOffBalanceCreate {
+	mutation := newTimeOffBalanceMutation(c.config, OpCreate)
+	return &TimeOffBalanceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TimeOffBalance entities.
+func (c *TimeOffBalanceClient) CreateBulk(builders ...*TimeOffBalanceCreate) *TimeOffBalanceCreateBulk {
+	return &TimeOffBalanceCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TimeOffBalanceClient) MapCreateBulk(slice any, setFunc func(*TimeOffBalanceCreate, int)) *TimeOffBalanceCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TimeOffBalanceCreateBulk{err: fmt.Errorf("calling to TimeOffBalanceClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TimeOffBalanceCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TimeOffBalanceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TimeOffBalance.
+func (c *TimeOffBalanceClient) Update() *TimeOffBalanceUpdate {
+	mutation := newTimeOffBalanceMutation(c.config, OpUpdate)
+	return &TimeOffBalanceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TimeOffBalanceClient) UpdateOne(_m *TimeOffBalance) *TimeOffBalanceUpdateOne {
+	mutation := newTimeOffBalanceMutation(c.config, OpUpdateOne, withTimeOffBalance(_m))
+	return &TimeOffBalanceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TimeOffBalanceClient) UpdateOneID(id int) *TimeOffBalanceUpdateOne {
+	mutation := newTimeOffBalanceMutation(c.config, OpUpdateOne, withTimeOffBalanceID(id))
+	return &TimeOffBalanceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TimeOffBalance.
+func (c *TimeOffBalanceClient) Delete() *TimeOffBalanceDelete {
+	mutation := newTimeOffBalanceMutation(c.config, OpDelete)
+	return &TimeOffBalanceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TimeOffBalanceClient) DeleteOne(_m *TimeOffBalance) *TimeOffBalanceDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TimeOffBalanceClient) DeleteOneID(id int) *TimeOffBalanceDeleteOne {
+	builder := c.Delete().Where(timeoffbalance.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TimeOffBalanceDeleteOne{builder}
+}
+
+// Query returns a query builder for TimeOffBalance.
+func (c *TimeOffBalanceClient) Query() *TimeOffBalanceQuery {
+	return &TimeOffBalanceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTimeOffBalance},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TimeOffBalance entity by its id.
+func (c *TimeOffBalanceClient) Get(ctx context.Context, id int) (*TimeOffBalance, error) {
+	return c.Query().Where(timeoffbalance.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TimeOffBalanceClient) GetX(ctx context.Context, id int) *TimeOffBalance {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTenant queries the tenant edge of a TimeOffBalance.
+func (c *TimeOffBalanceClient) QueryTenant(_m *TimeOffBalance) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timeoffbalance.Table, timeoffbalance.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, timeoffbalance.TenantTable, timeoffbalance.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEmployee queries the employee edge of a TimeOffBalance.
+func (c *TimeOffBalanceClient) QueryEmployee(_m *TimeOffBalance) *EmployeeQuery {
+	query := (&EmployeeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timeoffbalance.Table, timeoffbalance.FieldID, id),
+			sqlgraph.To(employee.Table, employee.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, timeoffbalance.EmployeeTable, timeoffbalance.EmployeeColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPolicy queries the policy edge of a TimeOffBalance.
+func (c *TimeOffBalanceClient) QueryPolicy(_m *TimeOffBalance) *TimeOffPolicyQuery {
+	query := (&TimeOffPolicyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timeoffbalance.Table, timeoffbalance.FieldID, id),
+			sqlgraph.To(timeoffpolicy.Table, timeoffpolicy.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, timeoffbalance.PolicyTable, timeoffbalance.PolicyColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TimeOffBalanceClient) Hooks() []Hook {
+	return c.hooks.TimeOffBalance
+}
+
+// Interceptors returns the client interceptors.
+func (c *TimeOffBalanceClient) Interceptors() []Interceptor {
+	return c.inters.TimeOffBalance
+}
+
+func (c *TimeOffBalanceClient) mutate(ctx context.Context, m *TimeOffBalanceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TimeOffBalanceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TimeOffBalanceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TimeOffBalanceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TimeOffBalanceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TimeOffBalance mutation op: %q", m.Op())
+	}
+}
+
+// TimeOffPolicyClient is a client for the TimeOffPolicy schema.
+type TimeOffPolicyClient struct {
+	config
+}
+
+// NewTimeOffPolicyClient returns a client for the TimeOffPolicy from the given config.
+func NewTimeOffPolicyClient(c config) *TimeOffPolicyClient {
+	return &TimeOffPolicyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `timeoffpolicy.Hooks(f(g(h())))`.
+func (c *TimeOffPolicyClient) Use(hooks ...Hook) {
+	c.hooks.TimeOffPolicy = append(c.hooks.TimeOffPolicy, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `timeoffpolicy.Intercept(f(g(h())))`.
+func (c *TimeOffPolicyClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TimeOffPolicy = append(c.inters.TimeOffPolicy, interceptors...)
+}
+
+// Create returns a builder for creating a TimeOffPolicy entity.
+func (c *TimeOffPolicyClient) Create() *TimeOffPolicyCreate {
+	mutation := newTimeOffPolicyMutation(c.config, OpCreate)
+	return &TimeOffPolicyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TimeOffPolicy entities.
+func (c *TimeOffPolicyClient) CreateBulk(builders ...*TimeOffPolicyCreate) *TimeOffPolicyCreateBulk {
+	return &TimeOffPolicyCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TimeOffPolicyClient) MapCreateBulk(slice any, setFunc func(*TimeOffPolicyCreate, int)) *TimeOffPolicyCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TimeOffPolicyCreateBulk{err: fmt.Errorf("calling to TimeOffPolicyClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TimeOffPolicyCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TimeOffPolicyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TimeOffPolicy.
+func (c *TimeOffPolicyClient) Update() *TimeOffPolicyUpdate {
+	mutation := newTimeOffPolicyMutation(c.config, OpUpdate)
+	return &TimeOffPolicyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TimeOffPolicyClient) UpdateOne(_m *TimeOffPolicy) *TimeOffPolicyUpdateOne {
+	mutation := newTimeOffPolicyMutation(c.config, OpUpdateOne, withTimeOffPolicy(_m))
+	return &TimeOffPolicyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TimeOffPolicyClient) UpdateOneID(id int) *TimeOffPolicyUpdateOne {
+	mutation := newTimeOffPolicyMutation(c.config, OpUpdateOne, withTimeOffPolicyID(id))
+	return &TimeOffPolicyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TimeOffPolicy.
+func (c *TimeOffPolicyClient) Delete() *TimeOffPolicyDelete {
+	mutation := newTimeOffPolicyMutation(c.config, OpDelete)
+	return &TimeOffPolicyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TimeOffPolicyClient) DeleteOne(_m *TimeOffPolicy) *TimeOffPolicyDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TimeOffPolicyClient) DeleteOneID(id int) *TimeOffPolicyDeleteOne {
+	builder := c.Delete().Where(timeoffpolicy.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TimeOffPolicyDeleteOne{builder}
+}
+
+// Query returns a query builder for TimeOffPolicy.
+func (c *TimeOffPolicyClient) Query() *TimeOffPolicyQuery {
+	return &TimeOffPolicyQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTimeOffPolicy},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TimeOffPolicy entity by its id.
+func (c *TimeOffPolicyClient) Get(ctx context.Context, id int) (*TimeOffPolicy, error) {
+	return c.Query().Where(timeoffpolicy.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TimeOffPolicyClient) GetX(ctx context.Context, id int) *TimeOffPolicy {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTenant queries the tenant edge of a TimeOffPolicy.
+func (c *TimeOffPolicyClient) QueryTenant(_m *TimeOffPolicy) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timeoffpolicy.Table, timeoffpolicy.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, timeoffpolicy.TenantTable, timeoffpolicy.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBalances queries the balances edge of a TimeOffPolicy.
+func (c *TimeOffPolicyClient) QueryBalances(_m *TimeOffPolicy) *TimeOffBalanceQuery {
+	query := (&TimeOffBalanceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timeoffpolicy.Table, timeoffpolicy.FieldID, id),
+			sqlgraph.To(timeoffbalance.Table, timeoffbalance.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, timeoffpolicy.BalancesTable, timeoffpolicy.BalancesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TimeOffPolicyClient) Hooks() []Hook {
+	return c.hooks.TimeOffPolicy
+}
+
+// Interceptors returns the client interceptors.
+func (c *TimeOffPolicyClient) Interceptors() []Interceptor {
+	return c.inters.TimeOffPolicy
+}
+
+func (c *TimeOffPolicyClient) mutate(ctx context.Context, m *TimeOffPolicyMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TimeOffPolicyCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TimeOffPolicyUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TimeOffPolicyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TimeOffPolicyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TimeOffPolicy mutation op: %q", m.Op())
+	}
+}
+
+// TimeOffRequestClient is a client for the TimeOffRequest schema.
+type TimeOffRequestClient struct {
+	config
+}
+
+// NewTimeOffRequestClient returns a client for the TimeOffRequest from the given config.
+func NewTimeOffRequestClient(c config) *TimeOffRequestClient {
+	return &TimeOffRequestClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `timeoffrequest.Hooks(f(g(h())))`.
+func (c *TimeOffRequestClient) Use(hooks ...Hook) {
+	c.hooks.TimeOffRequest = append(c.hooks.TimeOffRequest, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `timeoffrequest.Intercept(f(g(h())))`.
+func (c *TimeOffRequestClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TimeOffRequest = append(c.inters.TimeOffRequest, interceptors...)
+}
+
+// Create returns a builder for creating a TimeOffRequest entity.
+func (c *TimeOffRequestClient) Create() *TimeOffRequestCreate {
+	mutation := newTimeOffRequestMutation(c.config, OpCreate)
+	return &TimeOffRequestCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TimeOffRequest entities.
+func (c *TimeOffRequestClient) CreateBulk(builders ...*TimeOffRequestCreate) *TimeOffRequestCreateBulk {
+	return &TimeOffRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TimeOffRequestClient) MapCreateBulk(slice any, setFunc func(*TimeOffRequestCreate, int)) *TimeOffRequestCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TimeOffRequestCreateBulk{err: fmt.Errorf("calling to TimeOffRequestClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TimeOffRequestCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TimeOffRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TimeOffRequest.
+func (c *TimeOffRequestClient) Update() *TimeOffRequestUpdate {
+	mutation := newTimeOffRequestMutation(c.config, OpUpdate)
+	return &TimeOffRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TimeOffRequestClient) UpdateOne(_m *TimeOffRequest) *TimeOffRequestUpdateOne {
+	mutation := newTimeOffRequestMutation(c.config, OpUpdateOne, withTimeOffRequest(_m))
+	return &TimeOffRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TimeOffRequestClient) UpdateOneID(id int) *TimeOffRequestUpdateOne {
+	mutation := newTimeOffRequestMutation(c.config, OpUpdateOne, withTimeOffRequestID(id))
+	return &TimeOffRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TimeOffRequest.
+func (c *TimeOffRequestClient) Delete() *TimeOffRequestDelete {
+	mutation := newTimeOffRequestMutation(c.config, OpDelete)
+	return &TimeOffRequestDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TimeOffRequestClient) DeleteOne(_m *TimeOffRequest) *TimeOffRequestDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TimeOffRequestClient) DeleteOneID(id int) *TimeOffRequestDeleteOne {
+	builder := c.Delete().Where(timeoffrequest.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TimeOffRequestDeleteOne{builder}
+}
+
+// Query returns a query builder for TimeOffRequest.
+func (c *TimeOffRequestClient) Query() *TimeOffRequestQuery {
+	return &TimeOffRequestQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTimeOffRequest},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TimeOffRequest entity by its id.
+func (c *TimeOffRequestClient) Get(ctx context.Context, id int) (*TimeOffRequest, error) {
+	return c.Query().Where(timeoffrequest.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TimeOffRequestClient) GetX(ctx context.Context, id int) *TimeOffRequest {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTenant queries the tenant edge of a TimeOffRequest.
+func (c *TimeOffRequestClient) QueryTenant(_m *TimeOffRequest) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timeoffrequest.Table, timeoffrequest.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, timeoffrequest.TenantTable, timeoffrequest.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEmployee queries the employee edge of a TimeOffRequest.
+func (c *TimeOffRequestClient) QueryEmployee(_m *TimeOffRequest) *EmployeeQuery {
+	query := (&EmployeeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timeoffrequest.Table, timeoffrequest.FieldID, id),
+			sqlgraph.To(employee.Table, employee.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, timeoffrequest.EmployeeTable, timeoffrequest.EmployeeColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryApprovedBy queries the approved_by edge of a TimeOffRequest.
+func (c *TimeOffRequestClient) QueryApprovedBy(_m *TimeOffRequest) *EmployeeQuery {
+	query := (&EmployeeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timeoffrequest.Table, timeoffrequest.FieldID, id),
+			sqlgraph.To(employee.Table, employee.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, timeoffrequest.ApprovedByTable, timeoffrequest.ApprovedByColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TimeOffRequestClient) Hooks() []Hook {
+	return c.hooks.TimeOffRequest
+}
+
+// Interceptors returns the client interceptors.
+func (c *TimeOffRequestClient) Interceptors() []Interceptor {
+	return c.inters.TimeOffRequest
+}
+
+func (c *TimeOffRequestClient) mutate(ctx context.Context, m *TimeOffRequestMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TimeOffRequestCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TimeOffRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TimeOffRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TimeOffRequestDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TimeOffRequest mutation op: %q", m.Op())
 	}
 }
 
@@ -9264,21 +11561,25 @@ type (
 	hooks struct {
 		Account, Agent, Asset, AssetType, AuditLog, BudgetForecast, CallLog, Camera,
 		CompensationAgreement, Contract, Credential, Department, DetectionEvent,
-		DiscoveryEntry, Employee, HealthScoreSnapshot, IVRFlow, InventoryReservation,
-		JournalEntry, LedgerEntry, NetworkBackup, NetworkDevice, NetworkLink,
-		NetworkPort, NexusAudit, OneTimeLink, Permission, Product, Recording,
-		RecurringInvoice, RemediationStep, SOP, SaaSApp, SaaSFilter, SaaSIdentity,
-		SaaSUsage, ServiceRate, StockMovement, StrategicRoadmap, SuccessionMap, Tenant,
-		Ticket, TimeEntry, Transaction, User, VaultItem, Voicemail []ent.Hook
+		DiscoveryEntry, Employee, Goal, HealthScoreSnapshot, IVRFlow,
+		InventoryReservation, Job, JobExecution, JournalEntry, LedgerEntry,
+		NetworkBackup, NetworkDevice, NetworkLink, NetworkPort, NexusAudit,
+		OneTimeLink, PerformanceReview, Permission, Product, Recording,
+		RecurringInvoice, RemediationStep, ReviewCycle, SOP, SaaSApp, SaaSFilter,
+		SaaSIdentity, SaaSUsage, Script, ServiceRate, StockMovement, StrategicRoadmap,
+		SuccessionMap, Tenant, Ticket, TimeEntry, TimeOffBalance, TimeOffPolicy,
+		TimeOffRequest, Transaction, User, VaultItem, Voicemail []ent.Hook
 	}
 	inters struct {
 		Account, Agent, Asset, AssetType, AuditLog, BudgetForecast, CallLog, Camera,
 		CompensationAgreement, Contract, Credential, Department, DetectionEvent,
-		DiscoveryEntry, Employee, HealthScoreSnapshot, IVRFlow, InventoryReservation,
-		JournalEntry, LedgerEntry, NetworkBackup, NetworkDevice, NetworkLink,
-		NetworkPort, NexusAudit, OneTimeLink, Permission, Product, Recording,
-		RecurringInvoice, RemediationStep, SOP, SaaSApp, SaaSFilter, SaaSIdentity,
-		SaaSUsage, ServiceRate, StockMovement, StrategicRoadmap, SuccessionMap, Tenant,
-		Ticket, TimeEntry, Transaction, User, VaultItem, Voicemail []ent.Interceptor
+		DiscoveryEntry, Employee, Goal, HealthScoreSnapshot, IVRFlow,
+		InventoryReservation, Job, JobExecution, JournalEntry, LedgerEntry,
+		NetworkBackup, NetworkDevice, NetworkLink, NetworkPort, NexusAudit,
+		OneTimeLink, PerformanceReview, Permission, Product, Recording,
+		RecurringInvoice, RemediationStep, ReviewCycle, SOP, SaaSApp, SaaSFilter,
+		SaaSIdentity, SaaSUsage, Script, ServiceRate, StockMovement, StrategicRoadmap,
+		SuccessionMap, Tenant, Ticket, TimeEntry, TimeOffBalance, TimeOffPolicy,
+		TimeOffRequest, Transaction, User, VaultItem, Voicemail []ent.Interceptor
 	}
 )

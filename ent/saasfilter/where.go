@@ -55,6 +55,11 @@ func IDLTE(id int) predicate.SaaSFilter {
 	return predicate.SaaSFilter(sql.FieldLTE(FieldID, id))
 }
 
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldEQ(FieldName, v))
+}
+
 // DomainPattern applies equality check predicate on the "domain_pattern" field. It's identical to DomainPatternEQ.
 func DomainPattern(v string) predicate.SaaSFilter {
 	return predicate.SaaSFilter(sql.FieldEQ(FieldDomainPattern, v))
@@ -78,6 +83,71 @@ func CreatedAt(v time.Time) predicate.SaaSFilter {
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.SaaSFilter {
 	return predicate.SaaSFilter(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldEQ(FieldName, v))
+}
+
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldNEQ(FieldName, v))
+}
+
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldIn(FieldName, vs...))
+}
+
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldNotIn(FieldName, vs...))
+}
+
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldGT(FieldName, v))
+}
+
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldGTE(FieldName, v))
+}
+
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldLT(FieldName, v))
+}
+
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldLTE(FieldName, v))
+}
+
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldContains(FieldName, v))
+}
+
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldHasPrefix(FieldName, v))
+}
+
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldHasSuffix(FieldName, v))
+}
+
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldEqualFold(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.SaaSFilter {
+	return predicate.SaaSFilter(sql.FieldContainsFold(FieldName, v))
 }
 
 // DomainPatternEQ applies the EQ predicate on the "domain_pattern" field.

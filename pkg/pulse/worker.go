@@ -63,3 +63,11 @@ func (w *PulseWorker) Start(ctx context.Context) error {
 
 	return sub.Subscribe()
 }
+
+// PublishCommand sends a command to a specific agent channel.
+func (w *PulseWorker) PublishCommand(agentID string, cmd string) error {
+	// Channel format: pulse:control:<agentID>
+	channel := "pulse:control:" + agentID
+	_, err := w.client.Publish(context.Background(), channel, []byte(cmd))
+	return err
+}

@@ -1,0 +1,70 @@
+services:
+  db:
+    image: timescale/timescaledb:latest-pg16
+    container_name: sent-db
+    command: ["postgres", "-c", "shared_preload_libraries=timescaledb"]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: zitadel
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  zitadel-init:
+    image: ghcr.io/zitadel/zitadel:v3.4.6
+    container_name: sent-auth-init
+    command: 'init zitadel --config /zitadel-config.yaml'
+    volumes:
+      - ./zitadel-config.yaml:/zitadel-config.yaml:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  zitadel-setup:
+    image: ghcr.io/zitadel/zitadel:v3.4.6
+    container_name: sent-auth-setup
+    command: 'setup --masterkey "MasterkeyMustBe32CharactersLong!" --tlsMode disabled --config /zitadel-config.yaml --config /zitadel-setup.yaml'
+    volumes:
+      - ./zitadel-config.yaml:/zitadel-config.yaml:ro
+      - ./zitadel-setup.yaml:/zitadel-setup.yaml:ro
+    depends_on:
+      zitadel-init:
+        condition: service_completed_successfully
+
+  zitadel:
+    image: ghcr.io/zitadel/zitadel:v3.4.6
+    container_name: sent-auth
+    command: 'start --masterkey "MasterkeyMustBe32CharactersLong!" --tlsMode disabled --config /zitadel-config.yaml'
+    volumes:
+      - ./zitadel-config.yaml:/zitadel-config.yaml:ro
+    ports:
+      - "8080:8080"
+    depends_on:
+      zitadel-setup:
+        condition: service_completed_successfully
+
+  centrifugo:
+    image: centrifugo/centrifugo:v5
+    container_name: sent-realtime
+    volumes:
+      - ./centrifugo-config.json:/centrifugo/config.json:ro
+    command: centrifugo -c config.json
+    ports:
+      - "8000:8000"
+    environment:
+      - CENTRIFUGO_SECRET=very-secret-token
+      - CENTRIFUGO_API_KEY=api-key
+      - CENTRIFUGO_ADMIN_PASSWORD=password
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

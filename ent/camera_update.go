@@ -21,8 +21,9 @@ import (
 // CameraUpdate is the builder for updating Camera entities.
 type CameraUpdate struct {
 	config
-	hooks    []Hook
-	mutation *CameraMutation
+	hooks     []Hook
+	mutation  *CameraMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the CameraUpdate builder.
@@ -298,6 +299,12 @@ func (_u *CameraUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *CameraUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CameraUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *CameraUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -465,6 +472,7 @@ func (_u *CameraUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{camera.Label}
@@ -480,9 +488,10 @@ func (_u *CameraUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 // CameraUpdateOne is the builder for updating a single Camera entity.
 type CameraUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *CameraMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *CameraMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetName sets the "name" field.
@@ -765,6 +774,12 @@ func (_u *CameraUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *CameraUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CameraUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *CameraUpdateOne) sqlSave(ctx context.Context) (_node *Camera, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -949,6 +964,7 @@ func (_u *CameraUpdateOne) sqlSave(ctx context.Context) (_node *Camera, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &Camera{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

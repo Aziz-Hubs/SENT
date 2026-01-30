@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sent/ent/nexusaudit"
 	"sent/ent/predicate"
+	"sent/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -18,8 +19,9 @@ import (
 // NexusAuditUpdate is the builder for updating NexusAudit entities.
 type NexusAuditUpdate struct {
 	config
-	hooks    []Hook
-	mutation *NexusAuditMutation
+	hooks     []Hook
+	mutation  *NexusAuditMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the NexusAuditUpdate builder.
@@ -142,9 +144,26 @@ func (_u *NexusAuditUpdate) ClearMetadata() *NexusAuditUpdate {
 	return _u
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *NexusAuditUpdate) SetTenantID(id int) *NexusAuditUpdate {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *NexusAuditUpdate) SetTenant(v *Tenant) *NexusAuditUpdate {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the NexusAuditMutation object of the builder.
 func (_u *NexusAuditUpdate) Mutation() *NexusAuditMutation {
 	return _u.mutation
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *NexusAuditUpdate) ClearTenant() *NexusAuditUpdate {
+	_u.mutation.ClearTenant()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -174,7 +193,24 @@ func (_u *NexusAuditUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *NexusAuditUpdate) check() error {
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "NexusAudit.tenant"`)
+	}
+	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *NexusAuditUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *NexusAuditUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *NexusAuditUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(nexusaudit.Table, nexusaudit.Columns, sqlgraph.NewFieldSpec(nexusaudit.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -216,6 +252,36 @@ func (_u *NexusAuditUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if _u.mutation.MetadataCleared() {
 		_spec.ClearField(nexusaudit.FieldMetadata, field.TypeJSON)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   nexusaudit.TenantTable,
+			Columns: []string{nexusaudit.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   nexusaudit.TenantTable,
+			Columns: []string{nexusaudit.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{nexusaudit.Label}
@@ -231,9 +297,10 @@ func (_u *NexusAuditUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 // NexusAuditUpdateOne is the builder for updating a single NexusAudit entity.
 type NexusAuditUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *NexusAuditMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *NexusAuditMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetAction sets the "action" field.
@@ -350,9 +417,26 @@ func (_u *NexusAuditUpdateOne) ClearMetadata() *NexusAuditUpdateOne {
 	return _u
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *NexusAuditUpdateOne) SetTenantID(id int) *NexusAuditUpdateOne {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *NexusAuditUpdateOne) SetTenant(v *Tenant) *NexusAuditUpdateOne {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the NexusAuditMutation object of the builder.
 func (_u *NexusAuditUpdateOne) Mutation() *NexusAuditMutation {
 	return _u.mutation
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *NexusAuditUpdateOne) ClearTenant() *NexusAuditUpdateOne {
+	_u.mutation.ClearTenant()
+	return _u
 }
 
 // Where appends a list predicates to the NexusAuditUpdate builder.
@@ -395,7 +479,24 @@ func (_u *NexusAuditUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *NexusAuditUpdateOne) check() error {
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "NexusAudit.tenant"`)
+	}
+	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *NexusAuditUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *NexusAuditUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *NexusAuditUpdateOne) sqlSave(ctx context.Context) (_node *NexusAudit, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(nexusaudit.Table, nexusaudit.Columns, sqlgraph.NewFieldSpec(nexusaudit.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -454,6 +555,36 @@ func (_u *NexusAuditUpdateOne) sqlSave(ctx context.Context) (_node *NexusAudit, 
 	if _u.mutation.MetadataCleared() {
 		_spec.ClearField(nexusaudit.FieldMetadata, field.TypeJSON)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   nexusaudit.TenantTable,
+			Columns: []string{nexusaudit.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   nexusaudit.TenantTable,
+			Columns: []string{nexusaudit.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &NexusAudit{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

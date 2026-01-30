@@ -8,6 +8,7 @@ import (
 	"math"
 	"sent/ent/nexusaudit"
 	"sent/ent/predicate"
+	"sent/ent/tenant"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -22,6 +23,9 @@ type NexusAuditQuery struct {
 	order      []nexusaudit.OrderOption
 	inters     []Interceptor
 	predicates []predicate.NexusAudit
+	withTenant *TenantQuery
+	withFKs    bool
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +60,28 @@ func (_q *NexusAuditQuery) Unique(unique bool) *NexusAuditQuery {
 func (_q *NexusAuditQuery) Order(o ...nexusaudit.OrderOption) *NexusAuditQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryTenant chains the current query on the "tenant" edge.
+func (_q *NexusAuditQuery) QueryTenant() *TenantQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nexusaudit.Table, nexusaudit.FieldID, selector),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, nexusaudit.TenantTable, nexusaudit.TenantColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first NexusAudit entity from the query.
@@ -250,10 +276,23 @@ func (_q *NexusAuditQuery) Clone() *NexusAuditQuery {
 		order:      append([]nexusaudit.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
 		predicates: append([]predicate.NexusAudit{}, _q.predicates...),
+		withTenant: _q.withTenant.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
+}
+
+// WithTenant tells the query-builder to eager-load the nodes that are connected to
+// the "tenant" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *NexusAuditQuery) WithTenant(opts ...func(*TenantQuery)) *NexusAuditQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTenant = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,16 +371,30 @@ func (_q *NexusAuditQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *NexusAuditQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*NexusAudit, error) {
 	var (
-		nodes = []*NexusAudit{}
-		_spec = _q.querySpec()
+		nodes       = []*NexusAudit{}
+		withFKs     = _q.withFKs
+		_spec       = _q.querySpec()
+		loadedTypes = [1]bool{
+			_q.withTenant != nil,
+		}
 	)
+	if _q.withTenant != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, nexusaudit.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*NexusAudit).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &NexusAudit{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -352,11 +405,53 @@ func (_q *NexusAuditQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*N
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withTenant; query != nil {
+		if err := _q.loadTenant(ctx, query, nodes, nil,
+			func(n *NexusAudit, e *Tenant) { n.Edges.Tenant = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *NexusAuditQuery) loadTenant(ctx context.Context, query *TenantQuery, nodes []*NexusAudit, init func(*NexusAudit), assign func(*NexusAudit, *Tenant)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*NexusAudit)
+	for i := range nodes {
+		if nodes[i].tenant_nexus_audits == nil {
+			continue
+		}
+		fk := *nodes[i].tenant_nexus_audits
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(tenant.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tenant_nexus_audits" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (_q *NexusAuditQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -419,6 +514,9 @@ func (_q *NexusAuditQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -434,6 +532,12 @@ func (_q *NexusAuditQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *NexusAuditQuery) Modify(modifiers ...func(s *sql.Selector)) *NexusAuditSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // NexusAuditGroupBy is the group-by builder for NexusAudit entities.
@@ -524,4 +628,10 @@ func (_s *NexusAuditSelect) sqlScan(ctx context.Context, root *NexusAuditQuery, 
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *NexusAuditSelect) Modify(modifiers ...func(s *sql.Selector)) *NexusAuditSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

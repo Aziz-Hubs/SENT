@@ -35,6 +35,7 @@ func (Agent) Edges() []ent.Edge {
 		edge.From("tenant", Tenant.Type).
 			Ref("agents").
 			Unique(),
+		edge.To("job_executions", JobExecution.Type),
 	}
 }
 

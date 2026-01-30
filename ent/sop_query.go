@@ -29,6 +29,7 @@ type SOPQuery struct {
 	withAsset  *AssetQuery
 	withAuthor *UserQuery
 	withFKs    bool
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -327,8 +328,9 @@ func (_q *SOPQuery) Clone() *SOPQuery {
 		withAsset:  _q.withAsset.Clone(),
 		withAuthor: _q.withAuthor.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -465,6 +467,9 @@ func (_q *SOPQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*SOP, err
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -594,6 +599,9 @@ func (_q *SOPQuery) loadAuthor(ctx context.Context, query *UserQuery, nodes []*S
 
 func (_q *SOPQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -656,6 +664,9 @@ func (_q *SOPQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -671,6 +682,12 @@ func (_q *SOPQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *SOPQuery) Modify(modifiers ...func(s *sql.Selector)) *SOPSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // SOPGroupBy is the group-by builder for SOP entities.
@@ -761,4 +778,10 @@ func (_s *SOPSelect) sqlScan(ctx context.Context, root *SOPQuery, v any) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *SOPSelect) Modify(modifiers ...func(s *sql.Selector)) *SOPSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

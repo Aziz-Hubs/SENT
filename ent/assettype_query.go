@@ -10,6 +10,7 @@ import (
 	"sent/ent/asset"
 	"sent/ent/assettype"
 	"sent/ent/predicate"
+	"sent/ent/tenant"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -25,6 +26,9 @@ type AssetTypeQuery struct {
 	inters     []Interceptor
 	predicates []predicate.AssetType
 	withAssets *AssetQuery
+	withTenant *TenantQuery
+	withFKs    bool
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +80,28 @@ func (_q *AssetTypeQuery) QueryAssets() *AssetQuery {
 			sqlgraph.From(assettype.Table, assettype.FieldID, selector),
 			sqlgraph.To(asset.Table, asset.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, assettype.AssetsTable, assettype.AssetsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTenant chains the current query on the "tenant" edge.
+func (_q *AssetTypeQuery) QueryTenant() *TenantQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(assettype.Table, assettype.FieldID, selector),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, assettype.TenantTable, assettype.TenantColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -276,9 +302,11 @@ func (_q *AssetTypeQuery) Clone() *AssetTypeQuery {
 		inters:     append([]Interceptor{}, _q.inters...),
 		predicates: append([]predicate.AssetType{}, _q.predicates...),
 		withAssets: _q.withAssets.Clone(),
+		withTenant: _q.withTenant.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -290,6 +318,17 @@ func (_q *AssetTypeQuery) WithAssets(opts ...func(*AssetQuery)) *AssetTypeQuery 
 		opt(query)
 	}
 	_q.withAssets = query
+	return _q
+}
+
+// WithTenant tells the query-builder to eager-load the nodes that are connected to
+// the "tenant" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *AssetTypeQuery) WithTenant(opts ...func(*TenantQuery)) *AssetTypeQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTenant = query
 	return _q
 }
 
@@ -370,11 +409,19 @@ func (_q *AssetTypeQuery) prepareQuery(ctx context.Context) error {
 func (_q *AssetTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*AssetType, error) {
 	var (
 		nodes       = []*AssetType{}
+		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			_q.withAssets != nil,
+			_q.withTenant != nil,
 		}
 	)
+	if _q.withTenant != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, assettype.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*AssetType).scanValues(nil, columns)
 	}
@@ -383,6 +430,9 @@ func (_q *AssetTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*As
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -397,6 +447,12 @@ func (_q *AssetTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*As
 		if err := _q.loadAssets(ctx, query, nodes,
 			func(n *AssetType) { n.Edges.Assets = []*Asset{} },
 			func(n *AssetType, e *Asset) { n.Edges.Assets = append(n.Edges.Assets, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTenant; query != nil {
+		if err := _q.loadTenant(ctx, query, nodes, nil,
+			func(n *AssetType, e *Tenant) { n.Edges.Tenant = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -434,9 +490,44 @@ func (_q *AssetTypeQuery) loadAssets(ctx context.Context, query *AssetQuery, nod
 	}
 	return nil
 }
+func (_q *AssetTypeQuery) loadTenant(ctx context.Context, query *TenantQuery, nodes []*AssetType, init func(*AssetType), assign func(*AssetType, *Tenant)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*AssetType)
+	for i := range nodes {
+		if nodes[i].tenant_asset_types == nil {
+			continue
+		}
+		fk := *nodes[i].tenant_asset_types
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(tenant.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tenant_asset_types" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (_q *AssetTypeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -499,6 +590,9 @@ func (_q *AssetTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -514,6 +608,12 @@ func (_q *AssetTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *AssetTypeQuery) Modify(modifiers ...func(s *sql.Selector)) *AssetTypeSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // AssetTypeGroupBy is the group-by builder for AssetType entities.
@@ -604,4 +704,10 @@ func (_s *AssetTypeSelect) sqlScan(ctx context.Context, root *AssetTypeQuery, v 
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *AssetTypeSelect) Modify(modifiers ...func(s *sql.Selector)) *AssetTypeSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

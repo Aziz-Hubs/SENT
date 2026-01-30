@@ -8,6 +8,7 @@ import (
 	"sent/ent"
 	"sent/ent/product"
 	"sent/ent/stockmovement"
+	"github.com/shopspring/decimal"
 )
 
 type FIFOWorker struct {
@@ -69,7 +70,7 @@ func (w *FIFOWorker) processMovement(ctx context.Context, m *ent.StockMovement) 
 		return err
 	}
 
-	totalCogs := 0.0
+	totalCogs := decimal.Zero
 	remainingToConsume := m.Quantity
 	prodID := m.Edges.Product.ID
 
@@ -78,7 +79,7 @@ func (w *FIFOWorker) processMovement(ctx context.Context, m *ent.StockMovement) 
 		Where(
 			stockmovement.HasProductWith(product.ID(prodID)),
 			stockmovement.MovementTypeEQ(stockmovement.MovementTypeIncoming),
-			stockmovement.RemainingQuantityGT(0),
+			stockmovement.RemainingQuantityGT(decimal.Zero),
 		).
 		Order(ent.Asc(stockmovement.FieldCreatedAt)).
 		All(ctx)
@@ -89,24 +90,20 @@ func (w *FIFOWorker) processMovement(ctx context.Context, m *ent.StockMovement) 
 	}
 
 	for _, batch := range batches {
-		if remainingToConsume <= 0 {
+		if remainingToConsume.IsZero() {
 			break
 		}
 
-		if batch.RemainingQuantity == nil {
-			continue
-		}
-
-		consume := *batch.RemainingQuantity
-		if consume > remainingToConsume {
+		consume := batch.RemainingQuantity
+		if consume.GreaterThan(remainingToConsume) {
 			consume = remainingToConsume
 		}
 
-		totalCogs += consume * batch.UnitCost
-		remainingToConsume -= consume
+		totalCogs = totalCogs.Add(consume.Mul(batch.UnitCost))
+		remainingToConsume = remainingToConsume.Sub(consume)
 
 		// Update batch remaining quantity
-		newRemaining := *batch.RemainingQuantity - consume
+		newRemaining := batch.RemainingQuantity.Sub(consume)
 		err = tx.StockMovement.UpdateOne(batch).
 			SetRemainingQuantity(newRemaining).
 			Exec(ctx)

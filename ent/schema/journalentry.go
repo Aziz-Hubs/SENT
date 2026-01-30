@@ -2,8 +2,10 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 	"time"
 )
 
@@ -15,7 +17,11 @@ type JournalEntry struct {
 // Fields of the JournalEntry.
 func (JournalEntry) Fields() []ent.Field {
 	return []ent.Field{
-		field.Float("amount"),
+		field.Other("amount", decimal.Decimal{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "numeric(19,4)",
+			}).
+			Default(decimal.Zero),
 		field.Enum("direction").Values("debit", "credit"),
 		field.Time("created_at").Default(time.Now),
 		field.String("description").Optional(),

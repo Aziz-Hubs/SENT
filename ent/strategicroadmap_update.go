@@ -14,13 +14,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // StrategicRoadmapUpdate is the builder for updating StrategicRoadmap entities.
 type StrategicRoadmapUpdate struct {
 	config
-	hooks    []Hook
-	mutation *StrategicRoadmapMutation
+	hooks     []Hook
+	mutation  *StrategicRoadmapMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the StrategicRoadmapUpdate builder.
@@ -92,23 +94,16 @@ func (_u *StrategicRoadmapUpdate) SetNillableStatus(v *strategicroadmap.Status) 
 }
 
 // SetEstimatedCost sets the "estimated_cost" field.
-func (_u *StrategicRoadmapUpdate) SetEstimatedCost(v float64) *StrategicRoadmapUpdate {
-	_u.mutation.ResetEstimatedCost()
+func (_u *StrategicRoadmapUpdate) SetEstimatedCost(v decimal.Decimal) *StrategicRoadmapUpdate {
 	_u.mutation.SetEstimatedCost(v)
 	return _u
 }
 
 // SetNillableEstimatedCost sets the "estimated_cost" field if the given value is not nil.
-func (_u *StrategicRoadmapUpdate) SetNillableEstimatedCost(v *float64) *StrategicRoadmapUpdate {
+func (_u *StrategicRoadmapUpdate) SetNillableEstimatedCost(v *decimal.Decimal) *StrategicRoadmapUpdate {
 	if v != nil {
 		_u.SetEstimatedCost(*v)
 	}
-	return _u
-}
-
-// AddEstimatedCost adds value to the "estimated_cost" field.
-func (_u *StrategicRoadmapUpdate) AddEstimatedCost(v float64) *StrategicRoadmapUpdate {
-	_u.mutation.AddEstimatedCost(v)
 	return _u
 }
 
@@ -242,6 +237,12 @@ func (_u *StrategicRoadmapUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *StrategicRoadmapUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *StrategicRoadmapUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *StrategicRoadmapUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -270,10 +271,7 @@ func (_u *StrategicRoadmapUpdate) sqlSave(ctx context.Context) (_node int, err e
 		_spec.SetField(strategicroadmap.FieldStatus, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.EstimatedCost(); ok {
-		_spec.SetField(strategicroadmap.FieldEstimatedCost, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedEstimatedCost(); ok {
-		_spec.AddField(strategicroadmap.FieldEstimatedCost, field.TypeFloat64, value)
+		_spec.SetField(strategicroadmap.FieldEstimatedCost, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.TargetDate(); ok {
 		_spec.SetField(strategicroadmap.FieldTargetDate, field.TypeTime, value)
@@ -319,6 +317,7 @@ func (_u *StrategicRoadmapUpdate) sqlSave(ctx context.Context) (_node int, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{strategicroadmap.Label}
@@ -334,9 +333,10 @@ func (_u *StrategicRoadmapUpdate) sqlSave(ctx context.Context) (_node int, err e
 // StrategicRoadmapUpdateOne is the builder for updating a single StrategicRoadmap entity.
 type StrategicRoadmapUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *StrategicRoadmapMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *StrategicRoadmapMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetProjectName sets the "project_name" field.
@@ -402,23 +402,16 @@ func (_u *StrategicRoadmapUpdateOne) SetNillableStatus(v *strategicroadmap.Statu
 }
 
 // SetEstimatedCost sets the "estimated_cost" field.
-func (_u *StrategicRoadmapUpdateOne) SetEstimatedCost(v float64) *StrategicRoadmapUpdateOne {
-	_u.mutation.ResetEstimatedCost()
+func (_u *StrategicRoadmapUpdateOne) SetEstimatedCost(v decimal.Decimal) *StrategicRoadmapUpdateOne {
 	_u.mutation.SetEstimatedCost(v)
 	return _u
 }
 
 // SetNillableEstimatedCost sets the "estimated_cost" field if the given value is not nil.
-func (_u *StrategicRoadmapUpdateOne) SetNillableEstimatedCost(v *float64) *StrategicRoadmapUpdateOne {
+func (_u *StrategicRoadmapUpdateOne) SetNillableEstimatedCost(v *decimal.Decimal) *StrategicRoadmapUpdateOne {
 	if v != nil {
 		_u.SetEstimatedCost(*v)
 	}
-	return _u
-}
-
-// AddEstimatedCost adds value to the "estimated_cost" field.
-func (_u *StrategicRoadmapUpdateOne) AddEstimatedCost(v float64) *StrategicRoadmapUpdateOne {
-	_u.mutation.AddEstimatedCost(v)
 	return _u
 }
 
@@ -565,6 +558,12 @@ func (_u *StrategicRoadmapUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *StrategicRoadmapUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *StrategicRoadmapUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *StrategicRoadmapUpdateOne) sqlSave(ctx context.Context) (_node *StrategicRoadmap, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -610,10 +609,7 @@ func (_u *StrategicRoadmapUpdateOne) sqlSave(ctx context.Context) (_node *Strate
 		_spec.SetField(strategicroadmap.FieldStatus, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.EstimatedCost(); ok {
-		_spec.SetField(strategicroadmap.FieldEstimatedCost, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedEstimatedCost(); ok {
-		_spec.AddField(strategicroadmap.FieldEstimatedCost, field.TypeFloat64, value)
+		_spec.SetField(strategicroadmap.FieldEstimatedCost, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.TargetDate(); ok {
 		_spec.SetField(strategicroadmap.FieldTargetDate, field.TypeTime, value)
@@ -659,6 +655,7 @@ func (_u *StrategicRoadmapUpdateOne) sqlSave(ctx context.Context) (_node *Strate
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &StrategicRoadmap{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

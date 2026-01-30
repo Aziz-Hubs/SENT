@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 // ID filters vertices based on their ID field.
@@ -56,7 +57,7 @@ func IDLTE(id int) predicate.JournalEntry {
 }
 
 // Amount applies equality check predicate on the "amount" field. It's identical to AmountEQ.
-func Amount(v float64) predicate.JournalEntry {
+func Amount(v decimal.Decimal) predicate.JournalEntry {
 	return predicate.JournalEntry(sql.FieldEQ(FieldAmount, v))
 }
 
@@ -76,42 +77,42 @@ func ApprovedByID(v int) predicate.JournalEntry {
 }
 
 // AmountEQ applies the EQ predicate on the "amount" field.
-func AmountEQ(v float64) predicate.JournalEntry {
+func AmountEQ(v decimal.Decimal) predicate.JournalEntry {
 	return predicate.JournalEntry(sql.FieldEQ(FieldAmount, v))
 }
 
 // AmountNEQ applies the NEQ predicate on the "amount" field.
-func AmountNEQ(v float64) predicate.JournalEntry {
+func AmountNEQ(v decimal.Decimal) predicate.JournalEntry {
 	return predicate.JournalEntry(sql.FieldNEQ(FieldAmount, v))
 }
 
 // AmountIn applies the In predicate on the "amount" field.
-func AmountIn(vs ...float64) predicate.JournalEntry {
+func AmountIn(vs ...decimal.Decimal) predicate.JournalEntry {
 	return predicate.JournalEntry(sql.FieldIn(FieldAmount, vs...))
 }
 
 // AmountNotIn applies the NotIn predicate on the "amount" field.
-func AmountNotIn(vs ...float64) predicate.JournalEntry {
+func AmountNotIn(vs ...decimal.Decimal) predicate.JournalEntry {
 	return predicate.JournalEntry(sql.FieldNotIn(FieldAmount, vs...))
 }
 
 // AmountGT applies the GT predicate on the "amount" field.
-func AmountGT(v float64) predicate.JournalEntry {
+func AmountGT(v decimal.Decimal) predicate.JournalEntry {
 	return predicate.JournalEntry(sql.FieldGT(FieldAmount, v))
 }
 
 // AmountGTE applies the GTE predicate on the "amount" field.
-func AmountGTE(v float64) predicate.JournalEntry {
+func AmountGTE(v decimal.Decimal) predicate.JournalEntry {
 	return predicate.JournalEntry(sql.FieldGTE(FieldAmount, v))
 }
 
 // AmountLT applies the LT predicate on the "amount" field.
-func AmountLT(v float64) predicate.JournalEntry {
+func AmountLT(v decimal.Decimal) predicate.JournalEntry {
 	return predicate.JournalEntry(sql.FieldLT(FieldAmount, v))
 }
 
 // AmountLTE applies the LTE predicate on the "amount" field.
-func AmountLTE(v float64) predicate.JournalEntry {
+func AmountLTE(v decimal.Decimal) predicate.JournalEntry {
 	return predicate.JournalEntry(sql.FieldLTE(FieldAmount, v))
 }
 

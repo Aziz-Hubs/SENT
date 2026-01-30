@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sent/ent/permission"
 	"sent/ent/predicate"
+	"sent/ent/tenant"
 	"sent/ent/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -18,8 +19,9 @@ import (
 // PermissionUpdate is the builder for updating Permission entities.
 type PermissionUpdate struct {
 	config
-	hooks    []Hook
-	mutation *PermissionMutation
+	hooks     []Hook
+	mutation  *PermissionMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the PermissionUpdate builder.
@@ -71,6 +73,17 @@ func (_u *PermissionUpdate) AddUsers(v ...*User) *PermissionUpdate {
 	return _u.AddUserIDs(ids...)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *PermissionUpdate) SetTenantID(id int) *PermissionUpdate {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *PermissionUpdate) SetTenant(v *Tenant) *PermissionUpdate {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the PermissionMutation object of the builder.
 func (_u *PermissionUpdate) Mutation() *PermissionMutation {
 	return _u.mutation
@@ -95,6 +108,12 @@ func (_u *PermissionUpdate) RemoveUsers(v ...*User) *PermissionUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *PermissionUpdate) ClearTenant() *PermissionUpdate {
+	_u.mutation.ClearTenant()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -124,7 +143,24 @@ func (_u *PermissionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *PermissionUpdate) check() error {
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Permission.tenant"`)
+	}
+	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *PermissionUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PermissionUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *PermissionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(permission.Table, permission.Columns, sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -184,6 +220,36 @@ func (_u *PermissionUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permission.TenantTable,
+			Columns: []string{permission.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permission.TenantTable,
+			Columns: []string{permission.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{permission.Label}
@@ -199,9 +265,10 @@ func (_u *PermissionUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 // PermissionUpdateOne is the builder for updating a single Permission entity.
 type PermissionUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *PermissionMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *PermissionMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetName sets the "name" field.
@@ -247,6 +314,17 @@ func (_u *PermissionUpdateOne) AddUsers(v ...*User) *PermissionUpdateOne {
 	return _u.AddUserIDs(ids...)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *PermissionUpdateOne) SetTenantID(id int) *PermissionUpdateOne {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *PermissionUpdateOne) SetTenant(v *Tenant) *PermissionUpdateOne {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the PermissionMutation object of the builder.
 func (_u *PermissionUpdateOne) Mutation() *PermissionMutation {
 	return _u.mutation
@@ -271,6 +349,12 @@ func (_u *PermissionUpdateOne) RemoveUsers(v ...*User) *PermissionUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *PermissionUpdateOne) ClearTenant() *PermissionUpdateOne {
+	_u.mutation.ClearTenant()
+	return _u
 }
 
 // Where appends a list predicates to the PermissionUpdate builder.
@@ -313,7 +397,24 @@ func (_u *PermissionUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *PermissionUpdateOne) check() error {
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Permission.tenant"`)
+	}
+	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *PermissionUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PermissionUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *PermissionUpdateOne) sqlSave(ctx context.Context) (_node *Permission, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(permission.Table, permission.Columns, sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -390,6 +491,36 @@ func (_u *PermissionUpdateOne) sqlSave(ctx context.Context) (_node *Permission, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permission.TenantTable,
+			Columns: []string{permission.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permission.TenantTable,
+			Columns: []string{permission.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &Permission{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

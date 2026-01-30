@@ -10,6 +10,7 @@ import (
 	"sent/ent/networkdevice"
 	"sent/ent/networkport"
 	"sent/ent/predicate"
+	"sent/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -20,8 +21,9 @@ import (
 // NetworkDeviceUpdate is the builder for updating NetworkDevice entities.
 type NetworkDeviceUpdate struct {
 	config
-	hooks    []Hook
-	mutation *NetworkDeviceMutation
+	hooks     []Hook
+	mutation  *NetworkDeviceMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the NetworkDeviceUpdate builder.
@@ -196,6 +198,25 @@ func (_u *NetworkDeviceUpdate) AddBackups(v ...*NetworkBackup) *NetworkDeviceUpd
 	return _u.AddBackupIDs(ids...)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *NetworkDeviceUpdate) SetTenantID(id int) *NetworkDeviceUpdate {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetNillableTenantID sets the "tenant" edge to the Tenant entity by ID if the given value is not nil.
+func (_u *NetworkDeviceUpdate) SetNillableTenantID(id *int) *NetworkDeviceUpdate {
+	if id != nil {
+		_u = _u.SetTenantID(*id)
+	}
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *NetworkDeviceUpdate) SetTenant(v *Tenant) *NetworkDeviceUpdate {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the NetworkDeviceMutation object of the builder.
 func (_u *NetworkDeviceUpdate) Mutation() *NetworkDeviceMutation {
 	return _u.mutation
@@ -243,6 +264,12 @@ func (_u *NetworkDeviceUpdate) RemoveBackups(v ...*NetworkBackup) *NetworkDevice
 	return _u.RemoveBackupIDs(ids...)
 }
 
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *NetworkDeviceUpdate) ClearTenant() *NetworkDeviceUpdate {
+	_u.mutation.ClearTenant()
+	return _u
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *NetworkDeviceUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
@@ -287,6 +314,12 @@ func (_u *NetworkDeviceUpdate) check() error {
 		}
 	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *NetworkDeviceUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *NetworkDeviceUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *NetworkDeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
@@ -427,6 +460,36 @@ func (_u *NetworkDeviceUpdate) sqlSave(ctx context.Context) (_node int, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networkdevice.TenantTable,
+			Columns: []string{networkdevice.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networkdevice.TenantTable,
+			Columns: []string{networkdevice.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{networkdevice.Label}
@@ -442,9 +505,10 @@ func (_u *NetworkDeviceUpdate) sqlSave(ctx context.Context) (_node int, err erro
 // NetworkDeviceUpdateOne is the builder for updating a single NetworkDevice entity.
 type NetworkDeviceUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *NetworkDeviceMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *NetworkDeviceMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetName sets the "name" field.
@@ -613,6 +677,25 @@ func (_u *NetworkDeviceUpdateOne) AddBackups(v ...*NetworkBackup) *NetworkDevice
 	return _u.AddBackupIDs(ids...)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *NetworkDeviceUpdateOne) SetTenantID(id int) *NetworkDeviceUpdateOne {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetNillableTenantID sets the "tenant" edge to the Tenant entity by ID if the given value is not nil.
+func (_u *NetworkDeviceUpdateOne) SetNillableTenantID(id *int) *NetworkDeviceUpdateOne {
+	if id != nil {
+		_u = _u.SetTenantID(*id)
+	}
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *NetworkDeviceUpdateOne) SetTenant(v *Tenant) *NetworkDeviceUpdateOne {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the NetworkDeviceMutation object of the builder.
 func (_u *NetworkDeviceUpdateOne) Mutation() *NetworkDeviceMutation {
 	return _u.mutation
@@ -658,6 +741,12 @@ func (_u *NetworkDeviceUpdateOne) RemoveBackups(v ...*NetworkBackup) *NetworkDev
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveBackupIDs(ids...)
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *NetworkDeviceUpdateOne) ClearTenant() *NetworkDeviceUpdateOne {
+	_u.mutation.ClearTenant()
+	return _u
 }
 
 // Where appends a list predicates to the NetworkDeviceUpdate builder.
@@ -717,6 +806,12 @@ func (_u *NetworkDeviceUpdateOne) check() error {
 		}
 	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *NetworkDeviceUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *NetworkDeviceUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *NetworkDeviceUpdateOne) sqlSave(ctx context.Context) (_node *NetworkDevice, err error) {
@@ -874,6 +969,36 @@ func (_u *NetworkDeviceUpdateOne) sqlSave(ctx context.Context) (_node *NetworkDe
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networkdevice.TenantTable,
+			Columns: []string{networkdevice.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networkdevice.TenantTable,
+			Columns: []string{networkdevice.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &NetworkDevice{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

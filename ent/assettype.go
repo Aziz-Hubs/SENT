@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"sent/ent/assettype"
+	"sent/ent/tenant"
 	"strings"
 
 	"entgo.io/ent"
@@ -22,17 +23,20 @@ type AssetType struct {
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AssetTypeQuery when eager-loading is set.
-	Edges        AssetTypeEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges              AssetTypeEdges `json:"edges"`
+	tenant_asset_types *int
+	selectValues       sql.SelectValues
 }
 
 // AssetTypeEdges holds the relations/edges for other nodes in the graph.
 type AssetTypeEdges struct {
 	// Assets holds the value of the assets edge.
 	Assets []*Asset `json:"assets,omitempty"`
+	// Tenant holds the value of the tenant edge.
+	Tenant *Tenant `json:"tenant,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // AssetsOrErr returns the Assets value or an error if the edge
@@ -44,6 +48,17 @@ func (e AssetTypeEdges) AssetsOrErr() ([]*Asset, error) {
 	return nil, &NotLoadedError{edge: "assets"}
 }
 
+// TenantOrErr returns the Tenant value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e AssetTypeEdges) TenantOrErr() (*Tenant, error) {
+	if e.Tenant != nil {
+		return e.Tenant, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: tenant.Label}
+	}
+	return nil, &NotLoadedError{edge: "tenant"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*AssetType) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -53,6 +68,8 @@ func (*AssetType) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case assettype.FieldName, assettype.FieldDescription:
 			values[i] = new(sql.NullString)
+		case assettype.ForeignKeys[0]: // tenant_asset_types
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -86,6 +103,13 @@ func (_m *AssetType) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Description = value.String
 			}
+		case assettype.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field tenant_asset_types", value)
+			} else if value.Valid {
+				_m.tenant_asset_types = new(int)
+				*_m.tenant_asset_types = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -102,6 +126,11 @@ func (_m *AssetType) Value(name string) (ent.Value, error) {
 // QueryAssets queries the "assets" edge of the AssetType entity.
 func (_m *AssetType) QueryAssets() *AssetQuery {
 	return NewAssetTypeClient(_m.config).QueryAssets(_m)
+}
+
+// QueryTenant queries the "tenant" edge of the AssetType entity.
+func (_m *AssetType) QueryTenant() *TenantQuery {
+	return NewAssetTypeClient(_m.config).QueryTenant(_m)
 }
 
 // Update returns a builder for updating this AssetType.

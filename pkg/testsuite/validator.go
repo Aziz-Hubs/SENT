@@ -19,8 +19,14 @@ import (
 	"sent/pkg/people"
 
 	"strings"
-
 )
+
+var AdversarialPayloads = []string{
+	"<script>",
+	"' OR 1=1",
+	"admin",
+	"eval(",
+}
 
 
 
@@ -35,9 +41,11 @@ func RunValidation(db *ent.Client) {
 
 	// 1. DATASET_READY
 
-	seeder := NewSeeder(db)
+	// 1. DATASET_READY
 
-	err := seeder.Seed(2000)
+	seeder := NewComprehensiveSeeder(db)
+
+	err := seeder.SeedAll()
 
 	if err != nil {
 

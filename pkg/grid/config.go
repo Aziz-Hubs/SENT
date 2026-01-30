@@ -71,7 +71,7 @@ func (m *ConfigManager) BackupDevice(ctx context.Context, devID int) (string, er
 	
 	tenantID := 1 // Default to 1 for now
 
-	err = m.vault.SaveFile(vaultPath, b64Config, tenantID)
+	err = m.vault.SaveFileAsTenant(vaultPath, b64Config, tenantID)
 	if err != nil {
 		return "", fmt.Errorf("vault storage failed: %w", err)
 	}

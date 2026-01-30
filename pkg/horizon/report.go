@@ -97,7 +97,7 @@ func (g *ReportGenerator) GenerateQBR(ctx context.Context, tenantID int, comment
 	fileName := fmt.Sprintf("reports/QBR_%s_%d.pdf", t.Name, time.Now().Unix())
 	pdfBase64 := base64.StdEncoding.EncodeToString(document.GetBytes())
 	
-	if err := g.vault.SaveFile(fileName, pdfBase64, tenantID); err != nil {
+	if err := g.vault.SaveFile(fileName, pdfBase64); err != nil {
 		return "", err
 	}
 

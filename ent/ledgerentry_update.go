@@ -16,13 +16,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // LedgerEntryUpdate is the builder for updating LedgerEntry entities.
 type LedgerEntryUpdate struct {
 	config
-	hooks    []Hook
-	mutation *LedgerEntryMutation
+	hooks     []Hook
+	mutation  *LedgerEntryMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the LedgerEntryUpdate builder.
@@ -32,23 +34,16 @@ func (_u *LedgerEntryUpdate) Where(ps ...predicate.LedgerEntry) *LedgerEntryUpda
 }
 
 // SetAmount sets the "amount" field.
-func (_u *LedgerEntryUpdate) SetAmount(v float64) *LedgerEntryUpdate {
-	_u.mutation.ResetAmount()
+func (_u *LedgerEntryUpdate) SetAmount(v decimal.Decimal) *LedgerEntryUpdate {
 	_u.mutation.SetAmount(v)
 	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (_u *LedgerEntryUpdate) SetNillableAmount(v *float64) *LedgerEntryUpdate {
+func (_u *LedgerEntryUpdate) SetNillableAmount(v *decimal.Decimal) *LedgerEntryUpdate {
 	if v != nil {
 		_u.SetAmount(*v)
 	}
-	return _u
-}
-
-// AddAmount adds value to the "amount" field.
-func (_u *LedgerEntryUpdate) AddAmount(v float64) *LedgerEntryUpdate {
-	_u.mutation.AddAmount(v)
 	return _u
 }
 
@@ -182,6 +177,12 @@ func (_u *LedgerEntryUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *LedgerEntryUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LedgerEntryUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *LedgerEntryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -195,10 +196,7 @@ func (_u *LedgerEntryUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		}
 	}
 	if value, ok := _u.mutation.Amount(); ok {
-		_spec.SetField(ledgerentry.FieldAmount, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedAmount(); ok {
-		_spec.AddField(ledgerentry.FieldAmount, field.TypeFloat64, value)
+		_spec.SetField(ledgerentry.FieldAmount, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Direction(); ok {
 		_spec.SetField(ledgerentry.FieldDirection, field.TypeEnum, value)
@@ -293,6 +291,7 @@ func (_u *LedgerEntryUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{ledgerentry.Label}
@@ -308,29 +307,23 @@ func (_u *LedgerEntryUpdate) sqlSave(ctx context.Context) (_node int, err error)
 // LedgerEntryUpdateOne is the builder for updating a single LedgerEntry entity.
 type LedgerEntryUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *LedgerEntryMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *LedgerEntryMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetAmount sets the "amount" field.
-func (_u *LedgerEntryUpdateOne) SetAmount(v float64) *LedgerEntryUpdateOne {
-	_u.mutation.ResetAmount()
+func (_u *LedgerEntryUpdateOne) SetAmount(v decimal.Decimal) *LedgerEntryUpdateOne {
 	_u.mutation.SetAmount(v)
 	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (_u *LedgerEntryUpdateOne) SetNillableAmount(v *float64) *LedgerEntryUpdateOne {
+func (_u *LedgerEntryUpdateOne) SetNillableAmount(v *decimal.Decimal) *LedgerEntryUpdateOne {
 	if v != nil {
 		_u.SetAmount(*v)
 	}
-	return _u
-}
-
-// AddAmount adds value to the "amount" field.
-func (_u *LedgerEntryUpdateOne) AddAmount(v float64) *LedgerEntryUpdateOne {
-	_u.mutation.AddAmount(v)
 	return _u
 }
 
@@ -477,6 +470,12 @@ func (_u *LedgerEntryUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *LedgerEntryUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LedgerEntryUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *LedgerEntryUpdateOne) sqlSave(ctx context.Context) (_node *LedgerEntry, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -507,10 +506,7 @@ func (_u *LedgerEntryUpdateOne) sqlSave(ctx context.Context) (_node *LedgerEntry
 		}
 	}
 	if value, ok := _u.mutation.Amount(); ok {
-		_spec.SetField(ledgerentry.FieldAmount, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedAmount(); ok {
-		_spec.AddField(ledgerentry.FieldAmount, field.TypeFloat64, value)
+		_spec.SetField(ledgerentry.FieldAmount, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Direction(); ok {
 		_spec.SetField(ledgerentry.FieldDirection, field.TypeEnum, value)
@@ -605,6 +601,7 @@ func (_u *LedgerEntryUpdateOne) sqlSave(ctx context.Context) (_node *LedgerEntry
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &LedgerEntry{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

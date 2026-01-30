@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sent/ent/employee"
 	"sent/ent/successionmap"
+	"sent/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -77,6 +78,17 @@ func (_c *SuccessionMapCreate) SetBackupCandidate(v *Employee) *SuccessionMapCre
 	return _c.SetBackupCandidateID(v.ID)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_c *SuccessionMapCreate) SetTenantID(id int) *SuccessionMapCreate {
+	_c.mutation.SetTenantID(id)
+	return _c
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_c *SuccessionMapCreate) SetTenant(v *Tenant) *SuccessionMapCreate {
+	return _c.SetTenantID(v.ID)
+}
+
 // Mutation returns the SuccessionMapMutation object of the builder.
 func (_c *SuccessionMapCreate) Mutation() *SuccessionMapMutation {
 	return _c.mutation
@@ -136,6 +148,9 @@ func (_c *SuccessionMapCreate) check() error {
 	}
 	if len(_c.mutation.BackupCandidateIDs()) == 0 {
 		return &ValidationError{Name: "backup_candidate", err: errors.New(`ent: missing required edge "SuccessionMap.backup_candidate"`)}
+	}
+	if len(_c.mutation.TenantIDs()) == 0 {
+		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "SuccessionMap.tenant"`)}
 	}
 	return nil
 }
@@ -207,6 +222,23 @@ func (_c *SuccessionMapCreate) createSpec() (*SuccessionMap, *sqlgraph.CreateSpe
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.backup_candidate_id = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   successionmap.TenantTable,
+			Columns: []string{successionmap.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.tenant_succession_maps = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

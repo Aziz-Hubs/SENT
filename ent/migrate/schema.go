@@ -13,9 +13,9 @@ var (
 	AccountsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "number", Type: field.TypeString, Unique: true},
+		{Name: "number", Type: field.TypeString},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"asset", "liability", "equity", "revenue", "expense"}},
-		{Name: "balance", Type: field.TypeFloat64, Default: 0},
+		{Name: "balance", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
 		{Name: "is_intercompany", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "tenant_accounts", Type: field.TypeInt},
@@ -31,6 +31,23 @@ var (
 				Columns:    []*schema.Column{AccountsColumns[7]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "account_number_tenant_accounts",
+				Unique:  true,
+				Columns: []*schema.Column{AccountsColumns[2], AccountsColumns[7]},
+			},
+			{
+				Name:    "account_type",
+				Unique:  false,
+				Columns: []*schema.Column{AccountsColumns[3]},
+			},
+			{
+				Name:    "account_name",
+				Unique:  false,
+				Columns: []*schema.Column{AccountsColumns[1]},
 			},
 		},
 	}
@@ -79,8 +96,10 @@ var (
 		{Name: "manufacturer", Type: field.TypeString, Nullable: true},
 		{Name: "vendor_support_phone", Type: field.TypeString, Nullable: true},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"STAGED_FOR_DEPLOYMENT", "ACTIVE", "IN_REPAIR", "RETIRED", "LOST", "DISPOSED"}, Default: "STAGED_FOR_DEPLOYMENT"},
-		{Name: "metadata", Type: field.TypeJSON},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "last_certified_at", Type: field.TypeTime, Nullable: true},
+		{Name: "purchase_date", Type: field.TypeTime, Nullable: true},
+		{Name: "warranty_expiry", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "asset_hosted_assets", Type: field.TypeInt, Nullable: true},
@@ -97,31 +116,31 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "assets_assets_hosted_assets",
-				Columns:    []*schema.Column{AssetsColumns[11]},
+				Columns:    []*schema.Column{AssetsColumns[13]},
 				RefColumns: []*schema.Column{AssetsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "assets_products_product",
-				Columns:    []*schema.Column{AssetsColumns[12]},
+				Columns:    []*schema.Column{AssetsColumns[14]},
 				RefColumns: []*schema.Column{ProductsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "assets_asset_types_assets",
-				Columns:    []*schema.Column{AssetsColumns[13]},
+				Columns:    []*schema.Column{AssetsColumns[15]},
 				RefColumns: []*schema.Column{AssetTypesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "assets_tenants_assets",
-				Columns:    []*schema.Column{AssetsColumns[14]},
+				Columns:    []*schema.Column{AssetsColumns[16]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "assets_users_owned_assets",
-				Columns:    []*schema.Column{AssetsColumns[15]},
+				Columns:    []*schema.Column{AssetsColumns[17]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -130,14 +149,30 @@ var (
 	// AssetTypesColumns holds the columns for the "asset_types" table.
 	AssetTypesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "name", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "tenant_asset_types", Type: field.TypeInt},
 	}
 	// AssetTypesTable holds the schema information for the "asset_types" table.
 	AssetTypesTable = &schema.Table{
 		Name:       "asset_types",
 		Columns:    AssetTypesColumns,
 		PrimaryKey: []*schema.Column{AssetTypesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "asset_types_tenants_asset_types",
+				Columns:    []*schema.Column{AssetTypesColumns[3]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "assettype_name_tenant_asset_types",
+				Unique:  true,
+				Columns: []*schema.Column{AssetTypesColumns[1], AssetTypesColumns[3]},
+			},
+		},
 	}
 	// AuditLogsColumns holds the columns for the "audit_logs" table.
 	AuditLogsColumns = []*schema.Column{
@@ -146,7 +181,7 @@ var (
 		{Name: "action", Type: field.TypeString},
 		{Name: "actor_id", Type: field.TypeString},
 		{Name: "remote_ip", Type: field.TypeString, Nullable: true},
-		{Name: "payload", Type: field.TypeJSON, Nullable: true},
+		{Name: "payload", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "timestamp", Type: field.TypeTime},
 		{Name: "tenant_audit_logs", Type: field.TypeInt},
 	}
@@ -163,14 +198,36 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "auditlog_timestamp",
+				Unique:  false,
+				Columns: []*schema.Column{AuditLogsColumns[6]},
+			},
+			{
+				Name:    "auditlog_action",
+				Unique:  false,
+				Columns: []*schema.Column{AuditLogsColumns[2]},
+			},
+			{
+				Name:    "auditlog_actor_id",
+				Unique:  false,
+				Columns: []*schema.Column{AuditLogsColumns[3]},
+			},
+			{
+				Name:    "auditlog_tenant_audit_logs",
+				Unique:  false,
+				Columns: []*schema.Column{AuditLogsColumns[7]},
+			},
+		},
 	}
 	// BudgetForecastsColumns holds the columns for the "budget_forecasts" table.
 	BudgetForecastsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "year", Type: field.TypeInt},
 		{Name: "month", Type: field.TypeInt},
-		{Name: "projected_amount", Type: field.TypeFloat64},
-		{Name: "actual_spent", Type: field.TypeFloat64, Default: 0},
+		{Name: "projected_amount", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "actual_spent", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
 		{Name: "forecast_data", Type: field.TypeJSON, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "tenant_budget_forecasts", Type: field.TypeInt},
@@ -254,7 +311,7 @@ var (
 	// CompensationAgreementsColumns holds the columns for the "compensation_agreements" table.
 	CompensationAgreementsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "base_salary", Type: field.TypeFloat64},
+		{Name: "base_salary", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
 		{Name: "currency", Type: field.TypeString, Default: "USD"},
 		{Name: "effective_date", Type: field.TypeTime},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"ACTIVE", "ARCHIVED"}, Default: "ACTIVE"},
@@ -316,6 +373,7 @@ var (
 		{Name: "username", Type: field.TypeString, Nullable: true},
 		{Name: "password_encrypted", Type: field.TypeBytes},
 		{Name: "last_revealed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "asset_credentials", Type: field.TypeInt, Nullable: true},
 		{Name: "tenant_credentials", Type: field.TypeInt},
@@ -328,13 +386,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "credentials_assets_credentials",
-				Columns:    []*schema.Column{CredentialsColumns[6]},
+				Columns:    []*schema.Column{CredentialsColumns[7]},
 				RefColumns: []*schema.Column{AssetsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "credentials_tenants_credentials",
-				Columns:    []*schema.Column{CredentialsColumns[7]},
+				Columns:    []*schema.Column{CredentialsColumns[8]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -343,11 +401,12 @@ var (
 	// DepartmentsColumns holds the columns for the "departments" table.
 	DepartmentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "code", Type: field.TypeString, Unique: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "code", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Nullable: true},
 		{Name: "department_children", Type: field.TypeInt, Nullable: true},
 		{Name: "department_head", Type: field.TypeInt, Nullable: true},
+		{Name: "tenant_departments", Type: field.TypeInt},
 	}
 	// DepartmentsTable holds the schema information for the "departments" table.
 	DepartmentsTable = &schema.Table{
@@ -367,6 +426,24 @@ var (
 				RefColumns: []*schema.Column{EmployeesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
+			{
+				Symbol:     "departments_tenants_departments",
+				Columns:    []*schema.Column{DepartmentsColumns[6]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "department_name_tenant_departments",
+				Unique:  true,
+				Columns: []*schema.Column{DepartmentsColumns[1], DepartmentsColumns[6]},
+			},
+			{
+				Name:    "department_code_tenant_departments",
+				Unique:  true,
+				Columns: []*schema.Column{DepartmentsColumns[2], DepartmentsColumns[6]},
+			},
 		},
 	}
 	// DetectionEventsColumns holds the columns for the "detection_events" table.
@@ -379,6 +456,7 @@ var (
 		{Name: "thumbnail_path", Type: field.TypeString, Nullable: true},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "camera_detections", Type: field.TypeInt},
+		{Name: "tenant_detection_events", Type: field.TypeInt},
 	}
 	// DetectionEventsTable holds the schema information for the "detection_events" table.
 	DetectionEventsTable = &schema.Table{
@@ -392,6 +470,12 @@ var (
 				RefColumns: []*schema.Column{CamerasColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
+			{
+				Symbol:     "detection_events_tenants_detection_events",
+				Columns:    []*schema.Column{DetectionEventsColumns[8]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
 		},
 	}
 	// DiscoveryEntriesColumns holds the columns for the "discovery_entries" table.
@@ -399,6 +483,9 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "hardware_id", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString},
+		{Name: "hostname", Type: field.TypeString, Nullable: true},
+		{Name: "ip", Type: field.TypeString, Nullable: true},
+		{Name: "mac", Type: field.TypeString, Nullable: true},
 		{Name: "type", Type: field.TypeString},
 		{Name: "metadata", Type: field.TypeJSON},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "approved", "rejected"}, Default: "pending"},
@@ -413,7 +500,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "discovery_entries_tenants_discovery_entries",
-				Columns:    []*schema.Column{DiscoveryEntriesColumns[7]},
+				Columns:    []*schema.Column{DiscoveryEntriesColumns[10]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -423,10 +510,10 @@ var (
 	EmployeesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "zitadel_id", Type: field.TypeString, Unique: true},
-		{Name: "employee_id", Type: field.TypeString, Unique: true},
+		{Name: "employee_id", Type: field.TypeString},
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
-		{Name: "email", Type: field.TypeString, Unique: true},
+		{Name: "email", Type: field.TypeString},
 		{Name: "phone", Type: field.TypeString, Nullable: true},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"STAGED", "ACTIVE", "TERMINATED"}, Default: "STAGED"},
 		{Name: "salary_encrypted", Type: field.TypeString},
@@ -470,6 +557,82 @@ var (
 				Columns:    []*schema.Column{EmployeesColumns[18]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "employee_email_tenant_employees",
+				Unique:  true,
+				Columns: []*schema.Column{EmployeesColumns[5], EmployeesColumns[18]},
+			},
+			{
+				Name:    "employee_employee_id_tenant_employees",
+				Unique:  true,
+				Columns: []*schema.Column{EmployeesColumns[2], EmployeesColumns[18]},
+			},
+			{
+				Name:    "employee_status",
+				Unique:  false,
+				Columns: []*schema.Column{EmployeesColumns[7]},
+			},
+			{
+				Name:    "employee_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{EmployeesColumns[13]},
+			},
+		},
+	}
+	// GoalsColumns holds the columns for the "goals" table.
+	GoalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "category", Type: field.TypeEnum, Enums: []string{"PERFORMANCE", "DEVELOPMENT", "PROJECT", "BEHAVIORAL"}, Default: "PERFORMANCE"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"NOT_STARTED", "IN_PROGRESS", "COMPLETED", "CANCELLED"}, Default: "NOT_STARTED"},
+		{Name: "progress", Type: field.TypeInt, Default: 0},
+		{Name: "target_date", Type: field.TypeTime, Nullable: true},
+		{Name: "key_results", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "manager_notes", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "employee_goals", Type: field.TypeInt},
+		{Name: "tenant_goals", Type: field.TypeInt},
+	}
+	// GoalsTable holds the schema information for the "goals" table.
+	GoalsTable = &schema.Table{
+		Name:       "goals",
+		Columns:    GoalsColumns,
+		PrimaryKey: []*schema.Column{GoalsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "goals_employees_goals",
+				Columns:    []*schema.Column{GoalsColumns[12]},
+				RefColumns: []*schema.Column{EmployeesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "goals_tenants_goals",
+				Columns:    []*schema.Column{GoalsColumns[13]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "goal_status",
+				Unique:  false,
+				Columns: []*schema.Column{GoalsColumns[4]},
+			},
+			{
+				Name:    "goal_target_date",
+				Unique:  false,
+				Columns: []*schema.Column{GoalsColumns[6]},
+			},
+			{
+				Name:    "goal_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{GoalsColumns[10]},
 			},
 		},
 	}
@@ -527,7 +690,7 @@ var (
 	// InventoryReservationsColumns holds the columns for the "inventory_reservations" table.
 	InventoryReservationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "quantity", Type: field.TypeFloat64},
+		{Name: "quantity", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(15,4)"}},
 		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "released", "completed"}, Default: "active"},
 		{Name: "created_at", Type: field.TypeTime},
@@ -554,10 +717,74 @@ var (
 			},
 		},
 	}
+	// JobsColumns holds the columns for the "jobs" table.
+	JobsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "cron_schedule", Type: field.TypeString, Nullable: true},
+		{Name: "next_run", Type: field.TypeTime, Nullable: true},
+		{Name: "last_run", Type: field.TypeTime, Nullable: true},
+		{Name: "targets", Type: field.TypeJSON},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "script_jobs", Type: field.TypeInt},
+		{Name: "tenant_jobs", Type: field.TypeInt},
+	}
+	// JobsTable holds the schema information for the "jobs" table.
+	JobsTable = &schema.Table{
+		Name:       "jobs",
+		Columns:    JobsColumns,
+		PrimaryKey: []*schema.Column{JobsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "jobs_scripts_jobs",
+				Columns:    []*schema.Column{JobsColumns[8]},
+				RefColumns: []*schema.Column{ScriptsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "jobs_tenants_jobs",
+				Columns:    []*schema.Column{JobsColumns[9]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// JobExecutionsColumns holds the columns for the "job_executions" table.
+	JobExecutionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "running", "success", "failed"}, Default: "pending"},
+		{Name: "output", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "started_at", Type: field.TypeTime, Nullable: true},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "agent_job_executions", Type: field.TypeInt},
+		{Name: "job_executions", Type: field.TypeInt},
+	}
+	// JobExecutionsTable holds the schema information for the "job_executions" table.
+	JobExecutionsTable = &schema.Table{
+		Name:       "job_executions",
+		Columns:    JobExecutionsColumns,
+		PrimaryKey: []*schema.Column{JobExecutionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "job_executions_agents_job_executions",
+				Columns:    []*schema.Column{JobExecutionsColumns[6]},
+				RefColumns: []*schema.Column{AgentsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "job_executions_jobs_executions",
+				Columns:    []*schema.Column{JobExecutionsColumns[7]},
+				RefColumns: []*schema.Column{JobsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// JournalEntriesColumns holds the columns for the "journal_entries" table.
 	JournalEntriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "amount", Type: field.TypeFloat64},
+		{Name: "amount", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
 		{Name: "direction", Type: field.TypeEnum, Enums: []string{"debit", "credit"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "description", Type: field.TypeString, Nullable: true},
@@ -602,7 +829,7 @@ var (
 	// LedgerEntriesColumns holds the columns for the "ledger_entries" table.
 	LedgerEntriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "amount", Type: field.TypeFloat64},
+		{Name: "amount", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
 		{Name: "direction", Type: field.TypeEnum, Enums: []string{"debit", "credit"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "account_entries", Type: field.TypeInt},
@@ -634,6 +861,28 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ledgerentry_transaction_ledger_entries",
+				Unique:  false,
+				Columns: []*schema.Column{LedgerEntriesColumns[6]},
+			},
+			{
+				Name:    "ledgerentry_account_entries",
+				Unique:  false,
+				Columns: []*schema.Column{LedgerEntriesColumns[4]},
+			},
+			{
+				Name:    "ledgerentry_tenant_ledger_entries",
+				Unique:  false,
+				Columns: []*schema.Column{LedgerEntriesColumns[5]},
+			},
+			{
+				Name:    "ledgerentry_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LedgerEntriesColumns[3]},
+			},
+		},
 	}
 	// NetworkBackupsColumns holds the columns for the "network_backups" table.
 	NetworkBackupsColumns = []*schema.Column{
@@ -642,6 +891,7 @@ var (
 		{Name: "vault_path", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "network_device_backups", Type: field.TypeInt},
+		{Name: "tenant_network_backups", Type: field.TypeInt, Nullable: true},
 	}
 	// NetworkBackupsTable holds the schema information for the "network_backups" table.
 	NetworkBackupsTable = &schema.Table{
@@ -654,6 +904,12 @@ var (
 				Columns:    []*schema.Column{NetworkBackupsColumns[4]},
 				RefColumns: []*schema.Column{NetworkDevicesColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "network_backups_tenants_network_backups",
+				Columns:    []*schema.Column{NetworkBackupsColumns[5]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.SetNull,
 			},
 		},
 	}
@@ -669,12 +925,21 @@ var (
 		{Name: "last_polled", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "tenant_network_devices", Type: field.TypeInt, Nullable: true},
 	}
 	// NetworkDevicesTable holds the schema information for the "network_devices" table.
 	NetworkDevicesTable = &schema.Table{
 		Name:       "network_devices",
 		Columns:    NetworkDevicesColumns,
 		PrimaryKey: []*schema.Column{NetworkDevicesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "network_devices_tenants_network_devices",
+				Columns:    []*schema.Column{NetworkDevicesColumns[10]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// NetworkLinksColumns holds the columns for the "network_links" table.
 	NetworkLinksColumns = []*schema.Column{
@@ -683,6 +948,7 @@ var (
 		{Name: "last_seen", Type: field.TypeTime},
 		{Name: "network_link_target_port", Type: field.TypeInt},
 		{Name: "source_port_id", Type: field.TypeInt},
+		{Name: "tenant_network_links", Type: field.TypeInt},
 	}
 	// NetworkLinksTable holds the schema information for the "network_links" table.
 	NetworkLinksTable = &schema.Table{
@@ -702,6 +968,12 @@ var (
 				RefColumns: []*schema.Column{NetworkPortsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
+			{
+				Symbol:     "network_links_tenants_network_links",
+				Columns:    []*schema.Column{NetworkLinksColumns[5]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
 		},
 	}
 	// NetworkPortsColumns holds the columns for the "network_ports" table.
@@ -716,6 +988,7 @@ var (
 		{Name: "poe_wattage", Type: field.TypeFloat64, Default: 0},
 		{Name: "description", Type: field.TypeString, Nullable: true},
 		{Name: "network_device_ports", Type: field.TypeInt},
+		{Name: "tenant_network_ports", Type: field.TypeInt},
 	}
 	// NetworkPortsTable holds the schema information for the "network_ports" table.
 	NetworkPortsTable = &schema.Table{
@@ -727,6 +1000,12 @@ var (
 				Symbol:     "network_ports_network_devices_ports",
 				Columns:    []*schema.Column{NetworkPortsColumns[9]},
 				RefColumns: []*schema.Column{NetworkDevicesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "network_ports_tenants_network_ports",
+				Columns:    []*schema.Column{NetworkPortsColumns[10]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -741,12 +1020,21 @@ var (
 		{Name: "ticket_id", Type: field.TypeString, Nullable: true},
 		{Name: "timestamp", Type: field.TypeTime},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "tenant_nexus_audits", Type: field.TypeInt},
 	}
 	// NexusAuditsTable holds the schema information for the "nexus_audits" table.
 	NexusAuditsTable = &schema.Table{
 		Name:       "nexus_audits",
 		Columns:    NexusAuditsColumns,
 		PrimaryKey: []*schema.Column{NexusAuditsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "nexus_audits_tenants_nexus_audits",
+				Columns:    []*schema.Column{NexusAuditsColumns[8]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// OneTimeLinksColumns holds the columns for the "one_time_links" table.
 	OneTimeLinksColumns = []*schema.Column{
@@ -792,27 +1080,110 @@ var (
 			},
 		},
 	}
+	// PerformanceReviewsColumns holds the columns for the "performance_reviews" table.
+	PerformanceReviewsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "overall_rating", Type: field.TypeEnum, Nullable: true, Enums: []string{"EXCEPTIONAL", "EXCEEDS", "MEETS", "DEVELOPING", "NEEDS_IMPROVEMENT"}},
+		{Name: "strengths", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "areas_for_improvement", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "manager_comments", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "goals_assessment", Type: field.TypeJSON, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "IN_PROGRESS", "SUBMITTED", "ACKNOWLEDGED"}, Default: "PENDING"},
+		{Name: "submitted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "acknowledged_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "employee_performance_reviews", Type: field.TypeInt},
+		{Name: "employee_conducted_reviews", Type: field.TypeInt, Nullable: true},
+		{Name: "review_cycle_reviews", Type: field.TypeInt},
+		{Name: "tenant_performance_reviews", Type: field.TypeInt},
+	}
+	// PerformanceReviewsTable holds the schema information for the "performance_reviews" table.
+	PerformanceReviewsTable = &schema.Table{
+		Name:       "performance_reviews",
+		Columns:    PerformanceReviewsColumns,
+		PrimaryKey: []*schema.Column{PerformanceReviewsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "performance_reviews_employees_performance_reviews",
+				Columns:    []*schema.Column{PerformanceReviewsColumns[11]},
+				RefColumns: []*schema.Column{EmployeesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "performance_reviews_employees_conducted_reviews",
+				Columns:    []*schema.Column{PerformanceReviewsColumns[12]},
+				RefColumns: []*schema.Column{EmployeesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "performance_reviews_review_cycles_reviews",
+				Columns:    []*schema.Column{PerformanceReviewsColumns[13]},
+				RefColumns: []*schema.Column{ReviewCyclesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "performance_reviews_tenants_performance_reviews",
+				Columns:    []*schema.Column{PerformanceReviewsColumns[14]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "performancereview_status",
+				Unique:  false,
+				Columns: []*schema.Column{PerformanceReviewsColumns[6]},
+			},
+			{
+				Name:    "performancereview_employee_performance_reviews_review_cycle_reviews",
+				Unique:  true,
+				Columns: []*schema.Column{PerformanceReviewsColumns[11], PerformanceReviewsColumns[13]},
+			},
+		},
+	}
 	// PermissionsColumns holds the columns for the "permissions" table.
 	PermissionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "code", Type: field.TypeString, Unique: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "code", Type: field.TypeString},
+		{Name: "tenant_permissions", Type: field.TypeInt},
 	}
 	// PermissionsTable holds the schema information for the "permissions" table.
 	PermissionsTable = &schema.Table{
 		Name:       "permissions",
 		Columns:    PermissionsColumns,
 		PrimaryKey: []*schema.Column{PermissionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "permissions_tenants_permissions",
+				Columns:    []*schema.Column{PermissionsColumns[3]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "permission_name_tenant_permissions",
+				Unique:  true,
+				Columns: []*schema.Column{PermissionsColumns[1], PermissionsColumns[3]},
+			},
+			{
+				Name:    "permission_code_tenant_permissions",
+				Unique:  true,
+				Columns: []*schema.Column{PermissionsColumns[2], PermissionsColumns[3]},
+			},
+		},
 	}
 	// ProductsColumns holds the columns for the "products" table.
 	ProductsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "sku", Type: field.TypeString, Unique: true},
+		{Name: "sku", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Nullable: true},
-		{Name: "unit_cost", Type: field.TypeFloat64, Default: 0},
-		{Name: "quantity", Type: field.TypeFloat64, Default: 0},
-		{Name: "attributes", Type: field.TypeJSON, Nullable: true},
+		{Name: "unit_cost", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "quantity", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "attributes", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "product_vendor", Type: field.TypeInt, Nullable: true},
@@ -839,9 +1210,14 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "product_sku",
+				Name:    "product_sku_tenant_products",
 				Unique:  true,
-				Columns: []*schema.Column{ProductsColumns[1]},
+				Columns: []*schema.Column{ProductsColumns[1], ProductsColumns[10]},
+			},
+			{
+				Name:    "product_name",
+				Unique:  false,
+				Columns: []*schema.Column{ProductsColumns[2]},
 			},
 			{
 				Name:    "product_attributes",
@@ -862,6 +1238,7 @@ var (
 		{Name: "size_bytes", Type: field.TypeFloat64, Nullable: true},
 		{Name: "type", Type: field.TypeString, Default: "continuous"},
 		{Name: "camera_recordings", Type: field.TypeInt},
+		{Name: "tenant_recordings", Type: field.TypeInt},
 	}
 	// RecordingsTable holds the schema information for the "recordings" table.
 	RecordingsTable = &schema.Table{
@@ -875,13 +1252,19 @@ var (
 				RefColumns: []*schema.Column{CamerasColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
+			{
+				Symbol:     "recordings_tenants_recordings",
+				Columns:    []*schema.Column{RecordingsColumns[7]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
 		},
 	}
 	// RecurringInvoicesColumns holds the columns for the "recurring_invoices" table.
 	RecurringInvoicesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "description", Type: field.TypeString},
-		{Name: "amount", Type: field.TypeFloat64},
+		{Name: "amount", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
 		{Name: "currency", Type: field.TypeString, Default: "USD"},
 		{Name: "frequency", Type: field.TypeString, Default: "monthly"},
 		{Name: "next_run_date", Type: field.TypeTime},
@@ -935,11 +1318,56 @@ var (
 			},
 		},
 	}
+	// ReviewCyclesColumns holds the columns for the "review_cycles" table.
+	ReviewCyclesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "cycle_type", Type: field.TypeEnum, Enums: []string{"QUARTERLY", "ANNUAL", "PROBATION", "PROJECT"}, Default: "ANNUAL"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"DRAFT", "ACTIVE", "CLOSED"}, Default: "DRAFT"},
+		{Name: "start_date", Type: field.TypeTime},
+		{Name: "end_date", Type: field.TypeTime},
+		{Name: "review_deadline", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "tenant_review_cycles", Type: field.TypeInt},
+	}
+	// ReviewCyclesTable holds the schema information for the "review_cycles" table.
+	ReviewCyclesTable = &schema.Table{
+		Name:       "review_cycles",
+		Columns:    ReviewCyclesColumns,
+		PrimaryKey: []*schema.Column{ReviewCyclesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "review_cycles_tenants_review_cycles",
+				Columns:    []*schema.Column{ReviewCyclesColumns[10]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "reviewcycle_name_tenant_review_cycles",
+				Unique:  true,
+				Columns: []*schema.Column{ReviewCyclesColumns[1], ReviewCyclesColumns[10]},
+			},
+			{
+				Name:    "reviewcycle_status",
+				Unique:  false,
+				Columns: []*schema.Column{ReviewCyclesColumns[4]},
+			},
+			{
+				Name:    "reviewcycle_start_date",
+				Unique:  false,
+				Columns: []*schema.Column{ReviewCyclesColumns[5]},
+			},
+		},
+	}
 	// SoPsColumns holds the columns for the "so_ps" table.
 	SoPsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "title", Type: field.TypeString},
-		{Name: "content", Type: field.TypeJSON, Nullable: true},
+		{Name: "content", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "version", Type: field.TypeInt, Default: 1},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
@@ -982,6 +1410,7 @@ var (
 		{Name: "url", Type: field.TypeString, Nullable: true},
 		{Name: "is_managed", Type: field.TypeBool, Default: false},
 		{Name: "config", Type: field.TypeJSON},
+		{Name: "monthly_price", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "tenant_saas_apps", Type: field.TypeInt},
@@ -994,7 +1423,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "saa_sapps_tenants_saas_apps",
-				Columns:    []*schema.Column{SaaSappsColumns[9]},
+				Columns:    []*schema.Column{SaaSappsColumns[10]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1003,6 +1432,7 @@ var (
 	// SaaSfiltersColumns holds the columns for the "saa_sfilters" table.
 	SaaSfiltersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
 		{Name: "domain_pattern", Type: field.TypeString},
 		{Name: "action", Type: field.TypeEnum, Enums: []string{"ALLOW", "BLOCK"}, Default: "BLOCK"},
 		{Name: "reason", Type: field.TypeString, Nullable: true},
@@ -1020,13 +1450,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "saa_sfilters_saa_sapps_filters",
-				Columns:    []*schema.Column{SaaSfiltersColumns[7]},
+				Columns:    []*schema.Column{SaaSfiltersColumns[8]},
 				RefColumns: []*schema.Column{SaaSappsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "saa_sfilters_tenants_saas_filters",
-				Columns:    []*schema.Column{SaaSfiltersColumns[8]},
+				Columns:    []*schema.Column{SaaSfiltersColumns[9]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1045,6 +1475,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "saa_sapp_identities", Type: field.TypeInt},
+		{Name: "tenant_saas_identities", Type: field.TypeInt},
 		{Name: "user_saas_identities", Type: field.TypeInt, Nullable: true},
 	}
 	// SaaSidentitiesTable holds the schema information for the "saa_sidentities" table.
@@ -1060,8 +1491,14 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "saa_sidentities_users_saas_identities",
+				Symbol:     "saa_sidentities_tenants_saas_identities",
 				Columns:    []*schema.Column{SaaSidentitiesColumns[11]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "saa_sidentities_users_saas_identities",
+				Columns:    []*schema.Column{SaaSidentitiesColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -1073,9 +1510,9 @@ var (
 				Columns: []*schema.Column{SaaSidentitiesColumns[1], SaaSidentitiesColumns[10]},
 			},
 			{
-				Name:    "saasidentity_email",
-				Unique:  false,
-				Columns: []*schema.Column{SaaSidentitiesColumns[2]},
+				Name:    "saasidentity_email_tenant_saas_identities",
+				Unique:  true,
+				Columns: []*schema.Column{SaaSidentitiesColumns[2], SaaSidentitiesColumns[11]},
 			},
 		},
 	}
@@ -1087,6 +1524,7 @@ var (
 		{Name: "count", Type: field.TypeInt, Default: 1},
 		{Name: "metadata", Type: field.TypeJSON},
 		{Name: "saa_sidentity_usages", Type: field.TypeInt},
+		{Name: "tenant_saas_usages", Type: field.TypeInt},
 	}
 	// SaaSusagesTable holds the schema information for the "saa_susages" table.
 	SaaSusagesTable = &schema.Table{
@@ -1100,13 +1538,45 @@ var (
 				RefColumns: []*schema.Column{SaaSidentitiesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
+			{
+				Symbol:     "saa_susages_tenants_saas_usages",
+				Columns:    []*schema.Column{SaaSusagesColumns[6]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// ScriptsColumns holds the columns for the "scripts" table.
+	ScriptsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "content", Type: field.TypeString, Size: 2147483647},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"ps1", "sh"}},
+		{Name: "parameters", Type: field.TypeJSON, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "tenant_scripts", Type: field.TypeInt},
+	}
+	// ScriptsTable holds the schema information for the "scripts" table.
+	ScriptsTable = &schema.Table{
+		Name:       "scripts",
+		Columns:    ScriptsColumns,
+		PrimaryKey: []*schema.Column{ScriptsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "scripts_tenants_scripts",
+				Columns:    []*schema.Column{ScriptsColumns[8]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
 		},
 	}
 	// ServiceRatesColumns holds the columns for the "service_rates" table.
 	ServiceRatesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "work_type", Type: field.TypeString, Unique: true},
-		{Name: "rate", Type: field.TypeFloat64},
+		{Name: "rate", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
 		{Name: "description", Type: field.TypeString, Nullable: true},
 		{Name: "tenant_service_rates", Type: field.TypeInt},
 	}
@@ -1127,12 +1597,12 @@ var (
 	// StockMovementsColumns holds the columns for the "stock_movements" table.
 	StockMovementsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "quantity", Type: field.TypeFloat64},
+		{Name: "quantity", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
 		{Name: "movement_type", Type: field.TypeEnum, Enums: []string{"incoming", "outgoing", "manual"}},
 		{Name: "reason", Type: field.TypeString, Nullable: true},
-		{Name: "unit_cost", Type: field.TypeFloat64, Nullable: true},
-		{Name: "remaining_quantity", Type: field.TypeFloat64, Nullable: true},
-		{Name: "calculated_cogs", Type: field.TypeFloat64, Nullable: true},
+		{Name: "unit_cost", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "remaining_quantity", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "calculated_cogs", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "product_movements", Type: field.TypeInt},
@@ -1157,6 +1627,28 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "stockmovement_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{StockMovementsColumns[8]},
+			},
+			{
+				Name:    "stockmovement_product_movements",
+				Unique:  false,
+				Columns: []*schema.Column{StockMovementsColumns[9]},
+			},
+			{
+				Name:    "stockmovement_tenant_stock_movements",
+				Unique:  false,
+				Columns: []*schema.Column{StockMovementsColumns[10]},
+			},
+			{
+				Name:    "stockmovement_movement_type",
+				Unique:  false,
+				Columns: []*schema.Column{StockMovementsColumns[2]},
+			},
+		},
 	}
 	// StrategicRoadmapsColumns holds the columns for the "strategic_roadmaps" table.
 	StrategicRoadmapsColumns = []*schema.Column{
@@ -1165,7 +1657,7 @@ var (
 		{Name: "description", Type: field.TypeString, Nullable: true},
 		{Name: "priority", Type: field.TypeEnum, Enums: []string{"LOW", "MEDIUM", "HIGH", "CRITICAL"}, Default: "MEDIUM"},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"PLANNED", "APPROVED", "IN_PROGRESS", "COMPLETED"}, Default: "PLANNED"},
-		{Name: "estimated_cost", Type: field.TypeFloat64, Default: 0},
+		{Name: "estimated_cost", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
 		{Name: "target_date", Type: field.TypeTime},
 		{Name: "strategic_commentary", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
@@ -1194,6 +1686,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "employee_id", Type: field.TypeInt},
 		{Name: "backup_candidate_id", Type: field.TypeInt},
+		{Name: "tenant_succession_maps", Type: field.TypeInt},
 	}
 	// SuccessionMapsTable holds the schema information for the "succession_maps" table.
 	SuccessionMapsTable = &schema.Table{
@@ -1213,6 +1706,12 @@ var (
 				RefColumns: []*schema.Column{EmployeesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
+			{
+				Symbol:     "succession_maps_tenants_succession_maps",
+				Columns:    []*schema.Column{SuccessionMapsColumns[6]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
 		},
 	}
 	// TenantsColumns holds the columns for the "tenants" table.
@@ -1222,7 +1721,7 @@ var (
 		{Name: "domain", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "active", Type: field.TypeBool, Default: true},
-		{Name: "transaction_limit", Type: field.TypeFloat64, Default: 1000},
+		{Name: "transaction_limit", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
 		{Name: "tenant_children", Type: field.TypeInt, Nullable: true},
 		{Name: "tenant_customer_account", Type: field.TypeInt, Nullable: true},
 	}
@@ -1330,14 +1829,176 @@ var (
 			},
 		},
 	}
+	// TimeOffBalancesColumns holds the columns for the "time_off_balances" table.
+	TimeOffBalancesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "year", Type: field.TypeInt},
+		{Name: "available_hours", Type: field.TypeFloat64, Default: 0},
+		{Name: "used_hours", Type: field.TypeFloat64, Default: 0},
+		{Name: "pending_hours", Type: field.TypeFloat64, Default: 0},
+		{Name: "accrued_hours", Type: field.TypeFloat64, Default: 0},
+		{Name: "carried_over_hours", Type: field.TypeFloat64, Default: 0},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "employee_time_off_balances", Type: field.TypeInt},
+		{Name: "tenant_time_off_balances", Type: field.TypeInt},
+		{Name: "time_off_policy_balances", Type: field.TypeInt},
+	}
+	// TimeOffBalancesTable holds the schema information for the "time_off_balances" table.
+	TimeOffBalancesTable = &schema.Table{
+		Name:       "time_off_balances",
+		Columns:    TimeOffBalancesColumns,
+		PrimaryKey: []*schema.Column{TimeOffBalancesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "time_off_balances_employees_time_off_balances",
+				Columns:    []*schema.Column{TimeOffBalancesColumns[9]},
+				RefColumns: []*schema.Column{EmployeesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "time_off_balances_tenants_time_off_balances",
+				Columns:    []*schema.Column{TimeOffBalancesColumns[10]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "time_off_balances_time_off_policies_balances",
+				Columns:    []*schema.Column{TimeOffBalancesColumns[11]},
+				RefColumns: []*schema.Column{TimeOffPoliciesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "timeoffbalance_year",
+				Unique:  false,
+				Columns: []*schema.Column{TimeOffBalancesColumns[1]},
+			},
+			{
+				Name:    "timeoffbalance_year_employee_time_off_balances_time_off_policy_balances",
+				Unique:  true,
+				Columns: []*schema.Column{TimeOffBalancesColumns[1], TimeOffBalancesColumns[9], TimeOffBalancesColumns[11]},
+			},
+		},
+	}
+	// TimeOffPoliciesColumns holds the columns for the "time_off_policies" table.
+	TimeOffPoliciesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "policy_type", Type: field.TypeEnum, Enums: []string{"ACCRUAL", "UNLIMITED", "FIXED"}, Default: "FIXED"},
+		{Name: "leave_type", Type: field.TypeEnum, Enums: []string{"PTO", "SICK", "UNPAID", "PARENTAL", "BEREAVEMENT", "JURY_DUTY"}, Default: "PTO"},
+		{Name: "annual_allowance", Type: field.TypeFloat64, Default: 0},
+		{Name: "accrual_rate", Type: field.TypeFloat64, Nullable: true},
+		{Name: "carry_over_max", Type: field.TypeFloat64, Default: 0},
+		{Name: "requires_approval", Type: field.TypeBool, Default: true},
+		{Name: "min_notice_days", Type: field.TypeInt, Default: 0},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "tenant_time_off_policies", Type: field.TypeInt},
+	}
+	// TimeOffPoliciesTable holds the schema information for the "time_off_policies" table.
+	TimeOffPoliciesTable = &schema.Table{
+		Name:       "time_off_policies",
+		Columns:    TimeOffPoliciesColumns,
+		PrimaryKey: []*schema.Column{TimeOffPoliciesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "time_off_policies_tenants_time_off_policies",
+				Columns:    []*schema.Column{TimeOffPoliciesColumns[13]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "timeoffpolicy_name_tenant_time_off_policies",
+				Unique:  true,
+				Columns: []*schema.Column{TimeOffPoliciesColumns[1], TimeOffPoliciesColumns[13]},
+			},
+			{
+				Name:    "timeoffpolicy_leave_type",
+				Unique:  false,
+				Columns: []*schema.Column{TimeOffPoliciesColumns[4]},
+			},
+			{
+				Name:    "timeoffpolicy_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{TimeOffPoliciesColumns[10]},
+			},
+		},
+	}
+	// TimeOffRequestsColumns holds the columns for the "time_off_requests" table.
+	TimeOffRequestsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "request_type", Type: field.TypeEnum, Enums: []string{"PTO", "SICK", "UNPAID", "PARENTAL", "BEREAVEMENT", "JURY_DUTY"}, Default: "PTO"},
+		{Name: "start_date", Type: field.TypeTime},
+		{Name: "end_date", Type: field.TypeTime},
+		{Name: "requested_hours", Type: field.TypeFloat64},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "APPROVED", "REJECTED", "CANCELLED"}, Default: "PENDING"},
+		{Name: "notes", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "rejection_reason", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "reviewed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "employee_time_off_requests", Type: field.TypeInt},
+		{Name: "employee_approved_time_off", Type: field.TypeInt, Nullable: true},
+		{Name: "tenant_time_off_requests", Type: field.TypeInt},
+	}
+	// TimeOffRequestsTable holds the schema information for the "time_off_requests" table.
+	TimeOffRequestsTable = &schema.Table{
+		Name:       "time_off_requests",
+		Columns:    TimeOffRequestsColumns,
+		PrimaryKey: []*schema.Column{TimeOffRequestsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "time_off_requests_employees_time_off_requests",
+				Columns:    []*schema.Column{TimeOffRequestsColumns[11]},
+				RefColumns: []*schema.Column{EmployeesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "time_off_requests_employees_approved_time_off",
+				Columns:    []*schema.Column{TimeOffRequestsColumns[12]},
+				RefColumns: []*schema.Column{EmployeesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "time_off_requests_tenants_time_off_requests",
+				Columns:    []*schema.Column{TimeOffRequestsColumns[13]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "timeoffrequest_status",
+				Unique:  false,
+				Columns: []*schema.Column{TimeOffRequestsColumns[5]},
+			},
+			{
+				Name:    "timeoffrequest_start_date",
+				Unique:  false,
+				Columns: []*schema.Column{TimeOffRequestsColumns[2]},
+			},
+			{
+				Name:    "timeoffrequest_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{TimeOffRequestsColumns[9]},
+			},
+		},
+	}
 	// TransactionsColumns holds the columns for the "transactions" table.
 	TransactionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "description", Type: field.TypeString},
 		{Name: "date", Type: field.TypeTime},
-		{Name: "total_amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "total_amount", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "tax_amount", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
 		{Name: "type", Type: field.TypeString, Nullable: true},
-		{Name: "reference", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "reference", Type: field.TypeString, Nullable: true},
 		{Name: "uuid", Type: field.TypeString, Unique: true},
 		{Name: "approval_status", Type: field.TypeEnum, Enums: []string{"PENDING", "STAGED", "APPROVED", "REJECTED"}, Default: "APPROVED"},
 		{Name: "is_intercompany", Type: field.TypeBool, Default: false},
@@ -1353,21 +2014,43 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "transactions_tenants_transactions",
-				Columns:    []*schema.Column{TransactionsColumns[9]},
+				Columns:    []*schema.Column{TransactionsColumns[10]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "transactions_recordings_recording",
-				Columns:    []*schema.Column{TransactionsColumns[10]},
+				Columns:    []*schema.Column{TransactionsColumns[11]},
 				RefColumns: []*schema.Column{RecordingsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "transactions_users_approved_by",
-				Columns:    []*schema.Column{TransactionsColumns[11]},
+				Columns:    []*schema.Column{TransactionsColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "transaction_reference_tenant_transactions",
+				Unique:  true,
+				Columns: []*schema.Column{TransactionsColumns[6], TransactionsColumns[10]},
+			},
+			{
+				Name:    "transaction_date",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionsColumns[2]},
+			},
+			{
+				Name:    "transaction_type",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionsColumns[5]},
+			},
+			{
+				Name:    "transaction_approval_status",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionsColumns[8]},
 			},
 		},
 	}
@@ -1380,7 +2063,7 @@ var (
 		{Name: "last_name", Type: field.TypeString, Nullable: true},
 		{Name: "job_title", Type: field.TypeString, Nullable: true},
 		{Name: "department", Type: field.TypeString, Nullable: true},
-		{Name: "external_mappings", Type: field.TypeJSON, Nullable: true},
+		{Name: "external_mappings", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "role", Type: field.TypeString, Default: "user"},
 		{Name: "seniority", Type: field.TypeEnum, Enums: []string{"junior", "expert"}, Default: "junior"},
@@ -1400,6 +2083,23 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "user_email",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[2]},
+			},
+			{
+				Name:    "user_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[8]},
+			},
+			{
+				Name:    "user_role",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[9]},
+			},
+		},
 	}
 	// VaultItemsColumns holds the columns for the "vault_items" table.
 	VaultItemsColumns = []*schema.Column{
@@ -1408,6 +2108,9 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "size", Type: field.TypeInt64, Default: 0},
 		{Name: "hash", Type: field.TypeString},
+		{Name: "file_type", Type: field.TypeString, Nullable: true},
+		{Name: "encrypted", Type: field.TypeBool, Default: false},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "content", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "is_dir", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
@@ -1422,7 +2125,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "vault_items_tenants_vault_items",
-				Columns:    []*schema.Column{VaultItemsColumns[9]},
+				Columns:    []*schema.Column{VaultItemsColumns[12]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1431,7 +2134,7 @@ var (
 			{
 				Name:    "vaultitem_path_tenant_vault_items",
 				Unique:  true,
-				Columns: []*schema.Column{VaultItemsColumns[1], VaultItemsColumns[9]},
+				Columns: []*schema.Column{VaultItemsColumns[1], VaultItemsColumns[12]},
 			},
 			{
 				Name:    "vaultitem_hash",
@@ -1447,6 +2150,7 @@ var (
 		{Name: "audio_path", Type: field.TypeString},
 		{Name: "transcription", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "duration", Type: field.TypeInt, Default: 0},
 		{Name: "read_at", Type: field.TypeTime, Nullable: true},
 		{Name: "tenant_voicemails", Type: field.TypeInt},
 		{Name: "user_voicemails", Type: field.TypeInt},
@@ -1459,13 +2163,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "voicemails_tenants_voicemails",
-				Columns:    []*schema.Column{VoicemailsColumns[6]},
+				Columns:    []*schema.Column{VoicemailsColumns[7]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "voicemails_users_voicemails",
-				Columns:    []*schema.Column{VoicemailsColumns[7]},
+				Columns:    []*schema.Column{VoicemailsColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1538,9 +2242,12 @@ var (
 		DetectionEventsTable,
 		DiscoveryEntriesTable,
 		EmployeesTable,
+		GoalsTable,
 		HealthScoreSnapshotsTable,
 		IvrFlowsTable,
 		InventoryReservationsTable,
+		JobsTable,
+		JobExecutionsTable,
 		JournalEntriesTable,
 		LedgerEntriesTable,
 		NetworkBackupsTable,
@@ -1549,16 +2256,19 @@ var (
 		NetworkPortsTable,
 		NexusAuditsTable,
 		OneTimeLinksTable,
+		PerformanceReviewsTable,
 		PermissionsTable,
 		ProductsTable,
 		RecordingsTable,
 		RecurringInvoicesTable,
 		RemediationStepsTable,
+		ReviewCyclesTable,
 		SoPsTable,
 		SaaSappsTable,
 		SaaSfiltersTable,
 		SaaSidentitiesTable,
 		SaaSusagesTable,
+		ScriptsTable,
 		ServiceRatesTable,
 		StockMovementsTable,
 		StrategicRoadmapsTable,
@@ -1566,6 +2276,9 @@ var (
 		TenantsTable,
 		TicketsTable,
 		TimeEntriesTable,
+		TimeOffBalancesTable,
+		TimeOffPoliciesTable,
+		TimeOffRequestsTable,
 		TransactionsTable,
 		UsersTable,
 		VaultItemsTable,
@@ -1583,6 +2296,7 @@ func init() {
 	AssetsTable.ForeignKeys[2].RefTable = AssetTypesTable
 	AssetsTable.ForeignKeys[3].RefTable = TenantsTable
 	AssetsTable.ForeignKeys[4].RefTable = UsersTable
+	AssetTypesTable.ForeignKeys[0].RefTable = TenantsTable
 	AuditLogsTable.ForeignKeys[0].RefTable = TenantsTable
 	BudgetForecastsTable.ForeignKeys[0].RefTable = TenantsTable
 	CallLogsTable.ForeignKeys[0].RefTable = TenantsTable
@@ -1595,16 +2309,24 @@ func init() {
 	CredentialsTable.ForeignKeys[1].RefTable = TenantsTable
 	DepartmentsTable.ForeignKeys[0].RefTable = DepartmentsTable
 	DepartmentsTable.ForeignKeys[1].RefTable = EmployeesTable
+	DepartmentsTable.ForeignKeys[2].RefTable = TenantsTable
 	DetectionEventsTable.ForeignKeys[0].RefTable = CamerasTable
+	DetectionEventsTable.ForeignKeys[1].RefTable = TenantsTable
 	DiscoveryEntriesTable.ForeignKeys[0].RefTable = TenantsTable
 	EmployeesTable.ForeignKeys[0].RefTable = DepartmentsTable
 	EmployeesTable.ForeignKeys[1].RefTable = EmployeesTable
 	EmployeesTable.ForeignKeys[2].RefTable = AccountsTable
 	EmployeesTable.ForeignKeys[3].RefTable = TenantsTable
+	GoalsTable.ForeignKeys[0].RefTable = EmployeesTable
+	GoalsTable.ForeignKeys[1].RefTable = TenantsTable
 	HealthScoreSnapshotsTable.ForeignKeys[0].RefTable = TenantsTable
 	IvrFlowsTable.ForeignKeys[0].RefTable = TenantsTable
 	InventoryReservationsTable.ForeignKeys[0].RefTable = ProductsTable
 	InventoryReservationsTable.ForeignKeys[1].RefTable = TenantsTable
+	JobsTable.ForeignKeys[0].RefTable = ScriptsTable
+	JobsTable.ForeignKeys[1].RefTable = TenantsTable
+	JobExecutionsTable.ForeignKeys[0].RefTable = AgentsTable
+	JobExecutionsTable.ForeignKeys[1].RefTable = JobsTable
 	JournalEntriesTable.ForeignKeys[0].RefTable = AccountsTable
 	JournalEntriesTable.ForeignKeys[1].RefTable = UsersTable
 	JournalEntriesTable.ForeignKeys[2].RefTable = TenantsTable
@@ -1613,19 +2335,31 @@ func init() {
 	LedgerEntriesTable.ForeignKeys[1].RefTable = TenantsTable
 	LedgerEntriesTable.ForeignKeys[2].RefTable = TransactionsTable
 	NetworkBackupsTable.ForeignKeys[0].RefTable = NetworkDevicesTable
+	NetworkBackupsTable.ForeignKeys[1].RefTable = TenantsTable
+	NetworkDevicesTable.ForeignKeys[0].RefTable = TenantsTable
 	NetworkLinksTable.ForeignKeys[0].RefTable = NetworkPortsTable
 	NetworkLinksTable.ForeignKeys[1].RefTable = NetworkPortsTable
+	NetworkLinksTable.ForeignKeys[2].RefTable = TenantsTable
 	NetworkPortsTable.ForeignKeys[0].RefTable = NetworkDevicesTable
+	NetworkPortsTable.ForeignKeys[1].RefTable = TenantsTable
+	NexusAuditsTable.ForeignKeys[0].RefTable = TenantsTable
 	OneTimeLinksTable.ForeignKeys[0].RefTable = CredentialsTable
 	OneTimeLinksTable.ForeignKeys[1].RefTable = CredentialsTable
 	OneTimeLinksTable.ForeignKeys[2].RefTable = TenantsTable
 	OneTimeLinksTable.ForeignKeys[3].RefTable = TenantsTable
+	PerformanceReviewsTable.ForeignKeys[0].RefTable = EmployeesTable
+	PerformanceReviewsTable.ForeignKeys[1].RefTable = EmployeesTable
+	PerformanceReviewsTable.ForeignKeys[2].RefTable = ReviewCyclesTable
+	PerformanceReviewsTable.ForeignKeys[3].RefTable = TenantsTable
+	PermissionsTable.ForeignKeys[0].RefTable = TenantsTable
 	ProductsTable.ForeignKeys[0].RefTable = AccountsTable
 	ProductsTable.ForeignKeys[1].RefTable = TenantsTable
 	RecordingsTable.ForeignKeys[0].RefTable = CamerasTable
+	RecordingsTable.ForeignKeys[1].RefTable = TenantsTable
 	RecurringInvoicesTable.ForeignKeys[0].RefTable = AccountsTable
 	RecurringInvoicesTable.ForeignKeys[1].RefTable = TenantsTable
 	RemediationStepsTable.ForeignKeys[0].RefTable = TicketsTable
+	ReviewCyclesTable.ForeignKeys[0].RefTable = TenantsTable
 	SoPsTable.ForeignKeys[0].RefTable = AssetsTable
 	SoPsTable.ForeignKeys[1].RefTable = TenantsTable
 	SoPsTable.ForeignKeys[2].RefTable = UsersTable
@@ -1633,14 +2367,18 @@ func init() {
 	SaaSfiltersTable.ForeignKeys[0].RefTable = SaaSappsTable
 	SaaSfiltersTable.ForeignKeys[1].RefTable = TenantsTable
 	SaaSidentitiesTable.ForeignKeys[0].RefTable = SaaSappsTable
-	SaaSidentitiesTable.ForeignKeys[1].RefTable = UsersTable
+	SaaSidentitiesTable.ForeignKeys[1].RefTable = TenantsTable
+	SaaSidentitiesTable.ForeignKeys[2].RefTable = UsersTable
 	SaaSusagesTable.ForeignKeys[0].RefTable = SaaSidentitiesTable
+	SaaSusagesTable.ForeignKeys[1].RefTable = TenantsTable
+	ScriptsTable.ForeignKeys[0].RefTable = TenantsTable
 	ServiceRatesTable.ForeignKeys[0].RefTable = TenantsTable
 	StockMovementsTable.ForeignKeys[0].RefTable = ProductsTable
 	StockMovementsTable.ForeignKeys[1].RefTable = TenantsTable
 	StrategicRoadmapsTable.ForeignKeys[0].RefTable = TenantsTable
 	SuccessionMapsTable.ForeignKeys[0].RefTable = EmployeesTable
 	SuccessionMapsTable.ForeignKeys[1].RefTable = EmployeesTable
+	SuccessionMapsTable.ForeignKeys[2].RefTable = TenantsTable
 	TenantsTable.ForeignKeys[0].RefTable = TenantsTable
 	TenantsTable.ForeignKeys[1].RefTable = AccountsTable
 	TicketsTable.ForeignKeys[0].RefTable = AssetsTable
@@ -1649,6 +2387,13 @@ func init() {
 	TicketsTable.ForeignKeys[3].RefTable = UsersTable
 	TimeEntriesTable.ForeignKeys[0].RefTable = TicketsTable
 	TimeEntriesTable.ForeignKeys[1].RefTable = UsersTable
+	TimeOffBalancesTable.ForeignKeys[0].RefTable = EmployeesTable
+	TimeOffBalancesTable.ForeignKeys[1].RefTable = TenantsTable
+	TimeOffBalancesTable.ForeignKeys[2].RefTable = TimeOffPoliciesTable
+	TimeOffPoliciesTable.ForeignKeys[0].RefTable = TenantsTable
+	TimeOffRequestsTable.ForeignKeys[0].RefTable = EmployeesTable
+	TimeOffRequestsTable.ForeignKeys[1].RefTable = EmployeesTable
+	TimeOffRequestsTable.ForeignKeys[2].RefTable = TenantsTable
 	TransactionsTable.ForeignKeys[0].RefTable = TenantsTable
 	TransactionsTable.ForeignKeys[1].RefTable = RecordingsTable
 	TransactionsTable.ForeignKeys[2].RefTable = UsersTable

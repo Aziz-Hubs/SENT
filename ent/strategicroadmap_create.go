@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // StrategicRoadmapCreate is the builder for creating a StrategicRoadmap entity.
@@ -70,13 +71,13 @@ func (_c *StrategicRoadmapCreate) SetNillableStatus(v *strategicroadmap.Status) 
 }
 
 // SetEstimatedCost sets the "estimated_cost" field.
-func (_c *StrategicRoadmapCreate) SetEstimatedCost(v float64) *StrategicRoadmapCreate {
+func (_c *StrategicRoadmapCreate) SetEstimatedCost(v decimal.Decimal) *StrategicRoadmapCreate {
 	_c.mutation.SetEstimatedCost(v)
 	return _c
 }
 
 // SetNillableEstimatedCost sets the "estimated_cost" field if the given value is not nil.
-func (_c *StrategicRoadmapCreate) SetNillableEstimatedCost(v *float64) *StrategicRoadmapCreate {
+func (_c *StrategicRoadmapCreate) SetNillableEstimatedCost(v *decimal.Decimal) *StrategicRoadmapCreate {
 	if v != nil {
 		_c.SetEstimatedCost(*v)
 	}
@@ -278,7 +279,7 @@ func (_c *StrategicRoadmapCreate) createSpec() (*StrategicRoadmap, *sqlgraph.Cre
 		_node.Status = value
 	}
 	if value, ok := _c.mutation.EstimatedCost(); ok {
-		_spec.SetField(strategicroadmap.FieldEstimatedCost, field.TypeFloat64, value)
+		_spec.SetField(strategicroadmap.FieldEstimatedCost, field.TypeOther, value)
 		_node.EstimatedCost = value
 	}
 	if value, ok := _c.mutation.TargetDate(); ok {

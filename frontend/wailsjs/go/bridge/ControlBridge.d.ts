@@ -10,6 +10,8 @@ export function GetDowngradeRecommendations(arg1:number):Promise<Array<control.D
 
 export function GetManagedApps():Promise<Array<ent.SaaSApp>>;
 
+export function GetOrchestrator():Promise<control.ControlOrchestrator>;
+
 export function GetSNIRules(arg1:number):Promise<Record<string, string>>;
 
 export function GetShadowApps():Promise<Array<ent.SaaSApp>>;

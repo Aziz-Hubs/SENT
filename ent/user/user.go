@@ -173,8 +173,6 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultExternalMappings holds the default value on creation for the "external_mappings" field.
-	DefaultExternalMappings map[string]interface{}
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultRole holds the default value on creation for the "role" field.

@@ -9,6 +9,7 @@ import (
 	"sent/ent/networkdevice"
 	"sent/ent/networklink"
 	"sent/ent/networkport"
+	"sent/ent/tenant"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -151,6 +152,17 @@ func (_c *NetworkPortCreate) AddConnectedTo(v ...*NetworkLink) *NetworkPortCreat
 	return _c.AddConnectedToIDs(ids...)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_c *NetworkPortCreate) SetTenantID(id int) *NetworkPortCreate {
+	_c.mutation.SetTenantID(id)
+	return _c
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_c *NetworkPortCreate) SetTenant(v *Tenant) *NetworkPortCreate {
+	return _c.SetTenantID(v.ID)
+}
+
 // Mutation returns the NetworkPortMutation object of the builder.
 func (_c *NetworkPortCreate) Mutation() *NetworkPortMutation {
 	return _c.mutation
@@ -230,6 +242,9 @@ func (_c *NetworkPortCreate) check() error {
 	}
 	if len(_c.mutation.DeviceIDs()) == 0 {
 		return &ValidationError{Name: "device", err: errors.New(`ent: missing required edge "NetworkPort.device"`)}
+	}
+	if len(_c.mutation.TenantIDs()) == 0 {
+		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "NetworkPort.tenant"`)}
 	}
 	return nil
 }
@@ -320,6 +335,23 @@ func (_c *NetworkPortCreate) createSpec() (*NetworkPort, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networkport.TenantTable,
+			Columns: []string{networkport.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.tenant_network_ports = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

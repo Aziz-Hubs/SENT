@@ -42,12 +42,18 @@ type Tx struct {
 	DiscoveryEntry *DiscoveryEntryClient
 	// Employee is the client for interacting with the Employee builders.
 	Employee *EmployeeClient
+	// Goal is the client for interacting with the Goal builders.
+	Goal *GoalClient
 	// HealthScoreSnapshot is the client for interacting with the HealthScoreSnapshot builders.
 	HealthScoreSnapshot *HealthScoreSnapshotClient
 	// IVRFlow is the client for interacting with the IVRFlow builders.
 	IVRFlow *IVRFlowClient
 	// InventoryReservation is the client for interacting with the InventoryReservation builders.
 	InventoryReservation *InventoryReservationClient
+	// Job is the client for interacting with the Job builders.
+	Job *JobClient
+	// JobExecution is the client for interacting with the JobExecution builders.
+	JobExecution *JobExecutionClient
 	// JournalEntry is the client for interacting with the JournalEntry builders.
 	JournalEntry *JournalEntryClient
 	// LedgerEntry is the client for interacting with the LedgerEntry builders.
@@ -64,6 +70,8 @@ type Tx struct {
 	NexusAudit *NexusAuditClient
 	// OneTimeLink is the client for interacting with the OneTimeLink builders.
 	OneTimeLink *OneTimeLinkClient
+	// PerformanceReview is the client for interacting with the PerformanceReview builders.
+	PerformanceReview *PerformanceReviewClient
 	// Permission is the client for interacting with the Permission builders.
 	Permission *PermissionClient
 	// Product is the client for interacting with the Product builders.
@@ -74,6 +82,8 @@ type Tx struct {
 	RecurringInvoice *RecurringInvoiceClient
 	// RemediationStep is the client for interacting with the RemediationStep builders.
 	RemediationStep *RemediationStepClient
+	// ReviewCycle is the client for interacting with the ReviewCycle builders.
+	ReviewCycle *ReviewCycleClient
 	// SOP is the client for interacting with the SOP builders.
 	SOP *SOPClient
 	// SaaSApp is the client for interacting with the SaaSApp builders.
@@ -84,6 +94,8 @@ type Tx struct {
 	SaaSIdentity *SaaSIdentityClient
 	// SaaSUsage is the client for interacting with the SaaSUsage builders.
 	SaaSUsage *SaaSUsageClient
+	// Script is the client for interacting with the Script builders.
+	Script *ScriptClient
 	// ServiceRate is the client for interacting with the ServiceRate builders.
 	ServiceRate *ServiceRateClient
 	// StockMovement is the client for interacting with the StockMovement builders.
@@ -98,6 +110,12 @@ type Tx struct {
 	Ticket *TicketClient
 	// TimeEntry is the client for interacting with the TimeEntry builders.
 	TimeEntry *TimeEntryClient
+	// TimeOffBalance is the client for interacting with the TimeOffBalance builders.
+	TimeOffBalance *TimeOffBalanceClient
+	// TimeOffPolicy is the client for interacting with the TimeOffPolicy builders.
+	TimeOffPolicy *TimeOffPolicyClient
+	// TimeOffRequest is the client for interacting with the TimeOffRequest builders.
+	TimeOffRequest *TimeOffRequestClient
 	// Transaction is the client for interacting with the Transaction builders.
 	Transaction *TransactionClient
 	// User is the client for interacting with the User builders.
@@ -252,9 +270,12 @@ func (tx *Tx) init() {
 	tx.DetectionEvent = NewDetectionEventClient(tx.config)
 	tx.DiscoveryEntry = NewDiscoveryEntryClient(tx.config)
 	tx.Employee = NewEmployeeClient(tx.config)
+	tx.Goal = NewGoalClient(tx.config)
 	tx.HealthScoreSnapshot = NewHealthScoreSnapshotClient(tx.config)
 	tx.IVRFlow = NewIVRFlowClient(tx.config)
 	tx.InventoryReservation = NewInventoryReservationClient(tx.config)
+	tx.Job = NewJobClient(tx.config)
+	tx.JobExecution = NewJobExecutionClient(tx.config)
 	tx.JournalEntry = NewJournalEntryClient(tx.config)
 	tx.LedgerEntry = NewLedgerEntryClient(tx.config)
 	tx.NetworkBackup = NewNetworkBackupClient(tx.config)
@@ -263,16 +284,19 @@ func (tx *Tx) init() {
 	tx.NetworkPort = NewNetworkPortClient(tx.config)
 	tx.NexusAudit = NewNexusAuditClient(tx.config)
 	tx.OneTimeLink = NewOneTimeLinkClient(tx.config)
+	tx.PerformanceReview = NewPerformanceReviewClient(tx.config)
 	tx.Permission = NewPermissionClient(tx.config)
 	tx.Product = NewProductClient(tx.config)
 	tx.Recording = NewRecordingClient(tx.config)
 	tx.RecurringInvoice = NewRecurringInvoiceClient(tx.config)
 	tx.RemediationStep = NewRemediationStepClient(tx.config)
+	tx.ReviewCycle = NewReviewCycleClient(tx.config)
 	tx.SOP = NewSOPClient(tx.config)
 	tx.SaaSApp = NewSaaSAppClient(tx.config)
 	tx.SaaSFilter = NewSaaSFilterClient(tx.config)
 	tx.SaaSIdentity = NewSaaSIdentityClient(tx.config)
 	tx.SaaSUsage = NewSaaSUsageClient(tx.config)
+	tx.Script = NewScriptClient(tx.config)
 	tx.ServiceRate = NewServiceRateClient(tx.config)
 	tx.StockMovement = NewStockMovementClient(tx.config)
 	tx.StrategicRoadmap = NewStrategicRoadmapClient(tx.config)
@@ -280,6 +304,9 @@ func (tx *Tx) init() {
 	tx.Tenant = NewTenantClient(tx.config)
 	tx.Ticket = NewTicketClient(tx.config)
 	tx.TimeEntry = NewTimeEntryClient(tx.config)
+	tx.TimeOffBalance = NewTimeOffBalanceClient(tx.config)
+	tx.TimeOffPolicy = NewTimeOffPolicyClient(tx.config)
+	tx.TimeOffRequest = NewTimeOffRequestClient(tx.config)
 	tx.Transaction = NewTransactionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.VaultItem = NewVaultItemClient(tx.config)

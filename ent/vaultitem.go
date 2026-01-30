@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"sent/ent/tenant"
 	"sent/ent/vaultitem"
@@ -26,6 +27,12 @@ type VaultItem struct {
 	Size int64 `json:"size,omitempty"`
 	// Hash holds the value of the "hash" field.
 	Hash string `json:"hash,omitempty"`
+	// FileType holds the value of the "file_type" field.
+	FileType string `json:"file_type,omitempty"`
+	// Encrypted holds the value of the "encrypted" field.
+	Encrypted bool `json:"encrypted,omitempty"`
+	// Metadata holds the value of the "metadata" field.
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 	// Content holds the value of the "content" field.
 	Content string `json:"content,omitempty"`
 	// IsDir holds the value of the "is_dir" field.
@@ -66,11 +73,13 @@ func (*VaultItem) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case vaultitem.FieldIsDir:
+		case vaultitem.FieldMetadata:
+			values[i] = new([]byte)
+		case vaultitem.FieldEncrypted, vaultitem.FieldIsDir:
 			values[i] = new(sql.NullBool)
 		case vaultitem.FieldID, vaultitem.FieldSize:
 			values[i] = new(sql.NullInt64)
-		case vaultitem.FieldPath, vaultitem.FieldName, vaultitem.FieldHash, vaultitem.FieldContent:
+		case vaultitem.FieldPath, vaultitem.FieldName, vaultitem.FieldHash, vaultitem.FieldFileType, vaultitem.FieldContent:
 			values[i] = new(sql.NullString)
 		case vaultitem.FieldCreatedAt, vaultitem.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -120,6 +129,26 @@ func (_m *VaultItem) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field hash", values[i])
 			} else if value.Valid {
 				_m.Hash = value.String
+			}
+		case vaultitem.FieldFileType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field file_type", values[i])
+			} else if value.Valid {
+				_m.FileType = value.String
+			}
+		case vaultitem.FieldEncrypted:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field encrypted", values[i])
+			} else if value.Valid {
+				_m.Encrypted = value.Bool
+			}
+		case vaultitem.FieldMetadata:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field metadata", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Metadata); err != nil {
+					return fmt.Errorf("unmarshal field metadata: %w", err)
+				}
 			}
 		case vaultitem.FieldContent:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -204,6 +233,15 @@ func (_m *VaultItem) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("hash=")
 	builder.WriteString(_m.Hash)
+	builder.WriteString(", ")
+	builder.WriteString("file_type=")
+	builder.WriteString(_m.FileType)
+	builder.WriteString(", ")
+	builder.WriteString("encrypted=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Encrypted))
+	builder.WriteString(", ")
+	builder.WriteString("metadata=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
 	builder.WriteString(", ")
 	builder.WriteString("content=")
 	builder.WriteString(_m.Content)

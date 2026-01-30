@@ -2,8 +2,11 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
+	"github.com/shopspring/decimal"
 	"time"
 )
 
@@ -15,9 +18,23 @@ type LedgerEntry struct {
 // Fields of the LedgerEntry.
 func (LedgerEntry) Fields() []ent.Field {
 	return []ent.Field{
-		field.Float("amount"),
+		field.Other("amount", decimal.Decimal{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "numeric(19,4)",
+			}).
+			Default(decimal.Zero),
 		field.Enum("direction").Values("debit", "credit"),
 		field.Time("created_at").Default(time.Now),
+	}
+}
+
+// Indexes of the LedgerEntry.
+func (LedgerEntry) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Edges("transaction"),
+		index.Edges("account"),
+		index.Edges("tenant"),
+		index.Fields("created_at"),
 	}
 }
 

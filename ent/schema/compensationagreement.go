@@ -2,8 +2,10 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 	"time"
 )
 
@@ -15,7 +17,11 @@ type CompensationAgreement struct {
 // Fields of the CompensationAgreement.
 func (CompensationAgreement) Fields() []ent.Field {
 	return []ent.Field{
-		field.Float("base_salary"), // Using float for now, but in logic we use shopspring/decimal
+		field.Other("base_salary", decimal.Decimal{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "numeric(19,4)",
+			}).
+			Default(decimal.Zero),
 		field.String("currency").Default("USD"),
 		field.Time("effective_date").Default(time.Now),
 		field.Enum("status").

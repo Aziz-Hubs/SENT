@@ -9,7 +9,6 @@ import (
 	"sent/ent/auditlog"
 	"sent/ent/predicate"
 	"sent/ent/tenant"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -19,8 +18,9 @@ import (
 // AuditLogUpdate is the builder for updating AuditLog entities.
 type AuditLogUpdate struct {
 	config
-	hooks    []Hook
-	mutation *AuditLogMutation
+	hooks     []Hook
+	mutation  *AuditLogMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the AuditLogUpdate builder.
@@ -103,20 +103,6 @@ func (_u *AuditLogUpdate) ClearPayload() *AuditLogUpdate {
 	return _u
 }
 
-// SetTimestamp sets the "timestamp" field.
-func (_u *AuditLogUpdate) SetTimestamp(v time.Time) *AuditLogUpdate {
-	_u.mutation.SetTimestamp(v)
-	return _u
-}
-
-// SetNillableTimestamp sets the "timestamp" field if the given value is not nil.
-func (_u *AuditLogUpdate) SetNillableTimestamp(v *time.Time) *AuditLogUpdate {
-	if v != nil {
-		_u.SetTimestamp(*v)
-	}
-	return _u
-}
-
 // SetTenantID sets the "tenant" edge to the Tenant entity by ID.
 func (_u *AuditLogUpdate) SetTenantID(id int) *AuditLogUpdate {
 	_u.mutation.SetTenantID(id)
@@ -174,6 +160,12 @@ func (_u *AuditLogUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *AuditLogUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AuditLogUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *AuditLogUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -207,9 +199,6 @@ func (_u *AuditLogUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.PayloadCleared() {
 		_spec.ClearField(auditlog.FieldPayload, field.TypeJSON)
 	}
-	if value, ok := _u.mutation.Timestamp(); ok {
-		_spec.SetField(auditlog.FieldTimestamp, field.TypeTime, value)
-	}
 	if _u.mutation.TenantCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -239,6 +228,7 @@ func (_u *AuditLogUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{auditlog.Label}
@@ -254,9 +244,10 @@ func (_u *AuditLogUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 // AuditLogUpdateOne is the builder for updating a single AuditLog entity.
 type AuditLogUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *AuditLogMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *AuditLogMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetAppName sets the "app_name" field.
@@ -333,20 +324,6 @@ func (_u *AuditLogUpdateOne) ClearPayload() *AuditLogUpdateOne {
 	return _u
 }
 
-// SetTimestamp sets the "timestamp" field.
-func (_u *AuditLogUpdateOne) SetTimestamp(v time.Time) *AuditLogUpdateOne {
-	_u.mutation.SetTimestamp(v)
-	return _u
-}
-
-// SetNillableTimestamp sets the "timestamp" field if the given value is not nil.
-func (_u *AuditLogUpdateOne) SetNillableTimestamp(v *time.Time) *AuditLogUpdateOne {
-	if v != nil {
-		_u.SetTimestamp(*v)
-	}
-	return _u
-}
-
 // SetTenantID sets the "tenant" edge to the Tenant entity by ID.
 func (_u *AuditLogUpdateOne) SetTenantID(id int) *AuditLogUpdateOne {
 	_u.mutation.SetTenantID(id)
@@ -417,6 +394,12 @@ func (_u *AuditLogUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *AuditLogUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AuditLogUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *AuditLogUpdateOne) sqlSave(ctx context.Context) (_node *AuditLog, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -467,9 +450,6 @@ func (_u *AuditLogUpdateOne) sqlSave(ctx context.Context) (_node *AuditLog, err 
 	if _u.mutation.PayloadCleared() {
 		_spec.ClearField(auditlog.FieldPayload, field.TypeJSON)
 	}
-	if value, ok := _u.mutation.Timestamp(); ok {
-		_spec.SetField(auditlog.FieldTimestamp, field.TypeTime, value)
-	}
 	if _u.mutation.TenantCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -499,6 +479,7 @@ func (_u *AuditLogUpdateOne) sqlSave(ctx context.Context) (_node *AuditLog, err 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &AuditLog{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

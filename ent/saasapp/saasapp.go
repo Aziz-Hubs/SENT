@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 const (
@@ -26,6 +27,8 @@ const (
 	FieldIsManaged = "is_managed"
 	// FieldConfig holds the string denoting the config field in the database.
 	FieldConfig = "config"
+	// FieldMonthlyPrice holds the string denoting the monthly_price field in the database.
+	FieldMonthlyPrice = "monthly_price"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -70,6 +73,7 @@ var Columns = []string{
 	FieldURL,
 	FieldIsManaged,
 	FieldConfig,
+	FieldMonthlyPrice,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -104,6 +108,8 @@ var (
 	DefaultIsManaged bool
 	// DefaultConfig holds the default value on creation for the "config" field.
 	DefaultConfig map[string]interface{}
+	// DefaultMonthlyPrice holds the default value on creation for the "monthly_price" field.
+	DefaultMonthlyPrice decimal.Decimal
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -143,6 +149,11 @@ func ByURL(opts ...sql.OrderTermOption) OrderOption {
 // ByIsManaged orders the results by the is_managed field.
 func ByIsManaged(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsManaged, opts...).ToFunc()
+}
+
+// ByMonthlyPrice orders the results by the monthly_price field.
+func ByMonthlyPrice(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMonthlyPrice, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

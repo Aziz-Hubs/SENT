@@ -9,6 +9,7 @@ import (
 	"sent/ent/predicate"
 	"sent/ent/saasidentity"
 	"sent/ent/saasusage"
+	"sent/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -19,8 +20,9 @@ import (
 // SaaSUsageUpdate is the builder for updating SaaSUsage entities.
 type SaaSUsageUpdate struct {
 	config
-	hooks    []Hook
-	mutation *SaaSUsageMutation
+	hooks     []Hook
+	mutation  *SaaSUsageMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the SaaSUsageUpdate builder.
@@ -95,6 +97,17 @@ func (_u *SaaSUsageUpdate) SetIdentity(v *SaaSIdentity) *SaaSUsageUpdate {
 	return _u.SetIdentityID(v.ID)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *SaaSUsageUpdate) SetTenantID(id int) *SaaSUsageUpdate {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *SaaSUsageUpdate) SetTenant(v *Tenant) *SaaSUsageUpdate {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the SaaSUsageMutation object of the builder.
 func (_u *SaaSUsageUpdate) Mutation() *SaaSUsageMutation {
 	return _u.mutation
@@ -103,6 +116,12 @@ func (_u *SaaSUsageUpdate) Mutation() *SaaSUsageMutation {
 // ClearIdentity clears the "identity" edge to the SaaSIdentity entity.
 func (_u *SaaSUsageUpdate) ClearIdentity() *SaaSUsageUpdate {
 	_u.mutation.ClearIdentity()
+	return _u
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *SaaSUsageUpdate) ClearTenant() *SaaSUsageUpdate {
+	_u.mutation.ClearTenant()
 	return _u
 }
 
@@ -143,7 +162,16 @@ func (_u *SaaSUsageUpdate) check() error {
 	if _u.mutation.IdentityCleared() && len(_u.mutation.IdentityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "SaaSUsage.identity"`)
 	}
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "SaaSUsage.tenant"`)
+	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *SaaSUsageUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SaaSUsageUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *SaaSUsageUpdate) sqlSave(ctx context.Context) (_node int, err error) {
@@ -202,6 +230,36 @@ func (_u *SaaSUsageUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   saasusage.TenantTable,
+			Columns: []string{saasusage.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   saasusage.TenantTable,
+			Columns: []string{saasusage.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{saasusage.Label}
@@ -217,9 +275,10 @@ func (_u *SaaSUsageUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 // SaaSUsageUpdateOne is the builder for updating a single SaaSUsage entity.
 type SaaSUsageUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *SaaSUsageMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *SaaSUsageMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetTimestamp sets the "timestamp" field.
@@ -288,6 +347,17 @@ func (_u *SaaSUsageUpdateOne) SetIdentity(v *SaaSIdentity) *SaaSUsageUpdateOne {
 	return _u.SetIdentityID(v.ID)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *SaaSUsageUpdateOne) SetTenantID(id int) *SaaSUsageUpdateOne {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *SaaSUsageUpdateOne) SetTenant(v *Tenant) *SaaSUsageUpdateOne {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the SaaSUsageMutation object of the builder.
 func (_u *SaaSUsageUpdateOne) Mutation() *SaaSUsageMutation {
 	return _u.mutation
@@ -296,6 +366,12 @@ func (_u *SaaSUsageUpdateOne) Mutation() *SaaSUsageMutation {
 // ClearIdentity clears the "identity" edge to the SaaSIdentity entity.
 func (_u *SaaSUsageUpdateOne) ClearIdentity() *SaaSUsageUpdateOne {
 	_u.mutation.ClearIdentity()
+	return _u
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *SaaSUsageUpdateOne) ClearTenant() *SaaSUsageUpdateOne {
+	_u.mutation.ClearTenant()
 	return _u
 }
 
@@ -349,7 +425,16 @@ func (_u *SaaSUsageUpdateOne) check() error {
 	if _u.mutation.IdentityCleared() && len(_u.mutation.IdentityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "SaaSUsage.identity"`)
 	}
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "SaaSUsage.tenant"`)
+	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *SaaSUsageUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SaaSUsageUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *SaaSUsageUpdateOne) sqlSave(ctx context.Context) (_node *SaaSUsage, err error) {
@@ -425,6 +510,36 @@ func (_u *SaaSUsageUpdateOne) sqlSave(ctx context.Context) (_node *SaaSUsage, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   saasusage.TenantTable,
+			Columns: []string{saasusage.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   saasusage.TenantTable,
+			Columns: []string{saasusage.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &SaaSUsage{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

@@ -22,6 +22,8 @@ const (
 	EdgeSourcePort = "source_port"
 	// EdgeTargetPort holds the string denoting the target_port edge name in mutations.
 	EdgeTargetPort = "target_port"
+	// EdgeTenant holds the string denoting the tenant edge name in mutations.
+	EdgeTenant = "tenant"
 	// Table holds the table name of the networklink in the database.
 	Table = "network_links"
 	// SourcePortTable is the table that holds the source_port relation/edge.
@@ -38,6 +40,13 @@ const (
 	TargetPortInverseTable = "network_ports"
 	// TargetPortColumn is the table column denoting the target_port relation/edge.
 	TargetPortColumn = "network_link_target_port"
+	// TenantTable is the table that holds the tenant relation/edge.
+	TenantTable = "network_links"
+	// TenantInverseTable is the table name for the Tenant entity.
+	// It exists in this package in order to avoid circular dependency with the "tenant" package.
+	TenantInverseTable = "tenants"
+	// TenantColumn is the table column denoting the tenant relation/edge.
+	TenantColumn = "tenant_network_links"
 )
 
 // Columns holds all SQL columns for networklink fields.
@@ -52,6 +61,7 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"network_link_target_port",
 	"source_port_id",
+	"tenant_network_links",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -107,6 +117,13 @@ func ByTargetPortField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTargetPortStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByTenantField orders the results by tenant field.
+func ByTenantField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTenantStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newSourcePortStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -119,5 +136,12 @@ func newTargetPortStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TargetPortInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, TargetPortTable, TargetPortColumn),
+	)
+}
+func newTenantStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TenantInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, TenantTable, TenantColumn),
 	)
 }

@@ -2,6 +2,8 @@ package auth
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -9,9 +11,12 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
+	"sync"
 	"time"
 
 	"sent/ent"
+	"sent/ent/tenant"
 	"sent/ent/user"
 
 	"github.com/zalando/go-keyring"
@@ -23,7 +28,7 @@ const (
 	serviceName      = "sent-core-app"
 	tokenKey         = "auth-token"
 	defaultIssuer    = "http://localhost:8080"
-	defaultClientID  = "sent-core-app"
+	defaultClientID  = "357700606812553219"
 	callbackPath     = "/auth/callback"
 	callbackPort     = "4242"
 	callbackURL      = "http://localhost:" + callbackPort + callbackPath
@@ -35,9 +40,16 @@ const (
 type AuthBridge struct {
 	ctx          context.Context
 	db           *ent.Client
+	mu           sync.RWMutex // Protects isLoggedIn and userProfile
 	isLoggedIn   bool
 	userProfile  *UserProfile
 	relyingParty rp.RelyingParty
+	rpOnce       sync.Once
+	rpErr        error
+	rpReady      chan struct{}
+	
+	statesMu sync.Mutex
+	states   map[string]time.Time // Pending states with expiry
 }
 
 // UserProfile represents the authenticated user's details.
@@ -49,6 +61,8 @@ type UserProfile struct {
 	FirstName string `json:"given_name"`
 	LastName  string `json:"family_name"`
 	TenantID  int    `json:"tenantId"`
+	Role      string `json:"role"`
+	Seniority string `json:"seniority"`
 }
 
 // NewAuthBridge initializes a new AuthBridge instance.
@@ -56,7 +70,11 @@ type UserProfile struct {
 // @param db - The database client for user synchronization.
 // @returns A pointer to the initialized AuthBridge.
 func NewAuthBridge(db *ent.Client) *AuthBridge {
-	return &AuthBridge{db: db}
+	return &AuthBridge{
+		db:      db,
+		rpReady: make(chan struct{}),
+		states:  make(map[string]time.Time),
+	}
 }
 
 // Startup initializes the authentication bridge and attempts auto-login.
@@ -65,41 +83,67 @@ func NewAuthBridge(db *ent.Client) *AuthBridge {
 func (a *AuthBridge) Startup(ctx context.Context) {
 	fmt.Println("[AUTH] Starting AuthBridge...")
 	a.ctx = ctx
+	
+	// Initialize OIDC RP in a separate goroutine to avoid GTK/WebKit signal conflicts
+	go func() {
+		a.initRP()
+	}()
+	
 	a.tryAutoLogin()
 }
 
-// ensureRP ensures that the OpenID Connect Relying Party is initialized.
+// initRP initializes the OIDC Relying Party exactly once.
+// This is called from a goroutine to avoid signal handler conflicts with WebKit.
+func (a *AuthBridge) initRP() {
+	a.rpOnce.Do(func() {
+		issuer := os.Getenv("ZITADEL_ISSUER")
+		if issuer == "" {
+			issuer = defaultIssuer
+		}
+
+		clientID := os.Getenv("ZITADEL_CLIENT_ID")
+		if clientID == "" {
+			clientID = defaultClientID
+		}
+
+		scopes := []string{oidc.ScopeOpenID, oidc.ScopeProfile, oidc.ScopeEmail}
+
+		fmt.Printf("[AUTH] Initializing OIDC RP with issuer: %s, client: %s\n", issuer, clientID)
+
+		client := &http.Client{
+			Timeout: discoveryTimeout,
+		}
+
+		provider, err := rp.NewRelyingPartyOIDC(a.ctx, issuer, clientID, "", callbackURL, scopes, rp.WithHTTPClient(client))
+		if err != nil {
+			a.rpErr = fmt.Errorf("zitadel discovery failed: %w", err)
+			fmt.Printf("[AUTH] Failed to initialize OIDC RP: %v\n", a.rpErr)
+		} else {
+			a.relyingParty = provider
+			fmt.Println("[AUTH] OIDC RP initialized successfully")
+		}
+		// Signal that initialization is complete (success or failure)
+		close(a.rpReady)
+	})
+}
+
+// ensureRP waits for the Relying Party to be initialized and returns any error.
 //
-// @returns An error if initialization fails.
+// @returns An error if initialization failed.
 func (a *AuthBridge) ensureRP() error {
-	if a.relyingParty != nil {
-		return nil
+	fmt.Println("[AUTH] Waiting for OIDC RP initialization...")
+	// Wait for initialization to complete with timeout
+	select {
+	case <-a.rpReady:
+		if a.rpErr != nil {
+			fmt.Printf("[AUTH] OIDC RP initialization failed: %v\n", a.rpErr)
+		} else {
+			fmt.Println("[AUTH] OIDC RP is ready")
+		}
+		return a.rpErr
+	case <-time.After(30 * time.Second):
+		return fmt.Errorf("timeout waiting for OIDC initialization")
 	}
-
-	issuer := os.Getenv("ZITADEL_ISSUER")
-	if issuer == "" {
-		issuer = defaultIssuer
-	}
-
-	clientID := os.Getenv("ZITADEL_CLIENT_ID")
-	if clientID == "" {
-		clientID = defaultClientID
-	}
-
-	scopes := []string{oidc.ScopeOpenID, oidc.ScopeProfile, oidc.ScopeEmail}
-
-	fmt.Printf("[AUTH] Initializing OIDC RP with issuer: %s, client: %s\n", issuer, clientID)
-
-	client := &http.Client{
-		Timeout: discoveryTimeout,
-	}
-
-	provider, err := rp.NewRelyingPartyOIDC(a.ctx, issuer, clientID, "", callbackURL, scopes, rp.WithHTTPClient(client))
-	if err != nil {
-		return fmt.Errorf("zitadel discovery failed: %w", err)
-	}
-	a.relyingParty = provider
-	return nil
 }
 
 // tryAutoLogin attempts to retrieve a stored token and log the user in automatically.
@@ -116,6 +160,7 @@ func (a *AuthBridge) tryAutoLogin() {
 		return
 	}
 
+	a.mu.Lock()
 	a.isLoggedIn = true
 	a.userProfile = &UserProfile{
 		Subject:   claims.Subject,
@@ -124,6 +169,7 @@ func (a *AuthBridge) tryAutoLogin() {
 		FirstName: claims.GivenName,
 		LastName:  claims.FamilyName,
 	}
+	a.mu.Unlock()
 
 	if err := a.syncUserToDB(); err != nil {
 		fmt.Printf("[AUTH] Auto-login sync failed: %v\n", err)
@@ -139,7 +185,17 @@ func (a *AuthBridge) Login() (string, error) {
 		return "", err
 	}
 
-	state := fmt.Sprintf("state-%d", time.Now().Unix())
+	// Generate high-entropy state
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", fmt.Errorf("failed to generate random state: %w", err)
+	}
+	state := base64.RawURLEncoding.EncodeToString(b)
+	
+	// Track state for validation
+	a.statesMu.Lock()
+	a.states[state] = time.Now().Add(loginTimeout)
+	a.statesMu.Unlock()
 	
 	// Start local server to receive callback
 	l, err := net.Listen("tcp", "localhost:"+callbackPort)
@@ -150,7 +206,7 @@ func (a *AuthBridge) Login() (string, error) {
 
 	// Prepare callback handler
 	codeChan := make(chan string)
-	server := a.startCallbackServer(l, codeChan)
+	server := a.startCallbackServer(l, codeChan, state)
 	defer server.Close()
 
 	// Open browser for authentication
@@ -169,9 +225,24 @@ func (a *AuthBridge) Login() (string, error) {
 }
 
 // startCallbackServer starts the HTTP server to handle the OIDC callback.
-func (a *AuthBridge) startCallbackServer(l net.Listener, codeChan chan<- string) *http.Server {
+func (a *AuthBridge) startCallbackServer(l net.Listener, codeChan chan<- string, expectedState string) *http.Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc(callbackPath, func(w http.ResponseWriter, r *http.Request) {
+		// 1. Validate State
+		returnedState := r.URL.Query().Get("state")
+		a.statesMu.Lock()
+		expiry, exists := a.states[returnedState]
+		if exists {
+			delete(a.states, returnedState) // One-time use
+		}
+		a.statesMu.Unlock()
+
+		if !exists || time.Now().After(expiry) || returnedState != expectedState {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "Invalid or expired state")
+			return
+		}
+
 		code := r.URL.Query().Get("code")
 		// Provide a nice response to the user
 		w.Header().Set("Content-Type", "text/html")
@@ -212,6 +283,7 @@ func (a *AuthBridge) exchangeCode(code string) (string, error) {
 		}
 	}
 
+	a.mu.Lock()
 	a.isLoggedIn = true
 	a.userProfile = &UserProfile{
 		Subject:   tokens.IDTokenClaims.Subject,
@@ -220,6 +292,7 @@ func (a *AuthBridge) exchangeCode(code string) (string, error) {
 		FirstName: tokens.IDTokenClaims.GivenName,
 		LastName:  tokens.IDTokenClaims.FamilyName,
 	}
+	a.mu.Unlock()
 
 	if err := a.syncUserToDB(); err != nil {
 		return "Authenticated, but user sync failed", err
@@ -231,45 +304,89 @@ func (a *AuthBridge) exchangeCode(code string) (string, error) {
 // syncUserToDB synchronizes the authenticated user profile with the local database.
 // It creates a new user and/or tenant if they do not exist.
 func (a *AuthBridge) syncUserToDB() error {
+	// Attempt to find user by Zitadel ID
 	u, err := a.db.User.Query().Where(user.ZitadelID(a.userProfile.Subject)).Only(a.ctx)
 	
 	if ent.IsNotFound(err) {
-		// User not found, create new user (and tenant if needed)
-		tenant, err := a.db.Tenant.Query().First(a.ctx)
-		if err != nil && !ent.IsNotFound(err) {
-			return fmt.Errorf("failed to query tenants: %w", err)
+		// Secure Provisioning: 
+		// 1. Determine Tenant by email domain
+		domain := ""
+		if parts := strings.Split(a.userProfile.Email, "@"); len(parts) == 2 {
+			domain = parts[1]
 		}
 
-		if tenant == nil {
-			// Create default tenant
-			tenant, err = a.db.Tenant.Create().
-				SetName("Default Org").
-				SetDomain("sent.jo").
-				Save(a.ctx)
-			if err != nil {
-				return fmt.Errorf("failed to create default tenant: %w", err)
+		t, err := a.db.Tenant.Query().Where(tenant.Domain(domain)).Only(a.ctx)
+		if ent.IsNotFound(err) {
+			// If no domain match, check if any tenant exists. If not, this is the very first system setup.
+			count, _ := a.db.Tenant.Query().Count(a.ctx)
+			if count == 0 {
+				t, err = a.db.Tenant.Create().
+					SetName("Root Org").
+					SetDomain(domain).
+					Save(a.ctx)
+				if err != nil {
+					return fmt.Errorf("failed to anchor root tenant: %w", err)
+				}
+			} else {
+				// Prevent orphaned users - map to a "Pending" or default tenant if logic allows,
+				// but for high-security, we'll fail if domain doesn't match and it's not the first setup.
+				return fmt.Errorf("no tenant found matching domain %s; access denied", domain)
 			}
+		} else if err != nil {
+			return fmt.Errorf("tenant lookup failed: %w", err)
 		}
 
+		// 2. Atomic Create (using DB uniqueness to handle races)
 		newU, err := a.db.User.Create().
 			SetZitadelID(a.userProfile.Subject).
 			SetEmail(a.userProfile.Email).
 			SetFirstName(a.userProfile.FirstName).
 			SetLastName(a.userProfile.LastName).
-			SetTenant(tenant).
+			SetTenant(t).
+			SetRole("user"). // Default to user, admin must be promoted by system:admin
 			Save(a.ctx)
+			
 		if err != nil {
-			return fmt.Errorf("failed to create new user: %w", err)
+			// Check if we lost a race
+			u, err = a.db.User.Query().Where(user.ZitadelID(a.userProfile.Subject)).Only(a.ctx)
+			if err != nil {
+				return fmt.Errorf("failed to resolve user after conflict: %w", err)
+			}
+		} else {
+			u = newU
 		}
-		a.userProfile.TenantID = newU.ID
 	} else if err != nil {
-		// Other database error
-		return fmt.Errorf("database error checking user: %w", err)
-	} else {
-		// User exists
-		a.userProfile.TenantID = u.ID
+		return fmt.Errorf("database identity query failed: %w", err)
 	}
+
+	// Update profile with synced data
+	tID, err := u.QueryTenant().OnlyID(a.ctx)
+	if err != nil {
+		return fmt.Errorf("identity partition error: %w", err)
+	}
+	
+	a.mu.Lock()
+	a.userProfile.TenantID = tID
+	a.userProfile.Role = u.Role
+	a.userProfile.Seniority = string(u.Seniority)
+	a.mu.Unlock()
+
 	return nil
+}
+
+// HasRole checks if the currently logged-in user has the required role.
+func (a *AuthBridge) HasRole(role string) bool {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+
+	if !a.isLoggedIn || a.userProfile == nil {
+		return false
+	}
+	// Admin bypass: Admins have access to everything
+	if a.userProfile.Role == "admin" {
+		return true
+	}
+	return a.userProfile.Role == role
 }
 
 // Logout clears the session and removes the stored token.
@@ -277,14 +394,19 @@ func (a *AuthBridge) Logout() {
 	if err := keyring.Delete(serviceName, tokenKey); err != nil {
 		fmt.Printf("[AUTH] Warning: Failed to delete token from keyring: %v\n", err)
 	}
+	a.mu.Lock()
 	a.userProfile = nil
 	a.isLoggedIn = false
+	a.mu.Unlock()
 }
 
 // GetUserProfile returns the profile of the currently logged-in user.
 //
 // @returns The user profile or an error if not logged in.
 func (a *AuthBridge) GetUserProfile() (*UserProfile, error) {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+
 	if !a.isLoggedIn {
 		return nil, fmt.Errorf("not logged in")
 	}
@@ -295,6 +417,8 @@ func (a *AuthBridge) GetUserProfile() (*UserProfile, error) {
 //
 // @returns True if authenticated, false otherwise.
 func (a *AuthBridge) IsAuthenticated() bool {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
 	return a.isLoggedIn
 }
 

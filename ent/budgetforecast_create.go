@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // BudgetForecastCreate is the builder for creating a BudgetForecast entity.
@@ -34,19 +35,27 @@ func (_c *BudgetForecastCreate) SetMonth(v int) *BudgetForecastCreate {
 }
 
 // SetProjectedAmount sets the "projected_amount" field.
-func (_c *BudgetForecastCreate) SetProjectedAmount(v float64) *BudgetForecastCreate {
+func (_c *BudgetForecastCreate) SetProjectedAmount(v decimal.Decimal) *BudgetForecastCreate {
 	_c.mutation.SetProjectedAmount(v)
 	return _c
 }
 
+// SetNillableProjectedAmount sets the "projected_amount" field if the given value is not nil.
+func (_c *BudgetForecastCreate) SetNillableProjectedAmount(v *decimal.Decimal) *BudgetForecastCreate {
+	if v != nil {
+		_c.SetProjectedAmount(*v)
+	}
+	return _c
+}
+
 // SetActualSpent sets the "actual_spent" field.
-func (_c *BudgetForecastCreate) SetActualSpent(v float64) *BudgetForecastCreate {
+func (_c *BudgetForecastCreate) SetActualSpent(v decimal.Decimal) *BudgetForecastCreate {
 	_c.mutation.SetActualSpent(v)
 	return _c
 }
 
 // SetNillableActualSpent sets the "actual_spent" field if the given value is not nil.
-func (_c *BudgetForecastCreate) SetNillableActualSpent(v *float64) *BudgetForecastCreate {
+func (_c *BudgetForecastCreate) SetNillableActualSpent(v *decimal.Decimal) *BudgetForecastCreate {
 	if v != nil {
 		_c.SetActualSpent(*v)
 	}
@@ -119,6 +128,10 @@ func (_c *BudgetForecastCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *BudgetForecastCreate) defaults() {
+	if _, ok := _c.mutation.ProjectedAmount(); !ok {
+		v := budgetforecast.DefaultProjectedAmount
+		_c.mutation.SetProjectedAmount(v)
+	}
 	if _, ok := _c.mutation.ActualSpent(); !ok {
 		v := budgetforecast.DefaultActualSpent
 		_c.mutation.SetActualSpent(v)
@@ -184,11 +197,11 @@ func (_c *BudgetForecastCreate) createSpec() (*BudgetForecast, *sqlgraph.CreateS
 		_node.Month = value
 	}
 	if value, ok := _c.mutation.ProjectedAmount(); ok {
-		_spec.SetField(budgetforecast.FieldProjectedAmount, field.TypeFloat64, value)
+		_spec.SetField(budgetforecast.FieldProjectedAmount, field.TypeOther, value)
 		_node.ProjectedAmount = value
 	}
 	if value, ok := _c.mutation.ActualSpent(); ok {
-		_spec.SetField(budgetforecast.FieldActualSpent, field.TypeFloat64, value)
+		_spec.SetField(budgetforecast.FieldActualSpent, field.TypeOther, value)
 		_node.ActualSpent = value
 	}
 	if value, ok := _c.mutation.ForecastData(); ok {

@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"time"
 )
 
@@ -19,8 +20,22 @@ func (AuditLog) Fields() []ent.Field {
 		field.String("action"),
 		field.String("actor_id"),
 		field.String("remote_ip").Optional(),
-		field.JSON("payload", map[string]interface{}{}).Optional(),
-		field.Time("timestamp").Default(time.Now),
+		field.JSON("payload", map[string]interface{}{}).
+			SchemaType(map[string]string{
+				"postgres": "jsonb",
+			}).
+			Optional(),
+		field.Time("timestamp").Default(time.Now).Immutable(),
+	}
+}
+
+// Indexes of the AuditLog.
+func (AuditLog) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("timestamp"),
+		index.Fields("action"),
+		index.Fields("actor_id"),
+		index.Edges("tenant"),
 	}
 }
 

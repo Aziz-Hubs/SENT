@@ -31,6 +31,10 @@ const (
 	FieldMetadata = "metadata"
 	// FieldLastCertifiedAt holds the string denoting the last_certified_at field in the database.
 	FieldLastCertifiedAt = "last_certified_at"
+	// FieldPurchaseDate holds the string denoting the purchase_date field in the database.
+	FieldPurchaseDate = "purchase_date"
+	// FieldWarrantyExpiry holds the string denoting the warranty_expiry field in the database.
+	FieldWarrantyExpiry = "warranty_expiry"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -133,6 +137,8 @@ var Columns = []string{
 	FieldStatus,
 	FieldMetadata,
 	FieldLastCertifiedAt,
+	FieldPurchaseDate,
+	FieldWarrantyExpiry,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -172,8 +178,6 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultMetadata holds the default value on creation for the "metadata" field.
-	DefaultMetadata map[string]interface{}
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -253,6 +257,16 @@ func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByLastCertifiedAt orders the results by the last_certified_at field.
 func ByLastCertifiedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastCertifiedAt, opts...).ToFunc()
+}
+
+// ByPurchaseDate orders the results by the purchase_date field.
+func ByPurchaseDate(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPurchaseDate, opts...).ToFunc()
+}
+
+// ByWarrantyExpiry orders the results by the warranty_expiry field.
+func ByWarrantyExpiry(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWarrantyExpiry, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

@@ -2,8 +2,10 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 	"time"
 )
 
@@ -19,7 +21,11 @@ func (StrategicRoadmap) Fields() []ent.Field {
 		field.String("description").Optional(),
 		field.Enum("priority").Values("LOW", "MEDIUM", "HIGH", "CRITICAL").Default("MEDIUM"),
 		field.Enum("status").Values("PLANNED", "APPROVED", "IN_PROGRESS", "COMPLETED").Default("PLANNED"),
-		field.Float("estimated_cost").Default(0),
+		field.Other("estimated_cost", decimal.Decimal{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "numeric(19,4)",
+			}).
+			Default(decimal.Zero),
 		field.Time("target_date"),
 		field.String("strategic_commentary").Optional(),
 		field.Time("created_at").Default(time.Now),

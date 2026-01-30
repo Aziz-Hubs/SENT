@@ -16,6 +16,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // TransactionCreate is the builder for creating a Transaction entity.
@@ -46,15 +47,29 @@ func (_c *TransactionCreate) SetNillableDate(v *time.Time) *TransactionCreate {
 }
 
 // SetTotalAmount sets the "total_amount" field.
-func (_c *TransactionCreate) SetTotalAmount(v float64) *TransactionCreate {
+func (_c *TransactionCreate) SetTotalAmount(v decimal.Decimal) *TransactionCreate {
 	_c.mutation.SetTotalAmount(v)
 	return _c
 }
 
 // SetNillableTotalAmount sets the "total_amount" field if the given value is not nil.
-func (_c *TransactionCreate) SetNillableTotalAmount(v *float64) *TransactionCreate {
+func (_c *TransactionCreate) SetNillableTotalAmount(v *decimal.Decimal) *TransactionCreate {
 	if v != nil {
 		_c.SetTotalAmount(*v)
+	}
+	return _c
+}
+
+// SetTaxAmount sets the "tax_amount" field.
+func (_c *TransactionCreate) SetTaxAmount(v decimal.Decimal) *TransactionCreate {
+	_c.mutation.SetTaxAmount(v)
+	return _c
+}
+
+// SetNillableTaxAmount sets the "tax_amount" field if the given value is not nil.
+func (_c *TransactionCreate) SetNillableTaxAmount(v *decimal.Decimal) *TransactionCreate {
+	if v != nil {
+		_c.SetTaxAmount(*v)
 	}
 	return _c
 }
@@ -251,6 +266,10 @@ func (_c *TransactionCreate) defaults() {
 		v := transaction.DefaultTotalAmount
 		_c.mutation.SetTotalAmount(v)
 	}
+	if _, ok := _c.mutation.TaxAmount(); !ok {
+		v := transaction.DefaultTaxAmount
+		_c.mutation.SetTaxAmount(v)
+	}
 	if _, ok := _c.mutation.UUID(); !ok {
 		v := transaction.DefaultUUID()
 		_c.mutation.SetUUID(v)
@@ -275,6 +294,9 @@ func (_c *TransactionCreate) check() error {
 	}
 	if _, ok := _c.mutation.TotalAmount(); !ok {
 		return &ValidationError{Name: "total_amount", err: errors.New(`ent: missing required field "Transaction.total_amount"`)}
+	}
+	if _, ok := _c.mutation.TaxAmount(); !ok {
+		return &ValidationError{Name: "tax_amount", err: errors.New(`ent: missing required field "Transaction.tax_amount"`)}
 	}
 	if _, ok := _c.mutation.UUID(); !ok {
 		return &ValidationError{Name: "uuid", err: errors.New(`ent: missing required field "Transaction.uuid"`)}
@@ -328,8 +350,12 @@ func (_c *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		_node.Date = value
 	}
 	if value, ok := _c.mutation.TotalAmount(); ok {
-		_spec.SetField(transaction.FieldTotalAmount, field.TypeFloat64, value)
+		_spec.SetField(transaction.FieldTotalAmount, field.TypeOther, value)
 		_node.TotalAmount = value
+	}
+	if value, ok := _c.mutation.TaxAmount(); ok {
+		_spec.SetField(transaction.FieldTaxAmount, field.TypeOther, value)
+		_node.TaxAmount = value
 	}
 	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(transaction.FieldType, field.TypeString, value)

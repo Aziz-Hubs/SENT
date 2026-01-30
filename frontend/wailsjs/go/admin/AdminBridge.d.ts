@@ -3,6 +3,10 @@
 import {admin} from '../models';
 import {context} from '../models';
 
+export function CreateOrg(arg1:string,arg2:string):Promise<admin.OrgDTO>;
+
+export function CreateUser(arg1:string,arg2:string,arg3:string,arg4:string,arg5:number):Promise<admin.UserDTO>;
+
 export function DeleteOrg(arg1:number):Promise<void>;
 
 export function DeleteUser(arg1:number):Promise<void>;

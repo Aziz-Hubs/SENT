@@ -123,6 +123,34 @@ func (_c *AssetCreate) SetNillableLastCertifiedAt(v *time.Time) *AssetCreate {
 	return _c
 }
 
+// SetPurchaseDate sets the "purchase_date" field.
+func (_c *AssetCreate) SetPurchaseDate(v time.Time) *AssetCreate {
+	_c.mutation.SetPurchaseDate(v)
+	return _c
+}
+
+// SetNillablePurchaseDate sets the "purchase_date" field if the given value is not nil.
+func (_c *AssetCreate) SetNillablePurchaseDate(v *time.Time) *AssetCreate {
+	if v != nil {
+		_c.SetPurchaseDate(*v)
+	}
+	return _c
+}
+
+// SetWarrantyExpiry sets the "warranty_expiry" field.
+func (_c *AssetCreate) SetWarrantyExpiry(v time.Time) *AssetCreate {
+	_c.mutation.SetWarrantyExpiry(v)
+	return _c
+}
+
+// SetNillableWarrantyExpiry sets the "warranty_expiry" field if the given value is not nil.
+func (_c *AssetCreate) SetNillableWarrantyExpiry(v *time.Time) *AssetCreate {
+	if v != nil {
+		_c.SetWarrantyExpiry(*v)
+	}
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *AssetCreate) SetCreatedAt(v time.Time) *AssetCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -359,10 +387,6 @@ func (_c *AssetCreate) defaults() {
 		v := asset.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
-	if _, ok := _c.mutation.Metadata(); !ok {
-		v := asset.DefaultMetadata
-		_c.mutation.SetMetadata(v)
-	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := asset.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
@@ -385,9 +409,6 @@ func (_c *AssetCreate) check() error {
 		if err := asset.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Asset.status": %w`, err)}
 		}
-	}
-	if _, ok := _c.mutation.Metadata(); !ok {
-		return &ValidationError{Name: "metadata", err: errors.New(`ent: missing required field "Asset.metadata"`)}
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Asset.created_at"`)}
@@ -458,6 +479,14 @@ func (_c *AssetCreate) createSpec() (*Asset, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.LastCertifiedAt(); ok {
 		_spec.SetField(asset.FieldLastCertifiedAt, field.TypeTime, value)
 		_node.LastCertifiedAt = value
+	}
+	if value, ok := _c.mutation.PurchaseDate(); ok {
+		_spec.SetField(asset.FieldPurchaseDate, field.TypeTime, value)
+		_node.PurchaseDate = value
+	}
+	if value, ok := _c.mutation.WarrantyExpiry(); ok {
+		_spec.SetField(asset.FieldWarrantyExpiry, field.TypeTime, value)
+		_node.WarrantyExpiry = value
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(asset.FieldCreatedAt, field.TypeTime, value)

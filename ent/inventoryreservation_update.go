@@ -15,13 +15,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // InventoryReservationUpdate is the builder for updating InventoryReservation entities.
 type InventoryReservationUpdate struct {
 	config
-	hooks    []Hook
-	mutation *InventoryReservationMutation
+	hooks     []Hook
+	mutation  *InventoryReservationMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the InventoryReservationUpdate builder.
@@ -31,23 +33,16 @@ func (_u *InventoryReservationUpdate) Where(ps ...predicate.InventoryReservation
 }
 
 // SetQuantity sets the "quantity" field.
-func (_u *InventoryReservationUpdate) SetQuantity(v float64) *InventoryReservationUpdate {
-	_u.mutation.ResetQuantity()
+func (_u *InventoryReservationUpdate) SetQuantity(v decimal.Decimal) *InventoryReservationUpdate {
 	_u.mutation.SetQuantity(v)
 	return _u
 }
 
 // SetNillableQuantity sets the "quantity" field if the given value is not nil.
-func (_u *InventoryReservationUpdate) SetNillableQuantity(v *float64) *InventoryReservationUpdate {
+func (_u *InventoryReservationUpdate) SetNillableQuantity(v *decimal.Decimal) *InventoryReservationUpdate {
 	if v != nil {
 		_u.SetQuantity(*v)
 	}
-	return _u
-}
-
-// AddQuantity adds value to the "quantity" field.
-func (_u *InventoryReservationUpdate) AddQuantity(v float64) *InventoryReservationUpdate {
-	_u.mutation.AddQuantity(v)
 	return _u
 }
 
@@ -175,6 +170,12 @@ func (_u *InventoryReservationUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *InventoryReservationUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *InventoryReservationUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *InventoryReservationUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -188,10 +189,7 @@ func (_u *InventoryReservationUpdate) sqlSave(ctx context.Context) (_node int, e
 		}
 	}
 	if value, ok := _u.mutation.Quantity(); ok {
-		_spec.SetField(inventoryreservation.FieldQuantity, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedQuantity(); ok {
-		_spec.AddField(inventoryreservation.FieldQuantity, field.TypeFloat64, value)
+		_spec.SetField(inventoryreservation.FieldQuantity, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(inventoryreservation.FieldExpiresAt, field.TypeTime, value)
@@ -260,6 +258,7 @@ func (_u *InventoryReservationUpdate) sqlSave(ctx context.Context) (_node int, e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{inventoryreservation.Label}
@@ -275,29 +274,23 @@ func (_u *InventoryReservationUpdate) sqlSave(ctx context.Context) (_node int, e
 // InventoryReservationUpdateOne is the builder for updating a single InventoryReservation entity.
 type InventoryReservationUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *InventoryReservationMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *InventoryReservationMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetQuantity sets the "quantity" field.
-func (_u *InventoryReservationUpdateOne) SetQuantity(v float64) *InventoryReservationUpdateOne {
-	_u.mutation.ResetQuantity()
+func (_u *InventoryReservationUpdateOne) SetQuantity(v decimal.Decimal) *InventoryReservationUpdateOne {
 	_u.mutation.SetQuantity(v)
 	return _u
 }
 
 // SetNillableQuantity sets the "quantity" field if the given value is not nil.
-func (_u *InventoryReservationUpdateOne) SetNillableQuantity(v *float64) *InventoryReservationUpdateOne {
+func (_u *InventoryReservationUpdateOne) SetNillableQuantity(v *decimal.Decimal) *InventoryReservationUpdateOne {
 	if v != nil {
 		_u.SetQuantity(*v)
 	}
-	return _u
-}
-
-// AddQuantity adds value to the "quantity" field.
-func (_u *InventoryReservationUpdateOne) AddQuantity(v float64) *InventoryReservationUpdateOne {
-	_u.mutation.AddQuantity(v)
 	return _u
 }
 
@@ -438,6 +431,12 @@ func (_u *InventoryReservationUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *InventoryReservationUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *InventoryReservationUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *InventoryReservationUpdateOne) sqlSave(ctx context.Context) (_node *InventoryReservation, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -468,10 +467,7 @@ func (_u *InventoryReservationUpdateOne) sqlSave(ctx context.Context) (_node *In
 		}
 	}
 	if value, ok := _u.mutation.Quantity(); ok {
-		_spec.SetField(inventoryreservation.FieldQuantity, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedQuantity(); ok {
-		_spec.AddField(inventoryreservation.FieldQuantity, field.TypeFloat64, value)
+		_spec.SetField(inventoryreservation.FieldQuantity, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(inventoryreservation.FieldExpiresAt, field.TypeTime, value)
@@ -540,6 +536,7 @@ func (_u *InventoryReservationUpdateOne) sqlSave(ctx context.Context) (_node *In
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &InventoryReservation{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

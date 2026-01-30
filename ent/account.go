@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // Account is the model entity for the Account schema.
@@ -25,7 +26,7 @@ type Account struct {
 	// Type holds the value of the "type" field.
 	Type account.Type `json:"type,omitempty"`
 	// Balance holds the value of the "balance" field.
-	Balance float64 `json:"balance,omitempty"`
+	Balance decimal.Decimal `json:"balance,omitempty"`
 	// IsIntercompany holds the value of the "is_intercompany" field.
 	IsIntercompany bool `json:"is_intercompany,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -95,10 +96,10 @@ func (*Account) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case account.FieldBalance:
+			values[i] = new(decimal.Decimal)
 		case account.FieldIsIntercompany:
 			values[i] = new(sql.NullBool)
-		case account.FieldBalance:
-			values[i] = new(sql.NullFloat64)
 		case account.FieldID:
 			values[i] = new(sql.NullInt64)
 		case account.FieldName, account.FieldNumber, account.FieldType:
@@ -147,10 +148,10 @@ func (_m *Account) assignValues(columns []string, values []any) error {
 				_m.Type = account.Type(value.String)
 			}
 		case account.FieldBalance:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field balance", values[i])
-			} else if value.Valid {
-				_m.Balance = value.Float64
+			} else if value != nil {
+				_m.Balance = *value
 			}
 		case account.FieldIsIntercompany:
 			if value, ok := values[i].(*sql.NullBool); !ok {

@@ -61,30 +61,39 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    /* === NEON OBSIDIAN PALETTE === */
+    --background: 0 0% 0.8%; /* #020202 - Pitch Black Obsidian */
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 8%;
+    --card: 0 0% 3%; /* Slightly elevated glass base */
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 8%;
+    --popover: 0 0% 4%;
     --popover-foreground: 210 40% 98%;
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 0 0% 8%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 75.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 215 20.2% 65%;
+    --accent: 0 0% 10%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 40%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 25%;
-    --input: 217.2 32.6% 17.5%;
+    --border: 0 0% 15%;
+    --input: 0 0% 10%;
     --ring: 224.3 76.3% 48%;
 
-    /* Division Bases (Dark Mode) */
-    --erp: 142.1 70.6% 55%;
-    --msp: 221.2 83.2% 60%;
-    --sec: 24.6 95% 60%;
+    /* === CHROMATIC ARCHITECTURE === */
+    /* Emerald Neon: Capital, ERP, Financial */
+    --neon-emerald: 142 70% 50%;
+    --erp: 142 70% 50%;
+    /* Cyan Neon: Pulse, Engagement, People */
+    --neon-cyan: 185 100% 50%;
+    --msp: 185 100% 50%;
+    /* Amber Neon: Tax, Control, Compliance */
+    --neon-amber: 38 100% 50%;
+    --sec: 38 100% 50%;
+    /* Violet Neon: Admin, Settings, System */
+    --neon-violet: 270 100% 65%;
   }
 }
 
@@ -94,9 +103,13 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', 'Geist', sans-serif;
+    font-family: "Inter", "Geist", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  button {
+    cursor: pointer;
   }
 }
 
@@ -104,31 +117,134 @@
   .fade-in {
     animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40 transition-colors;
+  }
+
+  .paper-form {
+    @apply bg-[#fdfdfd] dark:bg-[#1a1c1e] border-[#333] dark:border-[#555] border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)];
+    background-image: radial-gradient(#e5e5e5 0.5px, transparent 0.5px);
+    background-size: 10px 10px;
+  }
+
+  .mono-audit {
+    font-family: "JetBrains Mono", "Courier New", monospace;
+    letter-spacing: -0.02em;
+  }
+
+  .audit-cell {
+    @apply border-b border-r border-black/10 dark:border-white/10 p-2;
+  }
+
+  .glass-sidebar {
+    @apply bg-black/40 backdrop-blur-xl border-r border-white/5;
+    box-shadow: inset -1px 0 0 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .glass-card {
+    @apply bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] shadow-2xl;
+  }
+
+  /* === NEON TEXT UTILITIES === */
+  .text-neon-emerald {
+    color: hsl(142 70% 50%);
+    text-shadow: 0 0 8px hsl(142 70% 50% / 0.5);
+  }
+  .text-neon-cyan {
+    color: hsl(185 100% 50%);
+    text-shadow: 0 0 8px hsl(185 100% 50% / 0.5);
+  }
+  .text-neon-amber {
+    color: hsl(38 100% 50%);
+    text-shadow: 0 0 8px hsl(38 100% 50% / 0.5);
+  }
+  .text-neon-violet {
+    color: hsl(270 100% 65%);
+    text-shadow: 0 0 8px hsl(270 100% 65% / 0.5);
+  }
+
+  /* === NEON BORDER UTILITIES === */
+  .border-neon-emerald {
+    border-color: hsl(142 70% 50% / 0.3);
+    box-shadow: 0 0 10px hsl(142 70% 50% / 0.15), inset 0 0 6px hsl(142 70% 50% / 0.05);
+  }
+  .border-neon-cyan {
+    border-color: hsl(185 100% 50% / 0.3);
+    box-shadow: 0 0 10px hsl(185 100% 50% / 0.15), inset 0 0 6px hsl(185 100% 50% / 0.05);
+  }
+  .border-neon-amber {
+    border-color: hsl(38 100% 50% / 0.3);
+    box-shadow: 0 0 10px hsl(38 100% 50% / 0.15), inset 0 0 6px hsl(38 100% 50% / 0.05);
+  }
+  .border-neon-violet {
+    border-color: hsl(270 100% 65% / 0.3);
+    box-shadow: 0 0 10px hsl(270 100% 65% / 0.15), inset 0 0 6px hsl(270 100% 65% / 0.05);
+  }
+
+  /* === GLASS PANEL WITH NEON RIM === */
+  .glass-panel-neon {
+    @apply bg-black/30 backdrop-blur-xl border rounded-lg;
+    border-width: 0.5px;
+  }
+
+  /* === NEON PULSE GLOW (Branding) === */
+  .neon-pulse-glow {
+    animation: neonPulse 2s ease-in-out infinite alternate;
+  }
+
+  /* === OBSIDIAN SCROLLBAR === */
+  .obsidian-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .obsidian-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .obsidian-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(0 0% 25%);
+    border-radius: 2px;
+  }
+  .obsidian-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(0 0% 35%);
   }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes neonPulse {
+  from {
+    text-shadow: 0 0 4px hsl(185 100% 50% / 0.4), 0 0 10px hsl(185 100% 50% / 0.2);
+  }
+  to {
+    text-shadow: 0 0 8px hsl(185 100% 50% / 0.6), 0 0 20px hsl(185 100% 50% / 0.3), 0 0 30px hsl(185 100% 50% / 0.1);
+  }
 }
 
 @media print {
   body * {
     visibility: hidden;
   }
-  .printable-area, .printable-area * {
+  .printable-area,
+  .printable-area * {
     visibility: visible;
   }
   .printable-area {

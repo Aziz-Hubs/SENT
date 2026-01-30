@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // ServiceRate is the model entity for the ServiceRate schema.
@@ -20,7 +21,7 @@ type ServiceRate struct {
 	// WorkType holds the value of the "work_type" field.
 	WorkType string `json:"work_type,omitempty"`
 	// Rate holds the value of the "rate" field.
-	Rate float64 `json:"rate,omitempty"`
+	Rate decimal.Decimal `json:"rate,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -56,7 +57,7 @@ func (*ServiceRate) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case servicerate.FieldRate:
-			values[i] = new(sql.NullFloat64)
+			values[i] = new(decimal.Decimal)
 		case servicerate.FieldID:
 			values[i] = new(sql.NullInt64)
 		case servicerate.FieldWorkType, servicerate.FieldDescription:
@@ -91,10 +92,10 @@ func (_m *ServiceRate) assignValues(columns []string, values []any) error {
 				_m.WorkType = value.String
 			}
 		case servicerate.FieldRate:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field rate", values[i])
-			} else if value.Valid {
-				_m.Rate = value.Float64
+			} else if value != nil {
+				_m.Rate = *value
 			}
 		case servicerate.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {

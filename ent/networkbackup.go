@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sent/ent/networkbackup"
 	"sent/ent/networkdevice"
+	"sent/ent/tenant"
 	"strings"
 	"time"
 
@@ -28,6 +29,7 @@ type NetworkBackup struct {
 	// The values are being populated by the NetworkBackupQuery when eager-loading is set.
 	Edges                  NetworkBackupEdges `json:"edges"`
 	network_device_backups *int
+	tenant_network_backups *int
 	selectValues           sql.SelectValues
 }
 
@@ -35,9 +37,11 @@ type NetworkBackup struct {
 type NetworkBackupEdges struct {
 	// Device holds the value of the device edge.
 	Device *NetworkDevice `json:"device,omitempty"`
+	// Tenant holds the value of the tenant edge.
+	Tenant *Tenant `json:"tenant,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // DeviceOrErr returns the Device value or an error if the edge
@@ -49,6 +53,17 @@ func (e NetworkBackupEdges) DeviceOrErr() (*NetworkDevice, error) {
 		return nil, &NotFoundError{label: networkdevice.Label}
 	}
 	return nil, &NotLoadedError{edge: "device"}
+}
+
+// TenantOrErr returns the Tenant value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e NetworkBackupEdges) TenantOrErr() (*Tenant, error) {
+	if e.Tenant != nil {
+		return e.Tenant, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: tenant.Label}
+	}
+	return nil, &NotLoadedError{edge: "tenant"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -63,6 +78,8 @@ func (*NetworkBackup) scanValues(columns []string) ([]any, error) {
 		case networkbackup.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		case networkbackup.ForeignKeys[0]: // network_device_backups
+			values[i] = new(sql.NullInt64)
+		case networkbackup.ForeignKeys[1]: // tenant_network_backups
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -110,6 +127,13 @@ func (_m *NetworkBackup) assignValues(columns []string, values []any) error {
 				_m.network_device_backups = new(int)
 				*_m.network_device_backups = int(value.Int64)
 			}
+		case networkbackup.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field tenant_network_backups", value)
+			} else if value.Valid {
+				_m.tenant_network_backups = new(int)
+				*_m.tenant_network_backups = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -126,6 +150,11 @@ func (_m *NetworkBackup) Value(name string) (ent.Value, error) {
 // QueryDevice queries the "device" edge of the NetworkBackup entity.
 func (_m *NetworkBackup) QueryDevice() *NetworkDeviceQuery {
 	return NewNetworkBackupClient(_m.config).QueryDevice(_m)
+}
+
+// QueryTenant queries the "tenant" edge of the NetworkBackup entity.
+func (_m *NetworkBackup) QueryTenant() *TenantQuery {
+	return NewNetworkBackupClient(_m.config).QueryTenant(_m)
 }
 
 // Update returns a builder for updating this NetworkBackup.

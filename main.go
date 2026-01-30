@@ -21,7 +21,6 @@ import (
 	"sent/pkg/bridge"
 	"sent/pkg/bridge/peripherals"
 	"sent/pkg/capital"
-	"sent/pkg/control"
 	"sent/pkg/database"
 	"sent/pkg/horizon"
 	"sent/pkg/nexus"
@@ -64,7 +63,14 @@ func main() {
 		Run:   runValidation,
 	}
 
+	seedCmd := &cobra.Command{
+		Use:   "seed",
+		Short: "Seed database with comprehensive fake data",
+		Run:   runSeeding,
+	}
+
 	rootCmd.AddCommand(validateCmd)
+	rootCmd.AddCommand(seedCmd)
 	rootCmd.PersistentFlags().StringVar(&mode, "mode", "client", "Application mode: 'client' (GUI) or 'worker' (Headless)")
 	rootCmd.PersistentFlags().StringVar(&service, "service", "", "Specific service to run in worker mode")
 
@@ -79,6 +85,16 @@ func runValidation(cmd *cobra.Command, args []string) {
 	defer dbClient.Close()
 
 	testsuite.RunValidation(dbClient)
+}
+
+func runSeeding(cmd *cobra.Command, args []string) {
+	dbClient := database.NewPostgresClient()
+	defer dbClient.Close()
+
+	seeder := testsuite.NewComprehensiveSeeder(dbClient)
+	if err := seeder.SeedAll(); err != nil {
+		log.Fatalf("Seeding failed: %v", err)
+	}
 }
 
 // runApp initializes core dependencies and starts the application in the selected mode.
@@ -156,25 +172,25 @@ func runClient(db *ent.Client) {
 	// Initialize Bridges with the live database connection
 	systemBridge := bridge.NewSystemBridge()
 	authBridge := auth.NewAuthBridge(db)
-	capitalBridge := capital.NewCapitalBridge(db)
-	vaultBridge := vault.NewVaultBridge(db)
-	stockBridge := stock.NewStockBridge(db)
+	capitalBridge := capital.NewCapitalBridge(db, authBridge)
+	vaultBridge := vault.NewVaultBridge(db, authBridge)
+	stockBridge := stock.NewStockBridge(db, authBridge)
 	controlBridge := bridge.NewControlBridge(db, centralOrchestrator)
 	securityAuditBridge := bridge.NewSecurityAuditBridge()
-	kioskBridge := stock.NewKioskBridge(db, centralOrchestrator.GetClient(), securityAuditBridge)
-	adminBridge := admin.NewAdminBridge(db)
-	taxBridge := tax.NewTaxBridge(db)
+	kioskBridge := stock.NewKioskBridge(db, centralOrchestrator.GetClient(), securityAuditBridge, authBridge)
+	adminBridge := admin.NewAdminBridge(db, authBridge)
+	taxBridge := tax.NewTaxBridge(db, authBridge)
 	pulseBridge := bridge.NewPulseBridge(db)
 	
 	// Set River Client for Vault (Now handled via central)
 	vaultBridge.SetRiverClient(centralOrchestrator.GetClient())
 	
-	opticBridge := optic.NewOpticBridge(db)
-	pilotBridge := pilot.NewPilotBridge(db)
+	opticBridge := optic.NewOpticBridge(db, authBridge)
+	pilotBridge := pilot.NewPilotBridge(db, authBridge)
 	pilotBridge.SetRiverClient(centralOrchestrator.GetClient())
-	nexusBridge := nexus.NewNexusBridge(db)
-	horizonBridge := horizon.NewHorizonBridge(db, vaultBridge)
-	waveBridge := wave.NewWaveBridge(db)
+	nexusBridge := nexus.NewNexusBridge(db, authBridge)
+	horizonBridge := horizon.NewHorizonBridge(db, authBridge, vaultBridge)
+	waveBridge := wave.NewWaveBridge(db, authBridge)
 	peripheralsBridge := peripherals.NewPeripheralsBridge(db)
 
 	// Configure and run the Wails application
@@ -189,13 +205,18 @@ func runClient(db *ent.Client) {
 		},
 		BackgroundColour: &options.RGBA{R: 15, G: 23, B: 42, A: 255}, // Matches slate-900 usually
 		OnStartup: func(ctx context.Context) {
-			// Register Workers
-			river.AddWorker(centralOrchestrator.Workers(), &control.KillSwitchWorker{})
+			// Register Workers (KillSwitchWorker is already registered in control.RegisterStockHooks)
 			river.AddWorker(centralOrchestrator.Workers(), vault.NewOCRWorker(db))
 			river.AddWorker(centralOrchestrator.Workers(), stock.NewReservationReleaseWorker(db))
 
 			centralOrchestrator.Start(ctx)
+			systemBridge.Startup(ctx)
+			authBridge.Startup(ctx)
 			adminBridge.Startup(ctx)
+			capitalBridge.Startup(ctx)
+			vaultBridge.Startup(ctx)
+			stockBridge.Startup(ctx)
+			kioskBridge.Startup(ctx)
 			taxBridge.Startup(ctx)
 			pulseBridge.Startup(ctx)
 			controlBridge.Startup(ctx)

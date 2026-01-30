@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sent/ent/department"
 	"sent/ent/employee"
+	"sent/ent/tenant"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -114,6 +115,17 @@ func (_c *DepartmentCreate) SetHead(v *Employee) *DepartmentCreate {
 	return _c.SetHeadID(v.ID)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_c *DepartmentCreate) SetTenantID(id int) *DepartmentCreate {
+	_c.mutation.SetTenantID(id)
+	return _c
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_c *DepartmentCreate) SetTenant(v *Tenant) *DepartmentCreate {
+	return _c.SetTenantID(v.ID)
+}
+
 // Mutation returns the DepartmentMutation object of the builder.
 func (_c *DepartmentCreate) Mutation() *DepartmentMutation {
 	return _c.mutation
@@ -153,6 +165,9 @@ func (_c *DepartmentCreate) check() error {
 	}
 	if _, ok := _c.mutation.Code(); !ok {
 		return &ValidationError{Name: "code", err: errors.New(`ent: missing required field "Department.code"`)}
+	}
+	if len(_c.mutation.TenantIDs()) == 0 {
+		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "Department.tenant"`)}
 	}
 	return nil
 }
@@ -256,6 +271,23 @@ func (_c *DepartmentCreate) createSpec() (*Department, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.department_head = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   department.TenantTable,
+			Columns: []string{department.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.tenant_departments = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

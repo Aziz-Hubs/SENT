@@ -2,8 +2,11 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
+	"github.com/shopspring/decimal"
 	"time"
 )
 
@@ -16,11 +19,24 @@ type Account struct {
 func (Account) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
-		field.String("number").Unique(),
+		field.String("number"),
 		field.Enum("type").Values("asset", "liability", "equity", "revenue", "expense"),
-		field.Float("balance").Default(0),
+		field.Other("balance", decimal.Decimal{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "numeric(19,4)",
+			}).
+			Default(decimal.Zero),
 		field.Bool("is_intercompany").Default(false),
 		field.Time("created_at").Default(time.Now),
+	}
+}
+
+// Indexes of the Account.
+func (Account) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("number").Edges("tenant").Unique(),
+		index.Fields("type"),
+		index.Fields("name"),
 	}
 }
 

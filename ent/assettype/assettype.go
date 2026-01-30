@@ -18,6 +18,8 @@ const (
 	FieldDescription = "description"
 	// EdgeAssets holds the string denoting the assets edge name in mutations.
 	EdgeAssets = "assets"
+	// EdgeTenant holds the string denoting the tenant edge name in mutations.
+	EdgeTenant = "tenant"
 	// Table holds the table name of the assettype in the database.
 	Table = "asset_types"
 	// AssetsTable is the table that holds the assets relation/edge.
@@ -27,6 +29,13 @@ const (
 	AssetsInverseTable = "assets"
 	// AssetsColumn is the table column denoting the assets relation/edge.
 	AssetsColumn = "asset_type_assets"
+	// TenantTable is the table that holds the tenant relation/edge.
+	TenantTable = "asset_types"
+	// TenantInverseTable is the table name for the Tenant entity.
+	// It exists in this package in order to avoid circular dependency with the "tenant" package.
+	TenantInverseTable = "tenants"
+	// TenantColumn is the table column denoting the tenant relation/edge.
+	TenantColumn = "tenant_asset_types"
 )
 
 // Columns holds all SQL columns for assettype fields.
@@ -36,10 +45,21 @@ var Columns = []string{
 	FieldDescription,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "asset_types"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"tenant_asset_types",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -77,10 +97,24 @@ func ByAssets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAssetsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByTenantField orders the results by tenant field.
+func ByTenantField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTenantStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newAssetsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AssetsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, AssetsTable, AssetsColumn),
+	)
+}
+func newTenantStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TenantInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, TenantTable, TenantColumn),
 	)
 }

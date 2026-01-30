@@ -2,8 +2,10 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 	"time"
 )
 
@@ -16,7 +18,11 @@ type RecurringInvoice struct {
 func (RecurringInvoice) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("description"),
-		field.Float("amount"),
+		field.Other("amount", decimal.Decimal{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "numeric(19,4)",
+			}).
+			Default(decimal.Zero),
 		field.String("currency").Default("USD"),
 		field.String("frequency").Default("monthly"), // monthly, quarterly, yearly
 		field.Time("next_run_date").Default(time.Now),

@@ -9,6 +9,7 @@ import (
 	"sent/ent/camera"
 	"sent/ent/detectionevent"
 	"sent/ent/predicate"
+	"sent/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -19,8 +20,9 @@ import (
 // DetectionEventUpdate is the builder for updating DetectionEvent entities.
 type DetectionEventUpdate struct {
 	config
-	hooks    []Hook
-	mutation *DetectionEventMutation
+	hooks     []Hook
+	mutation  *DetectionEventMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the DetectionEventUpdate builder.
@@ -127,6 +129,17 @@ func (_u *DetectionEventUpdate) SetCamera(v *Camera) *DetectionEventUpdate {
 	return _u.SetCameraID(v.ID)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *DetectionEventUpdate) SetTenantID(id int) *DetectionEventUpdate {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *DetectionEventUpdate) SetTenant(v *Tenant) *DetectionEventUpdate {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the DetectionEventMutation object of the builder.
 func (_u *DetectionEventUpdate) Mutation() *DetectionEventMutation {
 	return _u.mutation
@@ -135,6 +148,12 @@ func (_u *DetectionEventUpdate) Mutation() *DetectionEventMutation {
 // ClearCamera clears the "camera" edge to the Camera entity.
 func (_u *DetectionEventUpdate) ClearCamera() *DetectionEventUpdate {
 	_u.mutation.ClearCamera()
+	return _u
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *DetectionEventUpdate) ClearTenant() *DetectionEventUpdate {
+	_u.mutation.ClearTenant()
 	return _u
 }
 
@@ -170,7 +189,16 @@ func (_u *DetectionEventUpdate) check() error {
 	if _u.mutation.CameraCleared() && len(_u.mutation.CameraIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "DetectionEvent.camera"`)
 	}
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "DetectionEvent.tenant"`)
+	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *DetectionEventUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *DetectionEventUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *DetectionEventUpdate) sqlSave(ctx context.Context) (_node int, err error) {
@@ -241,6 +269,36 @@ func (_u *DetectionEventUpdate) sqlSave(ctx context.Context) (_node int, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   detectionevent.TenantTable,
+			Columns: []string{detectionevent.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   detectionevent.TenantTable,
+			Columns: []string{detectionevent.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{detectionevent.Label}
@@ -256,9 +314,10 @@ func (_u *DetectionEventUpdate) sqlSave(ctx context.Context) (_node int, err err
 // DetectionEventUpdateOne is the builder for updating a single DetectionEvent entity.
 type DetectionEventUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *DetectionEventMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *DetectionEventMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetLabel sets the "label" field.
@@ -359,6 +418,17 @@ func (_u *DetectionEventUpdateOne) SetCamera(v *Camera) *DetectionEventUpdateOne
 	return _u.SetCameraID(v.ID)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *DetectionEventUpdateOne) SetTenantID(id int) *DetectionEventUpdateOne {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *DetectionEventUpdateOne) SetTenant(v *Tenant) *DetectionEventUpdateOne {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the DetectionEventMutation object of the builder.
 func (_u *DetectionEventUpdateOne) Mutation() *DetectionEventMutation {
 	return _u.mutation
@@ -367,6 +437,12 @@ func (_u *DetectionEventUpdateOne) Mutation() *DetectionEventMutation {
 // ClearCamera clears the "camera" edge to the Camera entity.
 func (_u *DetectionEventUpdateOne) ClearCamera() *DetectionEventUpdateOne {
 	_u.mutation.ClearCamera()
+	return _u
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *DetectionEventUpdateOne) ClearTenant() *DetectionEventUpdateOne {
+	_u.mutation.ClearTenant()
 	return _u
 }
 
@@ -415,7 +491,16 @@ func (_u *DetectionEventUpdateOne) check() error {
 	if _u.mutation.CameraCleared() && len(_u.mutation.CameraIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "DetectionEvent.camera"`)
 	}
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "DetectionEvent.tenant"`)
+	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *DetectionEventUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *DetectionEventUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *DetectionEventUpdateOne) sqlSave(ctx context.Context) (_node *DetectionEvent, err error) {
@@ -503,6 +588,36 @@ func (_u *DetectionEventUpdateOne) sqlSave(ctx context.Context) (_node *Detectio
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   detectionevent.TenantTable,
+			Columns: []string{detectionevent.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   detectionevent.TenantTable,
+			Columns: []string{detectionevent.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &DetectionEvent{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

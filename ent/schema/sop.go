@@ -16,7 +16,11 @@ type SOP struct {
 func (SOP) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("title"),
-		field.JSON("content", map[string]interface{}{}).Optional(),
+		field.JSON("content", map[string]interface{}{}).
+			SchemaType(map[string]string{
+				"postgres": "jsonb",
+			}).
+			Optional(),
 		field.Int("version").Default(1),
 		field.Time("created_at").Default(time.Now),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),

@@ -9,6 +9,7 @@ import (
 	"sent/ent/employee"
 	"sent/ent/predicate"
 	"sent/ent/successionmap"
+	"sent/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -19,8 +20,9 @@ import (
 // SuccessionMapUpdate is the builder for updating SuccessionMap entities.
 type SuccessionMapUpdate struct {
 	config
-	hooks    []Hook
-	mutation *SuccessionMapMutation
+	hooks     []Hook
+	mutation  *SuccessionMapMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the SuccessionMapUpdate builder.
@@ -99,6 +101,17 @@ func (_u *SuccessionMapUpdate) SetBackupCandidate(v *Employee) *SuccessionMapUpd
 	return _u.SetBackupCandidateID(v.ID)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *SuccessionMapUpdate) SetTenantID(id int) *SuccessionMapUpdate {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *SuccessionMapUpdate) SetTenant(v *Tenant) *SuccessionMapUpdate {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the SuccessionMapMutation object of the builder.
 func (_u *SuccessionMapUpdate) Mutation() *SuccessionMapMutation {
 	return _u.mutation
@@ -113,6 +126,12 @@ func (_u *SuccessionMapUpdate) ClearEmployee() *SuccessionMapUpdate {
 // ClearBackupCandidate clears the "backup_candidate" edge to the Employee entity.
 func (_u *SuccessionMapUpdate) ClearBackupCandidate() *SuccessionMapUpdate {
 	_u.mutation.ClearBackupCandidate()
+	return _u
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *SuccessionMapUpdate) ClearTenant() *SuccessionMapUpdate {
+	_u.mutation.ClearTenant()
 	return _u
 }
 
@@ -156,7 +175,16 @@ func (_u *SuccessionMapUpdate) check() error {
 	if _u.mutation.BackupCandidateCleared() && len(_u.mutation.BackupCandidateIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "SuccessionMap.backup_candidate"`)
 	}
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "SuccessionMap.tenant"`)
+	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *SuccessionMapUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SuccessionMapUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *SuccessionMapUpdate) sqlSave(ctx context.Context) (_node int, err error) {
@@ -241,6 +269,36 @@ func (_u *SuccessionMapUpdate) sqlSave(ctx context.Context) (_node int, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   successionmap.TenantTable,
+			Columns: []string{successionmap.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   successionmap.TenantTable,
+			Columns: []string{successionmap.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{successionmap.Label}
@@ -256,9 +314,10 @@ func (_u *SuccessionMapUpdate) sqlSave(ctx context.Context) (_node int, err erro
 // SuccessionMapUpdateOne is the builder for updating a single SuccessionMap entity.
 type SuccessionMapUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *SuccessionMapMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *SuccessionMapMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetReadinessLevel sets the "readiness_level" field.
@@ -331,6 +390,17 @@ func (_u *SuccessionMapUpdateOne) SetBackupCandidate(v *Employee) *SuccessionMap
 	return _u.SetBackupCandidateID(v.ID)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *SuccessionMapUpdateOne) SetTenantID(id int) *SuccessionMapUpdateOne {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *SuccessionMapUpdateOne) SetTenant(v *Tenant) *SuccessionMapUpdateOne {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the SuccessionMapMutation object of the builder.
 func (_u *SuccessionMapUpdateOne) Mutation() *SuccessionMapMutation {
 	return _u.mutation
@@ -345,6 +415,12 @@ func (_u *SuccessionMapUpdateOne) ClearEmployee() *SuccessionMapUpdateOne {
 // ClearBackupCandidate clears the "backup_candidate" edge to the Employee entity.
 func (_u *SuccessionMapUpdateOne) ClearBackupCandidate() *SuccessionMapUpdateOne {
 	_u.mutation.ClearBackupCandidate()
+	return _u
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *SuccessionMapUpdateOne) ClearTenant() *SuccessionMapUpdateOne {
+	_u.mutation.ClearTenant()
 	return _u
 }
 
@@ -401,7 +477,16 @@ func (_u *SuccessionMapUpdateOne) check() error {
 	if _u.mutation.BackupCandidateCleared() && len(_u.mutation.BackupCandidateIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "SuccessionMap.backup_candidate"`)
 	}
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "SuccessionMap.tenant"`)
+	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *SuccessionMapUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SuccessionMapUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *SuccessionMapUpdateOne) sqlSave(ctx context.Context) (_node *SuccessionMap, err error) {
@@ -503,6 +588,36 @@ func (_u *SuccessionMapUpdateOne) sqlSave(ctx context.Context) (_node *Successio
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   successionmap.TenantTable,
+			Columns: []string{successionmap.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   successionmap.TenantTable,
+			Columns: []string{successionmap.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &SuccessionMap{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

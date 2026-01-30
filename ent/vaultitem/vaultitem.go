@@ -22,6 +22,12 @@ const (
 	FieldSize = "size"
 	// FieldHash holds the string denoting the hash field in the database.
 	FieldHash = "hash"
+	// FieldFileType holds the string denoting the file_type field in the database.
+	FieldFileType = "file_type"
+	// FieldEncrypted holds the string denoting the encrypted field in the database.
+	FieldEncrypted = "encrypted"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
 	// FieldContent holds the string denoting the content field in the database.
 	FieldContent = "content"
 	// FieldIsDir holds the string denoting the is_dir field in the database.
@@ -50,6 +56,9 @@ var Columns = []string{
 	FieldName,
 	FieldSize,
 	FieldHash,
+	FieldFileType,
+	FieldEncrypted,
+	FieldMetadata,
 	FieldContent,
 	FieldIsDir,
 	FieldCreatedAt,
@@ -86,6 +95,8 @@ var (
 	DefaultSize int64
 	// HashValidator is a validator for the "hash" field. It is called by the builders before save.
 	HashValidator func(string) error
+	// DefaultEncrypted holds the default value on creation for the "encrypted" field.
+	DefaultEncrypted bool
 	// DefaultIsDir holds the default value on creation for the "is_dir" field.
 	DefaultIsDir bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
@@ -122,6 +133,16 @@ func BySize(opts ...sql.OrderTermOption) OrderOption {
 // ByHash orders the results by the hash field.
 func ByHash(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHash, opts...).ToFunc()
+}
+
+// ByFileType orders the results by the file_type field.
+func ByFileType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFileType, opts...).ToFunc()
+}
+
+// ByEncrypted orders the results by the encrypted field.
+func ByEncrypted(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEncrypted, opts...).ToFunc()
 }
 
 // ByContent orders the results by the content field.

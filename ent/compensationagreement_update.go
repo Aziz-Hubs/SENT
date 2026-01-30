@@ -15,13 +15,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // CompensationAgreementUpdate is the builder for updating CompensationAgreement entities.
 type CompensationAgreementUpdate struct {
 	config
-	hooks    []Hook
-	mutation *CompensationAgreementMutation
+	hooks     []Hook
+	mutation  *CompensationAgreementMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the CompensationAgreementUpdate builder.
@@ -31,23 +33,16 @@ func (_u *CompensationAgreementUpdate) Where(ps ...predicate.CompensationAgreeme
 }
 
 // SetBaseSalary sets the "base_salary" field.
-func (_u *CompensationAgreementUpdate) SetBaseSalary(v float64) *CompensationAgreementUpdate {
-	_u.mutation.ResetBaseSalary()
+func (_u *CompensationAgreementUpdate) SetBaseSalary(v decimal.Decimal) *CompensationAgreementUpdate {
 	_u.mutation.SetBaseSalary(v)
 	return _u
 }
 
 // SetNillableBaseSalary sets the "base_salary" field if the given value is not nil.
-func (_u *CompensationAgreementUpdate) SetNillableBaseSalary(v *float64) *CompensationAgreementUpdate {
+func (_u *CompensationAgreementUpdate) SetNillableBaseSalary(v *decimal.Decimal) *CompensationAgreementUpdate {
 	if v != nil {
 		_u.SetBaseSalary(*v)
 	}
-	return _u
-}
-
-// AddBaseSalary adds value to the "base_salary" field.
-func (_u *CompensationAgreementUpdate) AddBaseSalary(v float64) *CompensationAgreementUpdate {
-	_u.mutation.AddBaseSalary(v)
 	return _u
 }
 
@@ -189,6 +184,12 @@ func (_u *CompensationAgreementUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *CompensationAgreementUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CompensationAgreementUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *CompensationAgreementUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -202,10 +203,7 @@ func (_u *CompensationAgreementUpdate) sqlSave(ctx context.Context) (_node int, 
 		}
 	}
 	if value, ok := _u.mutation.BaseSalary(); ok {
-		_spec.SetField(compensationagreement.FieldBaseSalary, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedBaseSalary(); ok {
-		_spec.AddField(compensationagreement.FieldBaseSalary, field.TypeFloat64, value)
+		_spec.SetField(compensationagreement.FieldBaseSalary, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Currency(); ok {
 		_spec.SetField(compensationagreement.FieldCurrency, field.TypeString, value)
@@ -277,6 +275,7 @@ func (_u *CompensationAgreementUpdate) sqlSave(ctx context.Context) (_node int, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{compensationagreement.Label}
@@ -292,29 +291,23 @@ func (_u *CompensationAgreementUpdate) sqlSave(ctx context.Context) (_node int, 
 // CompensationAgreementUpdateOne is the builder for updating a single CompensationAgreement entity.
 type CompensationAgreementUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *CompensationAgreementMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *CompensationAgreementMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetBaseSalary sets the "base_salary" field.
-func (_u *CompensationAgreementUpdateOne) SetBaseSalary(v float64) *CompensationAgreementUpdateOne {
-	_u.mutation.ResetBaseSalary()
+func (_u *CompensationAgreementUpdateOne) SetBaseSalary(v decimal.Decimal) *CompensationAgreementUpdateOne {
 	_u.mutation.SetBaseSalary(v)
 	return _u
 }
 
 // SetNillableBaseSalary sets the "base_salary" field if the given value is not nil.
-func (_u *CompensationAgreementUpdateOne) SetNillableBaseSalary(v *float64) *CompensationAgreementUpdateOne {
+func (_u *CompensationAgreementUpdateOne) SetNillableBaseSalary(v *decimal.Decimal) *CompensationAgreementUpdateOne {
 	if v != nil {
 		_u.SetBaseSalary(*v)
 	}
-	return _u
-}
-
-// AddBaseSalary adds value to the "base_salary" field.
-func (_u *CompensationAgreementUpdateOne) AddBaseSalary(v float64) *CompensationAgreementUpdateOne {
-	_u.mutation.AddBaseSalary(v)
 	return _u
 }
 
@@ -469,6 +462,12 @@ func (_u *CompensationAgreementUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *CompensationAgreementUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CompensationAgreementUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *CompensationAgreementUpdateOne) sqlSave(ctx context.Context) (_node *CompensationAgreement, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -499,10 +498,7 @@ func (_u *CompensationAgreementUpdateOne) sqlSave(ctx context.Context) (_node *C
 		}
 	}
 	if value, ok := _u.mutation.BaseSalary(); ok {
-		_spec.SetField(compensationagreement.FieldBaseSalary, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedBaseSalary(); ok {
-		_spec.AddField(compensationagreement.FieldBaseSalary, field.TypeFloat64, value)
+		_spec.SetField(compensationagreement.FieldBaseSalary, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Currency(); ok {
 		_spec.SetField(compensationagreement.FieldCurrency, field.TypeString, value)
@@ -574,6 +570,7 @@ func (_u *CompensationAgreementUpdateOne) sqlSave(ctx context.Context) (_node *C
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &CompensationAgreement{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

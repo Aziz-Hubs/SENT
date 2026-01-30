@@ -8,6 +8,7 @@ import (
 	"sent/ent"
 	"sent/ent/account"
 	"sent/ent/tenant"
+	"github.com/shopspring/decimal"
 )
 
 type ConsolidationWorker struct {
@@ -19,9 +20,9 @@ func NewConsolidationWorker(db *ent.Client) *ConsolidationWorker {
 }
 
 type ConsolidatedBalance struct {
-	AccountName string
+	AccountName   string
 	AccountNumber string
-	TotalBalance float64
+	TotalBalance  decimal.Decimal
 }
 
 func (w *ConsolidationWorker) Run(ctx context.Context) error {
@@ -52,20 +53,34 @@ func (w *ConsolidationWorker) ConsolidateAll(ctx context.Context) error {
 	}
 
 	for _, p := range parents {
-		balances, err := w.GenerateConsolidatedTrialBalance(ctx, p.ID)
+		// Use a transaction for consistent snapshot during consolidation
+		tx, err := w.db.Tx(ctx)
 		if err != nil {
+			fmt.Printf("[CAPITAL] Error creating transaction for tenant %s: %v\n", p.Name, err)
+			continue
+		}
+		
+		balances, err := w.GenerateConsolidatedTrialBalance(ctx, p.ID, tx)
+		if err != nil {
+			tx.Rollback()
 			fmt.Printf("[CAPITAL] Error consolidating for tenant %s: %v\n", p.Name, err)
 			continue
 		}
+		
+		if err := tx.Commit(); err != nil {
+			fmt.Printf("[CAPITAL] Error committing consolidation for tenant %s: %v\n", p.Name, err)
+			continue
+		}
+		
 		fmt.Printf("[CAPITAL] Consolidated Trial Balance for %s generated (%d accounts)\n", p.Name, len(balances))
 	}
 
 	return nil
 }
 
-func (w *ConsolidationWorker) GenerateConsolidatedTrialBalance(ctx context.Context, parentID int) ([]ConsolidatedBalance, error) {
+func (w *ConsolidationWorker) GenerateConsolidatedTrialBalance(ctx context.Context, parentID int, tx *ent.Tx) ([]ConsolidatedBalance, error) {
 	// Get parent and all children
-	tenants, err := w.db.Tenant.Query().
+	tenants, err := tx.Tenant.Query().
 		Where(
 			tenant.Or(
 				tenant.IDEQ(parentID),
@@ -83,7 +98,7 @@ func (w *ConsolidationWorker) GenerateConsolidatedTrialBalance(ctx context.Conte
 	}
 
 	// Fetch all accounts for these tenants
-	accounts, err := w.db.Account.Query().
+	accounts, err := tx.Account.Query().
 		Where(account.HasTenantWith(tenant.IDIn(tenantIDs...))).
 		All(ctx)
 	if err != nil {
@@ -103,10 +118,10 @@ func (w *ConsolidationWorker) GenerateConsolidatedTrialBalance(ctx context.Conte
 			agg[acc.Number] = &ConsolidatedBalance{
 				AccountName:   acc.Name,
 				AccountNumber: acc.Number,
-				TotalBalance:  0,
+				TotalBalance:  decimal.Zero,
 			}
 		}
-		agg[acc.Number].TotalBalance += acc.Balance
+		agg[acc.Number].TotalBalance = agg[acc.Number].TotalBalance.Add(acc.Balance)
 	}
 
 	result := make([]ConsolidatedBalance, 0, len(agg))

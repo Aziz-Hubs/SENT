@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 // ID filters vertices based on their ID field.
@@ -78,6 +79,11 @@ func URL(v string) predicate.SaaSApp {
 // IsManaged applies equality check predicate on the "is_managed" field. It's identical to IsManagedEQ.
 func IsManaged(v bool) predicate.SaaSApp {
 	return predicate.SaaSApp(sql.FieldEQ(FieldIsManaged, v))
+}
+
+// MonthlyPrice applies equality check predicate on the "monthly_price" field. It's identical to MonthlyPriceEQ.
+func MonthlyPrice(v decimal.Decimal) predicate.SaaSApp {
+	return predicate.SaaSApp(sql.FieldEQ(FieldMonthlyPrice, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -378,6 +384,56 @@ func IsManagedEQ(v bool) predicate.SaaSApp {
 // IsManagedNEQ applies the NEQ predicate on the "is_managed" field.
 func IsManagedNEQ(v bool) predicate.SaaSApp {
 	return predicate.SaaSApp(sql.FieldNEQ(FieldIsManaged, v))
+}
+
+// MonthlyPriceEQ applies the EQ predicate on the "monthly_price" field.
+func MonthlyPriceEQ(v decimal.Decimal) predicate.SaaSApp {
+	return predicate.SaaSApp(sql.FieldEQ(FieldMonthlyPrice, v))
+}
+
+// MonthlyPriceNEQ applies the NEQ predicate on the "monthly_price" field.
+func MonthlyPriceNEQ(v decimal.Decimal) predicate.SaaSApp {
+	return predicate.SaaSApp(sql.FieldNEQ(FieldMonthlyPrice, v))
+}
+
+// MonthlyPriceIn applies the In predicate on the "monthly_price" field.
+func MonthlyPriceIn(vs ...decimal.Decimal) predicate.SaaSApp {
+	return predicate.SaaSApp(sql.FieldIn(FieldMonthlyPrice, vs...))
+}
+
+// MonthlyPriceNotIn applies the NotIn predicate on the "monthly_price" field.
+func MonthlyPriceNotIn(vs ...decimal.Decimal) predicate.SaaSApp {
+	return predicate.SaaSApp(sql.FieldNotIn(FieldMonthlyPrice, vs...))
+}
+
+// MonthlyPriceGT applies the GT predicate on the "monthly_price" field.
+func MonthlyPriceGT(v decimal.Decimal) predicate.SaaSApp {
+	return predicate.SaaSApp(sql.FieldGT(FieldMonthlyPrice, v))
+}
+
+// MonthlyPriceGTE applies the GTE predicate on the "monthly_price" field.
+func MonthlyPriceGTE(v decimal.Decimal) predicate.SaaSApp {
+	return predicate.SaaSApp(sql.FieldGTE(FieldMonthlyPrice, v))
+}
+
+// MonthlyPriceLT applies the LT predicate on the "monthly_price" field.
+func MonthlyPriceLT(v decimal.Decimal) predicate.SaaSApp {
+	return predicate.SaaSApp(sql.FieldLT(FieldMonthlyPrice, v))
+}
+
+// MonthlyPriceLTE applies the LTE predicate on the "monthly_price" field.
+func MonthlyPriceLTE(v decimal.Decimal) predicate.SaaSApp {
+	return predicate.SaaSApp(sql.FieldLTE(FieldMonthlyPrice, v))
+}
+
+// MonthlyPriceIsNil applies the IsNil predicate on the "monthly_price" field.
+func MonthlyPriceIsNil() predicate.SaaSApp {
+	return predicate.SaaSApp(sql.FieldIsNull(FieldMonthlyPrice))
+}
+
+// MonthlyPriceNotNil applies the NotNil predicate on the "monthly_price" field.
+func MonthlyPriceNotNil() predicate.SaaSApp {
+	return predicate.SaaSApp(sql.FieldNotNull(FieldMonthlyPrice))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

@@ -11,6 +11,7 @@ import (
 	"sent/ent/networklink"
 	"sent/ent/networkport"
 	"sent/ent/predicate"
+	"sent/ent/tenant"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -27,7 +28,9 @@ type NetworkPortQuery struct {
 	predicates      []predicate.NetworkPort
 	withDevice      *NetworkDeviceQuery
 	withConnectedTo *NetworkLinkQuery
+	withTenant      *TenantQuery
 	withFKs         bool
+	modifiers       []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -101,6 +104,28 @@ func (_q *NetworkPortQuery) QueryConnectedTo() *NetworkLinkQuery {
 			sqlgraph.From(networkport.Table, networkport.FieldID, selector),
 			sqlgraph.To(networklink.Table, networklink.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, networkport.ConnectedToTable, networkport.ConnectedToColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTenant chains the current query on the "tenant" edge.
+func (_q *NetworkPortQuery) QueryTenant() *TenantQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(networkport.Table, networkport.FieldID, selector),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, networkport.TenantTable, networkport.TenantColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -302,9 +327,11 @@ func (_q *NetworkPortQuery) Clone() *NetworkPortQuery {
 		predicates:      append([]predicate.NetworkPort{}, _q.predicates...),
 		withDevice:      _q.withDevice.Clone(),
 		withConnectedTo: _q.withConnectedTo.Clone(),
+		withTenant:      _q.withTenant.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -327,6 +354,17 @@ func (_q *NetworkPortQuery) WithConnectedTo(opts ...func(*NetworkLinkQuery)) *Ne
 		opt(query)
 	}
 	_q.withConnectedTo = query
+	return _q
+}
+
+// WithTenant tells the query-builder to eager-load the nodes that are connected to
+// the "tenant" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *NetworkPortQuery) WithTenant(opts ...func(*TenantQuery)) *NetworkPortQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTenant = query
 	return _q
 }
 
@@ -409,12 +447,13 @@ func (_q *NetworkPortQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		nodes       = []*NetworkPort{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			_q.withDevice != nil,
 			_q.withConnectedTo != nil,
+			_q.withTenant != nil,
 		}
 	)
-	if _q.withDevice != nil {
+	if _q.withDevice != nil || _q.withTenant != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -428,6 +467,9 @@ func (_q *NetworkPortQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -448,6 +490,12 @@ func (_q *NetworkPortQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		if err := _q.loadConnectedTo(ctx, query, nodes,
 			func(n *NetworkPort) { n.Edges.ConnectedTo = []*NetworkLink{} },
 			func(n *NetworkPort, e *NetworkLink) { n.Edges.ConnectedTo = append(n.Edges.ConnectedTo, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTenant; query != nil {
+		if err := _q.loadTenant(ctx, query, nodes, nil,
+			func(n *NetworkPort, e *Tenant) { n.Edges.Tenant = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -517,9 +565,44 @@ func (_q *NetworkPortQuery) loadConnectedTo(ctx context.Context, query *NetworkL
 	}
 	return nil
 }
+func (_q *NetworkPortQuery) loadTenant(ctx context.Context, query *TenantQuery, nodes []*NetworkPort, init func(*NetworkPort), assign func(*NetworkPort, *Tenant)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*NetworkPort)
+	for i := range nodes {
+		if nodes[i].tenant_network_ports == nil {
+			continue
+		}
+		fk := *nodes[i].tenant_network_ports
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(tenant.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tenant_network_ports" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (_q *NetworkPortQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -582,6 +665,9 @@ func (_q *NetworkPortQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -597,6 +683,12 @@ func (_q *NetworkPortQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *NetworkPortQuery) Modify(modifiers ...func(s *sql.Selector)) *NetworkPortSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // NetworkPortGroupBy is the group-by builder for NetworkPort entities.
@@ -687,4 +779,10 @@ func (_s *NetworkPortSelect) sqlScan(ctx context.Context, root *NetworkPortQuery
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *NetworkPortSelect) Modify(modifiers ...func(s *sql.Selector)) *NetworkPortSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

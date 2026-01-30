@@ -15,6 +15,7 @@ type SaaSFilter struct {
 // Fields of the SaaSFilter.
 func (SaaSFilter) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("name").NotEmpty(),
 		field.String("domain_pattern").NotEmpty(), // e.g., "*.dropbox.com"
 		field.Enum("action").Values("ALLOW", "BLOCK").Default("BLOCK"),
 		field.String("reason").Optional(),

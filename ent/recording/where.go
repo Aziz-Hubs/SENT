@@ -373,6 +373,29 @@ func HasCameraWith(preds ...predicate.Camera) predicate.Recording {
 	})
 }
 
+// HasTenant applies the HasEdge predicate on the "tenant" edge.
+func HasTenant() predicate.Recording {
+	return predicate.Recording(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, TenantTable, TenantColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTenantWith applies the HasEdge predicate on the "tenant" edge with a given conditions (other predicates).
+func HasTenantWith(preds ...predicate.Tenant) predicate.Recording {
+	return predicate.Recording(func(s *sql.Selector) {
+		step := newTenantStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Recording) predicate.Recording {
 	return predicate.Recording(sql.AndPredicates(predicates...))

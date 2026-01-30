@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"regexp"
 	"sent/ent"
+	"sent/ent/tenant"
 	"sent/ent/ticket"
 	"sent/ent/timeentry"
 	"sent/ent/user"
+	"sent/pkg/auth"
 	"sent/pkg/orchestrator"
 	"time"
 
@@ -19,12 +21,13 @@ import (
 type PilotBridge struct {
 	ctx   context.Context
 	db    *ent.Client
+	auth  *auth.AuthBridge
 	river *river.Client[pgx.Tx]
 }
 
 // NewPilotBridge initializes the ITSM bridge.
-func NewPilotBridge(db *ent.Client) *PilotBridge {
-	return &PilotBridge{db: db}
+func NewPilotBridge(db *ent.Client, auth *auth.AuthBridge) *PilotBridge {
+	return &PilotBridge{db: db, auth: auth}
 }
 
 // SetRiverClient sets the river client for enqueuing jobs.
@@ -39,7 +42,14 @@ func (b *PilotBridge) Startup(ctx context.Context) {
 
 // GetTickets retrieves a list of tickets for the current tenant.
 func (b *PilotBridge) GetTickets() ([]TicketDTO, error) {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return nil, err
+	}
+	tenantID := profile.TenantID
+
 	tickets, err := b.db.Ticket.Query().
+		Where(ticket.HasTenantWith(tenant.ID(tenantID))).
 		WithAssignee().
 		WithRequester().
 		WithAsset().

@@ -11,6 +11,8 @@ export function ConsumeOneTimeLink(arg1:string):Promise<string>;
 
 export function CopyCredential(arg1:vault.RevealRequest):Promise<void>;
 
+export function CreateAsset(arg1:string,arg2:string,arg3:string,arg4:string):Promise<ent.Asset>;
+
 export function CreateOneTimeLink(arg1:number,arg2:number,arg3:number):Promise<string>;
 
 export function CreateSOP(arg1:number,arg2:number,arg3:string,arg4:Record<string, any>,arg5:any):Promise<ent.SOP>;
@@ -23,7 +25,13 @@ export function GetPendingDiscovery():Promise<Array<ent.DiscoveryEntry>>;
 
 export function GetSOPsByAsset(arg1:number):Promise<Array<ent.SOP>>;
 
+export function GetSaaSInventory():Promise<Array<ent.SaaSApp>>;
+
+export function ImportAssets(arg1:string):Promise<number>;
+
 export function RevealCredential(arg1:vault.RevealRequest):Promise<string>;
+
+export function ScanShadowIT():Promise<number>;
 
 export function Startup(arg1:context.Context):Promise<void>;
 

@@ -16,13 +16,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // SaaSAppUpdate is the builder for updating SaaSApp entities.
 type SaaSAppUpdate struct {
 	config
-	hooks    []Hook
-	mutation *SaaSAppMutation
+	hooks     []Hook
+	mutation  *SaaSAppMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the SaaSAppUpdate builder.
@@ -116,6 +118,26 @@ func (_u *SaaSAppUpdate) SetNillableIsManaged(v *bool) *SaaSAppUpdate {
 // SetConfig sets the "config" field.
 func (_u *SaaSAppUpdate) SetConfig(v map[string]interface{}) *SaaSAppUpdate {
 	_u.mutation.SetConfig(v)
+	return _u
+}
+
+// SetMonthlyPrice sets the "monthly_price" field.
+func (_u *SaaSAppUpdate) SetMonthlyPrice(v decimal.Decimal) *SaaSAppUpdate {
+	_u.mutation.SetMonthlyPrice(v)
+	return _u
+}
+
+// SetNillableMonthlyPrice sets the "monthly_price" field if the given value is not nil.
+func (_u *SaaSAppUpdate) SetNillableMonthlyPrice(v *decimal.Decimal) *SaaSAppUpdate {
+	if v != nil {
+		_u.SetMonthlyPrice(*v)
+	}
+	return _u
+}
+
+// ClearMonthlyPrice clears the value of the "monthly_price" field.
+func (_u *SaaSAppUpdate) ClearMonthlyPrice() *SaaSAppUpdate {
+	_u.mutation.ClearMonthlyPrice()
 	return _u
 }
 
@@ -273,6 +295,12 @@ func (_u *SaaSAppUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *SaaSAppUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SaaSAppUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *SaaSAppUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -308,6 +336,12 @@ func (_u *SaaSAppUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Config(); ok {
 		_spec.SetField(saasapp.FieldConfig, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.MonthlyPrice(); ok {
+		_spec.SetField(saasapp.FieldMonthlyPrice, field.TypeOther, value)
+	}
+	if _u.mutation.MonthlyPriceCleared() {
+		_spec.ClearField(saasapp.FieldMonthlyPrice, field.TypeOther)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(saasapp.FieldUpdatedAt, field.TypeTime, value)
@@ -431,6 +465,7 @@ func (_u *SaaSAppUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{saasapp.Label}
@@ -446,9 +481,10 @@ func (_u *SaaSAppUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 // SaaSAppUpdateOne is the builder for updating a single SaaSApp entity.
 type SaaSAppUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *SaaSAppMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *SaaSAppMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetName sets the "name" field.
@@ -536,6 +572,26 @@ func (_u *SaaSAppUpdateOne) SetNillableIsManaged(v *bool) *SaaSAppUpdateOne {
 // SetConfig sets the "config" field.
 func (_u *SaaSAppUpdateOne) SetConfig(v map[string]interface{}) *SaaSAppUpdateOne {
 	_u.mutation.SetConfig(v)
+	return _u
+}
+
+// SetMonthlyPrice sets the "monthly_price" field.
+func (_u *SaaSAppUpdateOne) SetMonthlyPrice(v decimal.Decimal) *SaaSAppUpdateOne {
+	_u.mutation.SetMonthlyPrice(v)
+	return _u
+}
+
+// SetNillableMonthlyPrice sets the "monthly_price" field if the given value is not nil.
+func (_u *SaaSAppUpdateOne) SetNillableMonthlyPrice(v *decimal.Decimal) *SaaSAppUpdateOne {
+	if v != nil {
+		_u.SetMonthlyPrice(*v)
+	}
+	return _u
+}
+
+// ClearMonthlyPrice clears the value of the "monthly_price" field.
+func (_u *SaaSAppUpdateOne) ClearMonthlyPrice() *SaaSAppUpdateOne {
+	_u.mutation.ClearMonthlyPrice()
 	return _u
 }
 
@@ -706,6 +762,12 @@ func (_u *SaaSAppUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *SaaSAppUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SaaSAppUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *SaaSAppUpdateOne) sqlSave(ctx context.Context) (_node *SaaSApp, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -758,6 +820,12 @@ func (_u *SaaSAppUpdateOne) sqlSave(ctx context.Context) (_node *SaaSApp, err er
 	}
 	if value, ok := _u.mutation.Config(); ok {
 		_spec.SetField(saasapp.FieldConfig, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.MonthlyPrice(); ok {
+		_spec.SetField(saasapp.FieldMonthlyPrice, field.TypeOther, value)
+	}
+	if _u.mutation.MonthlyPriceCleared() {
+		_spec.ClearField(saasapp.FieldMonthlyPrice, field.TypeOther)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(saasapp.FieldUpdatedAt, field.TypeTime, value)
@@ -881,6 +949,7 @@ func (_u *SaaSAppUpdateOne) sqlSave(ctx context.Context) (_node *SaaSApp, err er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &SaaSApp{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

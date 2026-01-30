@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // JournalEntry is the model entity for the JournalEntry schema.
@@ -22,7 +23,7 @@ type JournalEntry struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Amount holds the value of the "amount" field.
-	Amount float64 `json:"amount,omitempty"`
+	Amount decimal.Decimal `json:"amount,omitempty"`
 	// Direction holds the value of the "direction" field.
 	Direction journalentry.Direction `json:"direction,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -107,7 +108,7 @@ func (*JournalEntry) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case journalentry.FieldAmount:
-			values[i] = new(sql.NullFloat64)
+			values[i] = new(decimal.Decimal)
 		case journalentry.FieldID, journalentry.FieldApprovedByID:
 			values[i] = new(sql.NullInt64)
 		case journalentry.FieldDirection, journalentry.FieldDescription, journalentry.FieldApprovalStatus:
@@ -142,10 +143,10 @@ func (_m *JournalEntry) assignValues(columns []string, values []any) error {
 			}
 			_m.ID = int(value.Int64)
 		case journalentry.FieldAmount:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field amount", values[i])
-			} else if value.Valid {
-				_m.Amount = value.Float64
+			} else if value != nil {
+				_m.Amount = *value
 			}
 		case journalentry.FieldDirection:
 			if value, ok := values[i].(*sql.NullString); !ok {

@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // CompensationAgreement is the model entity for the CompensationAgreement schema.
@@ -20,7 +21,7 @@ type CompensationAgreement struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// BaseSalary holds the value of the "base_salary" field.
-	BaseSalary float64 `json:"base_salary,omitempty"`
+	BaseSalary decimal.Decimal `json:"base_salary,omitempty"`
 	// Currency holds the value of the "currency" field.
 	Currency string `json:"currency,omitempty"`
 	// EffectiveDate holds the value of the "effective_date" field.
@@ -76,7 +77,7 @@ func (*CompensationAgreement) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case compensationagreement.FieldBaseSalary:
-			values[i] = new(sql.NullFloat64)
+			values[i] = new(decimal.Decimal)
 		case compensationagreement.FieldID:
 			values[i] = new(sql.NullInt64)
 		case compensationagreement.FieldCurrency, compensationagreement.FieldStatus:
@@ -109,10 +110,10 @@ func (_m *CompensationAgreement) assignValues(columns []string, values []any) er
 			}
 			_m.ID = int(value.Int64)
 		case compensationagreement.FieldBaseSalary:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field base_salary", values[i])
-			} else if value.Valid {
-				_m.BaseSalary = value.Float64
+			} else if value != nil {
+				_m.BaseSalary = *value
 			}
 		case compensationagreement.FieldCurrency:
 			if value, ok := values[i].(*sql.NullString); !ok {

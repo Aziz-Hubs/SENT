@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // RecurringInvoiceCreate is the builder for creating a RecurringInvoice entity.
@@ -29,8 +30,16 @@ func (_c *RecurringInvoiceCreate) SetDescription(v string) *RecurringInvoiceCrea
 }
 
 // SetAmount sets the "amount" field.
-func (_c *RecurringInvoiceCreate) SetAmount(v float64) *RecurringInvoiceCreate {
+func (_c *RecurringInvoiceCreate) SetAmount(v decimal.Decimal) *RecurringInvoiceCreate {
 	_c.mutation.SetAmount(v)
+	return _c
+}
+
+// SetNillableAmount sets the "amount" field if the given value is not nil.
+func (_c *RecurringInvoiceCreate) SetNillableAmount(v *decimal.Decimal) *RecurringInvoiceCreate {
+	if v != nil {
+		_c.SetAmount(*v)
+	}
 	return _c
 }
 
@@ -175,6 +184,10 @@ func (_c *RecurringInvoiceCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *RecurringInvoiceCreate) defaults() {
+	if _, ok := _c.mutation.Amount(); !ok {
+		v := recurringinvoice.DefaultAmount
+		_c.mutation.SetAmount(v)
+	}
 	if _, ok := _c.mutation.Currency(); !ok {
 		v := recurringinvoice.DefaultCurrency
 		_c.mutation.SetCurrency(v)
@@ -257,7 +270,7 @@ func (_c *RecurringInvoiceCreate) createSpec() (*RecurringInvoice, *sqlgraph.Cre
 		_node.Description = value
 	}
 	if value, ok := _c.mutation.Amount(); ok {
-		_spec.SetField(recurringinvoice.FieldAmount, field.TypeFloat64, value)
+		_spec.SetField(recurringinvoice.FieldAmount, field.TypeOther, value)
 		_node.Amount = value
 	}
 	if value, ok := _c.mutation.Currency(); ok {

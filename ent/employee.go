@@ -76,9 +76,21 @@ type EmployeeEdges struct {
 	BackupFor []*SuccessionMap `json:"backup_for,omitempty"`
 	// ExpenseAccount holds the value of the expense_account edge.
 	ExpenseAccount *Account `json:"expense_account,omitempty"`
+	// TimeOffRequests holds the value of the time_off_requests edge.
+	TimeOffRequests []*TimeOffRequest `json:"time_off_requests,omitempty"`
+	// ApprovedTimeOff holds the value of the approved_time_off edge.
+	ApprovedTimeOff []*TimeOffRequest `json:"approved_time_off,omitempty"`
+	// TimeOffBalances holds the value of the time_off_balances edge.
+	TimeOffBalances []*TimeOffBalance `json:"time_off_balances,omitempty"`
+	// PerformanceReviews holds the value of the performance_reviews edge.
+	PerformanceReviews []*PerformanceReview `json:"performance_reviews,omitempty"`
+	// ConductedReviews holds the value of the conducted_reviews edge.
+	ConductedReviews []*PerformanceReview `json:"conducted_reviews,omitempty"`
+	// Goals holds the value of the goals edge.
+	Goals []*Goal `json:"goals,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [14]bool
 }
 
 // TenantOrErr returns the Tenant value or an error if the edge
@@ -159,6 +171,60 @@ func (e EmployeeEdges) ExpenseAccountOrErr() (*Account, error) {
 		return nil, &NotFoundError{label: account.Label}
 	}
 	return nil, &NotLoadedError{edge: "expense_account"}
+}
+
+// TimeOffRequestsOrErr returns the TimeOffRequests value or an error if the edge
+// was not loaded in eager-loading.
+func (e EmployeeEdges) TimeOffRequestsOrErr() ([]*TimeOffRequest, error) {
+	if e.loadedTypes[8] {
+		return e.TimeOffRequests, nil
+	}
+	return nil, &NotLoadedError{edge: "time_off_requests"}
+}
+
+// ApprovedTimeOffOrErr returns the ApprovedTimeOff value or an error if the edge
+// was not loaded in eager-loading.
+func (e EmployeeEdges) ApprovedTimeOffOrErr() ([]*TimeOffRequest, error) {
+	if e.loadedTypes[9] {
+		return e.ApprovedTimeOff, nil
+	}
+	return nil, &NotLoadedError{edge: "approved_time_off"}
+}
+
+// TimeOffBalancesOrErr returns the TimeOffBalances value or an error if the edge
+// was not loaded in eager-loading.
+func (e EmployeeEdges) TimeOffBalancesOrErr() ([]*TimeOffBalance, error) {
+	if e.loadedTypes[10] {
+		return e.TimeOffBalances, nil
+	}
+	return nil, &NotLoadedError{edge: "time_off_balances"}
+}
+
+// PerformanceReviewsOrErr returns the PerformanceReviews value or an error if the edge
+// was not loaded in eager-loading.
+func (e EmployeeEdges) PerformanceReviewsOrErr() ([]*PerformanceReview, error) {
+	if e.loadedTypes[11] {
+		return e.PerformanceReviews, nil
+	}
+	return nil, &NotLoadedError{edge: "performance_reviews"}
+}
+
+// ConductedReviewsOrErr returns the ConductedReviews value or an error if the edge
+// was not loaded in eager-loading.
+func (e EmployeeEdges) ConductedReviewsOrErr() ([]*PerformanceReview, error) {
+	if e.loadedTypes[12] {
+		return e.ConductedReviews, nil
+	}
+	return nil, &NotLoadedError{edge: "conducted_reviews"}
+}
+
+// GoalsOrErr returns the Goals value or an error if the edge
+// was not loaded in eager-loading.
+func (e EmployeeEdges) GoalsOrErr() ([]*Goal, error) {
+	if e.loadedTypes[13] {
+		return e.Goals, nil
+	}
+	return nil, &NotLoadedError{edge: "goals"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -366,6 +432,36 @@ func (_m *Employee) QueryBackupFor() *SuccessionMapQuery {
 // QueryExpenseAccount queries the "expense_account" edge of the Employee entity.
 func (_m *Employee) QueryExpenseAccount() *AccountQuery {
 	return NewEmployeeClient(_m.config).QueryExpenseAccount(_m)
+}
+
+// QueryTimeOffRequests queries the "time_off_requests" edge of the Employee entity.
+func (_m *Employee) QueryTimeOffRequests() *TimeOffRequestQuery {
+	return NewEmployeeClient(_m.config).QueryTimeOffRequests(_m)
+}
+
+// QueryApprovedTimeOff queries the "approved_time_off" edge of the Employee entity.
+func (_m *Employee) QueryApprovedTimeOff() *TimeOffRequestQuery {
+	return NewEmployeeClient(_m.config).QueryApprovedTimeOff(_m)
+}
+
+// QueryTimeOffBalances queries the "time_off_balances" edge of the Employee entity.
+func (_m *Employee) QueryTimeOffBalances() *TimeOffBalanceQuery {
+	return NewEmployeeClient(_m.config).QueryTimeOffBalances(_m)
+}
+
+// QueryPerformanceReviews queries the "performance_reviews" edge of the Employee entity.
+func (_m *Employee) QueryPerformanceReviews() *PerformanceReviewQuery {
+	return NewEmployeeClient(_m.config).QueryPerformanceReviews(_m)
+}
+
+// QueryConductedReviews queries the "conducted_reviews" edge of the Employee entity.
+func (_m *Employee) QueryConductedReviews() *PerformanceReviewQuery {
+	return NewEmployeeClient(_m.config).QueryConductedReviews(_m)
+}
+
+// QueryGoals queries the "goals" edge of the Employee entity.
+func (_m *Employee) QueryGoals() *GoalQuery {
+	return NewEmployeeClient(_m.config).QueryGoals(_m)
 }
 
 // Update returns a builder for updating this Employee.

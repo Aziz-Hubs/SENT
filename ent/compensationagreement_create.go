@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // CompensationAgreementCreate is the builder for creating a CompensationAgreement entity.
@@ -23,8 +24,16 @@ type CompensationAgreementCreate struct {
 }
 
 // SetBaseSalary sets the "base_salary" field.
-func (_c *CompensationAgreementCreate) SetBaseSalary(v float64) *CompensationAgreementCreate {
+func (_c *CompensationAgreementCreate) SetBaseSalary(v decimal.Decimal) *CompensationAgreementCreate {
 	_c.mutation.SetBaseSalary(v)
+	return _c
+}
+
+// SetNillableBaseSalary sets the "base_salary" field if the given value is not nil.
+func (_c *CompensationAgreementCreate) SetNillableBaseSalary(v *decimal.Decimal) *CompensationAgreementCreate {
+	if v != nil {
+		_c.SetBaseSalary(*v)
+	}
 	return _c
 }
 
@@ -141,6 +150,10 @@ func (_c *CompensationAgreementCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *CompensationAgreementCreate) defaults() {
+	if _, ok := _c.mutation.BaseSalary(); !ok {
+		v := compensationagreement.DefaultBaseSalary
+		_c.mutation.SetBaseSalary(v)
+	}
 	if _, ok := _c.mutation.Currency(); !ok {
 		v := compensationagreement.DefaultCurrency
 		_c.mutation.SetCurrency(v)
@@ -214,7 +227,7 @@ func (_c *CompensationAgreementCreate) createSpec() (*CompensationAgreement, *sq
 		_spec = sqlgraph.NewCreateSpec(compensationagreement.Table, sqlgraph.NewFieldSpec(compensationagreement.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.BaseSalary(); ok {
-		_spec.SetField(compensationagreement.FieldBaseSalary, field.TypeFloat64, value)
+		_spec.SetField(compensationagreement.FieldBaseSalary, field.TypeOther, value)
 		_node.BaseSalary = value
 	}
 	if value, ok := _c.mutation.Currency(); ok {

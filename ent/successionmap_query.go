@@ -9,6 +9,7 @@ import (
 	"sent/ent/employee"
 	"sent/ent/predicate"
 	"sent/ent/successionmap"
+	"sent/ent/tenant"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -25,7 +26,9 @@ type SuccessionMapQuery struct {
 	predicates          []predicate.SuccessionMap
 	withEmployee        *EmployeeQuery
 	withBackupCandidate *EmployeeQuery
+	withTenant          *TenantQuery
 	withFKs             bool
+	modifiers           []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -99,6 +102,28 @@ func (_q *SuccessionMapQuery) QueryBackupCandidate() *EmployeeQuery {
 			sqlgraph.From(successionmap.Table, successionmap.FieldID, selector),
 			sqlgraph.To(employee.Table, employee.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, successionmap.BackupCandidateTable, successionmap.BackupCandidateColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTenant chains the current query on the "tenant" edge.
+func (_q *SuccessionMapQuery) QueryTenant() *TenantQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(successionmap.Table, successionmap.FieldID, selector),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, successionmap.TenantTable, successionmap.TenantColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -300,9 +325,11 @@ func (_q *SuccessionMapQuery) Clone() *SuccessionMapQuery {
 		predicates:          append([]predicate.SuccessionMap{}, _q.predicates...),
 		withEmployee:        _q.withEmployee.Clone(),
 		withBackupCandidate: _q.withBackupCandidate.Clone(),
+		withTenant:          _q.withTenant.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -325,6 +352,17 @@ func (_q *SuccessionMapQuery) WithBackupCandidate(opts ...func(*EmployeeQuery)) 
 		opt(query)
 	}
 	_q.withBackupCandidate = query
+	return _q
+}
+
+// WithTenant tells the query-builder to eager-load the nodes that are connected to
+// the "tenant" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *SuccessionMapQuery) WithTenant(opts ...func(*TenantQuery)) *SuccessionMapQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTenant = query
 	return _q
 }
 
@@ -407,12 +445,13 @@ func (_q *SuccessionMapQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 		nodes       = []*SuccessionMap{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			_q.withEmployee != nil,
 			_q.withBackupCandidate != nil,
+			_q.withTenant != nil,
 		}
 	)
-	if _q.withEmployee != nil || _q.withBackupCandidate != nil {
+	if _q.withEmployee != nil || _q.withBackupCandidate != nil || _q.withTenant != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -426,6 +465,9 @@ func (_q *SuccessionMapQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -445,6 +487,12 @@ func (_q *SuccessionMapQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	if query := _q.withBackupCandidate; query != nil {
 		if err := _q.loadBackupCandidate(ctx, query, nodes, nil,
 			func(n *SuccessionMap, e *Employee) { n.Edges.BackupCandidate = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTenant; query != nil {
+		if err := _q.loadTenant(ctx, query, nodes, nil,
+			func(n *SuccessionMap, e *Tenant) { n.Edges.Tenant = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -515,9 +563,44 @@ func (_q *SuccessionMapQuery) loadBackupCandidate(ctx context.Context, query *Em
 	}
 	return nil
 }
+func (_q *SuccessionMapQuery) loadTenant(ctx context.Context, query *TenantQuery, nodes []*SuccessionMap, init func(*SuccessionMap), assign func(*SuccessionMap, *Tenant)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*SuccessionMap)
+	for i := range nodes {
+		if nodes[i].tenant_succession_maps == nil {
+			continue
+		}
+		fk := *nodes[i].tenant_succession_maps
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(tenant.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tenant_succession_maps" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (_q *SuccessionMapQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -580,6 +663,9 @@ func (_q *SuccessionMapQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -595,6 +681,12 @@ func (_q *SuccessionMapQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *SuccessionMapQuery) Modify(modifiers ...func(s *sql.Selector)) *SuccessionMapSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // SuccessionMapGroupBy is the group-by builder for SuccessionMap entities.
@@ -685,4 +777,10 @@ func (_s *SuccessionMapSelect) sqlScan(ctx context.Context, root *SuccessionMapQ
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *SuccessionMapSelect) Modify(modifiers ...func(s *sql.Selector)) *SuccessionMapSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

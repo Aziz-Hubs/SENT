@@ -7,6 +7,8 @@ export function CalculateTax(arg1:number,arg2:string):Promise<tax.TaxResult>;
 
 export function GetTaxConfig():Promise<Array<tax.TaxConfig>>;
 
+export function GetTaxSummary(arg1:string):Promise<tax.TaxSummaryDTO>;
+
 export function SignInvoice(arg1:string):Promise<string>;
 
 export function Startup(arg1:context.Context):Promise<void>;

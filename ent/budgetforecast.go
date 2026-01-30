@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // BudgetForecast is the model entity for the BudgetForecast schema.
@@ -24,9 +25,9 @@ type BudgetForecast struct {
 	// Month holds the value of the "month" field.
 	Month int `json:"month,omitempty"`
 	// ProjectedAmount holds the value of the "projected_amount" field.
-	ProjectedAmount float64 `json:"projected_amount,omitempty"`
+	ProjectedAmount decimal.Decimal `json:"projected_amount,omitempty"`
 	// ActualSpent holds the value of the "actual_spent" field.
-	ActualSpent float64 `json:"actual_spent,omitempty"`
+	ActualSpent decimal.Decimal `json:"actual_spent,omitempty"`
 	// ForecastData holds the value of the "forecast_data" field.
 	ForecastData map[string]interface{} `json:"forecast_data,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -66,7 +67,7 @@ func (*BudgetForecast) scanValues(columns []string) ([]any, error) {
 		case budgetforecast.FieldForecastData:
 			values[i] = new([]byte)
 		case budgetforecast.FieldProjectedAmount, budgetforecast.FieldActualSpent:
-			values[i] = new(sql.NullFloat64)
+			values[i] = new(decimal.Decimal)
 		case budgetforecast.FieldID, budgetforecast.FieldYear, budgetforecast.FieldMonth:
 			values[i] = new(sql.NullInt64)
 		case budgetforecast.FieldCreatedAt:
@@ -107,16 +108,16 @@ func (_m *BudgetForecast) assignValues(columns []string, values []any) error {
 				_m.Month = int(value.Int64)
 			}
 		case budgetforecast.FieldProjectedAmount:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field projected_amount", values[i])
-			} else if value.Valid {
-				_m.ProjectedAmount = value.Float64
+			} else if value != nil {
+				_m.ProjectedAmount = *value
 			}
 		case budgetforecast.FieldActualSpent:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field actual_spent", values[i])
-			} else if value.Valid {
-				_m.ActualSpent = value.Float64
+			} else if value != nil {
+				_m.ActualSpent = *value
 			}
 		case budgetforecast.FieldForecastData:
 			if value, ok := values[i].(*[]byte); !ok {

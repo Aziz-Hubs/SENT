@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // LedgerEntryCreate is the builder for creating a LedgerEntry entity.
@@ -24,8 +25,16 @@ type LedgerEntryCreate struct {
 }
 
 // SetAmount sets the "amount" field.
-func (_c *LedgerEntryCreate) SetAmount(v float64) *LedgerEntryCreate {
+func (_c *LedgerEntryCreate) SetAmount(v decimal.Decimal) *LedgerEntryCreate {
 	_c.mutation.SetAmount(v)
+	return _c
+}
+
+// SetNillableAmount sets the "amount" field if the given value is not nil.
+func (_c *LedgerEntryCreate) SetNillableAmount(v *decimal.Decimal) *LedgerEntryCreate {
+	if v != nil {
+		_c.SetAmount(*v)
+	}
 	return _c
 }
 
@@ -117,6 +126,10 @@ func (_c *LedgerEntryCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *LedgerEntryCreate) defaults() {
+	if _, ok := _c.mutation.Amount(); !ok {
+		v := ledgerentry.DefaultAmount
+		_c.mutation.SetAmount(v)
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := ledgerentry.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
@@ -175,7 +188,7 @@ func (_c *LedgerEntryCreate) createSpec() (*LedgerEntry, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(ledgerentry.Table, sqlgraph.NewFieldSpec(ledgerentry.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.Amount(); ok {
-		_spec.SetField(ledgerentry.FieldAmount, field.TypeFloat64, value)
+		_spec.SetField(ledgerentry.FieldAmount, field.TypeOther, value)
 		_node.Amount = value
 	}
 	if value, ok := _c.mutation.Direction(); ok {

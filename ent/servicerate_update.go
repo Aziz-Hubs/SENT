@@ -13,13 +13,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // ServiceRateUpdate is the builder for updating ServiceRate entities.
 type ServiceRateUpdate struct {
 	config
-	hooks    []Hook
-	mutation *ServiceRateMutation
+	hooks     []Hook
+	mutation  *ServiceRateMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the ServiceRateUpdate builder.
@@ -43,23 +45,16 @@ func (_u *ServiceRateUpdate) SetNillableWorkType(v *string) *ServiceRateUpdate {
 }
 
 // SetRate sets the "rate" field.
-func (_u *ServiceRateUpdate) SetRate(v float64) *ServiceRateUpdate {
-	_u.mutation.ResetRate()
+func (_u *ServiceRateUpdate) SetRate(v decimal.Decimal) *ServiceRateUpdate {
 	_u.mutation.SetRate(v)
 	return _u
 }
 
 // SetNillableRate sets the "rate" field if the given value is not nil.
-func (_u *ServiceRateUpdate) SetNillableRate(v *float64) *ServiceRateUpdate {
+func (_u *ServiceRateUpdate) SetNillableRate(v *decimal.Decimal) *ServiceRateUpdate {
 	if v != nil {
 		_u.SetRate(*v)
 	}
-	return _u
-}
-
-// AddRate adds value to the "rate" field.
-func (_u *ServiceRateUpdate) AddRate(v float64) *ServiceRateUpdate {
-	_u.mutation.AddRate(v)
 	return _u
 }
 
@@ -140,6 +135,12 @@ func (_u *ServiceRateUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *ServiceRateUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ServiceRateUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *ServiceRateUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -156,10 +157,7 @@ func (_u *ServiceRateUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		_spec.SetField(servicerate.FieldWorkType, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Rate(); ok {
-		_spec.SetField(servicerate.FieldRate, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedRate(); ok {
-		_spec.AddField(servicerate.FieldRate, field.TypeFloat64, value)
+		_spec.SetField(servicerate.FieldRate, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(servicerate.FieldDescription, field.TypeString, value)
@@ -196,6 +194,7 @@ func (_u *ServiceRateUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{servicerate.Label}
@@ -211,9 +210,10 @@ func (_u *ServiceRateUpdate) sqlSave(ctx context.Context) (_node int, err error)
 // ServiceRateUpdateOne is the builder for updating a single ServiceRate entity.
 type ServiceRateUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *ServiceRateMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *ServiceRateMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetWorkType sets the "work_type" field.
@@ -231,23 +231,16 @@ func (_u *ServiceRateUpdateOne) SetNillableWorkType(v *string) *ServiceRateUpdat
 }
 
 // SetRate sets the "rate" field.
-func (_u *ServiceRateUpdateOne) SetRate(v float64) *ServiceRateUpdateOne {
-	_u.mutation.ResetRate()
+func (_u *ServiceRateUpdateOne) SetRate(v decimal.Decimal) *ServiceRateUpdateOne {
 	_u.mutation.SetRate(v)
 	return _u
 }
 
 // SetNillableRate sets the "rate" field if the given value is not nil.
-func (_u *ServiceRateUpdateOne) SetNillableRate(v *float64) *ServiceRateUpdateOne {
+func (_u *ServiceRateUpdateOne) SetNillableRate(v *decimal.Decimal) *ServiceRateUpdateOne {
 	if v != nil {
 		_u.SetRate(*v)
 	}
-	return _u
-}
-
-// AddRate adds value to the "rate" field.
-func (_u *ServiceRateUpdateOne) AddRate(v float64) *ServiceRateUpdateOne {
-	_u.mutation.AddRate(v)
 	return _u
 }
 
@@ -341,6 +334,12 @@ func (_u *ServiceRateUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *ServiceRateUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ServiceRateUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *ServiceRateUpdateOne) sqlSave(ctx context.Context) (_node *ServiceRate, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -374,10 +373,7 @@ func (_u *ServiceRateUpdateOne) sqlSave(ctx context.Context) (_node *ServiceRate
 		_spec.SetField(servicerate.FieldWorkType, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Rate(); ok {
-		_spec.SetField(servicerate.FieldRate, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedRate(); ok {
-		_spec.AddField(servicerate.FieldRate, field.TypeFloat64, value)
+		_spec.SetField(servicerate.FieldRate, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(servicerate.FieldDescription, field.TypeString, value)
@@ -414,6 +410,7 @@ func (_u *ServiceRateUpdateOne) sqlSave(ctx context.Context) (_node *ServiceRate
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &ServiceRate{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

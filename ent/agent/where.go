@@ -653,6 +653,29 @@ func HasTenantWith(preds ...predicate.Tenant) predicate.Agent {
 	})
 }
 
+// HasJobExecutions applies the HasEdge predicate on the "job_executions" edge.
+func HasJobExecutions() predicate.Agent {
+	return predicate.Agent(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, JobExecutionsTable, JobExecutionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasJobExecutionsWith applies the HasEdge predicate on the "job_executions" edge with a given conditions (other predicates).
+func HasJobExecutionsWith(preds ...predicate.JobExecution) predicate.Agent {
+	return predicate.Agent(func(s *sql.Selector) {
+		step := newJobExecutionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Agent) predicate.Agent {
 	return predicate.Agent(sql.AndPredicates(predicates...))

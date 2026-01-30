@@ -9,6 +9,7 @@ import (
 	"sent/ent/account"
 	"sent/ent/agent"
 	"sent/ent/asset"
+	"sent/ent/assettype"
 	"sent/ent/auditlog"
 	"sent/ent/budgetforecast"
 	"sent/ent/calllog"
@@ -16,24 +17,44 @@ import (
 	"sent/ent/compensationagreement"
 	"sent/ent/contract"
 	"sent/ent/credential"
+	"sent/ent/department"
+	"sent/ent/detectionevent"
 	"sent/ent/discoveryentry"
 	"sent/ent/employee"
+	"sent/ent/goal"
 	"sent/ent/healthscoresnapshot"
 	"sent/ent/inventoryreservation"
 	"sent/ent/ivrflow"
+	"sent/ent/job"
 	"sent/ent/journalentry"
 	"sent/ent/ledgerentry"
+	"sent/ent/networkbackup"
+	"sent/ent/networkdevice"
+	"sent/ent/networklink"
+	"sent/ent/networkport"
+	"sent/ent/nexusaudit"
 	"sent/ent/onetimelink"
+	"sent/ent/performancereview"
+	"sent/ent/permission"
 	"sent/ent/product"
+	"sent/ent/recording"
 	"sent/ent/recurringinvoice"
+	"sent/ent/reviewcycle"
 	"sent/ent/saasapp"
 	"sent/ent/saasfilter"
+	"sent/ent/saasidentity"
+	"sent/ent/saasusage"
+	"sent/ent/script"
 	"sent/ent/servicerate"
 	"sent/ent/sop"
 	"sent/ent/stockmovement"
 	"sent/ent/strategicroadmap"
+	"sent/ent/successionmap"
 	"sent/ent/tenant"
 	"sent/ent/ticket"
+	"sent/ent/timeoffbalance"
+	"sent/ent/timeoffpolicy"
+	"sent/ent/timeoffrequest"
 	"sent/ent/transaction"
 	"sent/ent/user"
 	"sent/ent/vaultitem"
@@ -42,6 +63,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // TenantCreate is the builder for creating a Tenant entity.
@@ -92,13 +114,13 @@ func (_c *TenantCreate) SetNillableActive(v *bool) *TenantCreate {
 }
 
 // SetTransactionLimit sets the "transaction_limit" field.
-func (_c *TenantCreate) SetTransactionLimit(v float64) *TenantCreate {
+func (_c *TenantCreate) SetTransactionLimit(v decimal.Decimal) *TenantCreate {
 	_c.mutation.SetTransactionLimit(v)
 	return _c
 }
 
 // SetNillableTransactionLimit sets the "transaction_limit" field if the given value is not nil.
-func (_c *TenantCreate) SetNillableTransactionLimit(v *float64) *TenantCreate {
+func (_c *TenantCreate) SetNillableTransactionLimit(v *decimal.Decimal) *TenantCreate {
 	if v != nil {
 		_c.SetTransactionLimit(*v)
 	}
@@ -499,6 +521,36 @@ func (_c *TenantCreate) AddServiceRates(v ...*ServiceRate) *TenantCreate {
 	return _c.AddServiceRateIDs(ids...)
 }
 
+// AddNetworkDeviceIDs adds the "network_devices" edge to the NetworkDevice entity by IDs.
+func (_c *TenantCreate) AddNetworkDeviceIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddNetworkDeviceIDs(ids...)
+	return _c
+}
+
+// AddNetworkDevices adds the "network_devices" edges to the NetworkDevice entity.
+func (_c *TenantCreate) AddNetworkDevices(v ...*NetworkDevice) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddNetworkDeviceIDs(ids...)
+}
+
+// AddNetworkBackupIDs adds the "network_backups" edge to the NetworkBackup entity by IDs.
+func (_c *TenantCreate) AddNetworkBackupIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddNetworkBackupIDs(ids...)
+	return _c
+}
+
+// AddNetworkBackups adds the "network_backups" edges to the NetworkBackup entity.
+func (_c *TenantCreate) AddNetworkBackups(v ...*NetworkBackup) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddNetworkBackupIDs(ids...)
+}
+
 // AddBudgetForecastIDs adds the "budget_forecasts" edge to the BudgetForecast entity by IDs.
 func (_c *TenantCreate) AddBudgetForecastIDs(ids ...int) *TenantCreate {
 	_c.mutation.AddBudgetForecastIDs(ids...)
@@ -604,6 +656,171 @@ func (_c *TenantCreate) AddInventoryReservations(v ...*InventoryReservation) *Te
 	return _c.AddInventoryReservationIDs(ids...)
 }
 
+// AddDepartmentIDs adds the "departments" edge to the Department entity by IDs.
+func (_c *TenantCreate) AddDepartmentIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddDepartmentIDs(ids...)
+	return _c
+}
+
+// AddDepartments adds the "departments" edges to the Department entity.
+func (_c *TenantCreate) AddDepartments(v ...*Department) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddDepartmentIDs(ids...)
+}
+
+// AddPermissionIDs adds the "permissions" edge to the Permission entity by IDs.
+func (_c *TenantCreate) AddPermissionIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddPermissionIDs(ids...)
+	return _c
+}
+
+// AddPermissions adds the "permissions" edges to the Permission entity.
+func (_c *TenantCreate) AddPermissions(v ...*Permission) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddPermissionIDs(ids...)
+}
+
+// AddAssetTypeIDs adds the "asset_types" edge to the AssetType entity by IDs.
+func (_c *TenantCreate) AddAssetTypeIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddAssetTypeIDs(ids...)
+	return _c
+}
+
+// AddAssetTypes adds the "asset_types" edges to the AssetType entity.
+func (_c *TenantCreate) AddAssetTypes(v ...*AssetType) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddAssetTypeIDs(ids...)
+}
+
+// AddDetectionEventIDs adds the "detection_events" edge to the DetectionEvent entity by IDs.
+func (_c *TenantCreate) AddDetectionEventIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddDetectionEventIDs(ids...)
+	return _c
+}
+
+// AddDetectionEvents adds the "detection_events" edges to the DetectionEvent entity.
+func (_c *TenantCreate) AddDetectionEvents(v ...*DetectionEvent) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddDetectionEventIDs(ids...)
+}
+
+// AddSaasIdentityIDs adds the "saas_identities" edge to the SaaSIdentity entity by IDs.
+func (_c *TenantCreate) AddSaasIdentityIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddSaasIdentityIDs(ids...)
+	return _c
+}
+
+// AddSaasIdentities adds the "saas_identities" edges to the SaaSIdentity entity.
+func (_c *TenantCreate) AddSaasIdentities(v ...*SaaSIdentity) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSaasIdentityIDs(ids...)
+}
+
+// AddSaasUsageIDs adds the "saas_usages" edge to the SaaSUsage entity by IDs.
+func (_c *TenantCreate) AddSaasUsageIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddSaasUsageIDs(ids...)
+	return _c
+}
+
+// AddSaasUsages adds the "saas_usages" edges to the SaaSUsage entity.
+func (_c *TenantCreate) AddSaasUsages(v ...*SaaSUsage) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSaasUsageIDs(ids...)
+}
+
+// AddRecordingIDs adds the "recordings" edge to the Recording entity by IDs.
+func (_c *TenantCreate) AddRecordingIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddRecordingIDs(ids...)
+	return _c
+}
+
+// AddRecordings adds the "recordings" edges to the Recording entity.
+func (_c *TenantCreate) AddRecordings(v ...*Recording) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddRecordingIDs(ids...)
+}
+
+// AddNetworkLinkIDs adds the "network_links" edge to the NetworkLink entity by IDs.
+func (_c *TenantCreate) AddNetworkLinkIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddNetworkLinkIDs(ids...)
+	return _c
+}
+
+// AddNetworkLinks adds the "network_links" edges to the NetworkLink entity.
+func (_c *TenantCreate) AddNetworkLinks(v ...*NetworkLink) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddNetworkLinkIDs(ids...)
+}
+
+// AddNetworkPortIDs adds the "network_ports" edge to the NetworkPort entity by IDs.
+func (_c *TenantCreate) AddNetworkPortIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddNetworkPortIDs(ids...)
+	return _c
+}
+
+// AddNetworkPorts adds the "network_ports" edges to the NetworkPort entity.
+func (_c *TenantCreate) AddNetworkPorts(v ...*NetworkPort) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddNetworkPortIDs(ids...)
+}
+
+// AddNexusAuditIDs adds the "nexus_audits" edge to the NexusAudit entity by IDs.
+func (_c *TenantCreate) AddNexusAuditIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddNexusAuditIDs(ids...)
+	return _c
+}
+
+// AddNexusAudits adds the "nexus_audits" edges to the NexusAudit entity.
+func (_c *TenantCreate) AddNexusAudits(v ...*NexusAudit) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddNexusAuditIDs(ids...)
+}
+
+// AddSuccessionMapIDs adds the "succession_maps" edge to the SuccessionMap entity by IDs.
+func (_c *TenantCreate) AddSuccessionMapIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddSuccessionMapIDs(ids...)
+	return _c
+}
+
+// AddSuccessionMaps adds the "succession_maps" edges to the SuccessionMap entity.
+func (_c *TenantCreate) AddSuccessionMaps(v ...*SuccessionMap) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSuccessionMapIDs(ids...)
+}
+
 // SetCustomerAccountID sets the "customer_account" edge to the Account entity by ID.
 func (_c *TenantCreate) SetCustomerAccountID(id int) *TenantCreate {
 	_c.mutation.SetCustomerAccountID(id)
@@ -621,6 +838,126 @@ func (_c *TenantCreate) SetNillableCustomerAccountID(id *int) *TenantCreate {
 // SetCustomerAccount sets the "customer_account" edge to the Account entity.
 func (_c *TenantCreate) SetCustomerAccount(v *Account) *TenantCreate {
 	return _c.SetCustomerAccountID(v.ID)
+}
+
+// AddScriptIDs adds the "scripts" edge to the Script entity by IDs.
+func (_c *TenantCreate) AddScriptIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddScriptIDs(ids...)
+	return _c
+}
+
+// AddScripts adds the "scripts" edges to the Script entity.
+func (_c *TenantCreate) AddScripts(v ...*Script) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddScriptIDs(ids...)
+}
+
+// AddJobIDs adds the "jobs" edge to the Job entity by IDs.
+func (_c *TenantCreate) AddJobIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddJobIDs(ids...)
+	return _c
+}
+
+// AddJobs adds the "jobs" edges to the Job entity.
+func (_c *TenantCreate) AddJobs(v ...*Job) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddJobIDs(ids...)
+}
+
+// AddTimeOffRequestIDs adds the "time_off_requests" edge to the TimeOffRequest entity by IDs.
+func (_c *TenantCreate) AddTimeOffRequestIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddTimeOffRequestIDs(ids...)
+	return _c
+}
+
+// AddTimeOffRequests adds the "time_off_requests" edges to the TimeOffRequest entity.
+func (_c *TenantCreate) AddTimeOffRequests(v ...*TimeOffRequest) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddTimeOffRequestIDs(ids...)
+}
+
+// AddTimeOffPolicyIDs adds the "time_off_policies" edge to the TimeOffPolicy entity by IDs.
+func (_c *TenantCreate) AddTimeOffPolicyIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddTimeOffPolicyIDs(ids...)
+	return _c
+}
+
+// AddTimeOffPolicies adds the "time_off_policies" edges to the TimeOffPolicy entity.
+func (_c *TenantCreate) AddTimeOffPolicies(v ...*TimeOffPolicy) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddTimeOffPolicyIDs(ids...)
+}
+
+// AddTimeOffBalanceIDs adds the "time_off_balances" edge to the TimeOffBalance entity by IDs.
+func (_c *TenantCreate) AddTimeOffBalanceIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddTimeOffBalanceIDs(ids...)
+	return _c
+}
+
+// AddTimeOffBalances adds the "time_off_balances" edges to the TimeOffBalance entity.
+func (_c *TenantCreate) AddTimeOffBalances(v ...*TimeOffBalance) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddTimeOffBalanceIDs(ids...)
+}
+
+// AddReviewCycleIDs adds the "review_cycles" edge to the ReviewCycle entity by IDs.
+func (_c *TenantCreate) AddReviewCycleIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddReviewCycleIDs(ids...)
+	return _c
+}
+
+// AddReviewCycles adds the "review_cycles" edges to the ReviewCycle entity.
+func (_c *TenantCreate) AddReviewCycles(v ...*ReviewCycle) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddReviewCycleIDs(ids...)
+}
+
+// AddPerformanceReviewIDs adds the "performance_reviews" edge to the PerformanceReview entity by IDs.
+func (_c *TenantCreate) AddPerformanceReviewIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddPerformanceReviewIDs(ids...)
+	return _c
+}
+
+// AddPerformanceReviews adds the "performance_reviews" edges to the PerformanceReview entity.
+func (_c *TenantCreate) AddPerformanceReviews(v ...*PerformanceReview) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddPerformanceReviewIDs(ids...)
+}
+
+// AddGoalIDs adds the "goals" edge to the Goal entity by IDs.
+func (_c *TenantCreate) AddGoalIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddGoalIDs(ids...)
+	return _c
+}
+
+// AddGoals adds the "goals" edges to the Goal entity.
+func (_c *TenantCreate) AddGoals(v ...*Goal) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddGoalIDs(ids...)
 }
 
 // Mutation returns the TenantMutation object of the builder.
@@ -732,7 +1069,7 @@ func (_c *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 		_node.Active = value
 	}
 	if value, ok := _c.mutation.TransactionLimit(); ok {
-		_spec.SetField(tenant.FieldTransactionLimit, field.TypeFloat64, value)
+		_spec.SetField(tenant.FieldTransactionLimit, field.TypeOther, value)
 		_node.TransactionLimit = value
 	}
 	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
@@ -1152,6 +1489,38 @@ func (_c *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := _c.mutation.NetworkDevicesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.NetworkDevicesTable,
+			Columns: []string{tenant.NetworkDevicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(networkdevice.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.NetworkBackupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.NetworkBackupsTable,
+			Columns: []string{tenant.NetworkBackupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(networkbackup.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := _c.mutation.BudgetForecastsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -1264,6 +1633,182 @@ func (_c *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := _c.mutation.DepartmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.DepartmentsTable,
+			Columns: []string{tenant.DepartmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(department.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.PermissionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.PermissionsTable,
+			Columns: []string{tenant.PermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.AssetTypesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.AssetTypesTable,
+			Columns: []string{tenant.AssetTypesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(assettype.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.DetectionEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.DetectionEventsTable,
+			Columns: []string{tenant.DetectionEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(detectionevent.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SaasIdentitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.SaasIdentitiesTable,
+			Columns: []string{tenant.SaasIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(saasidentity.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SaasUsagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.SaasUsagesTable,
+			Columns: []string{tenant.SaasUsagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(saasusage.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.RecordingsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.RecordingsTable,
+			Columns: []string{tenant.RecordingsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(recording.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.NetworkLinksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.NetworkLinksTable,
+			Columns: []string{tenant.NetworkLinksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(networklink.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.NetworkPortsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.NetworkPortsTable,
+			Columns: []string{tenant.NetworkPortsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(networkport.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.NexusAuditsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.NexusAuditsTable,
+			Columns: []string{tenant.NexusAuditsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nexusaudit.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SuccessionMapsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.SuccessionMapsTable,
+			Columns: []string{tenant.SuccessionMapsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(successionmap.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := _c.mutation.CustomerAccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -1279,6 +1824,134 @@ func (_c *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.tenant_customer_account = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ScriptsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.ScriptsTable,
+			Columns: []string{tenant.ScriptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(script.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.JobsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.JobsTable,
+			Columns: []string{tenant.JobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(job.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TimeOffRequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.TimeOffRequestsTable,
+			Columns: []string{tenant.TimeOffRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TimeOffPoliciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.TimeOffPoliciesTable,
+			Columns: []string{tenant.TimeOffPoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffpolicy.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TimeOffBalancesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.TimeOffBalancesTable,
+			Columns: []string{tenant.TimeOffBalancesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffbalance.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ReviewCyclesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.ReviewCyclesTable,
+			Columns: []string{tenant.ReviewCyclesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(reviewcycle.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.PerformanceReviewsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.PerformanceReviewsTable,
+			Columns: []string{tenant.PerformanceReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(performancereview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.GoalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.GoalsTable,
+			Columns: []string{tenant.GoalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(goal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

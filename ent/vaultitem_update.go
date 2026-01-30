@@ -19,8 +19,9 @@ import (
 // VaultItemUpdate is the builder for updating VaultItem entities.
 type VaultItemUpdate struct {
 	config
-	hooks    []Hook
-	mutation *VaultItemMutation
+	hooks     []Hook
+	mutation  *VaultItemMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the VaultItemUpdate builder.
@@ -89,6 +90,52 @@ func (_u *VaultItemUpdate) SetNillableHash(v *string) *VaultItemUpdate {
 	if v != nil {
 		_u.SetHash(*v)
 	}
+	return _u
+}
+
+// SetFileType sets the "file_type" field.
+func (_u *VaultItemUpdate) SetFileType(v string) *VaultItemUpdate {
+	_u.mutation.SetFileType(v)
+	return _u
+}
+
+// SetNillableFileType sets the "file_type" field if the given value is not nil.
+func (_u *VaultItemUpdate) SetNillableFileType(v *string) *VaultItemUpdate {
+	if v != nil {
+		_u.SetFileType(*v)
+	}
+	return _u
+}
+
+// ClearFileType clears the value of the "file_type" field.
+func (_u *VaultItemUpdate) ClearFileType() *VaultItemUpdate {
+	_u.mutation.ClearFileType()
+	return _u
+}
+
+// SetEncrypted sets the "encrypted" field.
+func (_u *VaultItemUpdate) SetEncrypted(v bool) *VaultItemUpdate {
+	_u.mutation.SetEncrypted(v)
+	return _u
+}
+
+// SetNillableEncrypted sets the "encrypted" field if the given value is not nil.
+func (_u *VaultItemUpdate) SetNillableEncrypted(v *bool) *VaultItemUpdate {
+	if v != nil {
+		_u.SetEncrypted(*v)
+	}
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *VaultItemUpdate) SetMetadata(v map[string]interface{}) *VaultItemUpdate {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *VaultItemUpdate) ClearMetadata() *VaultItemUpdate {
+	_u.mutation.ClearMetadata()
 	return _u
 }
 
@@ -213,6 +260,12 @@ func (_u *VaultItemUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *VaultItemUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *VaultItemUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *VaultItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -239,6 +292,21 @@ func (_u *VaultItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Hash(); ok {
 		_spec.SetField(vaultitem.FieldHash, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.FileType(); ok {
+		_spec.SetField(vaultitem.FieldFileType, field.TypeString, value)
+	}
+	if _u.mutation.FileTypeCleared() {
+		_spec.ClearField(vaultitem.FieldFileType, field.TypeString)
+	}
+	if value, ok := _u.mutation.Encrypted(); ok {
+		_spec.SetField(vaultitem.FieldEncrypted, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(vaultitem.FieldMetadata, field.TypeJSON, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(vaultitem.FieldMetadata, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(vaultitem.FieldContent, field.TypeString, value)
@@ -281,6 +349,7 @@ func (_u *VaultItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{vaultitem.Label}
@@ -296,9 +365,10 @@ func (_u *VaultItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 // VaultItemUpdateOne is the builder for updating a single VaultItem entity.
 type VaultItemUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *VaultItemMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *VaultItemMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetPath sets the "path" field.
@@ -361,6 +431,52 @@ func (_u *VaultItemUpdateOne) SetNillableHash(v *string) *VaultItemUpdateOne {
 	if v != nil {
 		_u.SetHash(*v)
 	}
+	return _u
+}
+
+// SetFileType sets the "file_type" field.
+func (_u *VaultItemUpdateOne) SetFileType(v string) *VaultItemUpdateOne {
+	_u.mutation.SetFileType(v)
+	return _u
+}
+
+// SetNillableFileType sets the "file_type" field if the given value is not nil.
+func (_u *VaultItemUpdateOne) SetNillableFileType(v *string) *VaultItemUpdateOne {
+	if v != nil {
+		_u.SetFileType(*v)
+	}
+	return _u
+}
+
+// ClearFileType clears the value of the "file_type" field.
+func (_u *VaultItemUpdateOne) ClearFileType() *VaultItemUpdateOne {
+	_u.mutation.ClearFileType()
+	return _u
+}
+
+// SetEncrypted sets the "encrypted" field.
+func (_u *VaultItemUpdateOne) SetEncrypted(v bool) *VaultItemUpdateOne {
+	_u.mutation.SetEncrypted(v)
+	return _u
+}
+
+// SetNillableEncrypted sets the "encrypted" field if the given value is not nil.
+func (_u *VaultItemUpdateOne) SetNillableEncrypted(v *bool) *VaultItemUpdateOne {
+	if v != nil {
+		_u.SetEncrypted(*v)
+	}
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *VaultItemUpdateOne) SetMetadata(v map[string]interface{}) *VaultItemUpdateOne {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *VaultItemUpdateOne) ClearMetadata() *VaultItemUpdateOne {
+	_u.mutation.ClearMetadata()
 	return _u
 }
 
@@ -498,6 +614,12 @@ func (_u *VaultItemUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *VaultItemUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *VaultItemUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *VaultItemUpdateOne) sqlSave(ctx context.Context) (_node *VaultItem, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -542,6 +664,21 @@ func (_u *VaultItemUpdateOne) sqlSave(ctx context.Context) (_node *VaultItem, er
 	if value, ok := _u.mutation.Hash(); ok {
 		_spec.SetField(vaultitem.FieldHash, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.FileType(); ok {
+		_spec.SetField(vaultitem.FieldFileType, field.TypeString, value)
+	}
+	if _u.mutation.FileTypeCleared() {
+		_spec.ClearField(vaultitem.FieldFileType, field.TypeString)
+	}
+	if value, ok := _u.mutation.Encrypted(); ok {
+		_spec.SetField(vaultitem.FieldEncrypted, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(vaultitem.FieldMetadata, field.TypeJSON, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(vaultitem.FieldMetadata, field.TypeJSON)
+	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(vaultitem.FieldContent, field.TypeString, value)
 	}
@@ -583,6 +720,7 @@ func (_u *VaultItemUpdateOne) sqlSave(ctx context.Context) (_node *VaultItem, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &VaultItem{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

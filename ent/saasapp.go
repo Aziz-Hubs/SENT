@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // SaaSApp is the model entity for the SaaSApp schema.
@@ -31,6 +32,8 @@ type SaaSApp struct {
 	IsManaged bool `json:"is_managed,omitempty"`
 	// Config holds the value of the "config" field.
 	Config map[string]interface{} `json:"config,omitempty"`
+	// MonthlyPrice holds the value of the "monthly_price" field.
+	MonthlyPrice decimal.Decimal `json:"monthly_price,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -91,6 +94,8 @@ func (*SaaSApp) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case saasapp.FieldConfig:
 			values[i] = new([]byte)
+		case saasapp.FieldMonthlyPrice:
+			values[i] = new(decimal.Decimal)
 		case saasapp.FieldIsManaged:
 			values[i] = new(sql.NullBool)
 		case saasapp.FieldID:
@@ -159,6 +164,12 @@ func (_m *SaaSApp) assignValues(columns []string, values []any) error {
 				if err := json.Unmarshal(*value, &_m.Config); err != nil {
 					return fmt.Errorf("unmarshal field config: %w", err)
 				}
+			}
+		case saasapp.FieldMonthlyPrice:
+			if value, ok := values[i].(*decimal.Decimal); !ok {
+				return fmt.Errorf("unexpected type %T for field monthly_price", values[i])
+			} else if value != nil {
+				_m.MonthlyPrice = *value
 			}
 		case saasapp.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -247,6 +258,9 @@ func (_m *SaaSApp) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("config=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Config))
+	builder.WriteString(", ")
+	builder.WriteString("monthly_price=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MonthlyPrice))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

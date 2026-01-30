@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sent/ent/networkdevice"
 	"sent/ent/networkport"
+	"sent/ent/tenant"
 	"strings"
 
 	"entgo.io/ent"
@@ -37,6 +38,7 @@ type NetworkPort struct {
 	// The values are being populated by the NetworkPortQuery when eager-loading is set.
 	Edges                NetworkPortEdges `json:"edges"`
 	network_device_ports *int
+	tenant_network_ports *int
 	selectValues         sql.SelectValues
 }
 
@@ -46,9 +48,11 @@ type NetworkPortEdges struct {
 	Device *NetworkDevice `json:"device,omitempty"`
 	// ConnectedTo holds the value of the connected_to edge.
 	ConnectedTo []*NetworkLink `json:"connected_to,omitempty"`
+	// Tenant holds the value of the tenant edge.
+	Tenant *Tenant `json:"tenant,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // DeviceOrErr returns the Device value or an error if the edge
@@ -71,6 +75,17 @@ func (e NetworkPortEdges) ConnectedToOrErr() ([]*NetworkLink, error) {
 	return nil, &NotLoadedError{edge: "connected_to"}
 }
 
+// TenantOrErr returns the Tenant value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e NetworkPortEdges) TenantOrErr() (*Tenant, error) {
+	if e.Tenant != nil {
+		return e.Tenant, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: tenant.Label}
+	}
+	return nil, &NotLoadedError{edge: "tenant"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*NetworkPort) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -85,6 +100,8 @@ func (*NetworkPort) scanValues(columns []string) ([]any, error) {
 		case networkport.FieldName, networkport.FieldType, networkport.FieldStatus, networkport.FieldMACAddress, networkport.FieldDescription:
 			values[i] = new(sql.NullString)
 		case networkport.ForeignKeys[0]: // network_device_ports
+			values[i] = new(sql.NullInt64)
+		case networkport.ForeignKeys[1]: // tenant_network_ports
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -162,6 +179,13 @@ func (_m *NetworkPort) assignValues(columns []string, values []any) error {
 				_m.network_device_ports = new(int)
 				*_m.network_device_ports = int(value.Int64)
 			}
+		case networkport.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field tenant_network_ports", value)
+			} else if value.Valid {
+				_m.tenant_network_ports = new(int)
+				*_m.tenant_network_ports = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -183,6 +207,11 @@ func (_m *NetworkPort) QueryDevice() *NetworkDeviceQuery {
 // QueryConnectedTo queries the "connected_to" edge of the NetworkPort entity.
 func (_m *NetworkPort) QueryConnectedTo() *NetworkLinkQuery {
 	return NewNetworkPortClient(_m.config).QueryConnectedTo(_m)
+}
+
+// QueryTenant queries the "tenant" edge of the NetworkPort entity.
+func (_m *NetworkPort) QueryTenant() *TenantQuery {
+	return NewNetworkPortClient(_m.config).QueryTenant(_m)
 }
 
 // Update returns a builder for updating this NetworkPort.

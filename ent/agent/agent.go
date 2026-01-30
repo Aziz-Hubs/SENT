@@ -37,6 +37,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// EdgeTenant holds the string denoting the tenant edge name in mutations.
 	EdgeTenant = "tenant"
+	// EdgeJobExecutions holds the string denoting the job_executions edge name in mutations.
+	EdgeJobExecutions = "job_executions"
 	// Table holds the table name of the agent in the database.
 	Table = "agents"
 	// TenantTable is the table that holds the tenant relation/edge.
@@ -46,6 +48,13 @@ const (
 	TenantInverseTable = "tenants"
 	// TenantColumn is the table column denoting the tenant relation/edge.
 	TenantColumn = "tenant_agents"
+	// JobExecutionsTable is the table that holds the job_executions relation/edge.
+	JobExecutionsTable = "job_executions"
+	// JobExecutionsInverseTable is the table name for the JobExecution entity.
+	// It exists in this package in order to avoid circular dependency with the "jobexecution" package.
+	JobExecutionsInverseTable = "job_executions"
+	// JobExecutionsColumn is the table column denoting the job_executions relation/edge.
+	JobExecutionsColumn = "agent_job_executions"
 )
 
 // Columns holds all SQL columns for agent fields.
@@ -198,10 +207,31 @@ func ByTenantField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTenantStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByJobExecutionsCount orders the results by job_executions count.
+func ByJobExecutionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newJobExecutionsStep(), opts...)
+	}
+}
+
+// ByJobExecutions orders the results by job_executions terms.
+func ByJobExecutions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newJobExecutionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newTenantStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TenantInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, TenantTable, TenantColumn),
+	)
+}
+func newJobExecutionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(JobExecutionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, JobExecutionsTable, JobExecutionsColumn),
 	)
 }

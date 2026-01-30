@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // Tenant is the model entity for the Tenant schema.
@@ -27,7 +28,7 @@ type Tenant struct {
 	// Active holds the value of the "active" field.
 	Active bool `json:"active,omitempty"`
 	// TransactionLimit holds the value of the "transaction_limit" field.
-	TransactionLimit float64 `json:"transaction_limit,omitempty"`
+	TransactionLimit decimal.Decimal `json:"transaction_limit,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TenantQuery when eager-loading is set.
 	Edges                   TenantEdges `json:"edges"`
@@ -90,6 +91,10 @@ type TenantEdges struct {
 	Roadmaps []*StrategicRoadmap `json:"roadmaps,omitempty"`
 	// ServiceRates holds the value of the service_rates edge.
 	ServiceRates []*ServiceRate `json:"service_rates,omitempty"`
+	// NetworkDevices holds the value of the network_devices edge.
+	NetworkDevices []*NetworkDevice `json:"network_devices,omitempty"`
+	// NetworkBackups holds the value of the network_backups edge.
+	NetworkBackups []*NetworkBackup `json:"network_backups,omitempty"`
 	// BudgetForecasts holds the value of the budget_forecasts edge.
 	BudgetForecasts []*BudgetForecast `json:"budget_forecasts,omitempty"`
 	// Employees holds the value of the employees edge.
@@ -104,11 +109,49 @@ type TenantEdges struct {
 	RecurringInvoices []*RecurringInvoice `json:"recurring_invoices,omitempty"`
 	// InventoryReservations holds the value of the inventory_reservations edge.
 	InventoryReservations []*InventoryReservation `json:"inventory_reservations,omitempty"`
+	// Departments holds the value of the departments edge.
+	Departments []*Department `json:"departments,omitempty"`
+	// Permissions holds the value of the permissions edge.
+	Permissions []*Permission `json:"permissions,omitempty"`
+	// AssetTypes holds the value of the asset_types edge.
+	AssetTypes []*AssetType `json:"asset_types,omitempty"`
+	// DetectionEvents holds the value of the detection_events edge.
+	DetectionEvents []*DetectionEvent `json:"detection_events,omitempty"`
+	// SaasIdentities holds the value of the saas_identities edge.
+	SaasIdentities []*SaaSIdentity `json:"saas_identities,omitempty"`
+	// SaasUsages holds the value of the saas_usages edge.
+	SaasUsages []*SaaSUsage `json:"saas_usages,omitempty"`
+	// Recordings holds the value of the recordings edge.
+	Recordings []*Recording `json:"recordings,omitempty"`
+	// NetworkLinks holds the value of the network_links edge.
+	NetworkLinks []*NetworkLink `json:"network_links,omitempty"`
+	// NetworkPorts holds the value of the network_ports edge.
+	NetworkPorts []*NetworkPort `json:"network_ports,omitempty"`
+	// NexusAudits holds the value of the nexus_audits edge.
+	NexusAudits []*NexusAudit `json:"nexus_audits,omitempty"`
+	// SuccessionMaps holds the value of the succession_maps edge.
+	SuccessionMaps []*SuccessionMap `json:"succession_maps,omitempty"`
 	// CustomerAccount holds the value of the customer_account edge.
 	CustomerAccount *Account `json:"customer_account,omitempty"`
+	// Scripts holds the value of the scripts edge.
+	Scripts []*Script `json:"scripts,omitempty"`
+	// Jobs holds the value of the jobs edge.
+	Jobs []*Job `json:"jobs,omitempty"`
+	// TimeOffRequests holds the value of the time_off_requests edge.
+	TimeOffRequests []*TimeOffRequest `json:"time_off_requests,omitempty"`
+	// TimeOffPolicies holds the value of the time_off_policies edge.
+	TimeOffPolicies []*TimeOffPolicy `json:"time_off_policies,omitempty"`
+	// TimeOffBalances holds the value of the time_off_balances edge.
+	TimeOffBalances []*TimeOffBalance `json:"time_off_balances,omitempty"`
+	// ReviewCycles holds the value of the review_cycles edge.
+	ReviewCycles []*ReviewCycle `json:"review_cycles,omitempty"`
+	// PerformanceReviews holds the value of the performance_reviews edge.
+	PerformanceReviews []*PerformanceReview `json:"performance_reviews,omitempty"`
+	// Goals holds the value of the goals edge.
+	Goals []*Goal `json:"goals,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [34]bool
+	loadedTypes [55]bool
 }
 
 // ParentOrErr returns the Parent value or an error if the edge
@@ -347,10 +390,28 @@ func (e TenantEdges) ServiceRatesOrErr() ([]*ServiceRate, error) {
 	return nil, &NotLoadedError{edge: "service_rates"}
 }
 
+// NetworkDevicesOrErr returns the NetworkDevices value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) NetworkDevicesOrErr() ([]*NetworkDevice, error) {
+	if e.loadedTypes[26] {
+		return e.NetworkDevices, nil
+	}
+	return nil, &NotLoadedError{edge: "network_devices"}
+}
+
+// NetworkBackupsOrErr returns the NetworkBackups value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) NetworkBackupsOrErr() ([]*NetworkBackup, error) {
+	if e.loadedTypes[27] {
+		return e.NetworkBackups, nil
+	}
+	return nil, &NotLoadedError{edge: "network_backups"}
+}
+
 // BudgetForecastsOrErr returns the BudgetForecasts value or an error if the edge
 // was not loaded in eager-loading.
 func (e TenantEdges) BudgetForecastsOrErr() ([]*BudgetForecast, error) {
-	if e.loadedTypes[26] {
+	if e.loadedTypes[28] {
 		return e.BudgetForecasts, nil
 	}
 	return nil, &NotLoadedError{edge: "budget_forecasts"}
@@ -359,7 +420,7 @@ func (e TenantEdges) BudgetForecastsOrErr() ([]*BudgetForecast, error) {
 // EmployeesOrErr returns the Employees value or an error if the edge
 // was not loaded in eager-loading.
 func (e TenantEdges) EmployeesOrErr() ([]*Employee, error) {
-	if e.loadedTypes[27] {
+	if e.loadedTypes[29] {
 		return e.Employees, nil
 	}
 	return nil, &NotLoadedError{edge: "employees"}
@@ -368,7 +429,7 @@ func (e TenantEdges) EmployeesOrErr() ([]*Employee, error) {
 // CompensationAgreementsOrErr returns the CompensationAgreements value or an error if the edge
 // was not loaded in eager-loading.
 func (e TenantEdges) CompensationAgreementsOrErr() ([]*CompensationAgreement, error) {
-	if e.loadedTypes[28] {
+	if e.loadedTypes[30] {
 		return e.CompensationAgreements, nil
 	}
 	return nil, &NotLoadedError{edge: "compensation_agreements"}
@@ -377,7 +438,7 @@ func (e TenantEdges) CompensationAgreementsOrErr() ([]*CompensationAgreement, er
 // VaultItemsOrErr returns the VaultItems value or an error if the edge
 // was not loaded in eager-loading.
 func (e TenantEdges) VaultItemsOrErr() ([]*VaultItem, error) {
-	if e.loadedTypes[29] {
+	if e.loadedTypes[31] {
 		return e.VaultItems, nil
 	}
 	return nil, &NotLoadedError{edge: "vault_items"}
@@ -386,7 +447,7 @@ func (e TenantEdges) VaultItemsOrErr() ([]*VaultItem, error) {
 // JournalEntriesOrErr returns the JournalEntries value or an error if the edge
 // was not loaded in eager-loading.
 func (e TenantEdges) JournalEntriesOrErr() ([]*JournalEntry, error) {
-	if e.loadedTypes[30] {
+	if e.loadedTypes[32] {
 		return e.JournalEntries, nil
 	}
 	return nil, &NotLoadedError{edge: "journal_entries"}
@@ -395,7 +456,7 @@ func (e TenantEdges) JournalEntriesOrErr() ([]*JournalEntry, error) {
 // RecurringInvoicesOrErr returns the RecurringInvoices value or an error if the edge
 // was not loaded in eager-loading.
 func (e TenantEdges) RecurringInvoicesOrErr() ([]*RecurringInvoice, error) {
-	if e.loadedTypes[31] {
+	if e.loadedTypes[33] {
 		return e.RecurringInvoices, nil
 	}
 	return nil, &NotLoadedError{edge: "recurring_invoices"}
@@ -404,10 +465,109 @@ func (e TenantEdges) RecurringInvoicesOrErr() ([]*RecurringInvoice, error) {
 // InventoryReservationsOrErr returns the InventoryReservations value or an error if the edge
 // was not loaded in eager-loading.
 func (e TenantEdges) InventoryReservationsOrErr() ([]*InventoryReservation, error) {
-	if e.loadedTypes[32] {
+	if e.loadedTypes[34] {
 		return e.InventoryReservations, nil
 	}
 	return nil, &NotLoadedError{edge: "inventory_reservations"}
+}
+
+// DepartmentsOrErr returns the Departments value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) DepartmentsOrErr() ([]*Department, error) {
+	if e.loadedTypes[35] {
+		return e.Departments, nil
+	}
+	return nil, &NotLoadedError{edge: "departments"}
+}
+
+// PermissionsOrErr returns the Permissions value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) PermissionsOrErr() ([]*Permission, error) {
+	if e.loadedTypes[36] {
+		return e.Permissions, nil
+	}
+	return nil, &NotLoadedError{edge: "permissions"}
+}
+
+// AssetTypesOrErr returns the AssetTypes value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) AssetTypesOrErr() ([]*AssetType, error) {
+	if e.loadedTypes[37] {
+		return e.AssetTypes, nil
+	}
+	return nil, &NotLoadedError{edge: "asset_types"}
+}
+
+// DetectionEventsOrErr returns the DetectionEvents value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) DetectionEventsOrErr() ([]*DetectionEvent, error) {
+	if e.loadedTypes[38] {
+		return e.DetectionEvents, nil
+	}
+	return nil, &NotLoadedError{edge: "detection_events"}
+}
+
+// SaasIdentitiesOrErr returns the SaasIdentities value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) SaasIdentitiesOrErr() ([]*SaaSIdentity, error) {
+	if e.loadedTypes[39] {
+		return e.SaasIdentities, nil
+	}
+	return nil, &NotLoadedError{edge: "saas_identities"}
+}
+
+// SaasUsagesOrErr returns the SaasUsages value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) SaasUsagesOrErr() ([]*SaaSUsage, error) {
+	if e.loadedTypes[40] {
+		return e.SaasUsages, nil
+	}
+	return nil, &NotLoadedError{edge: "saas_usages"}
+}
+
+// RecordingsOrErr returns the Recordings value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) RecordingsOrErr() ([]*Recording, error) {
+	if e.loadedTypes[41] {
+		return e.Recordings, nil
+	}
+	return nil, &NotLoadedError{edge: "recordings"}
+}
+
+// NetworkLinksOrErr returns the NetworkLinks value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) NetworkLinksOrErr() ([]*NetworkLink, error) {
+	if e.loadedTypes[42] {
+		return e.NetworkLinks, nil
+	}
+	return nil, &NotLoadedError{edge: "network_links"}
+}
+
+// NetworkPortsOrErr returns the NetworkPorts value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) NetworkPortsOrErr() ([]*NetworkPort, error) {
+	if e.loadedTypes[43] {
+		return e.NetworkPorts, nil
+	}
+	return nil, &NotLoadedError{edge: "network_ports"}
+}
+
+// NexusAuditsOrErr returns the NexusAudits value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) NexusAuditsOrErr() ([]*NexusAudit, error) {
+	if e.loadedTypes[44] {
+		return e.NexusAudits, nil
+	}
+	return nil, &NotLoadedError{edge: "nexus_audits"}
+}
+
+// SuccessionMapsOrErr returns the SuccessionMaps value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) SuccessionMapsOrErr() ([]*SuccessionMap, error) {
+	if e.loadedTypes[45] {
+		return e.SuccessionMaps, nil
+	}
+	return nil, &NotLoadedError{edge: "succession_maps"}
 }
 
 // CustomerAccountOrErr returns the CustomerAccount value or an error if the edge
@@ -415,10 +575,82 @@ func (e TenantEdges) InventoryReservationsOrErr() ([]*InventoryReservation, erro
 func (e TenantEdges) CustomerAccountOrErr() (*Account, error) {
 	if e.CustomerAccount != nil {
 		return e.CustomerAccount, nil
-	} else if e.loadedTypes[33] {
+	} else if e.loadedTypes[46] {
 		return nil, &NotFoundError{label: account.Label}
 	}
 	return nil, &NotLoadedError{edge: "customer_account"}
+}
+
+// ScriptsOrErr returns the Scripts value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) ScriptsOrErr() ([]*Script, error) {
+	if e.loadedTypes[47] {
+		return e.Scripts, nil
+	}
+	return nil, &NotLoadedError{edge: "scripts"}
+}
+
+// JobsOrErr returns the Jobs value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) JobsOrErr() ([]*Job, error) {
+	if e.loadedTypes[48] {
+		return e.Jobs, nil
+	}
+	return nil, &NotLoadedError{edge: "jobs"}
+}
+
+// TimeOffRequestsOrErr returns the TimeOffRequests value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) TimeOffRequestsOrErr() ([]*TimeOffRequest, error) {
+	if e.loadedTypes[49] {
+		return e.TimeOffRequests, nil
+	}
+	return nil, &NotLoadedError{edge: "time_off_requests"}
+}
+
+// TimeOffPoliciesOrErr returns the TimeOffPolicies value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) TimeOffPoliciesOrErr() ([]*TimeOffPolicy, error) {
+	if e.loadedTypes[50] {
+		return e.TimeOffPolicies, nil
+	}
+	return nil, &NotLoadedError{edge: "time_off_policies"}
+}
+
+// TimeOffBalancesOrErr returns the TimeOffBalances value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) TimeOffBalancesOrErr() ([]*TimeOffBalance, error) {
+	if e.loadedTypes[51] {
+		return e.TimeOffBalances, nil
+	}
+	return nil, &NotLoadedError{edge: "time_off_balances"}
+}
+
+// ReviewCyclesOrErr returns the ReviewCycles value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) ReviewCyclesOrErr() ([]*ReviewCycle, error) {
+	if e.loadedTypes[52] {
+		return e.ReviewCycles, nil
+	}
+	return nil, &NotLoadedError{edge: "review_cycles"}
+}
+
+// PerformanceReviewsOrErr returns the PerformanceReviews value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) PerformanceReviewsOrErr() ([]*PerformanceReview, error) {
+	if e.loadedTypes[53] {
+		return e.PerformanceReviews, nil
+	}
+	return nil, &NotLoadedError{edge: "performance_reviews"}
+}
+
+// GoalsOrErr returns the Goals value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) GoalsOrErr() ([]*Goal, error) {
+	if e.loadedTypes[54] {
+		return e.Goals, nil
+	}
+	return nil, &NotLoadedError{edge: "goals"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -426,10 +658,10 @@ func (*Tenant) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case tenant.FieldTransactionLimit:
+			values[i] = new(decimal.Decimal)
 		case tenant.FieldActive:
 			values[i] = new(sql.NullBool)
-		case tenant.FieldTransactionLimit:
-			values[i] = new(sql.NullFloat64)
 		case tenant.FieldID:
 			values[i] = new(sql.NullInt64)
 		case tenant.FieldName, tenant.FieldDomain:
@@ -486,10 +718,10 @@ func (_m *Tenant) assignValues(columns []string, values []any) error {
 				_m.Active = value.Bool
 			}
 		case tenant.FieldTransactionLimit:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field transaction_limit", values[i])
-			} else if value.Valid {
-				_m.TransactionLimit = value.Float64
+			} else if value != nil {
+				_m.TransactionLimit = *value
 			}
 		case tenant.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -648,6 +880,16 @@ func (_m *Tenant) QueryServiceRates() *ServiceRateQuery {
 	return NewTenantClient(_m.config).QueryServiceRates(_m)
 }
 
+// QueryNetworkDevices queries the "network_devices" edge of the Tenant entity.
+func (_m *Tenant) QueryNetworkDevices() *NetworkDeviceQuery {
+	return NewTenantClient(_m.config).QueryNetworkDevices(_m)
+}
+
+// QueryNetworkBackups queries the "network_backups" edge of the Tenant entity.
+func (_m *Tenant) QueryNetworkBackups() *NetworkBackupQuery {
+	return NewTenantClient(_m.config).QueryNetworkBackups(_m)
+}
+
 // QueryBudgetForecasts queries the "budget_forecasts" edge of the Tenant entity.
 func (_m *Tenant) QueryBudgetForecasts() *BudgetForecastQuery {
 	return NewTenantClient(_m.config).QueryBudgetForecasts(_m)
@@ -683,9 +925,104 @@ func (_m *Tenant) QueryInventoryReservations() *InventoryReservationQuery {
 	return NewTenantClient(_m.config).QueryInventoryReservations(_m)
 }
 
+// QueryDepartments queries the "departments" edge of the Tenant entity.
+func (_m *Tenant) QueryDepartments() *DepartmentQuery {
+	return NewTenantClient(_m.config).QueryDepartments(_m)
+}
+
+// QueryPermissions queries the "permissions" edge of the Tenant entity.
+func (_m *Tenant) QueryPermissions() *PermissionQuery {
+	return NewTenantClient(_m.config).QueryPermissions(_m)
+}
+
+// QueryAssetTypes queries the "asset_types" edge of the Tenant entity.
+func (_m *Tenant) QueryAssetTypes() *AssetTypeQuery {
+	return NewTenantClient(_m.config).QueryAssetTypes(_m)
+}
+
+// QueryDetectionEvents queries the "detection_events" edge of the Tenant entity.
+func (_m *Tenant) QueryDetectionEvents() *DetectionEventQuery {
+	return NewTenantClient(_m.config).QueryDetectionEvents(_m)
+}
+
+// QuerySaasIdentities queries the "saas_identities" edge of the Tenant entity.
+func (_m *Tenant) QuerySaasIdentities() *SaaSIdentityQuery {
+	return NewTenantClient(_m.config).QuerySaasIdentities(_m)
+}
+
+// QuerySaasUsages queries the "saas_usages" edge of the Tenant entity.
+func (_m *Tenant) QuerySaasUsages() *SaaSUsageQuery {
+	return NewTenantClient(_m.config).QuerySaasUsages(_m)
+}
+
+// QueryRecordings queries the "recordings" edge of the Tenant entity.
+func (_m *Tenant) QueryRecordings() *RecordingQuery {
+	return NewTenantClient(_m.config).QueryRecordings(_m)
+}
+
+// QueryNetworkLinks queries the "network_links" edge of the Tenant entity.
+func (_m *Tenant) QueryNetworkLinks() *NetworkLinkQuery {
+	return NewTenantClient(_m.config).QueryNetworkLinks(_m)
+}
+
+// QueryNetworkPorts queries the "network_ports" edge of the Tenant entity.
+func (_m *Tenant) QueryNetworkPorts() *NetworkPortQuery {
+	return NewTenantClient(_m.config).QueryNetworkPorts(_m)
+}
+
+// QueryNexusAudits queries the "nexus_audits" edge of the Tenant entity.
+func (_m *Tenant) QueryNexusAudits() *NexusAuditQuery {
+	return NewTenantClient(_m.config).QueryNexusAudits(_m)
+}
+
+// QuerySuccessionMaps queries the "succession_maps" edge of the Tenant entity.
+func (_m *Tenant) QuerySuccessionMaps() *SuccessionMapQuery {
+	return NewTenantClient(_m.config).QuerySuccessionMaps(_m)
+}
+
 // QueryCustomerAccount queries the "customer_account" edge of the Tenant entity.
 func (_m *Tenant) QueryCustomerAccount() *AccountQuery {
 	return NewTenantClient(_m.config).QueryCustomerAccount(_m)
+}
+
+// QueryScripts queries the "scripts" edge of the Tenant entity.
+func (_m *Tenant) QueryScripts() *ScriptQuery {
+	return NewTenantClient(_m.config).QueryScripts(_m)
+}
+
+// QueryJobs queries the "jobs" edge of the Tenant entity.
+func (_m *Tenant) QueryJobs() *JobQuery {
+	return NewTenantClient(_m.config).QueryJobs(_m)
+}
+
+// QueryTimeOffRequests queries the "time_off_requests" edge of the Tenant entity.
+func (_m *Tenant) QueryTimeOffRequests() *TimeOffRequestQuery {
+	return NewTenantClient(_m.config).QueryTimeOffRequests(_m)
+}
+
+// QueryTimeOffPolicies queries the "time_off_policies" edge of the Tenant entity.
+func (_m *Tenant) QueryTimeOffPolicies() *TimeOffPolicyQuery {
+	return NewTenantClient(_m.config).QueryTimeOffPolicies(_m)
+}
+
+// QueryTimeOffBalances queries the "time_off_balances" edge of the Tenant entity.
+func (_m *Tenant) QueryTimeOffBalances() *TimeOffBalanceQuery {
+	return NewTenantClient(_m.config).QueryTimeOffBalances(_m)
+}
+
+// QueryReviewCycles queries the "review_cycles" edge of the Tenant entity.
+func (_m *Tenant) QueryReviewCycles() *ReviewCycleQuery {
+	return NewTenantClient(_m.config).QueryReviewCycles(_m)
+}
+
+// QueryPerformanceReviews queries the "performance_reviews" edge of the Tenant entity.
+func (_m *Tenant) QueryPerformanceReviews() *PerformanceReviewQuery {
+	return NewTenantClient(_m.config).QueryPerformanceReviews(_m)
+}
+
+// QueryGoals queries the "goals" edge of the Tenant entity.
+func (_m *Tenant) QueryGoals() *GoalQuery {
+	return NewTenantClient(_m.config).QueryGoals(_m)
 }
 
 // Update returns a builder for updating this Tenant.

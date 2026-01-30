@@ -310,6 +310,16 @@ func LastRevealedAtNotNil() predicate.Credential {
 	return predicate.Credential(sql.FieldNotNull(FieldLastRevealedAt))
 }
 
+// MetadataIsNil applies the IsNil predicate on the "metadata" field.
+func MetadataIsNil() predicate.Credential {
+	return predicate.Credential(sql.FieldIsNull(FieldMetadata))
+}
+
+// MetadataNotNil applies the NotNil predicate on the "metadata" field.
+func MetadataNotNil() predicate.Credential {
+	return predicate.Credential(sql.FieldNotNull(FieldMetadata))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Credential {
 	return predicate.Credential(sql.FieldEQ(FieldCreatedAt, v))

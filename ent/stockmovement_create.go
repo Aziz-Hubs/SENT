@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // StockMovementCreate is the builder for creating a StockMovement entity.
@@ -23,8 +24,16 @@ type StockMovementCreate struct {
 }
 
 // SetQuantity sets the "quantity" field.
-func (_c *StockMovementCreate) SetQuantity(v float64) *StockMovementCreate {
+func (_c *StockMovementCreate) SetQuantity(v decimal.Decimal) *StockMovementCreate {
 	_c.mutation.SetQuantity(v)
+	return _c
+}
+
+// SetNillableQuantity sets the "quantity" field if the given value is not nil.
+func (_c *StockMovementCreate) SetNillableQuantity(v *decimal.Decimal) *StockMovementCreate {
+	if v != nil {
+		_c.SetQuantity(*v)
+	}
 	return _c
 }
 
@@ -49,13 +58,13 @@ func (_c *StockMovementCreate) SetNillableReason(v *string) *StockMovementCreate
 }
 
 // SetUnitCost sets the "unit_cost" field.
-func (_c *StockMovementCreate) SetUnitCost(v float64) *StockMovementCreate {
+func (_c *StockMovementCreate) SetUnitCost(v decimal.Decimal) *StockMovementCreate {
 	_c.mutation.SetUnitCost(v)
 	return _c
 }
 
 // SetNillableUnitCost sets the "unit_cost" field if the given value is not nil.
-func (_c *StockMovementCreate) SetNillableUnitCost(v *float64) *StockMovementCreate {
+func (_c *StockMovementCreate) SetNillableUnitCost(v *decimal.Decimal) *StockMovementCreate {
 	if v != nil {
 		_c.SetUnitCost(*v)
 	}
@@ -63,13 +72,13 @@ func (_c *StockMovementCreate) SetNillableUnitCost(v *float64) *StockMovementCre
 }
 
 // SetRemainingQuantity sets the "remaining_quantity" field.
-func (_c *StockMovementCreate) SetRemainingQuantity(v float64) *StockMovementCreate {
+func (_c *StockMovementCreate) SetRemainingQuantity(v decimal.Decimal) *StockMovementCreate {
 	_c.mutation.SetRemainingQuantity(v)
 	return _c
 }
 
 // SetNillableRemainingQuantity sets the "remaining_quantity" field if the given value is not nil.
-func (_c *StockMovementCreate) SetNillableRemainingQuantity(v *float64) *StockMovementCreate {
+func (_c *StockMovementCreate) SetNillableRemainingQuantity(v *decimal.Decimal) *StockMovementCreate {
 	if v != nil {
 		_c.SetRemainingQuantity(*v)
 	}
@@ -77,13 +86,13 @@ func (_c *StockMovementCreate) SetNillableRemainingQuantity(v *float64) *StockMo
 }
 
 // SetCalculatedCogs sets the "calculated_cogs" field.
-func (_c *StockMovementCreate) SetCalculatedCogs(v float64) *StockMovementCreate {
+func (_c *StockMovementCreate) SetCalculatedCogs(v decimal.Decimal) *StockMovementCreate {
 	_c.mutation.SetCalculatedCogs(v)
 	return _c
 }
 
 // SetNillableCalculatedCogs sets the "calculated_cogs" field if the given value is not nil.
-func (_c *StockMovementCreate) SetNillableCalculatedCogs(v *float64) *StockMovementCreate {
+func (_c *StockMovementCreate) SetNillableCalculatedCogs(v *decimal.Decimal) *StockMovementCreate {
 	if v != nil {
 		_c.SetCalculatedCogs(*v)
 	}
@@ -167,6 +176,10 @@ func (_c *StockMovementCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *StockMovementCreate) defaults() {
+	if _, ok := _c.mutation.Quantity(); !ok {
+		v := stockmovement.DefaultQuantity
+		_c.mutation.SetQuantity(v)
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := stockmovement.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
@@ -222,7 +235,7 @@ func (_c *StockMovementCreate) createSpec() (*StockMovement, *sqlgraph.CreateSpe
 		_spec = sqlgraph.NewCreateSpec(stockmovement.Table, sqlgraph.NewFieldSpec(stockmovement.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.Quantity(); ok {
-		_spec.SetField(stockmovement.FieldQuantity, field.TypeFloat64, value)
+		_spec.SetField(stockmovement.FieldQuantity, field.TypeOther, value)
 		_node.Quantity = value
 	}
 	if value, ok := _c.mutation.MovementType(); ok {
@@ -234,16 +247,16 @@ func (_c *StockMovementCreate) createSpec() (*StockMovement, *sqlgraph.CreateSpe
 		_node.Reason = value
 	}
 	if value, ok := _c.mutation.UnitCost(); ok {
-		_spec.SetField(stockmovement.FieldUnitCost, field.TypeFloat64, value)
+		_spec.SetField(stockmovement.FieldUnitCost, field.TypeOther, value)
 		_node.UnitCost = value
 	}
 	if value, ok := _c.mutation.RemainingQuantity(); ok {
-		_spec.SetField(stockmovement.FieldRemainingQuantity, field.TypeFloat64, value)
-		_node.RemainingQuantity = &value
+		_spec.SetField(stockmovement.FieldRemainingQuantity, field.TypeOther, value)
+		_node.RemainingQuantity = value
 	}
 	if value, ok := _c.mutation.CalculatedCogs(); ok {
-		_spec.SetField(stockmovement.FieldCalculatedCogs, field.TypeFloat64, value)
-		_node.CalculatedCogs = &value
+		_spec.SetField(stockmovement.FieldCalculatedCogs, field.TypeOther, value)
+		_node.CalculatedCogs = value
 	}
 	if value, ok := _c.mutation.Metadata(); ok {
 		_spec.SetField(stockmovement.FieldMetadata, field.TypeJSON, value)

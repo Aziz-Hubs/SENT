@@ -65,6 +65,21 @@ func Name(v string) predicate.DiscoveryEntry {
 	return predicate.DiscoveryEntry(sql.FieldEQ(FieldName, v))
 }
 
+// Hostname applies equality check predicate on the "hostname" field. It's identical to HostnameEQ.
+func Hostname(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldEQ(FieldHostname, v))
+}
+
+// IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
+func IP(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldEQ(FieldIP, v))
+}
+
+// MAC applies equality check predicate on the "mac" field. It's identical to MACEQ.
+func MAC(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldEQ(FieldMAC, v))
+}
+
 // Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
 func Type(v string) predicate.DiscoveryEntry {
 	return predicate.DiscoveryEntry(sql.FieldEQ(FieldType, v))
@@ -203,6 +218,231 @@ func NameEqualFold(v string) predicate.DiscoveryEntry {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.DiscoveryEntry {
 	return predicate.DiscoveryEntry(sql.FieldContainsFold(FieldName, v))
+}
+
+// HostnameEQ applies the EQ predicate on the "hostname" field.
+func HostnameEQ(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldEQ(FieldHostname, v))
+}
+
+// HostnameNEQ applies the NEQ predicate on the "hostname" field.
+func HostnameNEQ(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldNEQ(FieldHostname, v))
+}
+
+// HostnameIn applies the In predicate on the "hostname" field.
+func HostnameIn(vs ...string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldIn(FieldHostname, vs...))
+}
+
+// HostnameNotIn applies the NotIn predicate on the "hostname" field.
+func HostnameNotIn(vs ...string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldNotIn(FieldHostname, vs...))
+}
+
+// HostnameGT applies the GT predicate on the "hostname" field.
+func HostnameGT(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldGT(FieldHostname, v))
+}
+
+// HostnameGTE applies the GTE predicate on the "hostname" field.
+func HostnameGTE(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldGTE(FieldHostname, v))
+}
+
+// HostnameLT applies the LT predicate on the "hostname" field.
+func HostnameLT(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldLT(FieldHostname, v))
+}
+
+// HostnameLTE applies the LTE predicate on the "hostname" field.
+func HostnameLTE(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldLTE(FieldHostname, v))
+}
+
+// HostnameContains applies the Contains predicate on the "hostname" field.
+func HostnameContains(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldContains(FieldHostname, v))
+}
+
+// HostnameHasPrefix applies the HasPrefix predicate on the "hostname" field.
+func HostnameHasPrefix(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldHasPrefix(FieldHostname, v))
+}
+
+// HostnameHasSuffix applies the HasSuffix predicate on the "hostname" field.
+func HostnameHasSuffix(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldHasSuffix(FieldHostname, v))
+}
+
+// HostnameIsNil applies the IsNil predicate on the "hostname" field.
+func HostnameIsNil() predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldIsNull(FieldHostname))
+}
+
+// HostnameNotNil applies the NotNil predicate on the "hostname" field.
+func HostnameNotNil() predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldNotNull(FieldHostname))
+}
+
+// HostnameEqualFold applies the EqualFold predicate on the "hostname" field.
+func HostnameEqualFold(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldEqualFold(FieldHostname, v))
+}
+
+// HostnameContainsFold applies the ContainsFold predicate on the "hostname" field.
+func HostnameContainsFold(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldContainsFold(FieldHostname, v))
+}
+
+// IPEQ applies the EQ predicate on the "ip" field.
+func IPEQ(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldEQ(FieldIP, v))
+}
+
+// IPNEQ applies the NEQ predicate on the "ip" field.
+func IPNEQ(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldNEQ(FieldIP, v))
+}
+
+// IPIn applies the In predicate on the "ip" field.
+func IPIn(vs ...string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldIn(FieldIP, vs...))
+}
+
+// IPNotIn applies the NotIn predicate on the "ip" field.
+func IPNotIn(vs ...string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldNotIn(FieldIP, vs...))
+}
+
+// IPGT applies the GT predicate on the "ip" field.
+func IPGT(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldGT(FieldIP, v))
+}
+
+// IPGTE applies the GTE predicate on the "ip" field.
+func IPGTE(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldGTE(FieldIP, v))
+}
+
+// IPLT applies the LT predicate on the "ip" field.
+func IPLT(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldLT(FieldIP, v))
+}
+
+// IPLTE applies the LTE predicate on the "ip" field.
+func IPLTE(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldLTE(FieldIP, v))
+}
+
+// IPContains applies the Contains predicate on the "ip" field.
+func IPContains(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldContains(FieldIP, v))
+}
+
+// IPHasPrefix applies the HasPrefix predicate on the "ip" field.
+func IPHasPrefix(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldHasPrefix(FieldIP, v))
+}
+
+// IPHasSuffix applies the HasSuffix predicate on the "ip" field.
+func IPHasSuffix(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldHasSuffix(FieldIP, v))
+}
+
+// IPIsNil applies the IsNil predicate on the "ip" field.
+func IPIsNil() predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldIsNull(FieldIP))
+}
+
+// IPNotNil applies the NotNil predicate on the "ip" field.
+func IPNotNil() predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldNotNull(FieldIP))
+}
+
+// IPEqualFold applies the EqualFold predicate on the "ip" field.
+func IPEqualFold(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldEqualFold(FieldIP, v))
+}
+
+// IPContainsFold applies the ContainsFold predicate on the "ip" field.
+func IPContainsFold(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldContainsFold(FieldIP, v))
+}
+
+// MACEQ applies the EQ predicate on the "mac" field.
+func MACEQ(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldEQ(FieldMAC, v))
+}
+
+// MACNEQ applies the NEQ predicate on the "mac" field.
+func MACNEQ(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldNEQ(FieldMAC, v))
+}
+
+// MACIn applies the In predicate on the "mac" field.
+func MACIn(vs ...string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldIn(FieldMAC, vs...))
+}
+
+// MACNotIn applies the NotIn predicate on the "mac" field.
+func MACNotIn(vs ...string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldNotIn(FieldMAC, vs...))
+}
+
+// MACGT applies the GT predicate on the "mac" field.
+func MACGT(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldGT(FieldMAC, v))
+}
+
+// MACGTE applies the GTE predicate on the "mac" field.
+func MACGTE(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldGTE(FieldMAC, v))
+}
+
+// MACLT applies the LT predicate on the "mac" field.
+func MACLT(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldLT(FieldMAC, v))
+}
+
+// MACLTE applies the LTE predicate on the "mac" field.
+func MACLTE(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldLTE(FieldMAC, v))
+}
+
+// MACContains applies the Contains predicate on the "mac" field.
+func MACContains(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldContains(FieldMAC, v))
+}
+
+// MACHasPrefix applies the HasPrefix predicate on the "mac" field.
+func MACHasPrefix(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldHasPrefix(FieldMAC, v))
+}
+
+// MACHasSuffix applies the HasSuffix predicate on the "mac" field.
+func MACHasSuffix(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldHasSuffix(FieldMAC, v))
+}
+
+// MACIsNil applies the IsNil predicate on the "mac" field.
+func MACIsNil() predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldIsNull(FieldMAC))
+}
+
+// MACNotNil applies the NotNil predicate on the "mac" field.
+func MACNotNil() predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldNotNull(FieldMAC))
+}
+
+// MACEqualFold applies the EqualFold predicate on the "mac" field.
+func MACEqualFold(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldEqualFold(FieldMAC, v))
+}
+
+// MACContainsFold applies the ContainsFold predicate on the "mac" field.
+func MACContainsFold(v string) predicate.DiscoveryEntry {
+	return predicate.DiscoveryEntry(sql.FieldContainsFold(FieldMAC, v))
 }
 
 // TypeEQ applies the EQ predicate on the "type" field.

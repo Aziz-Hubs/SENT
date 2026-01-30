@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Department holds the schema definition for the Department entity.
@@ -14,8 +15,8 @@ type Department struct {
 // Fields of the Department.
 func (Department) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").Unique(),
-		field.String("code").Unique(),
+		field.String("name"),
+		field.String("code"),
 		field.String("description").Optional(),
 	}
 }
@@ -29,5 +30,18 @@ func (Department) Edges() []ent.Edge {
 		edge.To("members", Employee.Type),
 		edge.To("head", Employee.Type).
 			Unique(),
+		edge.From("tenant", Tenant.Type).
+			Ref("departments").
+			Unique().
+			Required(),
 	}
 }
+
+// Indexes of the Department.
+func (Department) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("name").Edges("tenant").Unique(),
+		index.Fields("code").Edges("tenant").Unique(),
+	}
+}
+

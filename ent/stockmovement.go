@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // StockMovement is the model entity for the StockMovement schema.
@@ -21,17 +22,17 @@ type StockMovement struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Quantity holds the value of the "quantity" field.
-	Quantity float64 `json:"quantity,omitempty"`
+	Quantity decimal.Decimal `json:"quantity,omitempty"`
 	// MovementType holds the value of the "movement_type" field.
 	MovementType stockmovement.MovementType `json:"movement_type,omitempty"`
 	// Reason holds the value of the "reason" field.
 	Reason string `json:"reason,omitempty"`
 	// UnitCost holds the value of the "unit_cost" field.
-	UnitCost float64 `json:"unit_cost,omitempty"`
+	UnitCost decimal.Decimal `json:"unit_cost,omitempty"`
 	// RemainingQuantity holds the value of the "remaining_quantity" field.
-	RemainingQuantity *float64 `json:"remaining_quantity,omitempty"`
+	RemainingQuantity decimal.Decimal `json:"remaining_quantity,omitempty"`
 	// CalculatedCogs holds the value of the "calculated_cogs" field.
-	CalculatedCogs *float64 `json:"calculated_cogs,omitempty"`
+	CalculatedCogs decimal.Decimal `json:"calculated_cogs,omitempty"`
 	// Metadata holds the value of the "metadata" field.
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -85,7 +86,7 @@ func (*StockMovement) scanValues(columns []string) ([]any, error) {
 		case stockmovement.FieldMetadata:
 			values[i] = new([]byte)
 		case stockmovement.FieldQuantity, stockmovement.FieldUnitCost, stockmovement.FieldRemainingQuantity, stockmovement.FieldCalculatedCogs:
-			values[i] = new(sql.NullFloat64)
+			values[i] = new(decimal.Decimal)
 		case stockmovement.FieldID:
 			values[i] = new(sql.NullInt64)
 		case stockmovement.FieldMovementType, stockmovement.FieldReason:
@@ -118,10 +119,10 @@ func (_m *StockMovement) assignValues(columns []string, values []any) error {
 			}
 			_m.ID = int(value.Int64)
 		case stockmovement.FieldQuantity:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field quantity", values[i])
-			} else if value.Valid {
-				_m.Quantity = value.Float64
+			} else if value != nil {
+				_m.Quantity = *value
 			}
 		case stockmovement.FieldMovementType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -136,24 +137,22 @@ func (_m *StockMovement) assignValues(columns []string, values []any) error {
 				_m.Reason = value.String
 			}
 		case stockmovement.FieldUnitCost:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field unit_cost", values[i])
-			} else if value.Valid {
-				_m.UnitCost = value.Float64
+			} else if value != nil {
+				_m.UnitCost = *value
 			}
 		case stockmovement.FieldRemainingQuantity:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field remaining_quantity", values[i])
-			} else if value.Valid {
-				_m.RemainingQuantity = new(float64)
-				*_m.RemainingQuantity = value.Float64
+			} else if value != nil {
+				_m.RemainingQuantity = *value
 			}
 		case stockmovement.FieldCalculatedCogs:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field calculated_cogs", values[i])
-			} else if value.Valid {
-				_m.CalculatedCogs = new(float64)
-				*_m.CalculatedCogs = value.Float64
+			} else if value != nil {
+				_m.CalculatedCogs = *value
 			}
 		case stockmovement.FieldMetadata:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -241,15 +240,11 @@ func (_m *StockMovement) String() string {
 	builder.WriteString("unit_cost=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UnitCost))
 	builder.WriteString(", ")
-	if v := _m.RemainingQuantity; v != nil {
-		builder.WriteString("remaining_quantity=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("remaining_quantity=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RemainingQuantity))
 	builder.WriteString(", ")
-	if v := _m.CalculatedCogs; v != nil {
-		builder.WriteString("calculated_cogs=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("calculated_cogs=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CalculatedCogs))
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))

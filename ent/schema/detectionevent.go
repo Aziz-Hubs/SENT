@@ -28,5 +28,10 @@ func (DetectionEvent) Fields() []ent.Field {
 func (DetectionEvent) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("camera", Camera.Type).Ref("detections").Unique().Required(),
+		edge.From("tenant", Tenant.Type).
+			Ref("detection_events").
+			Unique().
+			Required(),
 	}
 }
+

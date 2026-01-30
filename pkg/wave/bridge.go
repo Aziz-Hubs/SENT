@@ -5,6 +5,8 @@ import (
 
 	"sent/ent"
 	"sent/ent/calllog"
+	"sent/ent/tenant"
+	"sent/pkg/auth"
 	"sent/pkg/wave/ivr"
 	"sent/pkg/wave/rtc"
 	"sent/pkg/wave/signaling"
@@ -14,15 +16,17 @@ import (
 type WaveBridge struct {
 	ctx       context.Context
 	db        *ent.Client
+	auth      *auth.AuthBridge
 	rtc       *rtc.Engine
 	signaling *signaling.Service
 	ivr       *ivr.Engine
 }
 
 // NewWaveBridge initializes a new WaveBridge.
-func NewWaveBridge(db *ent.Client) *WaveBridge {
+func NewWaveBridge(db *ent.Client, auth *auth.AuthBridge) *WaveBridge {
 	return &WaveBridge{
 		db:        db,
+		auth:      auth,
 		rtc:       rtc.NewEngine(),
 		signaling: signaling.NewService(),
 		ivr:       ivr.NewEngine(db),
@@ -49,7 +53,14 @@ func (b *WaveBridge) Hangup(callID string) error {
 
 // GetCallLogs retrieves call history for the current tenant.
 func (b *WaveBridge) GetCallLogs() ([]*ent.CallLog, error) {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return nil, err
+	}
+	tenantID := profile.TenantID
+
 	return b.db.CallLog.Query().
+		Where(calllog.HasTenantWith(tenant.ID(tenantID))).
 		Order(ent.Desc(calllog.FieldStartTime)).
 		All(b.ctx)
 }

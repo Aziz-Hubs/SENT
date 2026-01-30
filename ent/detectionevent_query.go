@@ -9,6 +9,7 @@ import (
 	"sent/ent/camera"
 	"sent/ent/detectionevent"
 	"sent/ent/predicate"
+	"sent/ent/tenant"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -24,7 +25,9 @@ type DetectionEventQuery struct {
 	inters     []Interceptor
 	predicates []predicate.DetectionEvent
 	withCamera *CameraQuery
+	withTenant *TenantQuery
 	withFKs    bool
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +79,28 @@ func (_q *DetectionEventQuery) QueryCamera() *CameraQuery {
 			sqlgraph.From(detectionevent.Table, detectionevent.FieldID, selector),
 			sqlgraph.To(camera.Table, camera.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, detectionevent.CameraTable, detectionevent.CameraColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTenant chains the current query on the "tenant" edge.
+func (_q *DetectionEventQuery) QueryTenant() *TenantQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(detectionevent.Table, detectionevent.FieldID, selector),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, detectionevent.TenantTable, detectionevent.TenantColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -276,9 +301,11 @@ func (_q *DetectionEventQuery) Clone() *DetectionEventQuery {
 		inters:     append([]Interceptor{}, _q.inters...),
 		predicates: append([]predicate.DetectionEvent{}, _q.predicates...),
 		withCamera: _q.withCamera.Clone(),
+		withTenant: _q.withTenant.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -290,6 +317,17 @@ func (_q *DetectionEventQuery) WithCamera(opts ...func(*CameraQuery)) *Detection
 		opt(query)
 	}
 	_q.withCamera = query
+	return _q
+}
+
+// WithTenant tells the query-builder to eager-load the nodes that are connected to
+// the "tenant" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *DetectionEventQuery) WithTenant(opts ...func(*TenantQuery)) *DetectionEventQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTenant = query
 	return _q
 }
 
@@ -372,11 +410,12 @@ func (_q *DetectionEventQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 		nodes       = []*DetectionEvent{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			_q.withCamera != nil,
+			_q.withTenant != nil,
 		}
 	)
-	if _q.withCamera != nil {
+	if _q.withCamera != nil || _q.withTenant != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -391,6 +430,9 @@ func (_q *DetectionEventQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -403,6 +445,12 @@ func (_q *DetectionEventQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	if query := _q.withCamera; query != nil {
 		if err := _q.loadCamera(ctx, query, nodes, nil,
 			func(n *DetectionEvent, e *Camera) { n.Edges.Camera = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTenant; query != nil {
+		if err := _q.loadTenant(ctx, query, nodes, nil,
+			func(n *DetectionEvent, e *Tenant) { n.Edges.Tenant = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -441,9 +489,44 @@ func (_q *DetectionEventQuery) loadCamera(ctx context.Context, query *CameraQuer
 	}
 	return nil
 }
+func (_q *DetectionEventQuery) loadTenant(ctx context.Context, query *TenantQuery, nodes []*DetectionEvent, init func(*DetectionEvent), assign func(*DetectionEvent, *Tenant)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*DetectionEvent)
+	for i := range nodes {
+		if nodes[i].tenant_detection_events == nil {
+			continue
+		}
+		fk := *nodes[i].tenant_detection_events
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(tenant.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tenant_detection_events" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (_q *DetectionEventQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -506,6 +589,9 @@ func (_q *DetectionEventQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -521,6 +607,12 @@ func (_q *DetectionEventQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *DetectionEventQuery) Modify(modifiers ...func(s *sql.Selector)) *DetectionEventSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // DetectionEventGroupBy is the group-by builder for DetectionEvent entities.
@@ -611,4 +703,10 @@ func (_s *DetectionEventSelect) sqlScan(ctx context.Context, root *DetectionEven
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *DetectionEventSelect) Modify(modifiers ...func(s *sql.Selector)) *DetectionEventSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

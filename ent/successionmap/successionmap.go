@@ -25,6 +25,8 @@ const (
 	EdgeEmployee = "employee"
 	// EdgeBackupCandidate holds the string denoting the backup_candidate edge name in mutations.
 	EdgeBackupCandidate = "backup_candidate"
+	// EdgeTenant holds the string denoting the tenant edge name in mutations.
+	EdgeTenant = "tenant"
 	// Table holds the table name of the successionmap in the database.
 	Table = "succession_maps"
 	// EmployeeTable is the table that holds the employee relation/edge.
@@ -41,6 +43,13 @@ const (
 	BackupCandidateInverseTable = "employees"
 	// BackupCandidateColumn is the table column denoting the backup_candidate relation/edge.
 	BackupCandidateColumn = "backup_candidate_id"
+	// TenantTable is the table that holds the tenant relation/edge.
+	TenantTable = "succession_maps"
+	// TenantInverseTable is the table name for the Tenant entity.
+	// It exists in this package in order to avoid circular dependency with the "tenant" package.
+	TenantInverseTable = "tenants"
+	// TenantColumn is the table column denoting the tenant relation/edge.
+	TenantColumn = "tenant_succession_maps"
 )
 
 // Columns holds all SQL columns for successionmap fields.
@@ -56,6 +65,7 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"employee_id",
 	"backup_candidate_id",
+	"tenant_succession_maps",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -138,6 +148,13 @@ func ByBackupCandidateField(field string, opts ...sql.OrderTermOption) OrderOpti
 		sqlgraph.OrderByNeighborTerms(s, newBackupCandidateStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByTenantField orders the results by tenant field.
+func ByTenantField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTenantStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newEmployeeStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -150,5 +167,12 @@ func newBackupCandidateStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(BackupCandidateInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, BackupCandidateTable, BackupCandidateColumn),
+	)
+}
+func newTenantStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TenantInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, TenantTable, TenantColumn),
 	)
 }

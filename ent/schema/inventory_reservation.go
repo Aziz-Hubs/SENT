@@ -2,8 +2,10 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 	"time"
 )
 
@@ -15,7 +17,11 @@ type InventoryReservation struct {
 // Fields of the InventoryReservation.
 func (InventoryReservation) Fields() []ent.Field {
 	return []ent.Field{
-		field.Float("quantity"),
+		field.Other("quantity", decimal.Decimal{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "numeric(15,4)",
+			}).
+			Default(decimal.Zero),
 		field.Time("expires_at"),
 		field.Enum("status").
 			Values("active", "released", "completed").

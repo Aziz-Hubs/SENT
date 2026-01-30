@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 // ID filters vertices based on their ID field.
@@ -56,7 +57,7 @@ func IDLTE(id int) predicate.CompensationAgreement {
 }
 
 // BaseSalary applies equality check predicate on the "base_salary" field. It's identical to BaseSalaryEQ.
-func BaseSalary(v float64) predicate.CompensationAgreement {
+func BaseSalary(v decimal.Decimal) predicate.CompensationAgreement {
 	return predicate.CompensationAgreement(sql.FieldEQ(FieldBaseSalary, v))
 }
 
@@ -76,42 +77,42 @@ func CreatedAt(v time.Time) predicate.CompensationAgreement {
 }
 
 // BaseSalaryEQ applies the EQ predicate on the "base_salary" field.
-func BaseSalaryEQ(v float64) predicate.CompensationAgreement {
+func BaseSalaryEQ(v decimal.Decimal) predicate.CompensationAgreement {
 	return predicate.CompensationAgreement(sql.FieldEQ(FieldBaseSalary, v))
 }
 
 // BaseSalaryNEQ applies the NEQ predicate on the "base_salary" field.
-func BaseSalaryNEQ(v float64) predicate.CompensationAgreement {
+func BaseSalaryNEQ(v decimal.Decimal) predicate.CompensationAgreement {
 	return predicate.CompensationAgreement(sql.FieldNEQ(FieldBaseSalary, v))
 }
 
 // BaseSalaryIn applies the In predicate on the "base_salary" field.
-func BaseSalaryIn(vs ...float64) predicate.CompensationAgreement {
+func BaseSalaryIn(vs ...decimal.Decimal) predicate.CompensationAgreement {
 	return predicate.CompensationAgreement(sql.FieldIn(FieldBaseSalary, vs...))
 }
 
 // BaseSalaryNotIn applies the NotIn predicate on the "base_salary" field.
-func BaseSalaryNotIn(vs ...float64) predicate.CompensationAgreement {
+func BaseSalaryNotIn(vs ...decimal.Decimal) predicate.CompensationAgreement {
 	return predicate.CompensationAgreement(sql.FieldNotIn(FieldBaseSalary, vs...))
 }
 
 // BaseSalaryGT applies the GT predicate on the "base_salary" field.
-func BaseSalaryGT(v float64) predicate.CompensationAgreement {
+func BaseSalaryGT(v decimal.Decimal) predicate.CompensationAgreement {
 	return predicate.CompensationAgreement(sql.FieldGT(FieldBaseSalary, v))
 }
 
 // BaseSalaryGTE applies the GTE predicate on the "base_salary" field.
-func BaseSalaryGTE(v float64) predicate.CompensationAgreement {
+func BaseSalaryGTE(v decimal.Decimal) predicate.CompensationAgreement {
 	return predicate.CompensationAgreement(sql.FieldGTE(FieldBaseSalary, v))
 }
 
 // BaseSalaryLT applies the LT predicate on the "base_salary" field.
-func BaseSalaryLT(v float64) predicate.CompensationAgreement {
+func BaseSalaryLT(v decimal.Decimal) predicate.CompensationAgreement {
 	return predicate.CompensationAgreement(sql.FieldLT(FieldBaseSalary, v))
 }
 
 // BaseSalaryLTE applies the LTE predicate on the "base_salary" field.
-func BaseSalaryLTE(v float64) predicate.CompensationAgreement {
+func BaseSalaryLTE(v decimal.Decimal) predicate.CompensationAgreement {
 	return predicate.CompensationAgreement(sql.FieldLTE(FieldBaseSalary, v))
 }
 

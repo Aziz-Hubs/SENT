@@ -20,6 +20,9 @@ func (VaultItem) Fields() []ent.Field {
 		field.String("name").NotEmpty(),
 		field.Int64("size").Default(0),
 		field.String("hash").NotEmpty(), // SHA-256 for CAS
+		field.String("file_type").Optional(),
+		field.Bool("encrypted").Default(false),
+		field.JSON("metadata", map[string]interface{}{}).Optional(),
 		field.Text("content").Optional(), // Extracted OCR text
 		field.Bool("is_dir").Default(false),
 		field.Time("created_at").Default(time.Now).Immutable(),

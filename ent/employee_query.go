@@ -11,9 +11,13 @@ import (
 	"sent/ent/compensationagreement"
 	"sent/ent/department"
 	"sent/ent/employee"
+	"sent/ent/goal"
+	"sent/ent/performancereview"
 	"sent/ent/predicate"
 	"sent/ent/successionmap"
 	"sent/ent/tenant"
+	"sent/ent/timeoffbalance"
+	"sent/ent/timeoffrequest"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -36,7 +40,14 @@ type EmployeeQuery struct {
 	withSuccessionPlans        *SuccessionMapQuery
 	withBackupFor              *SuccessionMapQuery
 	withExpenseAccount         *AccountQuery
+	withTimeOffRequests        *TimeOffRequestQuery
+	withApprovedTimeOff        *TimeOffRequestQuery
+	withTimeOffBalances        *TimeOffBalanceQuery
+	withPerformanceReviews     *PerformanceReviewQuery
+	withConductedReviews       *PerformanceReviewQuery
+	withGoals                  *GoalQuery
 	withFKs                    bool
+	modifiers                  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -249,6 +260,138 @@ func (_q *EmployeeQuery) QueryExpenseAccount() *AccountQuery {
 	return query
 }
 
+// QueryTimeOffRequests chains the current query on the "time_off_requests" edge.
+func (_q *EmployeeQuery) QueryTimeOffRequests() *TimeOffRequestQuery {
+	query := (&TimeOffRequestClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, selector),
+			sqlgraph.To(timeoffrequest.Table, timeoffrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.TimeOffRequestsTable, employee.TimeOffRequestsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryApprovedTimeOff chains the current query on the "approved_time_off" edge.
+func (_q *EmployeeQuery) QueryApprovedTimeOff() *TimeOffRequestQuery {
+	query := (&TimeOffRequestClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, selector),
+			sqlgraph.To(timeoffrequest.Table, timeoffrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.ApprovedTimeOffTable, employee.ApprovedTimeOffColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTimeOffBalances chains the current query on the "time_off_balances" edge.
+func (_q *EmployeeQuery) QueryTimeOffBalances() *TimeOffBalanceQuery {
+	query := (&TimeOffBalanceClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, selector),
+			sqlgraph.To(timeoffbalance.Table, timeoffbalance.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.TimeOffBalancesTable, employee.TimeOffBalancesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPerformanceReviews chains the current query on the "performance_reviews" edge.
+func (_q *EmployeeQuery) QueryPerformanceReviews() *PerformanceReviewQuery {
+	query := (&PerformanceReviewClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, selector),
+			sqlgraph.To(performancereview.Table, performancereview.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.PerformanceReviewsTable, employee.PerformanceReviewsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryConductedReviews chains the current query on the "conducted_reviews" edge.
+func (_q *EmployeeQuery) QueryConductedReviews() *PerformanceReviewQuery {
+	query := (&PerformanceReviewClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, selector),
+			sqlgraph.To(performancereview.Table, performancereview.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.ConductedReviewsTable, employee.ConductedReviewsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryGoals chains the current query on the "goals" edge.
+func (_q *EmployeeQuery) QueryGoals() *GoalQuery {
+	query := (&GoalClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, selector),
+			sqlgraph.To(goal.Table, goal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.GoalsTable, employee.GoalsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Employee entity from the query.
 // Returns a *NotFoundError when no Employee was found.
 func (_q *EmployeeQuery) First(ctx context.Context) (*Employee, error) {
@@ -449,9 +592,16 @@ func (_q *EmployeeQuery) Clone() *EmployeeQuery {
 		withSuccessionPlans:        _q.withSuccessionPlans.Clone(),
 		withBackupFor:              _q.withBackupFor.Clone(),
 		withExpenseAccount:         _q.withExpenseAccount.Clone(),
+		withTimeOffRequests:        _q.withTimeOffRequests.Clone(),
+		withApprovedTimeOff:        _q.withApprovedTimeOff.Clone(),
+		withTimeOffBalances:        _q.withTimeOffBalances.Clone(),
+		withPerformanceReviews:     _q.withPerformanceReviews.Clone(),
+		withConductedReviews:       _q.withConductedReviews.Clone(),
+		withGoals:                  _q.withGoals.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -543,6 +693,72 @@ func (_q *EmployeeQuery) WithExpenseAccount(opts ...func(*AccountQuery)) *Employ
 	return _q
 }
 
+// WithTimeOffRequests tells the query-builder to eager-load the nodes that are connected to
+// the "time_off_requests" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *EmployeeQuery) WithTimeOffRequests(opts ...func(*TimeOffRequestQuery)) *EmployeeQuery {
+	query := (&TimeOffRequestClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTimeOffRequests = query
+	return _q
+}
+
+// WithApprovedTimeOff tells the query-builder to eager-load the nodes that are connected to
+// the "approved_time_off" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *EmployeeQuery) WithApprovedTimeOff(opts ...func(*TimeOffRequestQuery)) *EmployeeQuery {
+	query := (&TimeOffRequestClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withApprovedTimeOff = query
+	return _q
+}
+
+// WithTimeOffBalances tells the query-builder to eager-load the nodes that are connected to
+// the "time_off_balances" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *EmployeeQuery) WithTimeOffBalances(opts ...func(*TimeOffBalanceQuery)) *EmployeeQuery {
+	query := (&TimeOffBalanceClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTimeOffBalances = query
+	return _q
+}
+
+// WithPerformanceReviews tells the query-builder to eager-load the nodes that are connected to
+// the "performance_reviews" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *EmployeeQuery) WithPerformanceReviews(opts ...func(*PerformanceReviewQuery)) *EmployeeQuery {
+	query := (&PerformanceReviewClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPerformanceReviews = query
+	return _q
+}
+
+// WithConductedReviews tells the query-builder to eager-load the nodes that are connected to
+// the "conducted_reviews" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *EmployeeQuery) WithConductedReviews(opts ...func(*PerformanceReviewQuery)) *EmployeeQuery {
+	query := (&PerformanceReviewClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withConductedReviews = query
+	return _q
+}
+
+// WithGoals tells the query-builder to eager-load the nodes that are connected to
+// the "goals" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *EmployeeQuery) WithGoals(opts ...func(*GoalQuery)) *EmployeeQuery {
+	query := (&GoalClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withGoals = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -622,7 +838,7 @@ func (_q *EmployeeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Emp
 		nodes       = []*Employee{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [8]bool{
+		loadedTypes = [14]bool{
 			_q.withTenant != nil,
 			_q.withDepartment != nil,
 			_q.withManager != nil,
@@ -631,6 +847,12 @@ func (_q *EmployeeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Emp
 			_q.withSuccessionPlans != nil,
 			_q.withBackupFor != nil,
 			_q.withExpenseAccount != nil,
+			_q.withTimeOffRequests != nil,
+			_q.withApprovedTimeOff != nil,
+			_q.withTimeOffBalances != nil,
+			_q.withPerformanceReviews != nil,
+			_q.withConductedReviews != nil,
+			_q.withGoals != nil,
 		}
 	)
 	if _q.withTenant != nil || _q.withDepartment != nil || _q.withManager != nil || _q.withExpenseAccount != nil {
@@ -647,6 +869,9 @@ func (_q *EmployeeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Emp
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -708,6 +933,52 @@ func (_q *EmployeeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Emp
 	if query := _q.withExpenseAccount; query != nil {
 		if err := _q.loadExpenseAccount(ctx, query, nodes, nil,
 			func(n *Employee, e *Account) { n.Edges.ExpenseAccount = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTimeOffRequests; query != nil {
+		if err := _q.loadTimeOffRequests(ctx, query, nodes,
+			func(n *Employee) { n.Edges.TimeOffRequests = []*TimeOffRequest{} },
+			func(n *Employee, e *TimeOffRequest) { n.Edges.TimeOffRequests = append(n.Edges.TimeOffRequests, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withApprovedTimeOff; query != nil {
+		if err := _q.loadApprovedTimeOff(ctx, query, nodes,
+			func(n *Employee) { n.Edges.ApprovedTimeOff = []*TimeOffRequest{} },
+			func(n *Employee, e *TimeOffRequest) { n.Edges.ApprovedTimeOff = append(n.Edges.ApprovedTimeOff, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTimeOffBalances; query != nil {
+		if err := _q.loadTimeOffBalances(ctx, query, nodes,
+			func(n *Employee) { n.Edges.TimeOffBalances = []*TimeOffBalance{} },
+			func(n *Employee, e *TimeOffBalance) { n.Edges.TimeOffBalances = append(n.Edges.TimeOffBalances, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withPerformanceReviews; query != nil {
+		if err := _q.loadPerformanceReviews(ctx, query, nodes,
+			func(n *Employee) { n.Edges.PerformanceReviews = []*PerformanceReview{} },
+			func(n *Employee, e *PerformanceReview) {
+				n.Edges.PerformanceReviews = append(n.Edges.PerformanceReviews, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withConductedReviews; query != nil {
+		if err := _q.loadConductedReviews(ctx, query, nodes,
+			func(n *Employee) { n.Edges.ConductedReviews = []*PerformanceReview{} },
+			func(n *Employee, e *PerformanceReview) {
+				n.Edges.ConductedReviews = append(n.Edges.ConductedReviews, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withGoals; query != nil {
+		if err := _q.loadGoals(ctx, query, nodes,
+			func(n *Employee) { n.Edges.Goals = []*Goal{} },
+			func(n *Employee, e *Goal) { n.Edges.Goals = append(n.Edges.Goals, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -966,9 +1237,198 @@ func (_q *EmployeeQuery) loadExpenseAccount(ctx context.Context, query *AccountQ
 	}
 	return nil
 }
+func (_q *EmployeeQuery) loadTimeOffRequests(ctx context.Context, query *TimeOffRequestQuery, nodes []*Employee, init func(*Employee), assign func(*Employee, *TimeOffRequest)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Employee)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.TimeOffRequest(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(employee.TimeOffRequestsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.employee_time_off_requests
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "employee_time_off_requests" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "employee_time_off_requests" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *EmployeeQuery) loadApprovedTimeOff(ctx context.Context, query *TimeOffRequestQuery, nodes []*Employee, init func(*Employee), assign func(*Employee, *TimeOffRequest)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Employee)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.TimeOffRequest(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(employee.ApprovedTimeOffColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.employee_approved_time_off
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "employee_approved_time_off" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "employee_approved_time_off" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *EmployeeQuery) loadTimeOffBalances(ctx context.Context, query *TimeOffBalanceQuery, nodes []*Employee, init func(*Employee), assign func(*Employee, *TimeOffBalance)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Employee)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.TimeOffBalance(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(employee.TimeOffBalancesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.employee_time_off_balances
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "employee_time_off_balances" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "employee_time_off_balances" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *EmployeeQuery) loadPerformanceReviews(ctx context.Context, query *PerformanceReviewQuery, nodes []*Employee, init func(*Employee), assign func(*Employee, *PerformanceReview)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Employee)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.PerformanceReview(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(employee.PerformanceReviewsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.employee_performance_reviews
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "employee_performance_reviews" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "employee_performance_reviews" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *EmployeeQuery) loadConductedReviews(ctx context.Context, query *PerformanceReviewQuery, nodes []*Employee, init func(*Employee), assign func(*Employee, *PerformanceReview)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Employee)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.PerformanceReview(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(employee.ConductedReviewsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.employee_conducted_reviews
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "employee_conducted_reviews" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "employee_conducted_reviews" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *EmployeeQuery) loadGoals(ctx context.Context, query *GoalQuery, nodes []*Employee, init func(*Employee), assign func(*Employee, *Goal)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Employee)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Goal(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(employee.GoalsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.employee_goals
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "employee_goals" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "employee_goals" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 
 func (_q *EmployeeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -1031,6 +1491,9 @@ func (_q *EmployeeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -1046,6 +1509,12 @@ func (_q *EmployeeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *EmployeeQuery) Modify(modifiers ...func(s *sql.Selector)) *EmployeeSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // EmployeeGroupBy is the group-by builder for Employee entities.
@@ -1136,4 +1605,10 @@ func (_s *EmployeeSelect) sqlScan(ctx context.Context, root *EmployeeQuery, v an
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *EmployeeSelect) Modify(modifiers ...func(s *sql.Selector)) *EmployeeSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

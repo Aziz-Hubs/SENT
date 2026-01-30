@@ -10,6 +10,7 @@ import (
 	"sent/ent/networklink"
 	"sent/ent/networkport"
 	"sent/ent/predicate"
+	"sent/ent/tenant"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -19,8 +20,9 @@ import (
 // NetworkPortUpdate is the builder for updating NetworkPort entities.
 type NetworkPortUpdate struct {
 	config
-	hooks    []Hook
-	mutation *NetworkPortMutation
+	hooks     []Hook
+	mutation  *NetworkPortMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the NetworkPortUpdate builder.
@@ -193,6 +195,17 @@ func (_u *NetworkPortUpdate) AddConnectedTo(v ...*NetworkLink) *NetworkPortUpdat
 	return _u.AddConnectedToIDs(ids...)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *NetworkPortUpdate) SetTenantID(id int) *NetworkPortUpdate {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *NetworkPortUpdate) SetTenant(v *Tenant) *NetworkPortUpdate {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the NetworkPortMutation object of the builder.
 func (_u *NetworkPortUpdate) Mutation() *NetworkPortMutation {
 	return _u.mutation
@@ -223,6 +236,12 @@ func (_u *NetworkPortUpdate) RemoveConnectedTo(v ...*NetworkLink) *NetworkPortUp
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveConnectedToIDs(ids...)
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *NetworkPortUpdate) ClearTenant() *NetworkPortUpdate {
+	_u.mutation.ClearTenant()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -257,7 +276,16 @@ func (_u *NetworkPortUpdate) check() error {
 	if _u.mutation.DeviceCleared() && len(_u.mutation.DeviceIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "NetworkPort.device"`)
 	}
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "NetworkPort.tenant"`)
+	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *NetworkPortUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *NetworkPortUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *NetworkPortUpdate) sqlSave(ctx context.Context) (_node int, err error) {
@@ -382,6 +410,36 @@ func (_u *NetworkPortUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networkport.TenantTable,
+			Columns: []string{networkport.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networkport.TenantTable,
+			Columns: []string{networkport.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{networkport.Label}
@@ -397,9 +455,10 @@ func (_u *NetworkPortUpdate) sqlSave(ctx context.Context) (_node int, err error)
 // NetworkPortUpdateOne is the builder for updating a single NetworkPort entity.
 type NetworkPortUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *NetworkPortMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *NetworkPortMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetName sets the "name" field.
@@ -566,6 +625,17 @@ func (_u *NetworkPortUpdateOne) AddConnectedTo(v ...*NetworkLink) *NetworkPortUp
 	return _u.AddConnectedToIDs(ids...)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *NetworkPortUpdateOne) SetTenantID(id int) *NetworkPortUpdateOne {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *NetworkPortUpdateOne) SetTenant(v *Tenant) *NetworkPortUpdateOne {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the NetworkPortMutation object of the builder.
 func (_u *NetworkPortUpdateOne) Mutation() *NetworkPortMutation {
 	return _u.mutation
@@ -596,6 +666,12 @@ func (_u *NetworkPortUpdateOne) RemoveConnectedTo(v ...*NetworkLink) *NetworkPor
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveConnectedToIDs(ids...)
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *NetworkPortUpdateOne) ClearTenant() *NetworkPortUpdateOne {
+	_u.mutation.ClearTenant()
+	return _u
 }
 
 // Where appends a list predicates to the NetworkPortUpdate builder.
@@ -643,7 +719,16 @@ func (_u *NetworkPortUpdateOne) check() error {
 	if _u.mutation.DeviceCleared() && len(_u.mutation.DeviceIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "NetworkPort.device"`)
 	}
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "NetworkPort.tenant"`)
+	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *NetworkPortUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *NetworkPortUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *NetworkPortUpdateOne) sqlSave(ctx context.Context) (_node *NetworkPort, err error) {
@@ -785,6 +870,36 @@ func (_u *NetworkPortUpdateOne) sqlSave(ctx context.Context) (_node *NetworkPort
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networkport.TenantTable,
+			Columns: []string{networkport.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networkport.TenantTable,
+			Columns: []string{networkport.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &NetworkPort{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

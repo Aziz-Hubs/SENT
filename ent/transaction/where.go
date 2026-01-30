@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 // ID filters vertices based on their ID field.
@@ -66,8 +67,13 @@ func Date(v time.Time) predicate.Transaction {
 }
 
 // TotalAmount applies equality check predicate on the "total_amount" field. It's identical to TotalAmountEQ.
-func TotalAmount(v float64) predicate.Transaction {
+func TotalAmount(v decimal.Decimal) predicate.Transaction {
 	return predicate.Transaction(sql.FieldEQ(FieldTotalAmount, v))
+}
+
+// TaxAmount applies equality check predicate on the "tax_amount" field. It's identical to TaxAmountEQ.
+func TaxAmount(v decimal.Decimal) predicate.Transaction {
+	return predicate.Transaction(sql.FieldEQ(FieldTaxAmount, v))
 }
 
 // Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
@@ -201,43 +207,83 @@ func DateLTE(v time.Time) predicate.Transaction {
 }
 
 // TotalAmountEQ applies the EQ predicate on the "total_amount" field.
-func TotalAmountEQ(v float64) predicate.Transaction {
+func TotalAmountEQ(v decimal.Decimal) predicate.Transaction {
 	return predicate.Transaction(sql.FieldEQ(FieldTotalAmount, v))
 }
 
 // TotalAmountNEQ applies the NEQ predicate on the "total_amount" field.
-func TotalAmountNEQ(v float64) predicate.Transaction {
+func TotalAmountNEQ(v decimal.Decimal) predicate.Transaction {
 	return predicate.Transaction(sql.FieldNEQ(FieldTotalAmount, v))
 }
 
 // TotalAmountIn applies the In predicate on the "total_amount" field.
-func TotalAmountIn(vs ...float64) predicate.Transaction {
+func TotalAmountIn(vs ...decimal.Decimal) predicate.Transaction {
 	return predicate.Transaction(sql.FieldIn(FieldTotalAmount, vs...))
 }
 
 // TotalAmountNotIn applies the NotIn predicate on the "total_amount" field.
-func TotalAmountNotIn(vs ...float64) predicate.Transaction {
+func TotalAmountNotIn(vs ...decimal.Decimal) predicate.Transaction {
 	return predicate.Transaction(sql.FieldNotIn(FieldTotalAmount, vs...))
 }
 
 // TotalAmountGT applies the GT predicate on the "total_amount" field.
-func TotalAmountGT(v float64) predicate.Transaction {
+func TotalAmountGT(v decimal.Decimal) predicate.Transaction {
 	return predicate.Transaction(sql.FieldGT(FieldTotalAmount, v))
 }
 
 // TotalAmountGTE applies the GTE predicate on the "total_amount" field.
-func TotalAmountGTE(v float64) predicate.Transaction {
+func TotalAmountGTE(v decimal.Decimal) predicate.Transaction {
 	return predicate.Transaction(sql.FieldGTE(FieldTotalAmount, v))
 }
 
 // TotalAmountLT applies the LT predicate on the "total_amount" field.
-func TotalAmountLT(v float64) predicate.Transaction {
+func TotalAmountLT(v decimal.Decimal) predicate.Transaction {
 	return predicate.Transaction(sql.FieldLT(FieldTotalAmount, v))
 }
 
 // TotalAmountLTE applies the LTE predicate on the "total_amount" field.
-func TotalAmountLTE(v float64) predicate.Transaction {
+func TotalAmountLTE(v decimal.Decimal) predicate.Transaction {
 	return predicate.Transaction(sql.FieldLTE(FieldTotalAmount, v))
+}
+
+// TaxAmountEQ applies the EQ predicate on the "tax_amount" field.
+func TaxAmountEQ(v decimal.Decimal) predicate.Transaction {
+	return predicate.Transaction(sql.FieldEQ(FieldTaxAmount, v))
+}
+
+// TaxAmountNEQ applies the NEQ predicate on the "tax_amount" field.
+func TaxAmountNEQ(v decimal.Decimal) predicate.Transaction {
+	return predicate.Transaction(sql.FieldNEQ(FieldTaxAmount, v))
+}
+
+// TaxAmountIn applies the In predicate on the "tax_amount" field.
+func TaxAmountIn(vs ...decimal.Decimal) predicate.Transaction {
+	return predicate.Transaction(sql.FieldIn(FieldTaxAmount, vs...))
+}
+
+// TaxAmountNotIn applies the NotIn predicate on the "tax_amount" field.
+func TaxAmountNotIn(vs ...decimal.Decimal) predicate.Transaction {
+	return predicate.Transaction(sql.FieldNotIn(FieldTaxAmount, vs...))
+}
+
+// TaxAmountGT applies the GT predicate on the "tax_amount" field.
+func TaxAmountGT(v decimal.Decimal) predicate.Transaction {
+	return predicate.Transaction(sql.FieldGT(FieldTaxAmount, v))
+}
+
+// TaxAmountGTE applies the GTE predicate on the "tax_amount" field.
+func TaxAmountGTE(v decimal.Decimal) predicate.Transaction {
+	return predicate.Transaction(sql.FieldGTE(FieldTaxAmount, v))
+}
+
+// TaxAmountLT applies the LT predicate on the "tax_amount" field.
+func TaxAmountLT(v decimal.Decimal) predicate.Transaction {
+	return predicate.Transaction(sql.FieldLT(FieldTaxAmount, v))
+}
+
+// TaxAmountLTE applies the LTE predicate on the "tax_amount" field.
+func TaxAmountLTE(v decimal.Decimal) predicate.Transaction {
+	return predicate.Transaction(sql.FieldLTE(FieldTaxAmount, v))
 }
 
 // TypeEQ applies the EQ predicate on the "type" field.

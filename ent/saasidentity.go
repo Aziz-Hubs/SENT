@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"sent/ent/saasapp"
 	"sent/ent/saasidentity"
+	"sent/ent/tenant"
 	"sent/ent/user"
 	"strings"
 	"time"
@@ -40,10 +41,11 @@ type SaaSIdentity struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SaaSIdentityQuery when eager-loading is set.
-	Edges                SaaSIdentityEdges `json:"edges"`
-	saa_sapp_identities  *int
-	user_saas_identities *int
-	selectValues         sql.SelectValues
+	Edges                  SaaSIdentityEdges `json:"edges"`
+	saa_sapp_identities    *int
+	tenant_saas_identities *int
+	user_saas_identities   *int
+	selectValues           sql.SelectValues
 }
 
 // SaaSIdentityEdges holds the relations/edges for other nodes in the graph.
@@ -54,9 +56,11 @@ type SaaSIdentityEdges struct {
 	App *SaaSApp `json:"app,omitempty"`
 	// Usages holds the value of the usages edge.
 	Usages []*SaaSUsage `json:"usages,omitempty"`
+	// Tenant holds the value of the tenant edge.
+	Tenant *Tenant `json:"tenant,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -90,6 +94,17 @@ func (e SaaSIdentityEdges) UsagesOrErr() ([]*SaaSUsage, error) {
 	return nil, &NotLoadedError{edge: "usages"}
 }
 
+// TenantOrErr returns the Tenant value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e SaaSIdentityEdges) TenantOrErr() (*Tenant, error) {
+	if e.Tenant != nil {
+		return e.Tenant, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: tenant.Label}
+	}
+	return nil, &NotLoadedError{edge: "tenant"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*SaaSIdentity) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -107,7 +122,9 @@ func (*SaaSIdentity) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case saasidentity.ForeignKeys[0]: // saa_sapp_identities
 			values[i] = new(sql.NullInt64)
-		case saasidentity.ForeignKeys[1]: // user_saas_identities
+		case saasidentity.ForeignKeys[1]: // tenant_saas_identities
+			values[i] = new(sql.NullInt64)
+		case saasidentity.ForeignKeys[2]: // user_saas_identities
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -195,6 +212,13 @@ func (_m *SaaSIdentity) assignValues(columns []string, values []any) error {
 			}
 		case saasidentity.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field tenant_saas_identities", value)
+			} else if value.Valid {
+				_m.tenant_saas_identities = new(int)
+				*_m.tenant_saas_identities = int(value.Int64)
+			}
+		case saasidentity.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_saas_identities", value)
 			} else if value.Valid {
 				_m.user_saas_identities = new(int)
@@ -226,6 +250,11 @@ func (_m *SaaSIdentity) QueryApp() *SaaSAppQuery {
 // QueryUsages queries the "usages" edge of the SaaSIdentity entity.
 func (_m *SaaSIdentity) QueryUsages() *SaaSUsageQuery {
 	return NewSaaSIdentityClient(_m.config).QueryUsages(_m)
+}
+
+// QueryTenant queries the "tenant" edge of the SaaSIdentity entity.
+func (_m *SaaSIdentity) QueryTenant() *TenantQuery {
+	return NewSaaSIdentityClient(_m.config).QueryTenant(_m)
 }
 
 // Update returns a builder for updating this SaaSIdentity.

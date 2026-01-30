@@ -27,6 +27,7 @@ type SaaSFilterQuery struct {
 	withApp    *SaaSAppQuery
 	withTenant *TenantQuery
 	withFKs    bool
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -302,8 +303,9 @@ func (_q *SaaSFilterQuery) Clone() *SaaSFilterQuery {
 		withApp:    _q.withApp.Clone(),
 		withTenant: _q.withTenant.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -335,12 +337,12 @@ func (_q *SaaSFilterQuery) WithTenant(opts ...func(*TenantQuery)) *SaaSFilterQue
 // Example:
 //
 //	var v []struct {
-//		DomainPattern string `json:"domain_pattern,omitempty"`
+//		Name string `json:"name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.SaaSFilter.Query().
-//		GroupBy(saasfilter.FieldDomainPattern).
+//		GroupBy(saasfilter.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *SaaSFilterQuery) GroupBy(field string, fields ...string) *SaaSFilterGroupBy {
@@ -358,11 +360,11 @@ func (_q *SaaSFilterQuery) GroupBy(field string, fields ...string) *SaaSFilterGr
 // Example:
 //
 //	var v []struct {
-//		DomainPattern string `json:"domain_pattern,omitempty"`
+//		Name string `json:"name,omitempty"`
 //	}
 //
 //	client.SaaSFilter.Query().
-//		Select(saasfilter.FieldDomainPattern).
+//		Select(saasfilter.FieldName).
 //		Scan(ctx, &v)
 func (_q *SaaSFilterQuery) Select(fields ...string) *SaaSFilterSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
@@ -427,6 +429,9 @@ func (_q *SaaSFilterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*S
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -519,6 +524,9 @@ func (_q *SaaSFilterQuery) loadTenant(ctx context.Context, query *TenantQuery, n
 
 func (_q *SaaSFilterQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -581,6 +589,9 @@ func (_q *SaaSFilterQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -596,6 +607,12 @@ func (_q *SaaSFilterQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *SaaSFilterQuery) Modify(modifiers ...func(s *sql.Selector)) *SaaSFilterSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // SaaSFilterGroupBy is the group-by builder for SaaSFilter entities.
@@ -686,4 +703,10 @@ func (_s *SaaSFilterSelect) sqlScan(ctx context.Context, root *SaaSFilterQuery, 
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *SaaSFilterSelect) Modify(modifiers ...func(s *sql.Selector)) *SaaSFilterSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

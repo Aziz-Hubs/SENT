@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"sent/ent/permission"
+	"sent/ent/tenant"
 	"sent/ent/user"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -45,6 +46,17 @@ func (_c *PermissionCreate) AddUsers(v ...*User) *PermissionCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddUserIDs(ids...)
+}
+
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_c *PermissionCreate) SetTenantID(id int) *PermissionCreate {
+	_c.mutation.SetTenantID(id)
+	return _c
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_c *PermissionCreate) SetTenant(v *Tenant) *PermissionCreate {
+	return _c.SetTenantID(v.ID)
 }
 
 // Mutation returns the PermissionMutation object of the builder.
@@ -86,6 +98,9 @@ func (_c *PermissionCreate) check() error {
 	}
 	if _, ok := _c.mutation.Code(); !ok {
 		return &ValidationError{Name: "code", err: errors.New(`ent: missing required field "Permission.code"`)}
+	}
+	if len(_c.mutation.TenantIDs()) == 0 {
+		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "Permission.tenant"`)}
 	}
 	return nil
 }
@@ -135,6 +150,23 @@ func (_c *PermissionCreate) createSpec() (*Permission, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permission.TenantTable,
+			Columns: []string{permission.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.tenant_permissions = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

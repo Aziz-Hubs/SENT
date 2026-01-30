@@ -10,7 +10,9 @@ import (
 	"sent/ent/inventoryreservation"
 	"sent/ent/ledgerentry"
 	"sent/ent/product"
+	"sent/pkg/auth"
 	"sent/pkg/orchestrator"
+	"github.com/shopspring/decimal"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/riverqueue/river"
@@ -29,6 +31,7 @@ type KioskBridge struct {
 	buffer *LocalPOSBuffer
 	river  *river.Client[pgx.Tx]
 	audit  AuditEmitter
+	auth   *auth.AuthBridge
 }
 
 // SaleItem represents a single line item in a sales transaction.
@@ -47,7 +50,7 @@ type SaleRequest struct {
 }
 
 // NewKioskBridge initializes a new KioskBridge with the given database client and river client.
-func NewKioskBridge(db *ent.Client, river *river.Client[pgx.Tx], audit AuditEmitter) *KioskBridge {
+func NewKioskBridge(db *ent.Client, river *river.Client[pgx.Tx], audit AuditEmitter, auth *auth.AuthBridge) *KioskBridge {
 	buffer, err := NewLocalPOSBuffer("pos_offline.db")
 	if err != nil {
 		fmt.Printf("[KIOSK] Warning: failed to initialize offline buffer: %v\n", err)
@@ -58,6 +61,7 @@ func NewKioskBridge(db *ent.Client, river *river.Client[pgx.Tx], audit AuditEmit
 		buffer: buffer,
 		river:  river,
 		audit:  audit,
+		auth:   auth,
 	}
 }
 
@@ -77,13 +81,14 @@ func (k *KioskBridge) ReserveStock(productID int, quantity float64) (int, error)
 		return 0, fmt.Errorf("product not found: %w", err)
 	}
 
-	if prod.Quantity < quantity {
+	decimalQty := decimal.NewFromFloat(quantity)
+	if prod.Quantity.LessThan(decimalQty) {
 		tx.Rollback()
 		return 0, fmt.Errorf("insufficient stock")
 	}
 
 	err = tx.Product.UpdateOne(prod).
-		AddQuantity(-quantity).
+		SetQuantity(prod.Quantity.Sub(decimalQty)).
 		Exec(k.ctx)
 	if err != nil {
 		tx.Rollback()
@@ -99,7 +104,7 @@ func (k *KioskBridge) ReserveStock(productID int, quantity float64) (int, error)
 
 	res, err := tx.InventoryReservation.Create().
 		SetProduct(prod).
-		SetQuantity(quantity).
+		SetQuantity(decimalQty).
 		SetExpiresAt(time.Now().Add(15 * time.Minute)).
 		SetStatus(inventoryreservation.StatusActive).
 		SetTenant(tenant).
@@ -138,6 +143,9 @@ func (k *KioskBridge) Startup(ctx context.Context) {
 
 // OpenDrawerNoSale opens the cash drawer without a sale and emits a security event.
 func (k *KioskBridge) OpenDrawerNoSale(actorID string) error {
+	if !k.auth.HasRole("admin") {
+		return fmt.Errorf("permission denied: elevated privileges required for no-sale drawer opening")
+	}
 	// 1. Send hardware signal
 	if err := k.OpenDrawer(); err != nil {
 		return err
@@ -304,13 +312,14 @@ func (k *KioskBridge) processSaleItems(tx *ent.Tx, tenant *ent.Tenant, txn *ent.
 			// Stock was already decremented during ReserveStock, so we skip it here.
 		} else {
 			// Normal checkout without reservation: decrement stock now.
-			if prod.Quantity < item.Quantity {
-				return fmt.Errorf("insufficient stock for %s (Requested: %.0f, Available: %.0f)", prod.Name, item.Quantity, prod.Quantity)
+			decimalQty := decimal.NewFromFloat(item.Quantity)
+			if prod.Quantity.LessThan(decimalQty) {
+				return fmt.Errorf("insufficient stock for %s (Requested: %.0f, Available: %s)", prod.Name, item.Quantity, prod.Quantity.StringFixed(0))
 			}
 
 			// Update product quantity.
 			err = tx.Product.UpdateOne(prod).
-				AddQuantity(-item.Quantity).
+				SetQuantity(prod.Quantity.Sub(decimalQty)).
 				Exec(k.ctx)
 			if err != nil {
 				return fmt.Errorf("failed to update stock for %s: %w", prod.Name, err)
@@ -319,7 +328,7 @@ func (k *KioskBridge) processSaleItems(tx *ent.Tx, tenant *ent.Tenant, txn *ent.
 
 		// Create stock movement record.
 		_, err = tx.StockMovement.Create().
-			SetQuantity(item.Quantity).
+			SetQuantity(decimal.NewFromFloat(item.Quantity)).
 			SetMovementType("outgoing").
 			SetReason("Retail Sale").
 			SetProduct(prod).
@@ -357,9 +366,10 @@ func (k *KioskBridge) updateFinancials(tx *ent.Tx, tenant *ent.Tenant, txn *ent.
 		return err
 	}
 
+	decimalTotal := decimal.NewFromFloat(totalAmount)
 	// Debit Cash
 	_, err = tx.LedgerEntry.Create().
-		SetAmount(totalAmount).
+		SetAmount(decimalTotal).
 		SetDirection(ledgerentry.DirectionDebit).
 		SetAccount(cashAcc).
 		SetTransaction(txn).
@@ -371,7 +381,7 @@ func (k *KioskBridge) updateFinancials(tx *ent.Tx, tenant *ent.Tenant, txn *ent.
 
 	// Credit Revenue
 	_, err = tx.LedgerEntry.Create().
-		SetAmount(totalAmount).
+		SetAmount(decimalTotal).
 		SetDirection(ledgerentry.DirectionCredit).
 		SetAccount(revAcc).
 		SetTransaction(txn).
@@ -384,12 +394,12 @@ func (k *KioskBridge) updateFinancials(tx *ent.Tx, tenant *ent.Tenant, txn *ent.
 	// Update Account Balances (Denormalization for performance)
 	// Note: This logic assumes 'Debit' increases Asset (Cash) and 'Credit' increases Income (Revenue).
 	// This is a simplified view. Real accounting systems might handle this differently based on account type.
-	err = tx.Account.UpdateOne(cashAcc).SetBalance(cashAcc.Balance + totalAmount).Exec(k.ctx)
+	err = tx.Account.UpdateOne(cashAcc).SetBalance(cashAcc.Balance.Add(decimalTotal)).Exec(k.ctx)
 	if err != nil {
 		return fmt.Errorf("failed to update cash balance: %w", err)
 	}
 
-	err = tx.Account.UpdateOne(revAcc).SetBalance(revAcc.Balance + totalAmount).Exec(k.ctx)
+	err = tx.Account.UpdateOne(revAcc).SetBalance(revAcc.Balance.Add(decimalTotal)).Exec(k.ctx)
 	if err != nil {
 		return fmt.Errorf("failed to update revenue balance: %w", err)
 	}

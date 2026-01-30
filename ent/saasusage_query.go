@@ -9,6 +9,7 @@ import (
 	"sent/ent/predicate"
 	"sent/ent/saasidentity"
 	"sent/ent/saasusage"
+	"sent/ent/tenant"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -24,7 +25,9 @@ type SaaSUsageQuery struct {
 	inters       []Interceptor
 	predicates   []predicate.SaaSUsage
 	withIdentity *SaaSIdentityQuery
+	withTenant   *TenantQuery
 	withFKs      bool
+	modifiers    []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +79,28 @@ func (_q *SaaSUsageQuery) QueryIdentity() *SaaSIdentityQuery {
 			sqlgraph.From(saasusage.Table, saasusage.FieldID, selector),
 			sqlgraph.To(saasidentity.Table, saasidentity.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, saasusage.IdentityTable, saasusage.IdentityColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTenant chains the current query on the "tenant" edge.
+func (_q *SaaSUsageQuery) QueryTenant() *TenantQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(saasusage.Table, saasusage.FieldID, selector),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, saasusage.TenantTable, saasusage.TenantColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -276,9 +301,11 @@ func (_q *SaaSUsageQuery) Clone() *SaaSUsageQuery {
 		inters:       append([]Interceptor{}, _q.inters...),
 		predicates:   append([]predicate.SaaSUsage{}, _q.predicates...),
 		withIdentity: _q.withIdentity.Clone(),
+		withTenant:   _q.withTenant.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -290,6 +317,17 @@ func (_q *SaaSUsageQuery) WithIdentity(opts ...func(*SaaSIdentityQuery)) *SaaSUs
 		opt(query)
 	}
 	_q.withIdentity = query
+	return _q
+}
+
+// WithTenant tells the query-builder to eager-load the nodes that are connected to
+// the "tenant" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *SaaSUsageQuery) WithTenant(opts ...func(*TenantQuery)) *SaaSUsageQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTenant = query
 	return _q
 }
 
@@ -372,11 +410,12 @@ func (_q *SaaSUsageQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sa
 		nodes       = []*SaaSUsage{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			_q.withIdentity != nil,
+			_q.withTenant != nil,
 		}
 	)
-	if _q.withIdentity != nil {
+	if _q.withIdentity != nil || _q.withTenant != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -391,6 +430,9 @@ func (_q *SaaSUsageQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sa
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -403,6 +445,12 @@ func (_q *SaaSUsageQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sa
 	if query := _q.withIdentity; query != nil {
 		if err := _q.loadIdentity(ctx, query, nodes, nil,
 			func(n *SaaSUsage, e *SaaSIdentity) { n.Edges.Identity = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTenant; query != nil {
+		if err := _q.loadTenant(ctx, query, nodes, nil,
+			func(n *SaaSUsage, e *Tenant) { n.Edges.Tenant = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -441,9 +489,44 @@ func (_q *SaaSUsageQuery) loadIdentity(ctx context.Context, query *SaaSIdentityQ
 	}
 	return nil
 }
+func (_q *SaaSUsageQuery) loadTenant(ctx context.Context, query *TenantQuery, nodes []*SaaSUsage, init func(*SaaSUsage), assign func(*SaaSUsage, *Tenant)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*SaaSUsage)
+	for i := range nodes {
+		if nodes[i].tenant_saas_usages == nil {
+			continue
+		}
+		fk := *nodes[i].tenant_saas_usages
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(tenant.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tenant_saas_usages" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (_q *SaaSUsageQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -506,6 +589,9 @@ func (_q *SaaSUsageQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -521,6 +607,12 @@ func (_q *SaaSUsageQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *SaaSUsageQuery) Modify(modifiers ...func(s *sql.Selector)) *SaaSUsageSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // SaaSUsageGroupBy is the group-by builder for SaaSUsage entities.
@@ -611,4 +703,10 @@ func (_s *SaaSUsageSelect) sqlScan(ctx context.Context, root *SaaSUsageQuery, v 
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *SaaSUsageSelect) Modify(modifiers ...func(s *sql.Selector)) *SaaSUsageSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

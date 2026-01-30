@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 const (
@@ -76,6 +77,10 @@ const (
 	EdgeRoadmaps = "roadmaps"
 	// EdgeServiceRates holds the string denoting the service_rates edge name in mutations.
 	EdgeServiceRates = "service_rates"
+	// EdgeNetworkDevices holds the string denoting the network_devices edge name in mutations.
+	EdgeNetworkDevices = "network_devices"
+	// EdgeNetworkBackups holds the string denoting the network_backups edge name in mutations.
+	EdgeNetworkBackups = "network_backups"
 	// EdgeBudgetForecasts holds the string denoting the budget_forecasts edge name in mutations.
 	EdgeBudgetForecasts = "budget_forecasts"
 	// EdgeEmployees holds the string denoting the employees edge name in mutations.
@@ -90,8 +95,46 @@ const (
 	EdgeRecurringInvoices = "recurring_invoices"
 	// EdgeInventoryReservations holds the string denoting the inventory_reservations edge name in mutations.
 	EdgeInventoryReservations = "inventory_reservations"
+	// EdgeDepartments holds the string denoting the departments edge name in mutations.
+	EdgeDepartments = "departments"
+	// EdgePermissions holds the string denoting the permissions edge name in mutations.
+	EdgePermissions = "permissions"
+	// EdgeAssetTypes holds the string denoting the asset_types edge name in mutations.
+	EdgeAssetTypes = "asset_types"
+	// EdgeDetectionEvents holds the string denoting the detection_events edge name in mutations.
+	EdgeDetectionEvents = "detection_events"
+	// EdgeSaasIdentities holds the string denoting the saas_identities edge name in mutations.
+	EdgeSaasIdentities = "saas_identities"
+	// EdgeSaasUsages holds the string denoting the saas_usages edge name in mutations.
+	EdgeSaasUsages = "saas_usages"
+	// EdgeRecordings holds the string denoting the recordings edge name in mutations.
+	EdgeRecordings = "recordings"
+	// EdgeNetworkLinks holds the string denoting the network_links edge name in mutations.
+	EdgeNetworkLinks = "network_links"
+	// EdgeNetworkPorts holds the string denoting the network_ports edge name in mutations.
+	EdgeNetworkPorts = "network_ports"
+	// EdgeNexusAudits holds the string denoting the nexus_audits edge name in mutations.
+	EdgeNexusAudits = "nexus_audits"
+	// EdgeSuccessionMaps holds the string denoting the succession_maps edge name in mutations.
+	EdgeSuccessionMaps = "succession_maps"
 	// EdgeCustomerAccount holds the string denoting the customer_account edge name in mutations.
 	EdgeCustomerAccount = "customer_account"
+	// EdgeScripts holds the string denoting the scripts edge name in mutations.
+	EdgeScripts = "scripts"
+	// EdgeJobs holds the string denoting the jobs edge name in mutations.
+	EdgeJobs = "jobs"
+	// EdgeTimeOffRequests holds the string denoting the time_off_requests edge name in mutations.
+	EdgeTimeOffRequests = "time_off_requests"
+	// EdgeTimeOffPolicies holds the string denoting the time_off_policies edge name in mutations.
+	EdgeTimeOffPolicies = "time_off_policies"
+	// EdgeTimeOffBalances holds the string denoting the time_off_balances edge name in mutations.
+	EdgeTimeOffBalances = "time_off_balances"
+	// EdgeReviewCycles holds the string denoting the review_cycles edge name in mutations.
+	EdgeReviewCycles = "review_cycles"
+	// EdgePerformanceReviews holds the string denoting the performance_reviews edge name in mutations.
+	EdgePerformanceReviews = "performance_reviews"
+	// EdgeGoals holds the string denoting the goals edge name in mutations.
+	EdgeGoals = "goals"
 	// Table holds the table name of the tenant in the database.
 	Table = "tenants"
 	// ParentTable is the table that holds the parent relation/edge.
@@ -270,6 +313,20 @@ const (
 	ServiceRatesInverseTable = "service_rates"
 	// ServiceRatesColumn is the table column denoting the service_rates relation/edge.
 	ServiceRatesColumn = "tenant_service_rates"
+	// NetworkDevicesTable is the table that holds the network_devices relation/edge.
+	NetworkDevicesTable = "network_devices"
+	// NetworkDevicesInverseTable is the table name for the NetworkDevice entity.
+	// It exists in this package in order to avoid circular dependency with the "networkdevice" package.
+	NetworkDevicesInverseTable = "network_devices"
+	// NetworkDevicesColumn is the table column denoting the network_devices relation/edge.
+	NetworkDevicesColumn = "tenant_network_devices"
+	// NetworkBackupsTable is the table that holds the network_backups relation/edge.
+	NetworkBackupsTable = "network_backups"
+	// NetworkBackupsInverseTable is the table name for the NetworkBackup entity.
+	// It exists in this package in order to avoid circular dependency with the "networkbackup" package.
+	NetworkBackupsInverseTable = "network_backups"
+	// NetworkBackupsColumn is the table column denoting the network_backups relation/edge.
+	NetworkBackupsColumn = "tenant_network_backups"
 	// BudgetForecastsTable is the table that holds the budget_forecasts relation/edge.
 	BudgetForecastsTable = "budget_forecasts"
 	// BudgetForecastsInverseTable is the table name for the BudgetForecast entity.
@@ -319,6 +376,83 @@ const (
 	InventoryReservationsInverseTable = "inventory_reservations"
 	// InventoryReservationsColumn is the table column denoting the inventory_reservations relation/edge.
 	InventoryReservationsColumn = "tenant_inventory_reservations"
+	// DepartmentsTable is the table that holds the departments relation/edge.
+	DepartmentsTable = "departments"
+	// DepartmentsInverseTable is the table name for the Department entity.
+	// It exists in this package in order to avoid circular dependency with the "department" package.
+	DepartmentsInverseTable = "departments"
+	// DepartmentsColumn is the table column denoting the departments relation/edge.
+	DepartmentsColumn = "tenant_departments"
+	// PermissionsTable is the table that holds the permissions relation/edge.
+	PermissionsTable = "permissions"
+	// PermissionsInverseTable is the table name for the Permission entity.
+	// It exists in this package in order to avoid circular dependency with the "permission" package.
+	PermissionsInverseTable = "permissions"
+	// PermissionsColumn is the table column denoting the permissions relation/edge.
+	PermissionsColumn = "tenant_permissions"
+	// AssetTypesTable is the table that holds the asset_types relation/edge.
+	AssetTypesTable = "asset_types"
+	// AssetTypesInverseTable is the table name for the AssetType entity.
+	// It exists in this package in order to avoid circular dependency with the "assettype" package.
+	AssetTypesInverseTable = "asset_types"
+	// AssetTypesColumn is the table column denoting the asset_types relation/edge.
+	AssetTypesColumn = "tenant_asset_types"
+	// DetectionEventsTable is the table that holds the detection_events relation/edge.
+	DetectionEventsTable = "detection_events"
+	// DetectionEventsInverseTable is the table name for the DetectionEvent entity.
+	// It exists in this package in order to avoid circular dependency with the "detectionevent" package.
+	DetectionEventsInverseTable = "detection_events"
+	// DetectionEventsColumn is the table column denoting the detection_events relation/edge.
+	DetectionEventsColumn = "tenant_detection_events"
+	// SaasIdentitiesTable is the table that holds the saas_identities relation/edge.
+	SaasIdentitiesTable = "saa_sidentities"
+	// SaasIdentitiesInverseTable is the table name for the SaaSIdentity entity.
+	// It exists in this package in order to avoid circular dependency with the "saasidentity" package.
+	SaasIdentitiesInverseTable = "saa_sidentities"
+	// SaasIdentitiesColumn is the table column denoting the saas_identities relation/edge.
+	SaasIdentitiesColumn = "tenant_saas_identities"
+	// SaasUsagesTable is the table that holds the saas_usages relation/edge.
+	SaasUsagesTable = "saa_susages"
+	// SaasUsagesInverseTable is the table name for the SaaSUsage entity.
+	// It exists in this package in order to avoid circular dependency with the "saasusage" package.
+	SaasUsagesInverseTable = "saa_susages"
+	// SaasUsagesColumn is the table column denoting the saas_usages relation/edge.
+	SaasUsagesColumn = "tenant_saas_usages"
+	// RecordingsTable is the table that holds the recordings relation/edge.
+	RecordingsTable = "recordings"
+	// RecordingsInverseTable is the table name for the Recording entity.
+	// It exists in this package in order to avoid circular dependency with the "recording" package.
+	RecordingsInverseTable = "recordings"
+	// RecordingsColumn is the table column denoting the recordings relation/edge.
+	RecordingsColumn = "tenant_recordings"
+	// NetworkLinksTable is the table that holds the network_links relation/edge.
+	NetworkLinksTable = "network_links"
+	// NetworkLinksInverseTable is the table name for the NetworkLink entity.
+	// It exists in this package in order to avoid circular dependency with the "networklink" package.
+	NetworkLinksInverseTable = "network_links"
+	// NetworkLinksColumn is the table column denoting the network_links relation/edge.
+	NetworkLinksColumn = "tenant_network_links"
+	// NetworkPortsTable is the table that holds the network_ports relation/edge.
+	NetworkPortsTable = "network_ports"
+	// NetworkPortsInverseTable is the table name for the NetworkPort entity.
+	// It exists in this package in order to avoid circular dependency with the "networkport" package.
+	NetworkPortsInverseTable = "network_ports"
+	// NetworkPortsColumn is the table column denoting the network_ports relation/edge.
+	NetworkPortsColumn = "tenant_network_ports"
+	// NexusAuditsTable is the table that holds the nexus_audits relation/edge.
+	NexusAuditsTable = "nexus_audits"
+	// NexusAuditsInverseTable is the table name for the NexusAudit entity.
+	// It exists in this package in order to avoid circular dependency with the "nexusaudit" package.
+	NexusAuditsInverseTable = "nexus_audits"
+	// NexusAuditsColumn is the table column denoting the nexus_audits relation/edge.
+	NexusAuditsColumn = "tenant_nexus_audits"
+	// SuccessionMapsTable is the table that holds the succession_maps relation/edge.
+	SuccessionMapsTable = "succession_maps"
+	// SuccessionMapsInverseTable is the table name for the SuccessionMap entity.
+	// It exists in this package in order to avoid circular dependency with the "successionmap" package.
+	SuccessionMapsInverseTable = "succession_maps"
+	// SuccessionMapsColumn is the table column denoting the succession_maps relation/edge.
+	SuccessionMapsColumn = "tenant_succession_maps"
 	// CustomerAccountTable is the table that holds the customer_account relation/edge.
 	CustomerAccountTable = "tenants"
 	// CustomerAccountInverseTable is the table name for the Account entity.
@@ -326,6 +460,62 @@ const (
 	CustomerAccountInverseTable = "accounts"
 	// CustomerAccountColumn is the table column denoting the customer_account relation/edge.
 	CustomerAccountColumn = "tenant_customer_account"
+	// ScriptsTable is the table that holds the scripts relation/edge.
+	ScriptsTable = "scripts"
+	// ScriptsInverseTable is the table name for the Script entity.
+	// It exists in this package in order to avoid circular dependency with the "script" package.
+	ScriptsInverseTable = "scripts"
+	// ScriptsColumn is the table column denoting the scripts relation/edge.
+	ScriptsColumn = "tenant_scripts"
+	// JobsTable is the table that holds the jobs relation/edge.
+	JobsTable = "jobs"
+	// JobsInverseTable is the table name for the Job entity.
+	// It exists in this package in order to avoid circular dependency with the "job" package.
+	JobsInverseTable = "jobs"
+	// JobsColumn is the table column denoting the jobs relation/edge.
+	JobsColumn = "tenant_jobs"
+	// TimeOffRequestsTable is the table that holds the time_off_requests relation/edge.
+	TimeOffRequestsTable = "time_off_requests"
+	// TimeOffRequestsInverseTable is the table name for the TimeOffRequest entity.
+	// It exists in this package in order to avoid circular dependency with the "timeoffrequest" package.
+	TimeOffRequestsInverseTable = "time_off_requests"
+	// TimeOffRequestsColumn is the table column denoting the time_off_requests relation/edge.
+	TimeOffRequestsColumn = "tenant_time_off_requests"
+	// TimeOffPoliciesTable is the table that holds the time_off_policies relation/edge.
+	TimeOffPoliciesTable = "time_off_policies"
+	// TimeOffPoliciesInverseTable is the table name for the TimeOffPolicy entity.
+	// It exists in this package in order to avoid circular dependency with the "timeoffpolicy" package.
+	TimeOffPoliciesInverseTable = "time_off_policies"
+	// TimeOffPoliciesColumn is the table column denoting the time_off_policies relation/edge.
+	TimeOffPoliciesColumn = "tenant_time_off_policies"
+	// TimeOffBalancesTable is the table that holds the time_off_balances relation/edge.
+	TimeOffBalancesTable = "time_off_balances"
+	// TimeOffBalancesInverseTable is the table name for the TimeOffBalance entity.
+	// It exists in this package in order to avoid circular dependency with the "timeoffbalance" package.
+	TimeOffBalancesInverseTable = "time_off_balances"
+	// TimeOffBalancesColumn is the table column denoting the time_off_balances relation/edge.
+	TimeOffBalancesColumn = "tenant_time_off_balances"
+	// ReviewCyclesTable is the table that holds the review_cycles relation/edge.
+	ReviewCyclesTable = "review_cycles"
+	// ReviewCyclesInverseTable is the table name for the ReviewCycle entity.
+	// It exists in this package in order to avoid circular dependency with the "reviewcycle" package.
+	ReviewCyclesInverseTable = "review_cycles"
+	// ReviewCyclesColumn is the table column denoting the review_cycles relation/edge.
+	ReviewCyclesColumn = "tenant_review_cycles"
+	// PerformanceReviewsTable is the table that holds the performance_reviews relation/edge.
+	PerformanceReviewsTable = "performance_reviews"
+	// PerformanceReviewsInverseTable is the table name for the PerformanceReview entity.
+	// It exists in this package in order to avoid circular dependency with the "performancereview" package.
+	PerformanceReviewsInverseTable = "performance_reviews"
+	// PerformanceReviewsColumn is the table column denoting the performance_reviews relation/edge.
+	PerformanceReviewsColumn = "tenant_performance_reviews"
+	// GoalsTable is the table that holds the goals relation/edge.
+	GoalsTable = "goals"
+	// GoalsInverseTable is the table name for the Goal entity.
+	// It exists in this package in order to avoid circular dependency with the "goal" package.
+	GoalsInverseTable = "goals"
+	// GoalsColumn is the table column denoting the goals relation/edge.
+	GoalsColumn = "tenant_goals"
 )
 
 // Columns holds all SQL columns for tenant fields.
@@ -366,7 +556,7 @@ var (
 	// DefaultActive holds the default value on creation for the "active" field.
 	DefaultActive bool
 	// DefaultTransactionLimit holds the default value on creation for the "transaction_limit" field.
-	DefaultTransactionLimit float64
+	DefaultTransactionLimit decimal.Decimal
 )
 
 // OrderOption defines the ordering options for the Tenant queries.
@@ -759,6 +949,34 @@ func ByServiceRates(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByNetworkDevicesCount orders the results by network_devices count.
+func ByNetworkDevicesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newNetworkDevicesStep(), opts...)
+	}
+}
+
+// ByNetworkDevices orders the results by network_devices terms.
+func ByNetworkDevices(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newNetworkDevicesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByNetworkBackupsCount orders the results by network_backups count.
+func ByNetworkBackupsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newNetworkBackupsStep(), opts...)
+	}
+}
+
+// ByNetworkBackups orders the results by network_backups terms.
+func ByNetworkBackups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newNetworkBackupsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByBudgetForecastsCount orders the results by budget_forecasts count.
 func ByBudgetForecastsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -857,10 +1075,276 @@ func ByInventoryReservations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOp
 	}
 }
 
+// ByDepartmentsCount orders the results by departments count.
+func ByDepartmentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDepartmentsStep(), opts...)
+	}
+}
+
+// ByDepartments orders the results by departments terms.
+func ByDepartments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDepartmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPermissionsCount orders the results by permissions count.
+func ByPermissionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPermissionsStep(), opts...)
+	}
+}
+
+// ByPermissions orders the results by permissions terms.
+func ByPermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByAssetTypesCount orders the results by asset_types count.
+func ByAssetTypesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAssetTypesStep(), opts...)
+	}
+}
+
+// ByAssetTypes orders the results by asset_types terms.
+func ByAssetTypes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAssetTypesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByDetectionEventsCount orders the results by detection_events count.
+func ByDetectionEventsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDetectionEventsStep(), opts...)
+	}
+}
+
+// ByDetectionEvents orders the results by detection_events terms.
+func ByDetectionEvents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDetectionEventsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// BySaasIdentitiesCount orders the results by saas_identities count.
+func BySaasIdentitiesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSaasIdentitiesStep(), opts...)
+	}
+}
+
+// BySaasIdentities orders the results by saas_identities terms.
+func BySaasIdentities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSaasIdentitiesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// BySaasUsagesCount orders the results by saas_usages count.
+func BySaasUsagesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSaasUsagesStep(), opts...)
+	}
+}
+
+// BySaasUsages orders the results by saas_usages terms.
+func BySaasUsages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSaasUsagesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByRecordingsCount orders the results by recordings count.
+func ByRecordingsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRecordingsStep(), opts...)
+	}
+}
+
+// ByRecordings orders the results by recordings terms.
+func ByRecordings(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRecordingsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByNetworkLinksCount orders the results by network_links count.
+func ByNetworkLinksCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newNetworkLinksStep(), opts...)
+	}
+}
+
+// ByNetworkLinks orders the results by network_links terms.
+func ByNetworkLinks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newNetworkLinksStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByNetworkPortsCount orders the results by network_ports count.
+func ByNetworkPortsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newNetworkPortsStep(), opts...)
+	}
+}
+
+// ByNetworkPorts orders the results by network_ports terms.
+func ByNetworkPorts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newNetworkPortsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByNexusAuditsCount orders the results by nexus_audits count.
+func ByNexusAuditsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newNexusAuditsStep(), opts...)
+	}
+}
+
+// ByNexusAudits orders the results by nexus_audits terms.
+func ByNexusAudits(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newNexusAuditsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// BySuccessionMapsCount orders the results by succession_maps count.
+func BySuccessionMapsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSuccessionMapsStep(), opts...)
+	}
+}
+
+// BySuccessionMaps orders the results by succession_maps terms.
+func BySuccessionMaps(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSuccessionMapsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByCustomerAccountField orders the results by customer_account field.
 func ByCustomerAccountField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newCustomerAccountStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByScriptsCount orders the results by scripts count.
+func ByScriptsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newScriptsStep(), opts...)
+	}
+}
+
+// ByScripts orders the results by scripts terms.
+func ByScripts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newScriptsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByJobsCount orders the results by jobs count.
+func ByJobsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newJobsStep(), opts...)
+	}
+}
+
+// ByJobs orders the results by jobs terms.
+func ByJobs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newJobsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByTimeOffRequestsCount orders the results by time_off_requests count.
+func ByTimeOffRequestsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTimeOffRequestsStep(), opts...)
+	}
+}
+
+// ByTimeOffRequests orders the results by time_off_requests terms.
+func ByTimeOffRequests(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTimeOffRequestsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByTimeOffPoliciesCount orders the results by time_off_policies count.
+func ByTimeOffPoliciesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTimeOffPoliciesStep(), opts...)
+	}
+}
+
+// ByTimeOffPolicies orders the results by time_off_policies terms.
+func ByTimeOffPolicies(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTimeOffPoliciesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByTimeOffBalancesCount orders the results by time_off_balances count.
+func ByTimeOffBalancesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTimeOffBalancesStep(), opts...)
+	}
+}
+
+// ByTimeOffBalances orders the results by time_off_balances terms.
+func ByTimeOffBalances(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTimeOffBalancesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByReviewCyclesCount orders the results by review_cycles count.
+func ByReviewCyclesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newReviewCyclesStep(), opts...)
+	}
+}
+
+// ByReviewCycles orders the results by review_cycles terms.
+func ByReviewCycles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newReviewCyclesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPerformanceReviewsCount orders the results by performance_reviews count.
+func ByPerformanceReviewsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPerformanceReviewsStep(), opts...)
+	}
+}
+
+// ByPerformanceReviews orders the results by performance_reviews terms.
+func ByPerformanceReviews(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPerformanceReviewsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByGoalsCount orders the results by goals count.
+func ByGoalsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newGoalsStep(), opts...)
+	}
+}
+
+// ByGoals orders the results by goals terms.
+func ByGoals(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGoalsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newParentStep() *sqlgraph.Step {
@@ -1045,6 +1529,20 @@ func newServiceRatesStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, ServiceRatesTable, ServiceRatesColumn),
 	)
 }
+func newNetworkDevicesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(NetworkDevicesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, NetworkDevicesTable, NetworkDevicesColumn),
+	)
+}
+func newNetworkBackupsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(NetworkBackupsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, NetworkBackupsTable, NetworkBackupsColumn),
+	)
+}
 func newBudgetForecastsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -1094,10 +1592,143 @@ func newInventoryReservationsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, InventoryReservationsTable, InventoryReservationsColumn),
 	)
 }
+func newDepartmentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DepartmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DepartmentsTable, DepartmentsColumn),
+	)
+}
+func newPermissionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PermissionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PermissionsTable, PermissionsColumn),
+	)
+}
+func newAssetTypesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AssetTypesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AssetTypesTable, AssetTypesColumn),
+	)
+}
+func newDetectionEventsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DetectionEventsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DetectionEventsTable, DetectionEventsColumn),
+	)
+}
+func newSaasIdentitiesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SaasIdentitiesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SaasIdentitiesTable, SaasIdentitiesColumn),
+	)
+}
+func newSaasUsagesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SaasUsagesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SaasUsagesTable, SaasUsagesColumn),
+	)
+}
+func newRecordingsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RecordingsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, RecordingsTable, RecordingsColumn),
+	)
+}
+func newNetworkLinksStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(NetworkLinksInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, NetworkLinksTable, NetworkLinksColumn),
+	)
+}
+func newNetworkPortsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(NetworkPortsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, NetworkPortsTable, NetworkPortsColumn),
+	)
+}
+func newNexusAuditsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(NexusAuditsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, NexusAuditsTable, NexusAuditsColumn),
+	)
+}
+func newSuccessionMapsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SuccessionMapsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SuccessionMapsTable, SuccessionMapsColumn),
+	)
+}
 func newCustomerAccountStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CustomerAccountInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, CustomerAccountTable, CustomerAccountColumn),
+	)
+}
+func newScriptsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ScriptsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ScriptsTable, ScriptsColumn),
+	)
+}
+func newJobsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(JobsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, JobsTable, JobsColumn),
+	)
+}
+func newTimeOffRequestsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TimeOffRequestsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TimeOffRequestsTable, TimeOffRequestsColumn),
+	)
+}
+func newTimeOffPoliciesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TimeOffPoliciesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TimeOffPoliciesTable, TimeOffPoliciesColumn),
+	)
+}
+func newTimeOffBalancesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TimeOffBalancesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TimeOffBalancesTable, TimeOffBalancesColumn),
+	)
+}
+func newReviewCyclesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ReviewCyclesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ReviewCyclesTable, ReviewCyclesColumn),
+	)
+}
+func newPerformanceReviewsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PerformanceReviewsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PerformanceReviewsTable, PerformanceReviewsColumn),
+	)
+}
+func newGoalsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GoalsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, GoalsTable, GoalsColumn),
 	)
 }

@@ -38,6 +38,10 @@ type Asset struct {
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 	// LastCertifiedAt holds the value of the "last_certified_at" field.
 	LastCertifiedAt time.Time `json:"last_certified_at,omitempty"`
+	// PurchaseDate holds the value of the "purchase_date" field.
+	PurchaseDate time.Time `json:"purchase_date,omitempty"`
+	// WarrantyExpiry holds the value of the "warranty_expiry" field.
+	WarrantyExpiry time.Time `json:"warranty_expiry,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -202,7 +206,7 @@ func (*Asset) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case asset.FieldName, asset.FieldHardwareID, asset.FieldSerialNumber, asset.FieldManufacturer, asset.FieldVendorSupportPhone, asset.FieldStatus:
 			values[i] = new(sql.NullString)
-		case asset.FieldLastCertifiedAt, asset.FieldCreatedAt, asset.FieldUpdatedAt:
+		case asset.FieldLastCertifiedAt, asset.FieldPurchaseDate, asset.FieldWarrantyExpiry, asset.FieldCreatedAt, asset.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case asset.ForeignKeys[0]: // asset_hosted_assets
 			values[i] = new(sql.NullInt64)
@@ -284,6 +288,18 @@ func (_m *Asset) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field last_certified_at", values[i])
 			} else if value.Valid {
 				_m.LastCertifiedAt = value.Time
+			}
+		case asset.FieldPurchaseDate:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field purchase_date", values[i])
+			} else if value.Valid {
+				_m.PurchaseDate = value.Time
+			}
+		case asset.FieldWarrantyExpiry:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field warranty_expiry", values[i])
+			} else if value.Valid {
+				_m.WarrantyExpiry = value.Time
 			}
 		case asset.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -446,6 +462,12 @@ func (_m *Asset) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("last_certified_at=")
 	builder.WriteString(_m.LastCertifiedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("purchase_date=")
+	builder.WriteString(_m.PurchaseDate.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("warranty_expiry=")
+	builder.WriteString(_m.WarrantyExpiry.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

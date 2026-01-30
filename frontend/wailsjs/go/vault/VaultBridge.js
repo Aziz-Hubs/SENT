@@ -26,6 +26,18 @@ export function SaveFile(arg1, arg2) {
   return window['go']['vault']['VaultBridge']['SaveFile'](arg1, arg2);
 }
 
+export function SaveFileAsTenant(arg1, arg2, arg3) {
+  return window['go']['vault']['VaultBridge']['SaveFileAsTenant'](arg1, arg2, arg3);
+}
+
+export function SearchFiles(arg1) {
+  return window['go']['vault']['VaultBridge']['SearchFiles'](arg1);
+}
+
+export function SetRiverClient(arg1) {
+  return window['go']['vault']['VaultBridge']['SetRiverClient'](arg1);
+}
+
 export function Startup(arg1) {
   return window['go']['vault']['VaultBridge']['Startup'](arg1);
 }

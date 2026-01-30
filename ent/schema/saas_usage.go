@@ -26,5 +26,10 @@ func (SaaSUsage) Fields() []ent.Field {
 func (SaaSUsage) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("identity", SaaSIdentity.Type).Ref("usages").Unique().Required(),
+		edge.From("tenant", Tenant.Type).
+			Ref("saas_usages").
+			Unique().
+			Required(),
 	}
 }
+

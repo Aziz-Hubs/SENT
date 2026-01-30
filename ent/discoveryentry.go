@@ -23,6 +23,12 @@ type DiscoveryEntry struct {
 	HardwareID string `json:"hardware_id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Hostname holds the value of the "hostname" field.
+	Hostname string `json:"hostname,omitempty"`
+	// IP holds the value of the "ip" field.
+	IP string `json:"ip,omitempty"`
+	// MAC holds the value of the "mac" field.
+	MAC string `json:"mac,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
 	// Metadata holds the value of the "metadata" field.
@@ -67,7 +73,7 @@ func (*DiscoveryEntry) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case discoveryentry.FieldID:
 			values[i] = new(sql.NullInt64)
-		case discoveryentry.FieldHardwareID, discoveryentry.FieldName, discoveryentry.FieldType, discoveryentry.FieldStatus:
+		case discoveryentry.FieldHardwareID, discoveryentry.FieldName, discoveryentry.FieldHostname, discoveryentry.FieldIP, discoveryentry.FieldMAC, discoveryentry.FieldType, discoveryentry.FieldStatus:
 			values[i] = new(sql.NullString)
 		case discoveryentry.FieldDiscoveredAt:
 			values[i] = new(sql.NullTime)
@@ -105,6 +111,24 @@ func (_m *DiscoveryEntry) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				_m.Name = value.String
+			}
+		case discoveryentry.FieldHostname:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field hostname", values[i])
+			} else if value.Valid {
+				_m.Hostname = value.String
+			}
+		case discoveryentry.FieldIP:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field ip", values[i])
+			} else if value.Valid {
+				_m.IP = value.String
+			}
+		case discoveryentry.FieldMAC:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field mac", values[i])
+			} else if value.Valid {
+				_m.MAC = value.String
 			}
 		case discoveryentry.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -185,6 +209,15 @@ func (_m *DiscoveryEntry) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
+	builder.WriteString("hostname=")
+	builder.WriteString(_m.Hostname)
+	builder.WriteString(", ")
+	builder.WriteString("ip=")
+	builder.WriteString(_m.IP)
+	builder.WriteString(", ")
+	builder.WriteString("mac=")
+	builder.WriteString(_m.MAC)
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(_m.Type)

@@ -29,6 +29,7 @@ type LedgerEntryQuery struct {
 	withAccount     *AccountQuery
 	withTenant      *TenantQuery
 	withFKs         bool
+	modifiers       []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -327,8 +328,9 @@ func (_q *LedgerEntryQuery) Clone() *LedgerEntryQuery {
 		withAccount:     _q.withAccount.Clone(),
 		withTenant:      _q.withTenant.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -371,7 +373,7 @@ func (_q *LedgerEntryQuery) WithTenant(opts ...func(*TenantQuery)) *LedgerEntryQ
 // Example:
 //
 //	var v []struct {
-//		Amount float64 `json:"amount,omitempty"`
+//		Amount decimal.Decimal `json:"amount,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -394,7 +396,7 @@ func (_q *LedgerEntryQuery) GroupBy(field string, fields ...string) *LedgerEntry
 // Example:
 //
 //	var v []struct {
-//		Amount float64 `json:"amount,omitempty"`
+//		Amount decimal.Decimal `json:"amount,omitempty"`
 //	}
 //
 //	client.LedgerEntry.Query().
@@ -464,6 +466,9 @@ func (_q *LedgerEntryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -594,6 +599,9 @@ func (_q *LedgerEntryQuery) loadTenant(ctx context.Context, query *TenantQuery, 
 
 func (_q *LedgerEntryQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -656,6 +664,9 @@ func (_q *LedgerEntryQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -671,6 +682,12 @@ func (_q *LedgerEntryQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *LedgerEntryQuery) Modify(modifiers ...func(s *sql.Selector)) *LedgerEntrySelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // LedgerEntryGroupBy is the group-by builder for LedgerEntry entities.
@@ -761,4 +778,10 @@ func (_s *LedgerEntrySelect) sqlScan(ctx context.Context, root *LedgerEntryQuery
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *LedgerEntrySelect) Modify(modifiers ...func(s *sql.Selector)) *LedgerEntrySelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

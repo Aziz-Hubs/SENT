@@ -63,9 +63,8 @@ func (w *BillingSyncWorker) Work(ctx context.Context, job *river.Job[BillingSync
 
 	// 3. Calculate Amount
 	duration := decimal.NewFromFloat(te.DurationHours)
-	rate := decimal.NewFromFloat(rateObj.Rate)
+	rate := rateObj.Rate
 	amount := duration.Mul(rate).RoundBank(2)
-	amountFloat, _ := amount.Float64()
 
 	// 4. Start Transaction
 	tx, err := w.db.Tx(ctx)
@@ -121,14 +120,14 @@ func (w *BillingSyncWorker) Work(ctx context.Context, job *river.Job[BillingSync
 	direction1 := ledgerentry.DirectionDebit
 	if cnt != nil {
 		// For liability (Unearned Revenue), Debit decreases balance
-		tx.Account.UpdateOne(arAcc).SetBalance(arAcc.Balance - amountFloat).Exec(ctx)
+		tx.Account.UpdateOne(arAcc).SetBalance(arAcc.Balance.Sub(amount)).Exec(ctx)
 	} else {
 		// For asset (AR), Debit increases balance
-		tx.Account.UpdateOne(arAcc).SetBalance(arAcc.Balance + amountFloat).Exec(ctx)
+		tx.Account.UpdateOne(arAcc).SetBalance(arAcc.Balance.Add(amount)).Exec(ctx)
 	}
 
 	_, err = tx.LedgerEntry.Create().
-		SetAmount(amountFloat).
+		SetAmount(amount).
 		SetDirection(direction1).
 		SetAccount(arAcc).
 		SetTransaction(txn).
@@ -140,10 +139,10 @@ func (w *BillingSyncWorker) Work(ctx context.Context, job *river.Job[BillingSync
 
 	// Ledger Entry 2 (Credit)
 	direction2 := ledgerentry.DirectionCredit
-	tx.Account.UpdateOne(revAcc).SetBalance(revAcc.Balance + amountFloat).Exec(ctx)
+	tx.Account.UpdateOne(revAcc).SetBalance(revAcc.Balance.Add(amount)).Exec(ctx)
 
 	_, err = tx.LedgerEntry.Create().
-		SetAmount(amountFloat).
+		SetAmount(amount).
 		SetDirection(direction2).
 		SetAccount(revAcc).
 		SetTransaction(txn).

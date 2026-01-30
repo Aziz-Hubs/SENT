@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // RecurringInvoice is the model entity for the RecurringInvoice schema.
@@ -22,7 +23,7 @@ type RecurringInvoice struct {
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
 	// Amount holds the value of the "amount" field.
-	Amount float64 `json:"amount,omitempty"`
+	Amount decimal.Decimal `json:"amount,omitempty"`
 	// Currency holds the value of the "currency" field.
 	Currency string `json:"currency,omitempty"`
 	// Frequency holds the value of the "frequency" field.
@@ -81,10 +82,10 @@ func (*RecurringInvoice) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case recurringinvoice.FieldAmount:
+			values[i] = new(decimal.Decimal)
 		case recurringinvoice.FieldIsActive:
 			values[i] = new(sql.NullBool)
-		case recurringinvoice.FieldAmount:
-			values[i] = new(sql.NullFloat64)
 		case recurringinvoice.FieldID:
 			values[i] = new(sql.NullInt64)
 		case recurringinvoice.FieldDescription, recurringinvoice.FieldCurrency, recurringinvoice.FieldFrequency:
@@ -123,10 +124,10 @@ func (_m *RecurringInvoice) assignValues(columns []string, values []any) error {
 				_m.Description = value.String
 			}
 		case recurringinvoice.FieldAmount:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field amount", values[i])
-			} else if value.Valid {
-				_m.Amount = value.Float64
+			} else if value != nil {
+				_m.Amount = *value
 			}
 		case recurringinvoice.FieldCurrency:
 			if value, ok := values[i].(*sql.NullString); !ok {

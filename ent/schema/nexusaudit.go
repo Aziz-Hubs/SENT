@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"time"
 )
@@ -21,5 +22,15 @@ func (NexusAudit) Fields() []ent.Field {
 		field.String("ticket_id").Optional(),
 		field.Time("timestamp").Default(time.Now),
 		field.JSON("metadata", map[string]interface{}{}).Optional(),
+	}
+}
+
+// Edges of the NexusAudit.
+func (NexusAudit) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("tenant", Tenant.Type).
+			Ref("nexus_audits").
+			Unique().
+			Required(),
 	}
 }

@@ -1,0 +1,40 @@
+linters-settings:
+  govet:
+    check-shadowing: true
+  golint:
+    min-confidence: 0.8
+  gocyclo:
+    min-complexity: 15
+  maligned:
+    suggest-new: true
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - gosimple
+    - structcheck
+    - varcheck
+    - ineffassign
+    - deadcode
+    - typecheck
+    - gocyclo
+    - goconst
+    - asciicheck
+    - bodyclose
+    - misspell
+
+run:
+  timeout: 5m
+  tests: false
+  skip-dirs:
+    - ent
+    - frontend
+    - tmp

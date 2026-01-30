@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 const (
@@ -72,8 +73,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultProjectedAmount holds the default value on creation for the "projected_amount" field.
+	DefaultProjectedAmount decimal.Decimal
 	// DefaultActualSpent holds the default value on creation for the "actual_spent" field.
-	DefaultActualSpent float64
+	DefaultActualSpent decimal.Decimal
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 )

@@ -38,7 +38,33 @@ func Run() {
 	// 4. Setup Control Handler
 	client.SubscribeControl(func(cmd string) {
 		log.Printf("[AGENT] Received remote command: %s", cmd)
-		// TODO: Implement Command Execution (Process Kill, etc.)
+		switch cmd {
+		case "reboot":
+			log.Println("[AGENT] Rebooting system via command...")
+			// exec.Command("reboot").Run() // Commented for safety in MVP
+		case "shell_connect":
+			log.Println("[AGENT] Spawning reverse shell session...")
+            // For MVP, we just start it locally to test logic. 
+            // In real world, we would dial a WebSocket to the bridge.
+            session, err := StartTerminal(80, 24)
+            if err != nil {
+                log.Printf("[AGENT] Failed to start terminal: %v", err)
+                return
+            }
+            defer session.Close()
+            
+            // Just echo to log for now to prove it works without a real WS tunnel yet
+            go func() {
+               buf := make([]byte, 1024)
+               for {
+                   n, err := session.Output.Read(buf)
+                   if err != nil { break }
+                   log.Printf("[TERM OUTPUT] %s", string(buf[:n]))
+               }
+            }()
+            
+            log.Println("[AGENT] Terminal started. Output piped to log.")
+		}
 	})
 
 	// 5. Setup Signal Handling

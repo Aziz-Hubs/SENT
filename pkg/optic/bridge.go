@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"sent/ent"
+	"sent/ent/camera"
+	"sent/ent/tenant"
+	"sent/pkg/auth"
 	"sync"
 )
 
@@ -11,14 +14,16 @@ import (
 type OpticBridge struct {
 	ctx   context.Context
 	db    *ent.Client
+	auth  *auth.AuthBridge
 	mu    sync.RWMutex
 	// activeConnections map[int]*PeerConnection
 }
 
 // NewOpticBridge initializes the surveillance bridge.
-func NewOpticBridge(db *ent.Client) *OpticBridge {
+func NewOpticBridge(db *ent.Client, auth *auth.AuthBridge) *OpticBridge {
 	return &OpticBridge{
-		db: db,
+		db:   db,
+		auth: auth,
 	}
 }
 
@@ -29,7 +34,15 @@ func (b *OpticBridge) Startup(ctx context.Context) {
 
 // GetCameras retrieves the list of configured cameras.
 func (b *OpticBridge) GetCameras() ([]CameraDTO, error) {
-	cameras, err := b.db.Camera.Query().All(b.ctx)
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return nil, err
+	}
+	tenantID := profile.TenantID
+
+	cameras, err := b.db.Camera.Query().
+		Where(camera.HasTenantWith(tenant.ID(tenantID))).
+		All(b.ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch cameras: %w", err)
 	}
@@ -48,9 +61,32 @@ func (b *OpticBridge) GetCameras() ([]CameraDTO, error) {
 
 // PTZMove sends a PTZ command to the specified camera.
 func (b *OpticBridge) PTZMove(cameraID int, direction string, speed float64) error {
-	// Implementation will use ONVIF SOAP client
-	fmt.Printf("[OPTIC] Moving camera %d in direction %s at speed %f\n", cameraID, direction, speed)
-	return nil
+	c, err := b.db.Camera.Get(b.ctx, cameraID)
+	if err != nil {
+		return err
+	}
+
+	client := &ONVIFClient{
+		Endpoint: fmt.Sprintf("http://%s/onvif/ptz_service", c.IPAddress),
+		Username: "admin", // Default for simulation
+		Password: "admin",
+	}
+
+	var x, y float64
+	switch direction {
+	case "up":
+		y = speed
+	case "down":
+		y = -speed
+	case "left":
+		x = -speed
+	case "right":
+		x = speed
+	case "stop":
+		return client.Stop()
+	}
+
+	return client.ContinuousMove(x, y, 0)
 }
 
 // PTZClickToCenter centers the camera on the specified normalized coordinates.

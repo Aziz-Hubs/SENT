@@ -10,9 +10,13 @@ import (
 	"sent/ent/compensationagreement"
 	"sent/ent/department"
 	"sent/ent/employee"
+	"sent/ent/goal"
+	"sent/ent/performancereview"
 	"sent/ent/predicate"
 	"sent/ent/successionmap"
 	"sent/ent/tenant"
+	"sent/ent/timeoffbalance"
+	"sent/ent/timeoffrequest"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -23,8 +27,9 @@ import (
 // EmployeeUpdate is the builder for updating Employee entities.
 type EmployeeUpdate struct {
 	config
-	hooks    []Hook
-	mutation *EmployeeMutation
+	hooks     []Hook
+	mutation  *EmployeeMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the EmployeeUpdate builder.
@@ -225,20 +230,6 @@ func (_u *EmployeeUpdate) SetNillableHipoStatus(v *bool) *EmployeeUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *EmployeeUpdate) SetCreatedAt(v time.Time) *EmployeeUpdate {
-	_u.mutation.SetCreatedAt(v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *EmployeeUpdate) SetNillableCreatedAt(v *time.Time) *EmployeeUpdate {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
-	return _u
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *EmployeeUpdate) SetUpdatedAt(v time.Time) *EmployeeUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -373,6 +364,96 @@ func (_u *EmployeeUpdate) SetExpenseAccount(v *Account) *EmployeeUpdate {
 	return _u.SetExpenseAccountID(v.ID)
 }
 
+// AddTimeOffRequestIDs adds the "time_off_requests" edge to the TimeOffRequest entity by IDs.
+func (_u *EmployeeUpdate) AddTimeOffRequestIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.AddTimeOffRequestIDs(ids...)
+	return _u
+}
+
+// AddTimeOffRequests adds the "time_off_requests" edges to the TimeOffRequest entity.
+func (_u *EmployeeUpdate) AddTimeOffRequests(v ...*TimeOffRequest) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTimeOffRequestIDs(ids...)
+}
+
+// AddApprovedTimeOffIDs adds the "approved_time_off" edge to the TimeOffRequest entity by IDs.
+func (_u *EmployeeUpdate) AddApprovedTimeOffIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.AddApprovedTimeOffIDs(ids...)
+	return _u
+}
+
+// AddApprovedTimeOff adds the "approved_time_off" edges to the TimeOffRequest entity.
+func (_u *EmployeeUpdate) AddApprovedTimeOff(v ...*TimeOffRequest) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddApprovedTimeOffIDs(ids...)
+}
+
+// AddTimeOffBalanceIDs adds the "time_off_balances" edge to the TimeOffBalance entity by IDs.
+func (_u *EmployeeUpdate) AddTimeOffBalanceIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.AddTimeOffBalanceIDs(ids...)
+	return _u
+}
+
+// AddTimeOffBalances adds the "time_off_balances" edges to the TimeOffBalance entity.
+func (_u *EmployeeUpdate) AddTimeOffBalances(v ...*TimeOffBalance) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTimeOffBalanceIDs(ids...)
+}
+
+// AddPerformanceReviewIDs adds the "performance_reviews" edge to the PerformanceReview entity by IDs.
+func (_u *EmployeeUpdate) AddPerformanceReviewIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.AddPerformanceReviewIDs(ids...)
+	return _u
+}
+
+// AddPerformanceReviews adds the "performance_reviews" edges to the PerformanceReview entity.
+func (_u *EmployeeUpdate) AddPerformanceReviews(v ...*PerformanceReview) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPerformanceReviewIDs(ids...)
+}
+
+// AddConductedReviewIDs adds the "conducted_reviews" edge to the PerformanceReview entity by IDs.
+func (_u *EmployeeUpdate) AddConductedReviewIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.AddConductedReviewIDs(ids...)
+	return _u
+}
+
+// AddConductedReviews adds the "conducted_reviews" edges to the PerformanceReview entity.
+func (_u *EmployeeUpdate) AddConductedReviews(v ...*PerformanceReview) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddConductedReviewIDs(ids...)
+}
+
+// AddGoalIDs adds the "goals" edge to the Goal entity by IDs.
+func (_u *EmployeeUpdate) AddGoalIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.AddGoalIDs(ids...)
+	return _u
+}
+
+// AddGoals adds the "goals" edges to the Goal entity.
+func (_u *EmployeeUpdate) AddGoals(v ...*Goal) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddGoalIDs(ids...)
+}
+
 // Mutation returns the EmployeeMutation object of the builder.
 func (_u *EmployeeUpdate) Mutation() *EmployeeMutation {
 	return _u.mutation
@@ -486,6 +567,132 @@ func (_u *EmployeeUpdate) ClearExpenseAccount() *EmployeeUpdate {
 	return _u
 }
 
+// ClearTimeOffRequests clears all "time_off_requests" edges to the TimeOffRequest entity.
+func (_u *EmployeeUpdate) ClearTimeOffRequests() *EmployeeUpdate {
+	_u.mutation.ClearTimeOffRequests()
+	return _u
+}
+
+// RemoveTimeOffRequestIDs removes the "time_off_requests" edge to TimeOffRequest entities by IDs.
+func (_u *EmployeeUpdate) RemoveTimeOffRequestIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.RemoveTimeOffRequestIDs(ids...)
+	return _u
+}
+
+// RemoveTimeOffRequests removes "time_off_requests" edges to TimeOffRequest entities.
+func (_u *EmployeeUpdate) RemoveTimeOffRequests(v ...*TimeOffRequest) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTimeOffRequestIDs(ids...)
+}
+
+// ClearApprovedTimeOff clears all "approved_time_off" edges to the TimeOffRequest entity.
+func (_u *EmployeeUpdate) ClearApprovedTimeOff() *EmployeeUpdate {
+	_u.mutation.ClearApprovedTimeOff()
+	return _u
+}
+
+// RemoveApprovedTimeOffIDs removes the "approved_time_off" edge to TimeOffRequest entities by IDs.
+func (_u *EmployeeUpdate) RemoveApprovedTimeOffIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.RemoveApprovedTimeOffIDs(ids...)
+	return _u
+}
+
+// RemoveApprovedTimeOff removes "approved_time_off" edges to TimeOffRequest entities.
+func (_u *EmployeeUpdate) RemoveApprovedTimeOff(v ...*TimeOffRequest) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveApprovedTimeOffIDs(ids...)
+}
+
+// ClearTimeOffBalances clears all "time_off_balances" edges to the TimeOffBalance entity.
+func (_u *EmployeeUpdate) ClearTimeOffBalances() *EmployeeUpdate {
+	_u.mutation.ClearTimeOffBalances()
+	return _u
+}
+
+// RemoveTimeOffBalanceIDs removes the "time_off_balances" edge to TimeOffBalance entities by IDs.
+func (_u *EmployeeUpdate) RemoveTimeOffBalanceIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.RemoveTimeOffBalanceIDs(ids...)
+	return _u
+}
+
+// RemoveTimeOffBalances removes "time_off_balances" edges to TimeOffBalance entities.
+func (_u *EmployeeUpdate) RemoveTimeOffBalances(v ...*TimeOffBalance) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTimeOffBalanceIDs(ids...)
+}
+
+// ClearPerformanceReviews clears all "performance_reviews" edges to the PerformanceReview entity.
+func (_u *EmployeeUpdate) ClearPerformanceReviews() *EmployeeUpdate {
+	_u.mutation.ClearPerformanceReviews()
+	return _u
+}
+
+// RemovePerformanceReviewIDs removes the "performance_reviews" edge to PerformanceReview entities by IDs.
+func (_u *EmployeeUpdate) RemovePerformanceReviewIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.RemovePerformanceReviewIDs(ids...)
+	return _u
+}
+
+// RemovePerformanceReviews removes "performance_reviews" edges to PerformanceReview entities.
+func (_u *EmployeeUpdate) RemovePerformanceReviews(v ...*PerformanceReview) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePerformanceReviewIDs(ids...)
+}
+
+// ClearConductedReviews clears all "conducted_reviews" edges to the PerformanceReview entity.
+func (_u *EmployeeUpdate) ClearConductedReviews() *EmployeeUpdate {
+	_u.mutation.ClearConductedReviews()
+	return _u
+}
+
+// RemoveConductedReviewIDs removes the "conducted_reviews" edge to PerformanceReview entities by IDs.
+func (_u *EmployeeUpdate) RemoveConductedReviewIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.RemoveConductedReviewIDs(ids...)
+	return _u
+}
+
+// RemoveConductedReviews removes "conducted_reviews" edges to PerformanceReview entities.
+func (_u *EmployeeUpdate) RemoveConductedReviews(v ...*PerformanceReview) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveConductedReviewIDs(ids...)
+}
+
+// ClearGoals clears all "goals" edges to the Goal entity.
+func (_u *EmployeeUpdate) ClearGoals() *EmployeeUpdate {
+	_u.mutation.ClearGoals()
+	return _u
+}
+
+// RemoveGoalIDs removes the "goals" edge to Goal entities by IDs.
+func (_u *EmployeeUpdate) RemoveGoalIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.RemoveGoalIDs(ids...)
+	return _u
+}
+
+// RemoveGoals removes "goals" edges to Goal entities.
+func (_u *EmployeeUpdate) RemoveGoals(v ...*Goal) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveGoalIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *EmployeeUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
@@ -533,6 +740,12 @@ func (_u *EmployeeUpdate) check() error {
 		return errors.New(`ent: clearing a required unique edge "Employee.tenant"`)
 	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *EmployeeUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *EmployeeUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *EmployeeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
@@ -594,9 +807,6 @@ func (_u *EmployeeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.HipoStatus(); ok {
 		_spec.SetField(employee.FieldHipoStatus, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(employee.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(employee.FieldUpdatedAt, field.TypeTime, value)
@@ -897,6 +1107,277 @@ func (_u *EmployeeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TimeOffRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeOffRequestsTable,
+			Columns: []string{employee.TimeOffRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffrequest.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTimeOffRequestsIDs(); len(nodes) > 0 && !_u.mutation.TimeOffRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeOffRequestsTable,
+			Columns: []string{employee.TimeOffRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TimeOffRequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeOffRequestsTable,
+			Columns: []string{employee.TimeOffRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ApprovedTimeOffCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.ApprovedTimeOffTable,
+			Columns: []string{employee.ApprovedTimeOffColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffrequest.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedApprovedTimeOffIDs(); len(nodes) > 0 && !_u.mutation.ApprovedTimeOffCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.ApprovedTimeOffTable,
+			Columns: []string{employee.ApprovedTimeOffColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ApprovedTimeOffIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.ApprovedTimeOffTable,
+			Columns: []string{employee.ApprovedTimeOffColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TimeOffBalancesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeOffBalancesTable,
+			Columns: []string{employee.TimeOffBalancesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffbalance.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTimeOffBalancesIDs(); len(nodes) > 0 && !_u.mutation.TimeOffBalancesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeOffBalancesTable,
+			Columns: []string{employee.TimeOffBalancesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffbalance.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TimeOffBalancesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeOffBalancesTable,
+			Columns: []string{employee.TimeOffBalancesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffbalance.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PerformanceReviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.PerformanceReviewsTable,
+			Columns: []string{employee.PerformanceReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(performancereview.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPerformanceReviewsIDs(); len(nodes) > 0 && !_u.mutation.PerformanceReviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.PerformanceReviewsTable,
+			Columns: []string{employee.PerformanceReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(performancereview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PerformanceReviewsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.PerformanceReviewsTable,
+			Columns: []string{employee.PerformanceReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(performancereview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ConductedReviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.ConductedReviewsTable,
+			Columns: []string{employee.ConductedReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(performancereview.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedConductedReviewsIDs(); len(nodes) > 0 && !_u.mutation.ConductedReviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.ConductedReviewsTable,
+			Columns: []string{employee.ConductedReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(performancereview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ConductedReviewsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.ConductedReviewsTable,
+			Columns: []string{employee.ConductedReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(performancereview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.GoalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.GoalsTable,
+			Columns: []string{employee.GoalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(goal.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedGoalsIDs(); len(nodes) > 0 && !_u.mutation.GoalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.GoalsTable,
+			Columns: []string{employee.GoalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(goal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.GoalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.GoalsTable,
+			Columns: []string{employee.GoalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(goal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{employee.Label}
@@ -912,9 +1393,10 @@ func (_u *EmployeeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 // EmployeeUpdateOne is the builder for updating a single Employee entity.
 type EmployeeUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *EmployeeMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *EmployeeMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetZitadelID sets the "zitadel_id" field.
@@ -1109,20 +1591,6 @@ func (_u *EmployeeUpdateOne) SetNillableHipoStatus(v *bool) *EmployeeUpdateOne {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *EmployeeUpdateOne) SetCreatedAt(v time.Time) *EmployeeUpdateOne {
-	_u.mutation.SetCreatedAt(v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *EmployeeUpdateOne) SetNillableCreatedAt(v *time.Time) *EmployeeUpdateOne {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
-	return _u
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *EmployeeUpdateOne) SetUpdatedAt(v time.Time) *EmployeeUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -1257,6 +1725,96 @@ func (_u *EmployeeUpdateOne) SetExpenseAccount(v *Account) *EmployeeUpdateOne {
 	return _u.SetExpenseAccountID(v.ID)
 }
 
+// AddTimeOffRequestIDs adds the "time_off_requests" edge to the TimeOffRequest entity by IDs.
+func (_u *EmployeeUpdateOne) AddTimeOffRequestIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.AddTimeOffRequestIDs(ids...)
+	return _u
+}
+
+// AddTimeOffRequests adds the "time_off_requests" edges to the TimeOffRequest entity.
+func (_u *EmployeeUpdateOne) AddTimeOffRequests(v ...*TimeOffRequest) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTimeOffRequestIDs(ids...)
+}
+
+// AddApprovedTimeOffIDs adds the "approved_time_off" edge to the TimeOffRequest entity by IDs.
+func (_u *EmployeeUpdateOne) AddApprovedTimeOffIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.AddApprovedTimeOffIDs(ids...)
+	return _u
+}
+
+// AddApprovedTimeOff adds the "approved_time_off" edges to the TimeOffRequest entity.
+func (_u *EmployeeUpdateOne) AddApprovedTimeOff(v ...*TimeOffRequest) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddApprovedTimeOffIDs(ids...)
+}
+
+// AddTimeOffBalanceIDs adds the "time_off_balances" edge to the TimeOffBalance entity by IDs.
+func (_u *EmployeeUpdateOne) AddTimeOffBalanceIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.AddTimeOffBalanceIDs(ids...)
+	return _u
+}
+
+// AddTimeOffBalances adds the "time_off_balances" edges to the TimeOffBalance entity.
+func (_u *EmployeeUpdateOne) AddTimeOffBalances(v ...*TimeOffBalance) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTimeOffBalanceIDs(ids...)
+}
+
+// AddPerformanceReviewIDs adds the "performance_reviews" edge to the PerformanceReview entity by IDs.
+func (_u *EmployeeUpdateOne) AddPerformanceReviewIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.AddPerformanceReviewIDs(ids...)
+	return _u
+}
+
+// AddPerformanceReviews adds the "performance_reviews" edges to the PerformanceReview entity.
+func (_u *EmployeeUpdateOne) AddPerformanceReviews(v ...*PerformanceReview) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPerformanceReviewIDs(ids...)
+}
+
+// AddConductedReviewIDs adds the "conducted_reviews" edge to the PerformanceReview entity by IDs.
+func (_u *EmployeeUpdateOne) AddConductedReviewIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.AddConductedReviewIDs(ids...)
+	return _u
+}
+
+// AddConductedReviews adds the "conducted_reviews" edges to the PerformanceReview entity.
+func (_u *EmployeeUpdateOne) AddConductedReviews(v ...*PerformanceReview) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddConductedReviewIDs(ids...)
+}
+
+// AddGoalIDs adds the "goals" edge to the Goal entity by IDs.
+func (_u *EmployeeUpdateOne) AddGoalIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.AddGoalIDs(ids...)
+	return _u
+}
+
+// AddGoals adds the "goals" edges to the Goal entity.
+func (_u *EmployeeUpdateOne) AddGoals(v ...*Goal) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddGoalIDs(ids...)
+}
+
 // Mutation returns the EmployeeMutation object of the builder.
 func (_u *EmployeeUpdateOne) Mutation() *EmployeeMutation {
 	return _u.mutation
@@ -1370,6 +1928,132 @@ func (_u *EmployeeUpdateOne) ClearExpenseAccount() *EmployeeUpdateOne {
 	return _u
 }
 
+// ClearTimeOffRequests clears all "time_off_requests" edges to the TimeOffRequest entity.
+func (_u *EmployeeUpdateOne) ClearTimeOffRequests() *EmployeeUpdateOne {
+	_u.mutation.ClearTimeOffRequests()
+	return _u
+}
+
+// RemoveTimeOffRequestIDs removes the "time_off_requests" edge to TimeOffRequest entities by IDs.
+func (_u *EmployeeUpdateOne) RemoveTimeOffRequestIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.RemoveTimeOffRequestIDs(ids...)
+	return _u
+}
+
+// RemoveTimeOffRequests removes "time_off_requests" edges to TimeOffRequest entities.
+func (_u *EmployeeUpdateOne) RemoveTimeOffRequests(v ...*TimeOffRequest) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTimeOffRequestIDs(ids...)
+}
+
+// ClearApprovedTimeOff clears all "approved_time_off" edges to the TimeOffRequest entity.
+func (_u *EmployeeUpdateOne) ClearApprovedTimeOff() *EmployeeUpdateOne {
+	_u.mutation.ClearApprovedTimeOff()
+	return _u
+}
+
+// RemoveApprovedTimeOffIDs removes the "approved_time_off" edge to TimeOffRequest entities by IDs.
+func (_u *EmployeeUpdateOne) RemoveApprovedTimeOffIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.RemoveApprovedTimeOffIDs(ids...)
+	return _u
+}
+
+// RemoveApprovedTimeOff removes "approved_time_off" edges to TimeOffRequest entities.
+func (_u *EmployeeUpdateOne) RemoveApprovedTimeOff(v ...*TimeOffRequest) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveApprovedTimeOffIDs(ids...)
+}
+
+// ClearTimeOffBalances clears all "time_off_balances" edges to the TimeOffBalance entity.
+func (_u *EmployeeUpdateOne) ClearTimeOffBalances() *EmployeeUpdateOne {
+	_u.mutation.ClearTimeOffBalances()
+	return _u
+}
+
+// RemoveTimeOffBalanceIDs removes the "time_off_balances" edge to TimeOffBalance entities by IDs.
+func (_u *EmployeeUpdateOne) RemoveTimeOffBalanceIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.RemoveTimeOffBalanceIDs(ids...)
+	return _u
+}
+
+// RemoveTimeOffBalances removes "time_off_balances" edges to TimeOffBalance entities.
+func (_u *EmployeeUpdateOne) RemoveTimeOffBalances(v ...*TimeOffBalance) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTimeOffBalanceIDs(ids...)
+}
+
+// ClearPerformanceReviews clears all "performance_reviews" edges to the PerformanceReview entity.
+func (_u *EmployeeUpdateOne) ClearPerformanceReviews() *EmployeeUpdateOne {
+	_u.mutation.ClearPerformanceReviews()
+	return _u
+}
+
+// RemovePerformanceReviewIDs removes the "performance_reviews" edge to PerformanceReview entities by IDs.
+func (_u *EmployeeUpdateOne) RemovePerformanceReviewIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.RemovePerformanceReviewIDs(ids...)
+	return _u
+}
+
+// RemovePerformanceReviews removes "performance_reviews" edges to PerformanceReview entities.
+func (_u *EmployeeUpdateOne) RemovePerformanceReviews(v ...*PerformanceReview) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePerformanceReviewIDs(ids...)
+}
+
+// ClearConductedReviews clears all "conducted_reviews" edges to the PerformanceReview entity.
+func (_u *EmployeeUpdateOne) ClearConductedReviews() *EmployeeUpdateOne {
+	_u.mutation.ClearConductedReviews()
+	return _u
+}
+
+// RemoveConductedReviewIDs removes the "conducted_reviews" edge to PerformanceReview entities by IDs.
+func (_u *EmployeeUpdateOne) RemoveConductedReviewIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.RemoveConductedReviewIDs(ids...)
+	return _u
+}
+
+// RemoveConductedReviews removes "conducted_reviews" edges to PerformanceReview entities.
+func (_u *EmployeeUpdateOne) RemoveConductedReviews(v ...*PerformanceReview) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveConductedReviewIDs(ids...)
+}
+
+// ClearGoals clears all "goals" edges to the Goal entity.
+func (_u *EmployeeUpdateOne) ClearGoals() *EmployeeUpdateOne {
+	_u.mutation.ClearGoals()
+	return _u
+}
+
+// RemoveGoalIDs removes the "goals" edge to Goal entities by IDs.
+func (_u *EmployeeUpdateOne) RemoveGoalIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.RemoveGoalIDs(ids...)
+	return _u
+}
+
+// RemoveGoals removes "goals" edges to Goal entities.
+func (_u *EmployeeUpdateOne) RemoveGoals(v ...*Goal) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveGoalIDs(ids...)
+}
+
 // Where appends a list predicates to the EmployeeUpdate builder.
 func (_u *EmployeeUpdateOne) Where(ps ...predicate.Employee) *EmployeeUpdateOne {
 	_u.mutation.Where(ps...)
@@ -1430,6 +2114,12 @@ func (_u *EmployeeUpdateOne) check() error {
 		return errors.New(`ent: clearing a required unique edge "Employee.tenant"`)
 	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *EmployeeUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *EmployeeUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *EmployeeUpdateOne) sqlSave(ctx context.Context) (_node *Employee, err error) {
@@ -1508,9 +2198,6 @@ func (_u *EmployeeUpdateOne) sqlSave(ctx context.Context) (_node *Employee, err 
 	}
 	if value, ok := _u.mutation.HipoStatus(); ok {
 		_spec.SetField(employee.FieldHipoStatus, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(employee.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(employee.FieldUpdatedAt, field.TypeTime, value)
@@ -1811,6 +2498,277 @@ func (_u *EmployeeUpdateOne) sqlSave(ctx context.Context) (_node *Employee, err 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TimeOffRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeOffRequestsTable,
+			Columns: []string{employee.TimeOffRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffrequest.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTimeOffRequestsIDs(); len(nodes) > 0 && !_u.mutation.TimeOffRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeOffRequestsTable,
+			Columns: []string{employee.TimeOffRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TimeOffRequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeOffRequestsTable,
+			Columns: []string{employee.TimeOffRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ApprovedTimeOffCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.ApprovedTimeOffTable,
+			Columns: []string{employee.ApprovedTimeOffColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffrequest.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedApprovedTimeOffIDs(); len(nodes) > 0 && !_u.mutation.ApprovedTimeOffCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.ApprovedTimeOffTable,
+			Columns: []string{employee.ApprovedTimeOffColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ApprovedTimeOffIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.ApprovedTimeOffTable,
+			Columns: []string{employee.ApprovedTimeOffColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TimeOffBalancesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeOffBalancesTable,
+			Columns: []string{employee.TimeOffBalancesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffbalance.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTimeOffBalancesIDs(); len(nodes) > 0 && !_u.mutation.TimeOffBalancesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeOffBalancesTable,
+			Columns: []string{employee.TimeOffBalancesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffbalance.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TimeOffBalancesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeOffBalancesTable,
+			Columns: []string{employee.TimeOffBalancesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeoffbalance.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PerformanceReviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.PerformanceReviewsTable,
+			Columns: []string{employee.PerformanceReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(performancereview.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPerformanceReviewsIDs(); len(nodes) > 0 && !_u.mutation.PerformanceReviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.PerformanceReviewsTable,
+			Columns: []string{employee.PerformanceReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(performancereview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PerformanceReviewsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.PerformanceReviewsTable,
+			Columns: []string{employee.PerformanceReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(performancereview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ConductedReviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.ConductedReviewsTable,
+			Columns: []string{employee.ConductedReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(performancereview.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedConductedReviewsIDs(); len(nodes) > 0 && !_u.mutation.ConductedReviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.ConductedReviewsTable,
+			Columns: []string{employee.ConductedReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(performancereview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ConductedReviewsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.ConductedReviewsTable,
+			Columns: []string{employee.ConductedReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(performancereview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.GoalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.GoalsTable,
+			Columns: []string{employee.GoalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(goal.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedGoalsIDs(); len(nodes) > 0 && !_u.mutation.GoalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.GoalsTable,
+			Columns: []string{employee.GoalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(goal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.GoalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.GoalsTable,
+			Columns: []string{employee.GoalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(goal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &Employee{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

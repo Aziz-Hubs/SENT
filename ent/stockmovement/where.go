@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 // ID filters vertices based on their ID field.
@@ -56,7 +57,7 @@ func IDLTE(id int) predicate.StockMovement {
 }
 
 // Quantity applies equality check predicate on the "quantity" field. It's identical to QuantityEQ.
-func Quantity(v float64) predicate.StockMovement {
+func Quantity(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldEQ(FieldQuantity, v))
 }
 
@@ -66,17 +67,17 @@ func Reason(v string) predicate.StockMovement {
 }
 
 // UnitCost applies equality check predicate on the "unit_cost" field. It's identical to UnitCostEQ.
-func UnitCost(v float64) predicate.StockMovement {
+func UnitCost(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldEQ(FieldUnitCost, v))
 }
 
 // RemainingQuantity applies equality check predicate on the "remaining_quantity" field. It's identical to RemainingQuantityEQ.
-func RemainingQuantity(v float64) predicate.StockMovement {
+func RemainingQuantity(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldEQ(FieldRemainingQuantity, v))
 }
 
 // CalculatedCogs applies equality check predicate on the "calculated_cogs" field. It's identical to CalculatedCogsEQ.
-func CalculatedCogs(v float64) predicate.StockMovement {
+func CalculatedCogs(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldEQ(FieldCalculatedCogs, v))
 }
 
@@ -86,42 +87,42 @@ func CreatedAt(v time.Time) predicate.StockMovement {
 }
 
 // QuantityEQ applies the EQ predicate on the "quantity" field.
-func QuantityEQ(v float64) predicate.StockMovement {
+func QuantityEQ(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldEQ(FieldQuantity, v))
 }
 
 // QuantityNEQ applies the NEQ predicate on the "quantity" field.
-func QuantityNEQ(v float64) predicate.StockMovement {
+func QuantityNEQ(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldNEQ(FieldQuantity, v))
 }
 
 // QuantityIn applies the In predicate on the "quantity" field.
-func QuantityIn(vs ...float64) predicate.StockMovement {
+func QuantityIn(vs ...decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldIn(FieldQuantity, vs...))
 }
 
 // QuantityNotIn applies the NotIn predicate on the "quantity" field.
-func QuantityNotIn(vs ...float64) predicate.StockMovement {
+func QuantityNotIn(vs ...decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldNotIn(FieldQuantity, vs...))
 }
 
 // QuantityGT applies the GT predicate on the "quantity" field.
-func QuantityGT(v float64) predicate.StockMovement {
+func QuantityGT(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldGT(FieldQuantity, v))
 }
 
 // QuantityGTE applies the GTE predicate on the "quantity" field.
-func QuantityGTE(v float64) predicate.StockMovement {
+func QuantityGTE(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldGTE(FieldQuantity, v))
 }
 
 // QuantityLT applies the LT predicate on the "quantity" field.
-func QuantityLT(v float64) predicate.StockMovement {
+func QuantityLT(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldLT(FieldQuantity, v))
 }
 
 // QuantityLTE applies the LTE predicate on the "quantity" field.
-func QuantityLTE(v float64) predicate.StockMovement {
+func QuantityLTE(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldLTE(FieldQuantity, v))
 }
 
@@ -221,42 +222,42 @@ func ReasonContainsFold(v string) predicate.StockMovement {
 }
 
 // UnitCostEQ applies the EQ predicate on the "unit_cost" field.
-func UnitCostEQ(v float64) predicate.StockMovement {
+func UnitCostEQ(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldEQ(FieldUnitCost, v))
 }
 
 // UnitCostNEQ applies the NEQ predicate on the "unit_cost" field.
-func UnitCostNEQ(v float64) predicate.StockMovement {
+func UnitCostNEQ(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldNEQ(FieldUnitCost, v))
 }
 
 // UnitCostIn applies the In predicate on the "unit_cost" field.
-func UnitCostIn(vs ...float64) predicate.StockMovement {
+func UnitCostIn(vs ...decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldIn(FieldUnitCost, vs...))
 }
 
 // UnitCostNotIn applies the NotIn predicate on the "unit_cost" field.
-func UnitCostNotIn(vs ...float64) predicate.StockMovement {
+func UnitCostNotIn(vs ...decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldNotIn(FieldUnitCost, vs...))
 }
 
 // UnitCostGT applies the GT predicate on the "unit_cost" field.
-func UnitCostGT(v float64) predicate.StockMovement {
+func UnitCostGT(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldGT(FieldUnitCost, v))
 }
 
 // UnitCostGTE applies the GTE predicate on the "unit_cost" field.
-func UnitCostGTE(v float64) predicate.StockMovement {
+func UnitCostGTE(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldGTE(FieldUnitCost, v))
 }
 
 // UnitCostLT applies the LT predicate on the "unit_cost" field.
-func UnitCostLT(v float64) predicate.StockMovement {
+func UnitCostLT(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldLT(FieldUnitCost, v))
 }
 
 // UnitCostLTE applies the LTE predicate on the "unit_cost" field.
-func UnitCostLTE(v float64) predicate.StockMovement {
+func UnitCostLTE(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldLTE(FieldUnitCost, v))
 }
 
@@ -271,42 +272,42 @@ func UnitCostNotNil() predicate.StockMovement {
 }
 
 // RemainingQuantityEQ applies the EQ predicate on the "remaining_quantity" field.
-func RemainingQuantityEQ(v float64) predicate.StockMovement {
+func RemainingQuantityEQ(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldEQ(FieldRemainingQuantity, v))
 }
 
 // RemainingQuantityNEQ applies the NEQ predicate on the "remaining_quantity" field.
-func RemainingQuantityNEQ(v float64) predicate.StockMovement {
+func RemainingQuantityNEQ(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldNEQ(FieldRemainingQuantity, v))
 }
 
 // RemainingQuantityIn applies the In predicate on the "remaining_quantity" field.
-func RemainingQuantityIn(vs ...float64) predicate.StockMovement {
+func RemainingQuantityIn(vs ...decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldIn(FieldRemainingQuantity, vs...))
 }
 
 // RemainingQuantityNotIn applies the NotIn predicate on the "remaining_quantity" field.
-func RemainingQuantityNotIn(vs ...float64) predicate.StockMovement {
+func RemainingQuantityNotIn(vs ...decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldNotIn(FieldRemainingQuantity, vs...))
 }
 
 // RemainingQuantityGT applies the GT predicate on the "remaining_quantity" field.
-func RemainingQuantityGT(v float64) predicate.StockMovement {
+func RemainingQuantityGT(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldGT(FieldRemainingQuantity, v))
 }
 
 // RemainingQuantityGTE applies the GTE predicate on the "remaining_quantity" field.
-func RemainingQuantityGTE(v float64) predicate.StockMovement {
+func RemainingQuantityGTE(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldGTE(FieldRemainingQuantity, v))
 }
 
 // RemainingQuantityLT applies the LT predicate on the "remaining_quantity" field.
-func RemainingQuantityLT(v float64) predicate.StockMovement {
+func RemainingQuantityLT(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldLT(FieldRemainingQuantity, v))
 }
 
 // RemainingQuantityLTE applies the LTE predicate on the "remaining_quantity" field.
-func RemainingQuantityLTE(v float64) predicate.StockMovement {
+func RemainingQuantityLTE(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldLTE(FieldRemainingQuantity, v))
 }
 
@@ -321,42 +322,42 @@ func RemainingQuantityNotNil() predicate.StockMovement {
 }
 
 // CalculatedCogsEQ applies the EQ predicate on the "calculated_cogs" field.
-func CalculatedCogsEQ(v float64) predicate.StockMovement {
+func CalculatedCogsEQ(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldEQ(FieldCalculatedCogs, v))
 }
 
 // CalculatedCogsNEQ applies the NEQ predicate on the "calculated_cogs" field.
-func CalculatedCogsNEQ(v float64) predicate.StockMovement {
+func CalculatedCogsNEQ(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldNEQ(FieldCalculatedCogs, v))
 }
 
 // CalculatedCogsIn applies the In predicate on the "calculated_cogs" field.
-func CalculatedCogsIn(vs ...float64) predicate.StockMovement {
+func CalculatedCogsIn(vs ...decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldIn(FieldCalculatedCogs, vs...))
 }
 
 // CalculatedCogsNotIn applies the NotIn predicate on the "calculated_cogs" field.
-func CalculatedCogsNotIn(vs ...float64) predicate.StockMovement {
+func CalculatedCogsNotIn(vs ...decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldNotIn(FieldCalculatedCogs, vs...))
 }
 
 // CalculatedCogsGT applies the GT predicate on the "calculated_cogs" field.
-func CalculatedCogsGT(v float64) predicate.StockMovement {
+func CalculatedCogsGT(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldGT(FieldCalculatedCogs, v))
 }
 
 // CalculatedCogsGTE applies the GTE predicate on the "calculated_cogs" field.
-func CalculatedCogsGTE(v float64) predicate.StockMovement {
+func CalculatedCogsGTE(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldGTE(FieldCalculatedCogs, v))
 }
 
 // CalculatedCogsLT applies the LT predicate on the "calculated_cogs" field.
-func CalculatedCogsLT(v float64) predicate.StockMovement {
+func CalculatedCogsLT(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldLT(FieldCalculatedCogs, v))
 }
 
 // CalculatedCogsLTE applies the LTE predicate on the "calculated_cogs" field.
-func CalculatedCogsLTE(v float64) predicate.StockMovement {
+func CalculatedCogsLTE(v decimal.Decimal) predicate.StockMovement {
 	return predicate.StockMovement(sql.FieldLTE(FieldCalculatedCogs, v))
 }
 

@@ -22,9 +22,12 @@ import (
 	"sent/ent/detectionevent"
 	"sent/ent/discoveryentry"
 	"sent/ent/employee"
+	"sent/ent/goal"
 	"sent/ent/healthscoresnapshot"
 	"sent/ent/inventoryreservation"
 	"sent/ent/ivrflow"
+	"sent/ent/job"
+	"sent/ent/jobexecution"
 	"sent/ent/journalentry"
 	"sent/ent/ledgerentry"
 	"sent/ent/networkbackup"
@@ -33,15 +36,18 @@ import (
 	"sent/ent/networkport"
 	"sent/ent/nexusaudit"
 	"sent/ent/onetimelink"
+	"sent/ent/performancereview"
 	"sent/ent/permission"
 	"sent/ent/product"
 	"sent/ent/recording"
 	"sent/ent/recurringinvoice"
 	"sent/ent/remediationstep"
+	"sent/ent/reviewcycle"
 	"sent/ent/saasapp"
 	"sent/ent/saasfilter"
 	"sent/ent/saasidentity"
 	"sent/ent/saasusage"
+	"sent/ent/script"
 	"sent/ent/servicerate"
 	"sent/ent/sop"
 	"sent/ent/stockmovement"
@@ -50,6 +56,9 @@ import (
 	"sent/ent/tenant"
 	"sent/ent/ticket"
 	"sent/ent/timeentry"
+	"sent/ent/timeoffbalance"
+	"sent/ent/timeoffpolicy"
+	"sent/ent/timeoffrequest"
 	"sent/ent/transaction"
 	"sent/ent/user"
 	"sent/ent/vaultitem"
@@ -134,9 +143,12 @@ func checkColumn(t, c string) error {
 			detectionevent.Table:        detectionevent.ValidColumn,
 			discoveryentry.Table:        discoveryentry.ValidColumn,
 			employee.Table:              employee.ValidColumn,
+			goal.Table:                  goal.ValidColumn,
 			healthscoresnapshot.Table:   healthscoresnapshot.ValidColumn,
 			ivrflow.Table:               ivrflow.ValidColumn,
 			inventoryreservation.Table:  inventoryreservation.ValidColumn,
+			job.Table:                   job.ValidColumn,
+			jobexecution.Table:          jobexecution.ValidColumn,
 			journalentry.Table:          journalentry.ValidColumn,
 			ledgerentry.Table:           ledgerentry.ValidColumn,
 			networkbackup.Table:         networkbackup.ValidColumn,
@@ -145,16 +157,19 @@ func checkColumn(t, c string) error {
 			networkport.Table:           networkport.ValidColumn,
 			nexusaudit.Table:            nexusaudit.ValidColumn,
 			onetimelink.Table:           onetimelink.ValidColumn,
+			performancereview.Table:     performancereview.ValidColumn,
 			permission.Table:            permission.ValidColumn,
 			product.Table:               product.ValidColumn,
 			recording.Table:             recording.ValidColumn,
 			recurringinvoice.Table:      recurringinvoice.ValidColumn,
 			remediationstep.Table:       remediationstep.ValidColumn,
+			reviewcycle.Table:           reviewcycle.ValidColumn,
 			sop.Table:                   sop.ValidColumn,
 			saasapp.Table:               saasapp.ValidColumn,
 			saasfilter.Table:            saasfilter.ValidColumn,
 			saasidentity.Table:          saasidentity.ValidColumn,
 			saasusage.Table:             saasusage.ValidColumn,
+			script.Table:                script.ValidColumn,
 			servicerate.Table:           servicerate.ValidColumn,
 			stockmovement.Table:         stockmovement.ValidColumn,
 			strategicroadmap.Table:      strategicroadmap.ValidColumn,
@@ -162,6 +177,9 @@ func checkColumn(t, c string) error {
 			tenant.Table:                tenant.ValidColumn,
 			ticket.Table:                ticket.ValidColumn,
 			timeentry.Table:             timeentry.ValidColumn,
+			timeoffbalance.Table:        timeoffbalance.ValidColumn,
+			timeoffpolicy.Table:         timeoffpolicy.ValidColumn,
+			timeoffrequest.Table:        timeoffrequest.ValidColumn,
 			transaction.Table:           transaction.ValidColumn,
 			user.Table:                  user.ValidColumn,
 			vaultitem.Table:             vaultitem.ValidColumn,

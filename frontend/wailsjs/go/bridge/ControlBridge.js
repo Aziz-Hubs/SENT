@@ -14,6 +14,10 @@ export function GetManagedApps() {
   return window['go']['bridge']['ControlBridge']['GetManagedApps']();
 }
 
+export function GetOrchestrator() {
+  return window['go']['bridge']['ControlBridge']['GetOrchestrator']();
+}
+
 export function GetSNIRules(arg1) {
   return window['go']['bridge']['ControlBridge']['GetSNIRules'](arg1);
 }

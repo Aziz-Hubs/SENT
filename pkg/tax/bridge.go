@@ -6,6 +6,11 @@ import (
 	"encoding/hex"
 	"fmt"
 	"sent/ent"
+	"sent/ent/tenant"
+	"sent/ent/transaction"
+	"sent/pkg/auth"
+
+	"github.com/shopspring/decimal"
 )
 
 // Default Tax Rates
@@ -19,8 +24,9 @@ const (
 
 // TaxBridge handles tax calculations and fiscal compliance signatures.
 type TaxBridge struct {
-	ctx context.Context
-	db  *ent.Client
+	ctx  context.Context
+	db   *ent.Client
+	auth *auth.AuthBridge
 }
 
 // TaxResult represents the breakdown of a tax calculation.
@@ -38,9 +44,16 @@ type TaxConfig struct {
 	IsFiscal    bool    `json:"isFiscal"`
 }
 
+// TaxSummaryDTO represents the data for a VAT-100 form.
+type TaxSummaryDTO struct {
+	Box1 float64 `json:"box1"` // Output Tax
+	Box4 float64 `json:"box4"` // Input Tax
+	Box5 float64 `json:"box5"` // Net Payable
+}
+
 // NewTaxBridge initializes a new TaxBridge.
-func NewTaxBridge(db *ent.Client) *TaxBridge {
-	return &TaxBridge{db: db}
+func NewTaxBridge(db *ent.Client, auth *auth.AuthBridge) *TaxBridge {
+	return &TaxBridge{db: db, auth: auth}
 }
 
 // Startup initializes the bridge context.
@@ -97,5 +110,38 @@ func (t *TaxBridge) GetTaxConfig() ([]TaxConfig, error) {
 		{CountryCode: "AE", DefaultRate: TaxRateAE, IsFiscal: true},
 		{CountryCode: "US", DefaultRate: TaxRateUS, IsFiscal: false},
 		{CountryCode: "GB", DefaultRate: TaxRateGB, IsFiscal: true},
+	}, nil
+}
+
+// GetTaxSummary calculates the VAT boxes for the given period.
+func (t *TaxBridge) GetTaxSummary(period string) (*TaxSummaryDTO, error) {
+	profile, err := t.auth.GetUserProfile()
+	if err != nil {
+		return nil, err
+	}
+
+	// For simplicity, we'll just query all transactions for now.
+	// In a real app, we'd parse the period (e.g., 2026-Q1) to date ranges.
+	txs, err := t.db.Transaction.Query().
+		Where(transaction.HasTenantWith(tenant.ID(profile.TenantID))).
+		All(t.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var box1, box4 decimal.Decimal
+
+	for _, tx := range txs {
+		if tx.Type == "sale" {
+			box1 = box1.Add(tx.TaxAmount)
+		} else if tx.Type == "purchase" {
+			box4 = box4.Add(tx.TaxAmount)
+		}
+	}
+
+	return &TaxSummaryDTO{
+		Box1: box1.InexactFloat64(),
+		Box4: box4.InexactFloat64(),
+		Box5: box1.Sub(box4).InexactFloat64(),
 	}, nil
 }

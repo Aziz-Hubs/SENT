@@ -34,6 +34,10 @@ func (SaaSIdentity) Edges() []ent.Edge {
 		edge.From("user", User.Type).Ref("saas_identities").Unique(),
 		edge.From("app", SaaSApp.Type).Ref("identities").Unique().Required(),
 		edge.To("usages", SaaSUsage.Type),
+		edge.From("tenant", Tenant.Type).
+			Ref("saas_identities").
+			Unique().
+			Required(),
 	}
 }
 
@@ -41,6 +45,6 @@ func (SaaSIdentity) Edges() []ent.Edge {
 func (SaaSIdentity) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("external_id").Edges("app").Unique(),
-		index.Fields("email"),
+		index.Fields("email").Edges("tenant").Unique(),
 	}
 }

@@ -59,6 +59,18 @@ const (
 	EdgeBackupFor = "backup_for"
 	// EdgeExpenseAccount holds the string denoting the expense_account edge name in mutations.
 	EdgeExpenseAccount = "expense_account"
+	// EdgeTimeOffRequests holds the string denoting the time_off_requests edge name in mutations.
+	EdgeTimeOffRequests = "time_off_requests"
+	// EdgeApprovedTimeOff holds the string denoting the approved_time_off edge name in mutations.
+	EdgeApprovedTimeOff = "approved_time_off"
+	// EdgeTimeOffBalances holds the string denoting the time_off_balances edge name in mutations.
+	EdgeTimeOffBalances = "time_off_balances"
+	// EdgePerformanceReviews holds the string denoting the performance_reviews edge name in mutations.
+	EdgePerformanceReviews = "performance_reviews"
+	// EdgeConductedReviews holds the string denoting the conducted_reviews edge name in mutations.
+	EdgeConductedReviews = "conducted_reviews"
+	// EdgeGoals holds the string denoting the goals edge name in mutations.
+	EdgeGoals = "goals"
 	// Table holds the table name of the employee in the database.
 	Table = "employees"
 	// TenantTable is the table that holds the tenant relation/edge.
@@ -111,6 +123,48 @@ const (
 	ExpenseAccountInverseTable = "accounts"
 	// ExpenseAccountColumn is the table column denoting the expense_account relation/edge.
 	ExpenseAccountColumn = "employee_expense_account"
+	// TimeOffRequestsTable is the table that holds the time_off_requests relation/edge.
+	TimeOffRequestsTable = "time_off_requests"
+	// TimeOffRequestsInverseTable is the table name for the TimeOffRequest entity.
+	// It exists in this package in order to avoid circular dependency with the "timeoffrequest" package.
+	TimeOffRequestsInverseTable = "time_off_requests"
+	// TimeOffRequestsColumn is the table column denoting the time_off_requests relation/edge.
+	TimeOffRequestsColumn = "employee_time_off_requests"
+	// ApprovedTimeOffTable is the table that holds the approved_time_off relation/edge.
+	ApprovedTimeOffTable = "time_off_requests"
+	// ApprovedTimeOffInverseTable is the table name for the TimeOffRequest entity.
+	// It exists in this package in order to avoid circular dependency with the "timeoffrequest" package.
+	ApprovedTimeOffInverseTable = "time_off_requests"
+	// ApprovedTimeOffColumn is the table column denoting the approved_time_off relation/edge.
+	ApprovedTimeOffColumn = "employee_approved_time_off"
+	// TimeOffBalancesTable is the table that holds the time_off_balances relation/edge.
+	TimeOffBalancesTable = "time_off_balances"
+	// TimeOffBalancesInverseTable is the table name for the TimeOffBalance entity.
+	// It exists in this package in order to avoid circular dependency with the "timeoffbalance" package.
+	TimeOffBalancesInverseTable = "time_off_balances"
+	// TimeOffBalancesColumn is the table column denoting the time_off_balances relation/edge.
+	TimeOffBalancesColumn = "employee_time_off_balances"
+	// PerformanceReviewsTable is the table that holds the performance_reviews relation/edge.
+	PerformanceReviewsTable = "performance_reviews"
+	// PerformanceReviewsInverseTable is the table name for the PerformanceReview entity.
+	// It exists in this package in order to avoid circular dependency with the "performancereview" package.
+	PerformanceReviewsInverseTable = "performance_reviews"
+	// PerformanceReviewsColumn is the table column denoting the performance_reviews relation/edge.
+	PerformanceReviewsColumn = "employee_performance_reviews"
+	// ConductedReviewsTable is the table that holds the conducted_reviews relation/edge.
+	ConductedReviewsTable = "performance_reviews"
+	// ConductedReviewsInverseTable is the table name for the PerformanceReview entity.
+	// It exists in this package in order to avoid circular dependency with the "performancereview" package.
+	ConductedReviewsInverseTable = "performance_reviews"
+	// ConductedReviewsColumn is the table column denoting the conducted_reviews relation/edge.
+	ConductedReviewsColumn = "employee_conducted_reviews"
+	// GoalsTable is the table that holds the goals relation/edge.
+	GoalsTable = "goals"
+	// GoalsInverseTable is the table name for the Goal entity.
+	// It exists in this package in order to avoid circular dependency with the "goal" package.
+	GoalsInverseTable = "goals"
+	// GoalsColumn is the table column denoting the goals relation/edge.
+	GoalsColumn = "employee_goals"
 )
 
 // Columns holds all SQL columns for employee fields.
@@ -355,6 +409,90 @@ func ByExpenseAccountField(field string, opts ...sql.OrderTermOption) OrderOptio
 		sqlgraph.OrderByNeighborTerms(s, newExpenseAccountStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByTimeOffRequestsCount orders the results by time_off_requests count.
+func ByTimeOffRequestsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTimeOffRequestsStep(), opts...)
+	}
+}
+
+// ByTimeOffRequests orders the results by time_off_requests terms.
+func ByTimeOffRequests(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTimeOffRequestsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByApprovedTimeOffCount orders the results by approved_time_off count.
+func ByApprovedTimeOffCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newApprovedTimeOffStep(), opts...)
+	}
+}
+
+// ByApprovedTimeOff orders the results by approved_time_off terms.
+func ByApprovedTimeOff(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newApprovedTimeOffStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByTimeOffBalancesCount orders the results by time_off_balances count.
+func ByTimeOffBalancesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTimeOffBalancesStep(), opts...)
+	}
+}
+
+// ByTimeOffBalances orders the results by time_off_balances terms.
+func ByTimeOffBalances(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTimeOffBalancesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPerformanceReviewsCount orders the results by performance_reviews count.
+func ByPerformanceReviewsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPerformanceReviewsStep(), opts...)
+	}
+}
+
+// ByPerformanceReviews orders the results by performance_reviews terms.
+func ByPerformanceReviews(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPerformanceReviewsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByConductedReviewsCount orders the results by conducted_reviews count.
+func ByConductedReviewsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newConductedReviewsStep(), opts...)
+	}
+}
+
+// ByConductedReviews orders the results by conducted_reviews terms.
+func ByConductedReviews(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newConductedReviewsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByGoalsCount orders the results by goals count.
+func ByGoalsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newGoalsStep(), opts...)
+	}
+}
+
+// ByGoals orders the results by goals terms.
+func ByGoals(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGoalsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newTenantStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -409,5 +547,47 @@ func newExpenseAccountStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ExpenseAccountInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, ExpenseAccountTable, ExpenseAccountColumn),
+	)
+}
+func newTimeOffRequestsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TimeOffRequestsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TimeOffRequestsTable, TimeOffRequestsColumn),
+	)
+}
+func newApprovedTimeOffStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ApprovedTimeOffInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ApprovedTimeOffTable, ApprovedTimeOffColumn),
+	)
+}
+func newTimeOffBalancesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TimeOffBalancesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TimeOffBalancesTable, TimeOffBalancesColumn),
+	)
+}
+func newPerformanceReviewsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PerformanceReviewsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PerformanceReviewsTable, PerformanceReviewsColumn),
+	)
+}
+func newConductedReviewsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ConductedReviewsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ConductedReviewsTable, ConductedReviewsColumn),
+	)
+}
+func newGoalsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GoalsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, GoalsTable, GoalsColumn),
 	)
 }

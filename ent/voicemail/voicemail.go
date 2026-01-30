@@ -22,6 +22,8 @@ const (
 	FieldTranscription = "transcription"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldDuration holds the string denoting the duration field in the database.
+	FieldDuration = "duration"
 	// FieldReadAt holds the string denoting the read_at field in the database.
 	FieldReadAt = "read_at"
 	// EdgeTenant holds the string denoting the tenant edge name in mutations.
@@ -53,6 +55,7 @@ var Columns = []string{
 	FieldAudioPath,
 	FieldTranscription,
 	FieldCreatedAt,
+	FieldDuration,
 	FieldReadAt,
 }
 
@@ -81,6 +84,8 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultDuration holds the default value on creation for the "duration" field.
+	DefaultDuration int
 )
 
 // OrderOption defines the ordering options for the Voicemail queries.
@@ -109,6 +114,11 @@ func ByTranscription(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByDuration orders the results by the duration field.
+func ByDuration(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDuration, opts...).ToFunc()
 }
 
 // ByReadAt orders the results by the read_at field.

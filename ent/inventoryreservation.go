@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // InventoryReservation is the model entity for the InventoryReservation schema.
@@ -20,7 +21,7 @@ type InventoryReservation struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Quantity holds the value of the "quantity" field.
-	Quantity float64 `json:"quantity,omitempty"`
+	Quantity decimal.Decimal `json:"quantity,omitempty"`
 	// ExpiresAt holds the value of the "expires_at" field.
 	ExpiresAt time.Time `json:"expires_at,omitempty"`
 	// Status holds the value of the "status" field.
@@ -74,7 +75,7 @@ func (*InventoryReservation) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case inventoryreservation.FieldQuantity:
-			values[i] = new(sql.NullFloat64)
+			values[i] = new(decimal.Decimal)
 		case inventoryreservation.FieldID:
 			values[i] = new(sql.NullInt64)
 		case inventoryreservation.FieldStatus:
@@ -107,10 +108,10 @@ func (_m *InventoryReservation) assignValues(columns []string, values []any) err
 			}
 			_m.ID = int(value.Int64)
 		case inventoryreservation.FieldQuantity:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field quantity", values[i])
-			} else if value.Valid {
-				_m.Quantity = value.Float64
+			} else if value != nil {
+				_m.Quantity = *value
 			}
 		case inventoryreservation.FieldExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {

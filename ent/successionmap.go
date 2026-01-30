@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sent/ent/employee"
 	"sent/ent/successionmap"
+	"sent/ent/tenant"
 	"strings"
 	"time"
 
@@ -26,10 +27,11 @@ type SuccessionMap struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SuccessionMapQuery when eager-loading is set.
-	Edges               SuccessionMapEdges `json:"edges"`
-	employee_id         *int
-	backup_candidate_id *int
-	selectValues        sql.SelectValues
+	Edges                  SuccessionMapEdges `json:"edges"`
+	employee_id            *int
+	backup_candidate_id    *int
+	tenant_succession_maps *int
+	selectValues           sql.SelectValues
 }
 
 // SuccessionMapEdges holds the relations/edges for other nodes in the graph.
@@ -38,9 +40,11 @@ type SuccessionMapEdges struct {
 	Employee *Employee `json:"employee,omitempty"`
 	// BackupCandidate holds the value of the backup_candidate edge.
 	BackupCandidate *Employee `json:"backup_candidate,omitempty"`
+	// Tenant holds the value of the tenant edge.
+	Tenant *Tenant `json:"tenant,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // EmployeeOrErr returns the Employee value or an error if the edge
@@ -65,6 +69,17 @@ func (e SuccessionMapEdges) BackupCandidateOrErr() (*Employee, error) {
 	return nil, &NotLoadedError{edge: "backup_candidate"}
 }
 
+// TenantOrErr returns the Tenant value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e SuccessionMapEdges) TenantOrErr() (*Tenant, error) {
+	if e.Tenant != nil {
+		return e.Tenant, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: tenant.Label}
+	}
+	return nil, &NotLoadedError{edge: "tenant"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*SuccessionMap) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -79,6 +94,8 @@ func (*SuccessionMap) scanValues(columns []string) ([]any, error) {
 		case successionmap.ForeignKeys[0]: // employee_id
 			values[i] = new(sql.NullInt64)
 		case successionmap.ForeignKeys[1]: // backup_candidate_id
+			values[i] = new(sql.NullInt64)
+		case successionmap.ForeignKeys[2]: // tenant_succession_maps
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -133,6 +150,13 @@ func (_m *SuccessionMap) assignValues(columns []string, values []any) error {
 				_m.backup_candidate_id = new(int)
 				*_m.backup_candidate_id = int(value.Int64)
 			}
+		case successionmap.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field tenant_succession_maps", value)
+			} else if value.Valid {
+				_m.tenant_succession_maps = new(int)
+				*_m.tenant_succession_maps = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -154,6 +178,11 @@ func (_m *SuccessionMap) QueryEmployee() *EmployeeQuery {
 // QueryBackupCandidate queries the "backup_candidate" edge of the SuccessionMap entity.
 func (_m *SuccessionMap) QueryBackupCandidate() *EmployeeQuery {
 	return NewSuccessionMapClient(_m.config).QueryBackupCandidate(_m)
+}
+
+// QueryTenant queries the "tenant" edge of the SuccessionMap entity.
+func (_m *SuccessionMap) QueryTenant() *TenantQuery {
+	return NewSuccessionMapClient(_m.config).QueryTenant(_m)
 }
 
 // Update returns a builder for updating this SuccessionMap.

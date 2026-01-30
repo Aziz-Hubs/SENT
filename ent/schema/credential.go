@@ -19,6 +19,7 @@ func (Credential) Fields() []ent.Field {
 		field.String("username").Optional(),
 		field.Bytes("password_encrypted"),
 		field.Time("last_revealed_at").Optional(),
+		field.JSON("metadata", map[string]interface{}{}).Optional(),
 		field.Time("created_at").Default(time.Now),
 	}
 }

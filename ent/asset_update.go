@@ -25,8 +25,9 @@ import (
 // AssetUpdate is the builder for updating Asset entities.
 type AssetUpdate struct {
 	config
-	hooks    []Hook
-	mutation *AssetMutation
+	hooks     []Hook
+	mutation  *AssetMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the AssetUpdate builder.
@@ -149,6 +150,12 @@ func (_u *AssetUpdate) SetMetadata(v map[string]interface{}) *AssetUpdate {
 	return _u
 }
 
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *AssetUpdate) ClearMetadata() *AssetUpdate {
+	_u.mutation.ClearMetadata()
+	return _u
+}
+
 // SetLastCertifiedAt sets the "last_certified_at" field.
 func (_u *AssetUpdate) SetLastCertifiedAt(v time.Time) *AssetUpdate {
 	_u.mutation.SetLastCertifiedAt(v)
@@ -166,6 +173,46 @@ func (_u *AssetUpdate) SetNillableLastCertifiedAt(v *time.Time) *AssetUpdate {
 // ClearLastCertifiedAt clears the value of the "last_certified_at" field.
 func (_u *AssetUpdate) ClearLastCertifiedAt() *AssetUpdate {
 	_u.mutation.ClearLastCertifiedAt()
+	return _u
+}
+
+// SetPurchaseDate sets the "purchase_date" field.
+func (_u *AssetUpdate) SetPurchaseDate(v time.Time) *AssetUpdate {
+	_u.mutation.SetPurchaseDate(v)
+	return _u
+}
+
+// SetNillablePurchaseDate sets the "purchase_date" field if the given value is not nil.
+func (_u *AssetUpdate) SetNillablePurchaseDate(v *time.Time) *AssetUpdate {
+	if v != nil {
+		_u.SetPurchaseDate(*v)
+	}
+	return _u
+}
+
+// ClearPurchaseDate clears the value of the "purchase_date" field.
+func (_u *AssetUpdate) ClearPurchaseDate() *AssetUpdate {
+	_u.mutation.ClearPurchaseDate()
+	return _u
+}
+
+// SetWarrantyExpiry sets the "warranty_expiry" field.
+func (_u *AssetUpdate) SetWarrantyExpiry(v time.Time) *AssetUpdate {
+	_u.mutation.SetWarrantyExpiry(v)
+	return _u
+}
+
+// SetNillableWarrantyExpiry sets the "warranty_expiry" field if the given value is not nil.
+func (_u *AssetUpdate) SetNillableWarrantyExpiry(v *time.Time) *AssetUpdate {
+	if v != nil {
+		_u.SetWarrantyExpiry(*v)
+	}
+	return _u
+}
+
+// ClearWarrantyExpiry clears the value of the "warranty_expiry" field.
+func (_u *AssetUpdate) ClearWarrantyExpiry() *AssetUpdate {
+	_u.mutation.ClearWarrantyExpiry()
 	return _u
 }
 
@@ -571,6 +618,12 @@ func (_u *AssetUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *AssetUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AssetUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *AssetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -616,11 +669,26 @@ func (_u *AssetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(asset.FieldMetadata, field.TypeJSON, value)
 	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(asset.FieldMetadata, field.TypeJSON)
+	}
 	if value, ok := _u.mutation.LastCertifiedAt(); ok {
 		_spec.SetField(asset.FieldLastCertifiedAt, field.TypeTime, value)
 	}
 	if _u.mutation.LastCertifiedAtCleared() {
 		_spec.ClearField(asset.FieldLastCertifiedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.PurchaseDate(); ok {
+		_spec.SetField(asset.FieldPurchaseDate, field.TypeTime, value)
+	}
+	if _u.mutation.PurchaseDateCleared() {
+		_spec.ClearField(asset.FieldPurchaseDate, field.TypeTime)
+	}
+	if value, ok := _u.mutation.WarrantyExpiry(); ok {
+		_spec.SetField(asset.FieldWarrantyExpiry, field.TypeTime, value)
+	}
+	if _u.mutation.WarrantyExpiryCleared() {
+		_spec.ClearField(asset.FieldWarrantyExpiry, field.TypeTime)
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(asset.FieldCreatedAt, field.TypeTime, value)
@@ -1043,6 +1111,7 @@ func (_u *AssetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{asset.Label}
@@ -1058,9 +1127,10 @@ func (_u *AssetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 // AssetUpdateOne is the builder for updating a single Asset entity.
 type AssetUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *AssetMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *AssetMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetName sets the "name" field.
@@ -1177,6 +1247,12 @@ func (_u *AssetUpdateOne) SetMetadata(v map[string]interface{}) *AssetUpdateOne 
 	return _u
 }
 
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *AssetUpdateOne) ClearMetadata() *AssetUpdateOne {
+	_u.mutation.ClearMetadata()
+	return _u
+}
+
 // SetLastCertifiedAt sets the "last_certified_at" field.
 func (_u *AssetUpdateOne) SetLastCertifiedAt(v time.Time) *AssetUpdateOne {
 	_u.mutation.SetLastCertifiedAt(v)
@@ -1194,6 +1270,46 @@ func (_u *AssetUpdateOne) SetNillableLastCertifiedAt(v *time.Time) *AssetUpdateO
 // ClearLastCertifiedAt clears the value of the "last_certified_at" field.
 func (_u *AssetUpdateOne) ClearLastCertifiedAt() *AssetUpdateOne {
 	_u.mutation.ClearLastCertifiedAt()
+	return _u
+}
+
+// SetPurchaseDate sets the "purchase_date" field.
+func (_u *AssetUpdateOne) SetPurchaseDate(v time.Time) *AssetUpdateOne {
+	_u.mutation.SetPurchaseDate(v)
+	return _u
+}
+
+// SetNillablePurchaseDate sets the "purchase_date" field if the given value is not nil.
+func (_u *AssetUpdateOne) SetNillablePurchaseDate(v *time.Time) *AssetUpdateOne {
+	if v != nil {
+		_u.SetPurchaseDate(*v)
+	}
+	return _u
+}
+
+// ClearPurchaseDate clears the value of the "purchase_date" field.
+func (_u *AssetUpdateOne) ClearPurchaseDate() *AssetUpdateOne {
+	_u.mutation.ClearPurchaseDate()
+	return _u
+}
+
+// SetWarrantyExpiry sets the "warranty_expiry" field.
+func (_u *AssetUpdateOne) SetWarrantyExpiry(v time.Time) *AssetUpdateOne {
+	_u.mutation.SetWarrantyExpiry(v)
+	return _u
+}
+
+// SetNillableWarrantyExpiry sets the "warranty_expiry" field if the given value is not nil.
+func (_u *AssetUpdateOne) SetNillableWarrantyExpiry(v *time.Time) *AssetUpdateOne {
+	if v != nil {
+		_u.SetWarrantyExpiry(*v)
+	}
+	return _u
+}
+
+// ClearWarrantyExpiry clears the value of the "warranty_expiry" field.
+func (_u *AssetUpdateOne) ClearWarrantyExpiry() *AssetUpdateOne {
+	_u.mutation.ClearWarrantyExpiry()
 	return _u
 }
 
@@ -1612,6 +1728,12 @@ func (_u *AssetUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *AssetUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AssetUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *AssetUpdateOne) sqlSave(ctx context.Context) (_node *Asset, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -1674,11 +1796,26 @@ func (_u *AssetUpdateOne) sqlSave(ctx context.Context) (_node *Asset, err error)
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(asset.FieldMetadata, field.TypeJSON, value)
 	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(asset.FieldMetadata, field.TypeJSON)
+	}
 	if value, ok := _u.mutation.LastCertifiedAt(); ok {
 		_spec.SetField(asset.FieldLastCertifiedAt, field.TypeTime, value)
 	}
 	if _u.mutation.LastCertifiedAtCleared() {
 		_spec.ClearField(asset.FieldLastCertifiedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.PurchaseDate(); ok {
+		_spec.SetField(asset.FieldPurchaseDate, field.TypeTime, value)
+	}
+	if _u.mutation.PurchaseDateCleared() {
+		_spec.ClearField(asset.FieldPurchaseDate, field.TypeTime)
+	}
+	if value, ok := _u.mutation.WarrantyExpiry(); ok {
+		_spec.SetField(asset.FieldWarrantyExpiry, field.TypeTime, value)
+	}
+	if _u.mutation.WarrantyExpiryCleared() {
+		_spec.ClearField(asset.FieldWarrantyExpiry, field.TypeTime)
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(asset.FieldCreatedAt, field.TypeTime, value)
@@ -2101,6 +2238,7 @@ func (_u *AssetUpdateOne) sqlSave(ctx context.Context) (_node *Asset, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &Asset{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

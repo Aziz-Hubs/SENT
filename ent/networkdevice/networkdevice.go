@@ -37,6 +37,8 @@ const (
 	EdgePorts = "ports"
 	// EdgeBackups holds the string denoting the backups edge name in mutations.
 	EdgeBackups = "backups"
+	// EdgeTenant holds the string denoting the tenant edge name in mutations.
+	EdgeTenant = "tenant"
 	// Table holds the table name of the networkdevice in the database.
 	Table = "network_devices"
 	// PortsTable is the table that holds the ports relation/edge.
@@ -53,6 +55,13 @@ const (
 	BackupsInverseTable = "network_backups"
 	// BackupsColumn is the table column denoting the backups relation/edge.
 	BackupsColumn = "network_device_backups"
+	// TenantTable is the table that holds the tenant relation/edge.
+	TenantTable = "network_devices"
+	// TenantInverseTable is the table name for the Tenant entity.
+	// It exists in this package in order to avoid circular dependency with the "tenant" package.
+	TenantInverseTable = "tenants"
+	// TenantColumn is the table column denoting the tenant relation/edge.
+	TenantColumn = "tenant_network_devices"
 )
 
 // Columns holds all SQL columns for networkdevice fields.
@@ -69,10 +78,21 @@ var Columns = []string{
 	FieldUpdatedAt,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "network_devices"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"tenant_network_devices",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -197,6 +217,13 @@ func ByBackups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newBackupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByTenantField orders the results by tenant field.
+func ByTenantField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTenantStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newPortsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -209,5 +236,12 @@ func newBackupsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(BackupsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, BackupsTable, BackupsColumn),
+	)
+}
+func newTenantStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TenantInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, TenantTable, TenantColumn),
 	)
 }

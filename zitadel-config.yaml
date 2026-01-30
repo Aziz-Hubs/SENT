@@ -1,0 +1,17 @@
+Database:
+  Postgres:
+    Host: db
+    Port: 5432
+    Database: zitadel
+    User:
+      Username: postgres
+      Password: postgres
+    SSL:
+      Mode: disable
+    Admin:
+      Username: postgres
+      Password: postgres
+
+ExternalDomain: localhost
+ExternalPort: 8080
+ExternalSecure: false

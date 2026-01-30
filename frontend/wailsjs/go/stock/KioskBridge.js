@@ -10,8 +10,16 @@ export function OpenDrawer() {
   return window['go']['stock']['KioskBridge']['OpenDrawer']();
 }
 
+export function OpenDrawerNoSale(arg1) {
+  return window['go']['stock']['KioskBridge']['OpenDrawerNoSale'](arg1);
+}
+
 export function PrintReceipt(arg1) {
   return window['go']['stock']['KioskBridge']['PrintReceipt'](arg1);
+}
+
+export function ReserveStock(arg1, arg2) {
+  return window['go']['stock']['KioskBridge']['ReserveStock'](arg1, arg2);
 }
 
 export function Startup(arg1) {

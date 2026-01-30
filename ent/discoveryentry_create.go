@@ -33,6 +33,48 @@ func (_c *DiscoveryEntryCreate) SetName(v string) *DiscoveryEntryCreate {
 	return _c
 }
 
+// SetHostname sets the "hostname" field.
+func (_c *DiscoveryEntryCreate) SetHostname(v string) *DiscoveryEntryCreate {
+	_c.mutation.SetHostname(v)
+	return _c
+}
+
+// SetNillableHostname sets the "hostname" field if the given value is not nil.
+func (_c *DiscoveryEntryCreate) SetNillableHostname(v *string) *DiscoveryEntryCreate {
+	if v != nil {
+		_c.SetHostname(*v)
+	}
+	return _c
+}
+
+// SetIP sets the "ip" field.
+func (_c *DiscoveryEntryCreate) SetIP(v string) *DiscoveryEntryCreate {
+	_c.mutation.SetIP(v)
+	return _c
+}
+
+// SetNillableIP sets the "ip" field if the given value is not nil.
+func (_c *DiscoveryEntryCreate) SetNillableIP(v *string) *DiscoveryEntryCreate {
+	if v != nil {
+		_c.SetIP(*v)
+	}
+	return _c
+}
+
+// SetMAC sets the "mac" field.
+func (_c *DiscoveryEntryCreate) SetMAC(v string) *DiscoveryEntryCreate {
+	_c.mutation.SetMAC(v)
+	return _c
+}
+
+// SetNillableMAC sets the "mac" field if the given value is not nil.
+func (_c *DiscoveryEntryCreate) SetNillableMAC(v *string) *DiscoveryEntryCreate {
+	if v != nil {
+		_c.SetMAC(*v)
+	}
+	return _c
+}
+
 // SetType sets the "type" field.
 func (_c *DiscoveryEntryCreate) SetType(v string) *DiscoveryEntryCreate {
 	_c.mutation.SetType(v)
@@ -190,6 +232,18 @@ func (_c *DiscoveryEntryCreate) createSpec() (*DiscoveryEntry, *sqlgraph.CreateS
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(discoveryentry.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := _c.mutation.Hostname(); ok {
+		_spec.SetField(discoveryentry.FieldHostname, field.TypeString, value)
+		_node.Hostname = value
+	}
+	if value, ok := _c.mutation.IP(); ok {
+		_spec.SetField(discoveryentry.FieldIP, field.TypeString, value)
+		_node.IP = value
+	}
+	if value, ok := _c.mutation.MAC(); ok {
+		_spec.SetField(discoveryentry.FieldMAC, field.TypeString, value)
+		_node.MAC = value
 	}
 	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(discoveryentry.FieldType, field.TypeString, value)

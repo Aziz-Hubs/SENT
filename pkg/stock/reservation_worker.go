@@ -59,7 +59,7 @@ func (w *ReservationReleaseWorker) Work(ctx context.Context, job *river.Job[Rese
 
 	// 2. Add the quantity back to the product.
 	err = tx.Product.UpdateOne(res.Edges.Product).
-		AddQuantity(res.Quantity).
+		SetQuantity(res.Edges.Product.Quantity.Add(res.Quantity)).
 		Exec(ctx)
 	if err != nil {
 		tx.Rollback()

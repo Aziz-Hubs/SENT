@@ -5,6 +5,8 @@ import {context} from '../models';
 
 export function GetUserProfile():Promise<auth.UserProfile>;
 
+export function HasRole(arg1:string):Promise<boolean>;
+
 export function IsAuthenticated():Promise<boolean>;
 
 export function Login():Promise<string>;

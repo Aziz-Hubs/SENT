@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // Transaction is the model entity for the Transaction schema.
@@ -25,7 +26,9 @@ type Transaction struct {
 	// Date holds the value of the "date" field.
 	Date time.Time `json:"date,omitempty"`
 	// TotalAmount holds the value of the "total_amount" field.
-	TotalAmount float64 `json:"total_amount,omitempty"`
+	TotalAmount decimal.Decimal `json:"total_amount,omitempty"`
+	// TaxAmount holds the value of the "tax_amount" field.
+	TaxAmount decimal.Decimal `json:"tax_amount,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
 	// Reference holds the value of the "reference" field.
@@ -119,10 +122,10 @@ func (*Transaction) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case transaction.FieldTotalAmount, transaction.FieldTaxAmount:
+			values[i] = new(decimal.Decimal)
 		case transaction.FieldIsIntercompany:
 			values[i] = new(sql.NullBool)
-		case transaction.FieldTotalAmount:
-			values[i] = new(sql.NullFloat64)
 		case transaction.FieldID, transaction.FieldRecordingID:
 			values[i] = new(sql.NullInt64)
 		case transaction.FieldDescription, transaction.FieldType, transaction.FieldReference, transaction.FieldUUID, transaction.FieldApprovalStatus:
@@ -167,10 +170,16 @@ func (_m *Transaction) assignValues(columns []string, values []any) error {
 				_m.Date = value.Time
 			}
 		case transaction.FieldTotalAmount:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field total_amount", values[i])
-			} else if value.Valid {
-				_m.TotalAmount = value.Float64
+			} else if value != nil {
+				_m.TotalAmount = *value
+			}
+		case transaction.FieldTaxAmount:
+			if value, ok := values[i].(*decimal.Decimal); !ok {
+				return fmt.Errorf("unexpected type %T for field tax_amount", values[i])
+			} else if value != nil {
+				_m.TaxAmount = *value
 			}
 		case transaction.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -292,6 +301,9 @@ func (_m *Transaction) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("total_amount=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TotalAmount))
+	builder.WriteString(", ")
+	builder.WriteString("tax_amount=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TaxAmount))
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(_m.Type)

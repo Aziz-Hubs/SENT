@@ -27,6 +27,8 @@ type Voicemail struct {
 	Transcription string `json:"transcription,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// Duration holds the value of the "duration" field.
+	Duration int `json:"duration,omitempty"`
 	// ReadAt holds the value of the "read_at" field.
 	ReadAt time.Time `json:"read_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -75,7 +77,7 @@ func (*Voicemail) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case voicemail.FieldID:
+		case voicemail.FieldID, voicemail.FieldDuration:
 			values[i] = new(sql.NullInt64)
 		case voicemail.FieldCaller, voicemail.FieldAudioPath, voicemail.FieldTranscription:
 			values[i] = new(sql.NullString)
@@ -129,6 +131,12 @@ func (_m *Voicemail) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
+			}
+		case voicemail.FieldDuration:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field duration", values[i])
+			} else if value.Valid {
+				_m.Duration = int(value.Int64)
 			}
 		case voicemail.FieldReadAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -207,6 +215,9 @@ func (_m *Voicemail) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("duration=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Duration))
 	builder.WriteString(", ")
 	builder.WriteString("read_at=")
 	builder.WriteString(_m.ReadAt.Format(time.ANSIC))

@@ -63,6 +63,12 @@ func (_c *CredentialCreate) SetNillableLastRevealedAt(v *time.Time) *CredentialC
 	return _c
 }
 
+// SetMetadata sets the "metadata" field.
+func (_c *CredentialCreate) SetMetadata(v map[string]interface{}) *CredentialCreate {
+	_c.mutation.SetMetadata(v)
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *CredentialCreate) SetCreatedAt(v time.Time) *CredentialCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -218,6 +224,10 @@ func (_c *CredentialCreate) createSpec() (*Credential, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.LastRevealedAt(); ok {
 		_spec.SetField(credential.FieldLastRevealedAt, field.TypeTime, value)
 		_node.LastRevealedAt = value
+	}
+	if value, ok := _c.mutation.Metadata(); ok {
+		_spec.SetField(credential.FieldMetadata, field.TypeJSON, value)
+		_node.Metadata = value
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(credential.FieldCreatedAt, field.TypeTime, value)

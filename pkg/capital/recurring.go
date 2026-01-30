@@ -62,8 +62,8 @@ func (w *RecurringInvoiceWorker) Work(ctx context.Context, job *river.Job[Recurr
 	}
 	defer tx.Rollback()
 
-	// 3. Precision Math with shopspring/decimal
-	amount := decimal.NewFromFloat(ri.Amount)
+	// 3. Precision Math
+	amount := ri.Amount
 	
 	// 4. Generate Journal Entry
 	arAcc, err := tx.Account.Query().Where(account.Number("1200")).Only(ctx)
@@ -129,11 +129,8 @@ func (w *RecurringInvoiceWorker) Work(ctx context.Context, job *river.Job[Recurr
 	}
 
 	// Update Account Balances
-	newArBal, _ := decimal.NewFromFloat(arAcc.Balance).Add(amount).Float64()
-	newRevBal, _ := decimal.NewFromFloat(revAcc.Balance).Add(amount).Float64()
-
-	tx.Account.UpdateOne(arAcc).SetBalance(newArBal).Exec(ctx)
-	tx.Account.UpdateOne(revAcc).SetBalance(newRevBal).Exec(ctx)
+	tx.Account.UpdateOne(arAcc).SetBalance(arAcc.Balance.Add(amount)).Exec(ctx)
+	tx.Account.UpdateOne(revAcc).SetBalance(revAcc.Balance.Add(amount)).Exec(ctx)
 
 	// 5. Update Recurring Invoice state
 	nextRun := w.calculateNextRun(ri.NextRunDate, ri.Frequency)

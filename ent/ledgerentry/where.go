@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 // ID filters vertices based on their ID field.
@@ -56,7 +57,7 @@ func IDLTE(id int) predicate.LedgerEntry {
 }
 
 // Amount applies equality check predicate on the "amount" field. It's identical to AmountEQ.
-func Amount(v float64) predicate.LedgerEntry {
+func Amount(v decimal.Decimal) predicate.LedgerEntry {
 	return predicate.LedgerEntry(sql.FieldEQ(FieldAmount, v))
 }
 
@@ -66,42 +67,42 @@ func CreatedAt(v time.Time) predicate.LedgerEntry {
 }
 
 // AmountEQ applies the EQ predicate on the "amount" field.
-func AmountEQ(v float64) predicate.LedgerEntry {
+func AmountEQ(v decimal.Decimal) predicate.LedgerEntry {
 	return predicate.LedgerEntry(sql.FieldEQ(FieldAmount, v))
 }
 
 // AmountNEQ applies the NEQ predicate on the "amount" field.
-func AmountNEQ(v float64) predicate.LedgerEntry {
+func AmountNEQ(v decimal.Decimal) predicate.LedgerEntry {
 	return predicate.LedgerEntry(sql.FieldNEQ(FieldAmount, v))
 }
 
 // AmountIn applies the In predicate on the "amount" field.
-func AmountIn(vs ...float64) predicate.LedgerEntry {
+func AmountIn(vs ...decimal.Decimal) predicate.LedgerEntry {
 	return predicate.LedgerEntry(sql.FieldIn(FieldAmount, vs...))
 }
 
 // AmountNotIn applies the NotIn predicate on the "amount" field.
-func AmountNotIn(vs ...float64) predicate.LedgerEntry {
+func AmountNotIn(vs ...decimal.Decimal) predicate.LedgerEntry {
 	return predicate.LedgerEntry(sql.FieldNotIn(FieldAmount, vs...))
 }
 
 // AmountGT applies the GT predicate on the "amount" field.
-func AmountGT(v float64) predicate.LedgerEntry {
+func AmountGT(v decimal.Decimal) predicate.LedgerEntry {
 	return predicate.LedgerEntry(sql.FieldGT(FieldAmount, v))
 }
 
 // AmountGTE applies the GTE predicate on the "amount" field.
-func AmountGTE(v float64) predicate.LedgerEntry {
+func AmountGTE(v decimal.Decimal) predicate.LedgerEntry {
 	return predicate.LedgerEntry(sql.FieldGTE(FieldAmount, v))
 }
 
 // AmountLT applies the LT predicate on the "amount" field.
-func AmountLT(v float64) predicate.LedgerEntry {
+func AmountLT(v decimal.Decimal) predicate.LedgerEntry {
 	return predicate.LedgerEntry(sql.FieldLT(FieldAmount, v))
 }
 
 // AmountLTE applies the LTE predicate on the "amount" field.
-func AmountLTE(v float64) predicate.LedgerEntry {
+func AmountLTE(v decimal.Decimal) predicate.LedgerEntry {
 	return predicate.LedgerEntry(sql.FieldLTE(FieldAmount, v))
 }
 

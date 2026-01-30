@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // LedgerEntry is the model entity for the LedgerEntry schema.
@@ -21,7 +22,7 @@ type LedgerEntry struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Amount holds the value of the "amount" field.
-	Amount float64 `json:"amount,omitempty"`
+	Amount decimal.Decimal `json:"amount,omitempty"`
 	// Direction holds the value of the "direction" field.
 	Direction ledgerentry.Direction `json:"direction,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -87,7 +88,7 @@ func (*LedgerEntry) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case ledgerentry.FieldAmount:
-			values[i] = new(sql.NullFloat64)
+			values[i] = new(decimal.Decimal)
 		case ledgerentry.FieldID:
 			values[i] = new(sql.NullInt64)
 		case ledgerentry.FieldDirection:
@@ -122,10 +123,10 @@ func (_m *LedgerEntry) assignValues(columns []string, values []any) error {
 			}
 			_m.ID = int(value.Int64)
 		case ledgerentry.FieldAmount:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field amount", values[i])
-			} else if value.Valid {
-				_m.Amount = value.Float64
+			} else if value != nil {
+				_m.Amount = *value
 			}
 		case ledgerentry.FieldDirection:
 			if value, ok := values[i].(*sql.NullString); !ok {

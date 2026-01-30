@@ -14,6 +14,10 @@ export function CopyCredential(arg1) {
   return window['go']['nexus']['NexusBridge']['CopyCredential'](arg1);
 }
 
+export function CreateAsset(arg1, arg2, arg3, arg4) {
+  return window['go']['nexus']['NexusBridge']['CreateAsset'](arg1, arg2, arg3, arg4);
+}
+
 export function CreateOneTimeLink(arg1, arg2, arg3) {
   return window['go']['nexus']['NexusBridge']['CreateOneTimeLink'](arg1, arg2, arg3);
 }
@@ -38,8 +42,20 @@ export function GetSOPsByAsset(arg1) {
   return window['go']['nexus']['NexusBridge']['GetSOPsByAsset'](arg1);
 }
 
+export function GetSaaSInventory() {
+  return window['go']['nexus']['NexusBridge']['GetSaaSInventory']();
+}
+
+export function ImportAssets(arg1) {
+  return window['go']['nexus']['NexusBridge']['ImportAssets'](arg1);
+}
+
 export function RevealCredential(arg1) {
   return window['go']['nexus']['NexusBridge']['RevealCredential'](arg1);
+}
+
+export function ScanShadowIT() {
+  return window['go']['nexus']['NexusBridge']['ScanShadowIT']();
 }
 
 export function Startup(arg1) {

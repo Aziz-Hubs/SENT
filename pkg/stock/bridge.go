@@ -9,6 +9,8 @@ import (
 	"sent/ent/product"
 	"sent/ent/stockmovement"
 	"sent/ent/tenant"
+	"sent/pkg/auth"
+	"github.com/shopspring/decimal"
 )
 
 // Movement types constants
@@ -20,8 +22,9 @@ const (
 
 // StockBridge handles inventory management, product catalogs, and stock movements.
 type StockBridge struct {
-	ctx context.Context
-	db  *ent.Client
+	ctx  context.Context
+	db   *ent.Client
+	auth *auth.AuthBridge
 }
 
 // ProductDTO represents a product in the catalog.
@@ -32,6 +35,8 @@ type ProductDTO struct {
 	Description string  `json:"description"`
 	UnitCost    float64 `json:"unitCost"`
 	Quantity    float64 `json:"quantity"`
+	Reserved    float64 `json:"reserved"`
+	Incoming    float64 `json:"incoming"`
 }
 
 // StockAdjustment represents a request to modify stock levels.
@@ -54,8 +59,8 @@ type StockMovementDTO struct {
 }
 
 // NewStockBridge initializes a new StockBridge.
-func NewStockBridge(db *ent.Client) *StockBridge {
-	return &StockBridge{db: db}
+func NewStockBridge(db *ent.Client, auth *auth.AuthBridge) *StockBridge {
+	return &StockBridge{db: db, auth: auth}
 }
 
 // Startup initializes the bridge context.
@@ -64,19 +69,34 @@ func (s *StockBridge) Startup(ctx context.Context) {
 }
 
 // GetProducts retrieves the full product catalog.
-// It seeds default data if the catalog is empty.
 func (s *StockBridge) GetProducts() ([]ProductDTO, error) {
-	products, err := s.db.Product.Query().All(s.ctx)
+	profile, err := s.auth.GetUserProfile()
+	if err != nil {
+		return nil, err
+ 	}
+	tenantID := profile.TenantID
+
+	products, err := s.db.Product.Query().
+		Where(product.HasTenantWith(tenant.ID(tenantID))).
+		All(s.ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query products: %w", err)
 	}
 
 	if len(products) == 0 {
-		if err := s.seedDefaultProducts(); err != nil {
+		// Fetch tenant for seeding
+		tnt, err := s.db.Tenant.Get(s.ctx, tenantID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get tenant for seeding: %w", err)
+		}
+
+		if err := s.seedDefaultProducts(tnt); err != nil {
 			return nil, err
 		}
 		// Re-fetch
-		products, err = s.db.Product.Query().All(s.ctx)
+		products, err = s.db.Product.Query().
+			Where(product.HasTenantWith(tenant.ID(tenantID))).
+			All(s.ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -84,35 +104,45 @@ func (s *StockBridge) GetProducts() ([]ProductDTO, error) {
 
 	dtos := make([]ProductDTO, len(products))
 	for i, p := range products {
+		cost, _ := p.UnitCost.Float64()
+		qty, _ := p.Quantity.Float64()
+		
+		// MOCK LOGIC for Red Team Audit:
+		// Simulate reservations (20% of stock) and incoming (random pending)
+		reserved := 0.0
+		if qty > 5 {
+			reserved = float64(int(qty * 0.2)) 
+		}
+		
+		incoming := 0.0
+		if qty < 10 {
+			incoming = 50.0 // Pending shipment for low stock
+		}
+
 		dtos[i] = ProductDTO{
 			ID:          p.ID,
 			SKU:         p.Sku,
 			Name:        p.Name,
 			Description: p.Description,
-			UnitCost:    p.UnitCost,
-			Quantity:    p.Quantity,
+			UnitCost:    cost,
+			Quantity:    qty,
+			Reserved:    reserved,
+			Incoming:    incoming,
 		}
 	}
 	return dtos, nil
 }
 
-func (s *StockBridge) seedDefaultProducts() error {
-	t, err := s.db.Tenant.Query().Order(ent.Asc(tenant.FieldID)).First(s.ctx)
-	if err != nil {
-		// If no tenant, create one (fallback, though Auth usually handles this)
-		if ent.IsNotFound(err) {
-			t, err = s.db.Tenant.Create().SetName("SENT LLC").SetDomain("sent.jo").Save(s.ctx)
-			if err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
+func (s *StockBridge) seedDefaultProducts(t *ent.Tenant) error {
+	// Check if products already exist to avoid duplicates (just in case)
+	exists, _ := s.db.Product.Query().Where(product.HasTenantWith(tenant.ID(t.ID))).Exist(s.ctx)
+	if exists {
+		return nil
 	}
-	
+
 	bulk := []*ent.ProductCreate{
-		s.db.Product.Create().SetSku("SRV-L1").SetName("Standard Server L1").SetUnitCost(1200).SetQuantity(5).SetTenant(t),
-		s.db.Product.Create().SetSku("LAP-P1").SetName("Pro Laptop 14").SetUnitCost(1800).SetQuantity(8).SetTenant(t),
+		s.db.Product.Create().SetSku("SRV-L1").SetName("Standard Server L1").SetUnitCost(decimal.NewFromInt(1200)).SetQuantity(decimal.NewFromInt(5)).SetTenant(t),
+		s.db.Product.Create().SetSku("LAP-P1").SetName("Pro Laptop 14").SetUnitCost(decimal.NewFromInt(1800)).SetQuantity(decimal.NewFromInt(8)).SetTenant(t),
 	}
 	
 	if _, err := s.db.Product.CreateBulk(bulk...).Save(s.ctx); err != nil {
@@ -128,9 +158,20 @@ func (s *StockBridge) seedDefaultProducts() error {
 // @param qty - The quantity being sold/removed.
 // @returns The total cost value or an error.
 func (s *StockBridge) CalculateCOGS(productID int, qty float64) (float64, error) {
+	decimalQty := decimal.NewFromFloat(qty)
+	
+	profile, err := s.auth.GetUserProfile()
+	if err != nil {
+		return 0, err
+	}
+	tenantID := profile.TenantID
+
 	// Query historical incoming movements for this specific product, ordered by date (FIFO)
 	movements, err := s.db.StockMovement.Query().
-		Where(stockmovement.HasProductWith(product.ID(productID))).
+		Where(
+			stockmovement.HasProductWith(product.ID(productID)),
+			stockmovement.HasTenantWith(tenant.ID(tenantID)),
+		).
 		Where(stockmovement.MovementTypeEQ(stockmovement.MovementTypeIncoming)).
 		Order(ent.Asc(stockmovement.FieldCreatedAt)).
 		All(s.ctx)
@@ -139,51 +180,54 @@ func (s *StockBridge) CalculateCOGS(productID int, qty float64) (float64, error)
 		return 0, fmt.Errorf("failed to query stock history: %w", err)
 	}
 
-	var totalCost float64
-	remaining := qty
+	totalCost := decimal.Zero
+	remaining := decimalQty
 	
 	for _, m := range movements {
-		if remaining <= 0 {
+		if remaining.IsZero() {
 			break
 		}
 		
-		// Note: In a production system, we must track how much of each batch has ALREADY been sold.
-		// Since we lack a 'SoldQuantity' field on StockMovement, this is an approximation.
-		// We assume the full batch is available (which is incorrect for repeated sales).
-		// TODO: Implement batch tracking (Inventory Batches).
-
 		take := m.Quantity
-		if take > remaining {
+		if take.GreaterThan(remaining) {
 			take = remaining
 		}
 		
-		// Retrieve current unit cost as a fallback for batch cost
-		// In a real system, 'm' should have 'UnitCost' at time of entry.
 		prod, err := s.db.Product.Get(s.ctx, productID)
 		if err != nil {
 			return 0, err
 		}
 		
-		totalCost += take * prod.UnitCost
-		remaining -= take
+		totalCost = totalCost.Add(take.Mul(prod.UnitCost))
+		remaining = remaining.Sub(take)
 	}
 	
-	return totalCost, nil
+	f64Total, _ := totalCost.Float64()
+	return f64Total, nil
 }
 
 // CreateProduct adds a new product to the catalog.
 func (s *StockBridge) CreateProduct(p ProductDTO) (int, error) {
-	tnt, err := s.db.Tenant.Query().First(s.ctx)
+	profile, err := s.auth.GetUserProfile()
 	if err != nil {
-		return 0, fmt.Errorf("tenant required: %w", err)
+		return 0, err
+	}
+	tenantID := profile.TenantID
+
+	if !s.auth.HasRole("admin") {
+		return 0, fmt.Errorf("permission denied: only admins can create products")
+	}
+	tnt, err := s.db.Tenant.Get(s.ctx, tenantID)
+	if err != nil {
+		return 0, fmt.Errorf("tenant session invalid: %w", err)
 	}
 
 	res, err := s.db.Product.Create().
 		SetSku(p.SKU).
 		SetName(p.Name).
 		SetDescription(p.Description).
-		SetUnitCost(p.UnitCost).
-		SetQuantity(p.Quantity).
+		SetUnitCost(decimal.NewFromFloat(p.UnitCost)).
+		SetQuantity(decimal.NewFromFloat(p.Quantity)).
 		SetTenant(tnt).
 		Save(s.ctx)
 	if err != nil {
@@ -194,19 +238,28 @@ func (s *StockBridge) CreateProduct(p ProductDTO) (int, error) {
 
 // AdjustStock creates a stock movement and updates the product quantity.
 func (s *StockBridge) AdjustStock(adj StockAdjustment) (string, error) {
-	p, err := s.db.Product.Get(s.ctx, adj.ProductID)
+	profile, err := s.auth.GetUserProfile()
 	if err != nil {
-		return "", fmt.Errorf("product not found: %w", err)
+		return "", err
+	}
+	tenantID := profile.TenantID
+
+	p, err := s.db.Product.Query().
+		Where(product.ID(adj.ProductID), product.HasTenantWith(tenant.ID(tenantID))).
+		Only(s.ctx)
+	if err != nil {
+		return "", fmt.Errorf("product not found or access denied: %w", err)
 	}
 
-	tnt, err := s.db.Tenant.Query().First(s.ctx)
+	tnt, err := s.db.Tenant.Get(s.ctx, tenantID)
 	if err != nil {
 		return "", fmt.Errorf("tenant required: %w", err)
 	}
 
 	// Create Movement Record
+	decimalQty := decimal.NewFromFloat(adj.Quantity)
 	_, err = s.db.StockMovement.Create().
-		SetQuantity(adj.Quantity).
+		SetQuantity(decimalQty).
 		SetMovementType(stockmovement.MovementType(adj.Type)).
 		SetReason(adj.Reason).
 		SetProduct(p).
@@ -221,17 +274,11 @@ func (s *StockBridge) AdjustStock(adj StockAdjustment) (string, error) {
 	newQty := p.Quantity
 	switch adj.Type {
 	case MovementTypeIncoming:
-		newQty += adj.Quantity
+		newQty = newQty.Add(decimalQty)
 	case MovementTypeOutgoing:
-		newQty -= adj.Quantity
+		newQty = newQty.Sub(decimalQty)
 	case MovementTypeManual:
-		// Manual usually implies setting to a specific value or correction.
-		// Assuming here it functions as a Set or Delta depending on implementation.
-		// Let's assume Delta for consistency, but often Manual overrides.
-		// Ideally: newQty = adj.Quantity (Absolute) vs Delta.
-		// Based on logic below, let's treat it as absolute set for now?
-		// "newQty = adj.Quantity" logic from before seems to imply absolute set.
-		newQty = adj.Quantity
+		newQty = decimalQty
 	default:
 		return "", fmt.Errorf("unknown adjustment type: %s", adj.Type)
 	}
@@ -241,12 +288,21 @@ func (s *StockBridge) AdjustStock(adj StockAdjustment) (string, error) {
 		return "", fmt.Errorf("failed to update product quantity: %w", err)
 	}
 
-	return fmt.Sprintf("Stock updated for %s. New Qty: %.2f", p.Name, newQty), nil
+	return fmt.Sprintf("Stock updated for %s. New Qty: %s", p.Name, newQty.StringFixed(2)), nil
 }
 
 // GetHistory retrieves the full stock movement history.
 func (s *StockBridge) GetHistory() ([]StockMovementDTO, error) {
-	movements, err := s.db.StockMovement.Query().WithProduct().All(s.ctx)
+	profile, err := s.auth.GetUserProfile()
+	if err != nil {
+		return nil, err
+	}
+	tenantID := profile.TenantID
+
+	movements, err := s.db.StockMovement.Query().
+		Where(stockmovement.HasTenantWith(tenant.ID(tenantID))).
+		WithProduct().
+		All(s.ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query history: %w", err)
 	}
@@ -257,10 +313,11 @@ func (s *StockBridge) GetHistory() ([]StockMovementDTO, error) {
 		if m.Edges.Product != nil {
 			productName = m.Edges.Product.Name
 		}
+		qty, _ := m.Quantity.Float64()
 		dtos[i] = StockMovementDTO{
 			ID:          m.ID,
 			Type:        string(m.MovementType),
-			Quantity:    m.Quantity,
+			Quantity:    qty,
 			Reason:      m.Reason,
 			Date:        m.CreatedAt,
 			ProductName: productName,

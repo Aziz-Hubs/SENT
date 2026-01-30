@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // ServiceRateCreate is the builder for creating a ServiceRate entity.
@@ -27,8 +28,16 @@ func (_c *ServiceRateCreate) SetWorkType(v string) *ServiceRateCreate {
 }
 
 // SetRate sets the "rate" field.
-func (_c *ServiceRateCreate) SetRate(v float64) *ServiceRateCreate {
+func (_c *ServiceRateCreate) SetRate(v decimal.Decimal) *ServiceRateCreate {
 	_c.mutation.SetRate(v)
+	return _c
+}
+
+// SetNillableRate sets the "rate" field if the given value is not nil.
+func (_c *ServiceRateCreate) SetNillableRate(v *decimal.Decimal) *ServiceRateCreate {
+	if v != nil {
+		_c.SetRate(*v)
+	}
 	return _c
 }
 
@@ -64,6 +73,7 @@ func (_c *ServiceRateCreate) Mutation() *ServiceRateMutation {
 
 // Save creates the ServiceRate in the database.
 func (_c *ServiceRateCreate) Save(ctx context.Context) (*ServiceRate, error) {
+	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -86,6 +96,14 @@ func (_c *ServiceRateCreate) Exec(ctx context.Context) error {
 func (_c *ServiceRateCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_c *ServiceRateCreate) defaults() {
+	if _, ok := _c.mutation.Rate(); !ok {
+		v := servicerate.DefaultRate
+		_c.mutation.SetRate(v)
 	}
 }
 
@@ -131,7 +149,7 @@ func (_c *ServiceRateCreate) createSpec() (*ServiceRate, *sqlgraph.CreateSpec) {
 		_node.WorkType = value
 	}
 	if value, ok := _c.mutation.Rate(); ok {
-		_spec.SetField(servicerate.FieldRate, field.TypeFloat64, value)
+		_spec.SetField(servicerate.FieldRate, field.TypeOther, value)
 		_node.Rate = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
@@ -176,6 +194,7 @@ func (_c *ServiceRateCreateBulk) Save(ctx context.Context) ([]*ServiceRate, erro
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ServiceRateMutation)
 				if !ok {

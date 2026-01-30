@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 // ID filters vertices based on their ID field.
@@ -60,7 +61,7 @@ func WorkType(v string) predicate.ServiceRate {
 }
 
 // Rate applies equality check predicate on the "rate" field. It's identical to RateEQ.
-func Rate(v float64) predicate.ServiceRate {
+func Rate(v decimal.Decimal) predicate.ServiceRate {
 	return predicate.ServiceRate(sql.FieldEQ(FieldRate, v))
 }
 
@@ -135,42 +136,42 @@ func WorkTypeContainsFold(v string) predicate.ServiceRate {
 }
 
 // RateEQ applies the EQ predicate on the "rate" field.
-func RateEQ(v float64) predicate.ServiceRate {
+func RateEQ(v decimal.Decimal) predicate.ServiceRate {
 	return predicate.ServiceRate(sql.FieldEQ(FieldRate, v))
 }
 
 // RateNEQ applies the NEQ predicate on the "rate" field.
-func RateNEQ(v float64) predicate.ServiceRate {
+func RateNEQ(v decimal.Decimal) predicate.ServiceRate {
 	return predicate.ServiceRate(sql.FieldNEQ(FieldRate, v))
 }
 
 // RateIn applies the In predicate on the "rate" field.
-func RateIn(vs ...float64) predicate.ServiceRate {
+func RateIn(vs ...decimal.Decimal) predicate.ServiceRate {
 	return predicate.ServiceRate(sql.FieldIn(FieldRate, vs...))
 }
 
 // RateNotIn applies the NotIn predicate on the "rate" field.
-func RateNotIn(vs ...float64) predicate.ServiceRate {
+func RateNotIn(vs ...decimal.Decimal) predicate.ServiceRate {
 	return predicate.ServiceRate(sql.FieldNotIn(FieldRate, vs...))
 }
 
 // RateGT applies the GT predicate on the "rate" field.
-func RateGT(v float64) predicate.ServiceRate {
+func RateGT(v decimal.Decimal) predicate.ServiceRate {
 	return predicate.ServiceRate(sql.FieldGT(FieldRate, v))
 }
 
 // RateGTE applies the GTE predicate on the "rate" field.
-func RateGTE(v float64) predicate.ServiceRate {
+func RateGTE(v decimal.Decimal) predicate.ServiceRate {
 	return predicate.ServiceRate(sql.FieldGTE(FieldRate, v))
 }
 
 // RateLT applies the LT predicate on the "rate" field.
-func RateLT(v float64) predicate.ServiceRate {
+func RateLT(v decimal.Decimal) predicate.ServiceRate {
 	return predicate.ServiceRate(sql.FieldLT(FieldRate, v))
 }
 
 // RateLTE applies the LTE predicate on the "rate" field.
-func RateLTE(v float64) predicate.ServiceRate {
+func RateLTE(v decimal.Decimal) predicate.ServiceRate {
 	return predicate.ServiceRate(sql.FieldLTE(FieldRate, v))
 }
 

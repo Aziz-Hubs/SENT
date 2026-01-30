@@ -30,8 +30,14 @@ func (Asset) Fields() []ent.Field {
 				"DISPOSED",
 			).
 			Default("STAGED_FOR_DEPLOYMENT"),
-		field.JSON("metadata", map[string]interface{}{}).Default(map[string]interface{}{}),
+		field.JSON("metadata", map[string]interface{}{}).
+			SchemaType(map[string]string{
+				"postgres": "jsonb",
+			}).
+			Optional(),
 		field.Time("last_certified_at").Optional(),
+		field.Time("purchase_date").Optional(),
+		field.Time("warranty_expiry").Optional(),
 		field.Time("created_at").Default(time.Now),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}

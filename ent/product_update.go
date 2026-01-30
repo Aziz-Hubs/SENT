@@ -17,13 +17,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // ProductUpdate is the builder for updating Product entities.
 type ProductUpdate struct {
 	config
-	hooks    []Hook
-	mutation *ProductMutation
+	hooks     []Hook
+	mutation  *ProductMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the ProductUpdate builder.
@@ -81,44 +83,30 @@ func (_u *ProductUpdate) ClearDescription() *ProductUpdate {
 }
 
 // SetUnitCost sets the "unit_cost" field.
-func (_u *ProductUpdate) SetUnitCost(v float64) *ProductUpdate {
-	_u.mutation.ResetUnitCost()
+func (_u *ProductUpdate) SetUnitCost(v decimal.Decimal) *ProductUpdate {
 	_u.mutation.SetUnitCost(v)
 	return _u
 }
 
 // SetNillableUnitCost sets the "unit_cost" field if the given value is not nil.
-func (_u *ProductUpdate) SetNillableUnitCost(v *float64) *ProductUpdate {
+func (_u *ProductUpdate) SetNillableUnitCost(v *decimal.Decimal) *ProductUpdate {
 	if v != nil {
 		_u.SetUnitCost(*v)
 	}
 	return _u
 }
 
-// AddUnitCost adds value to the "unit_cost" field.
-func (_u *ProductUpdate) AddUnitCost(v float64) *ProductUpdate {
-	_u.mutation.AddUnitCost(v)
-	return _u
-}
-
 // SetQuantity sets the "quantity" field.
-func (_u *ProductUpdate) SetQuantity(v float64) *ProductUpdate {
-	_u.mutation.ResetQuantity()
+func (_u *ProductUpdate) SetQuantity(v decimal.Decimal) *ProductUpdate {
 	_u.mutation.SetQuantity(v)
 	return _u
 }
 
 // SetNillableQuantity sets the "quantity" field if the given value is not nil.
-func (_u *ProductUpdate) SetNillableQuantity(v *float64) *ProductUpdate {
+func (_u *ProductUpdate) SetNillableQuantity(v *decimal.Decimal) *ProductUpdate {
 	if v != nil {
 		_u.SetQuantity(*v)
 	}
-	return _u
-}
-
-// AddQuantity adds value to the "quantity" field.
-func (_u *ProductUpdate) AddQuantity(v float64) *ProductUpdate {
-	_u.mutation.AddQuantity(v)
 	return _u
 }
 
@@ -131,20 +119,6 @@ func (_u *ProductUpdate) SetAttributes(v map[string]interface{}) *ProductUpdate 
 // ClearAttributes clears the value of the "attributes" field.
 func (_u *ProductUpdate) ClearAttributes() *ProductUpdate {
 	_u.mutation.ClearAttributes()
-	return _u
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (_u *ProductUpdate) SetCreatedAt(v time.Time) *ProductUpdate {
-	_u.mutation.SetCreatedAt(v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *ProductUpdate) SetNillableCreatedAt(v *time.Time) *ProductUpdate {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
 	return _u
 }
 
@@ -317,6 +291,12 @@ func (_u *ProductUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *ProductUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ProductUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *ProductUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -342,25 +322,16 @@ func (_u *ProductUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.ClearField(product.FieldDescription, field.TypeString)
 	}
 	if value, ok := _u.mutation.UnitCost(); ok {
-		_spec.SetField(product.FieldUnitCost, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedUnitCost(); ok {
-		_spec.AddField(product.FieldUnitCost, field.TypeFloat64, value)
+		_spec.SetField(product.FieldUnitCost, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Quantity(); ok {
-		_spec.SetField(product.FieldQuantity, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedQuantity(); ok {
-		_spec.AddField(product.FieldQuantity, field.TypeFloat64, value)
+		_spec.SetField(product.FieldQuantity, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Attributes(); ok {
 		_spec.SetField(product.FieldAttributes, field.TypeJSON, value)
 	}
 	if _u.mutation.AttributesCleared() {
 		_spec.ClearField(product.FieldAttributes, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(product.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(product.FieldUpdatedAt, field.TypeTime, value)
@@ -513,6 +484,7 @@ func (_u *ProductUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{product.Label}
@@ -528,9 +500,10 @@ func (_u *ProductUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 // ProductUpdateOne is the builder for updating a single Product entity.
 type ProductUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *ProductMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *ProductMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetSku sets the "sku" field.
@@ -582,44 +555,30 @@ func (_u *ProductUpdateOne) ClearDescription() *ProductUpdateOne {
 }
 
 // SetUnitCost sets the "unit_cost" field.
-func (_u *ProductUpdateOne) SetUnitCost(v float64) *ProductUpdateOne {
-	_u.mutation.ResetUnitCost()
+func (_u *ProductUpdateOne) SetUnitCost(v decimal.Decimal) *ProductUpdateOne {
 	_u.mutation.SetUnitCost(v)
 	return _u
 }
 
 // SetNillableUnitCost sets the "unit_cost" field if the given value is not nil.
-func (_u *ProductUpdateOne) SetNillableUnitCost(v *float64) *ProductUpdateOne {
+func (_u *ProductUpdateOne) SetNillableUnitCost(v *decimal.Decimal) *ProductUpdateOne {
 	if v != nil {
 		_u.SetUnitCost(*v)
 	}
 	return _u
 }
 
-// AddUnitCost adds value to the "unit_cost" field.
-func (_u *ProductUpdateOne) AddUnitCost(v float64) *ProductUpdateOne {
-	_u.mutation.AddUnitCost(v)
-	return _u
-}
-
 // SetQuantity sets the "quantity" field.
-func (_u *ProductUpdateOne) SetQuantity(v float64) *ProductUpdateOne {
-	_u.mutation.ResetQuantity()
+func (_u *ProductUpdateOne) SetQuantity(v decimal.Decimal) *ProductUpdateOne {
 	_u.mutation.SetQuantity(v)
 	return _u
 }
 
 // SetNillableQuantity sets the "quantity" field if the given value is not nil.
-func (_u *ProductUpdateOne) SetNillableQuantity(v *float64) *ProductUpdateOne {
+func (_u *ProductUpdateOne) SetNillableQuantity(v *decimal.Decimal) *ProductUpdateOne {
 	if v != nil {
 		_u.SetQuantity(*v)
 	}
-	return _u
-}
-
-// AddQuantity adds value to the "quantity" field.
-func (_u *ProductUpdateOne) AddQuantity(v float64) *ProductUpdateOne {
-	_u.mutation.AddQuantity(v)
 	return _u
 }
 
@@ -632,20 +591,6 @@ func (_u *ProductUpdateOne) SetAttributes(v map[string]interface{}) *ProductUpda
 // ClearAttributes clears the value of the "attributes" field.
 func (_u *ProductUpdateOne) ClearAttributes() *ProductUpdateOne {
 	_u.mutation.ClearAttributes()
-	return _u
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (_u *ProductUpdateOne) SetCreatedAt(v time.Time) *ProductUpdateOne {
-	_u.mutation.SetCreatedAt(v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *ProductUpdateOne) SetNillableCreatedAt(v *time.Time) *ProductUpdateOne {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
 	return _u
 }
 
@@ -831,6 +776,12 @@ func (_u *ProductUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *ProductUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ProductUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -873,25 +824,16 @@ func (_u *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err er
 		_spec.ClearField(product.FieldDescription, field.TypeString)
 	}
 	if value, ok := _u.mutation.UnitCost(); ok {
-		_spec.SetField(product.FieldUnitCost, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedUnitCost(); ok {
-		_spec.AddField(product.FieldUnitCost, field.TypeFloat64, value)
+		_spec.SetField(product.FieldUnitCost, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Quantity(); ok {
-		_spec.SetField(product.FieldQuantity, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedQuantity(); ok {
-		_spec.AddField(product.FieldQuantity, field.TypeFloat64, value)
+		_spec.SetField(product.FieldQuantity, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.Attributes(); ok {
 		_spec.SetField(product.FieldAttributes, field.TypeJSON, value)
 	}
 	if _u.mutation.AttributesCleared() {
 		_spec.ClearField(product.FieldAttributes, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(product.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(product.FieldUpdatedAt, field.TypeTime, value)
@@ -1044,6 +986,7 @@ func (_u *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &Product{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

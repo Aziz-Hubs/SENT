@@ -10,6 +10,10 @@ export function GetTaxConfig() {
   return window['go']['tax']['TaxBridge']['GetTaxConfig']();
 }
 
+export function GetTaxSummary(arg1) {
+  return window['go']['tax']['TaxBridge']['GetTaxSummary'](arg1);
+}
+
 export function SignInvoice(arg1) {
   return window['go']['tax']['TaxBridge']['SignInvoice'](arg1);
 }

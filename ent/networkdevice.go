@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"sent/ent/networkdevice"
+	"sent/ent/tenant"
 	"strings"
 	"time"
 
@@ -37,8 +38,9 @@ type NetworkDevice struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the NetworkDeviceQuery when eager-loading is set.
-	Edges        NetworkDeviceEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges                  NetworkDeviceEdges `json:"edges"`
+	tenant_network_devices *int
+	selectValues           sql.SelectValues
 }
 
 // NetworkDeviceEdges holds the relations/edges for other nodes in the graph.
@@ -47,9 +49,11 @@ type NetworkDeviceEdges struct {
 	Ports []*NetworkPort `json:"ports,omitempty"`
 	// Backups holds the value of the backups edge.
 	Backups []*NetworkBackup `json:"backups,omitempty"`
+	// Tenant holds the value of the tenant edge.
+	Tenant *Tenant `json:"tenant,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // PortsOrErr returns the Ports value or an error if the edge
@@ -70,6 +74,17 @@ func (e NetworkDeviceEdges) BackupsOrErr() ([]*NetworkBackup, error) {
 	return nil, &NotLoadedError{edge: "backups"}
 }
 
+// TenantOrErr returns the Tenant value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e NetworkDeviceEdges) TenantOrErr() (*Tenant, error) {
+	if e.Tenant != nil {
+		return e.Tenant, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: tenant.Label}
+	}
+	return nil, &NotLoadedError{edge: "tenant"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*NetworkDevice) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -81,6 +96,8 @@ func (*NetworkDevice) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case networkdevice.FieldLastPolled, networkdevice.FieldCreatedAt, networkdevice.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case networkdevice.ForeignKeys[0]: // tenant_network_devices
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -156,6 +173,13 @@ func (_m *NetworkDevice) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
+		case networkdevice.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field tenant_network_devices", value)
+			} else if value.Valid {
+				_m.tenant_network_devices = new(int)
+				*_m.tenant_network_devices = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -177,6 +201,11 @@ func (_m *NetworkDevice) QueryPorts() *NetworkPortQuery {
 // QueryBackups queries the "backups" edge of the NetworkDevice entity.
 func (_m *NetworkDevice) QueryBackups() *NetworkBackupQuery {
 	return NewNetworkDeviceClient(_m.config).QueryBackups(_m)
+}
+
+// QueryTenant queries the "tenant" edge of the NetworkDevice entity.
+func (_m *NetworkDevice) QueryTenant() *TenantQuery {
+	return NewNetworkDeviceClient(_m.config).QueryTenant(_m)
 }
 
 // Update returns a builder for updating this NetworkDevice.

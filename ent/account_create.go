@@ -15,6 +15,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // AccountCreate is the builder for creating a Account entity.
@@ -43,13 +44,13 @@ func (_c *AccountCreate) SetType(v account.Type) *AccountCreate {
 }
 
 // SetBalance sets the "balance" field.
-func (_c *AccountCreate) SetBalance(v float64) *AccountCreate {
+func (_c *AccountCreate) SetBalance(v decimal.Decimal) *AccountCreate {
 	_c.mutation.SetBalance(v)
 	return _c
 }
 
 // SetNillableBalance sets the "balance" field if the given value is not nil.
-func (_c *AccountCreate) SetNillableBalance(v *float64) *AccountCreate {
+func (_c *AccountCreate) SetNillableBalance(v *decimal.Decimal) *AccountCreate {
 	if v != nil {
 		_c.SetBalance(*v)
 	}
@@ -256,7 +257,7 @@ func (_c *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		_node.Type = value
 	}
 	if value, ok := _c.mutation.Balance(); ok {
-		_spec.SetField(account.FieldBalance, field.TypeFloat64, value)
+		_spec.SetField(account.FieldBalance, field.TypeOther, value)
 		_node.Balance = value
 	}
 	if value, ok := _c.mutation.IsIntercompany(); ok {

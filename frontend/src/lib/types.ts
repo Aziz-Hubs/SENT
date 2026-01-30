@@ -13,7 +13,11 @@ export interface UserProfile {
     picture: string;
     given_name: string;
     family_name: string;
+    firstName?: string; // Fallback for non-standard OIDC claims
+    lastName?: string;  // Fallback for non-standard OIDC claims
     tenantId: number;
+    role: string;
+    seniority: string;
 }
 
 export interface Account {
@@ -31,6 +35,8 @@ export interface Product {
     description: string;
     unitCost: number;
     quantity: number;
+    reserved: number;
+    incoming: number;
 }
 
 export interface StockMovement {

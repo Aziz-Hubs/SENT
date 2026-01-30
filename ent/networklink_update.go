@@ -9,6 +9,7 @@ import (
 	"sent/ent/networklink"
 	"sent/ent/networkport"
 	"sent/ent/predicate"
+	"sent/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -19,8 +20,9 @@ import (
 // NetworkLinkUpdate is the builder for updating NetworkLink entities.
 type NetworkLinkUpdate struct {
 	config
-	hooks    []Hook
-	mutation *NetworkLinkMutation
+	hooks     []Hook
+	mutation  *NetworkLinkMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the NetworkLinkUpdate builder.
@@ -79,6 +81,17 @@ func (_u *NetworkLinkUpdate) SetTargetPort(v *NetworkPort) *NetworkLinkUpdate {
 	return _u.SetTargetPortID(v.ID)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *NetworkLinkUpdate) SetTenantID(id int) *NetworkLinkUpdate {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *NetworkLinkUpdate) SetTenant(v *Tenant) *NetworkLinkUpdate {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the NetworkLinkMutation object of the builder.
 func (_u *NetworkLinkUpdate) Mutation() *NetworkLinkMutation {
 	return _u.mutation
@@ -93,6 +106,12 @@ func (_u *NetworkLinkUpdate) ClearSourcePort() *NetworkLinkUpdate {
 // ClearTargetPort clears the "target_port" edge to the NetworkPort entity.
 func (_u *NetworkLinkUpdate) ClearTargetPort() *NetworkLinkUpdate {
 	_u.mutation.ClearTargetPort()
+	return _u
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *NetworkLinkUpdate) ClearTenant() *NetworkLinkUpdate {
+	_u.mutation.ClearTenant()
 	return _u
 }
 
@@ -131,7 +150,16 @@ func (_u *NetworkLinkUpdate) check() error {
 	if _u.mutation.TargetPortCleared() && len(_u.mutation.TargetPortIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "NetworkLink.target_port"`)
 	}
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "NetworkLink.tenant"`)
+	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *NetworkLinkUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *NetworkLinkUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *NetworkLinkUpdate) sqlSave(ctx context.Context) (_node int, err error) {
@@ -210,6 +238,36 @@ func (_u *NetworkLinkUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networklink.TenantTable,
+			Columns: []string{networklink.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networklink.TenantTable,
+			Columns: []string{networklink.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{networklink.Label}
@@ -225,9 +283,10 @@ func (_u *NetworkLinkUpdate) sqlSave(ctx context.Context) (_node int, err error)
 // NetworkLinkUpdateOne is the builder for updating a single NetworkLink entity.
 type NetworkLinkUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *NetworkLinkMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *NetworkLinkMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetProtocol sets the "protocol" field.
@@ -280,6 +339,17 @@ func (_u *NetworkLinkUpdateOne) SetTargetPort(v *NetworkPort) *NetworkLinkUpdate
 	return _u.SetTargetPortID(v.ID)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *NetworkLinkUpdateOne) SetTenantID(id int) *NetworkLinkUpdateOne {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *NetworkLinkUpdateOne) SetTenant(v *Tenant) *NetworkLinkUpdateOne {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the NetworkLinkMutation object of the builder.
 func (_u *NetworkLinkUpdateOne) Mutation() *NetworkLinkMutation {
 	return _u.mutation
@@ -294,6 +364,12 @@ func (_u *NetworkLinkUpdateOne) ClearSourcePort() *NetworkLinkUpdateOne {
 // ClearTargetPort clears the "target_port" edge to the NetworkPort entity.
 func (_u *NetworkLinkUpdateOne) ClearTargetPort() *NetworkLinkUpdateOne {
 	_u.mutation.ClearTargetPort()
+	return _u
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *NetworkLinkUpdateOne) ClearTenant() *NetworkLinkUpdateOne {
+	_u.mutation.ClearTenant()
 	return _u
 }
 
@@ -345,7 +421,16 @@ func (_u *NetworkLinkUpdateOne) check() error {
 	if _u.mutation.TargetPortCleared() && len(_u.mutation.TargetPortIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "NetworkLink.target_port"`)
 	}
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "NetworkLink.tenant"`)
+	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *NetworkLinkUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *NetworkLinkUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *NetworkLinkUpdateOne) sqlSave(ctx context.Context) (_node *NetworkLink, err error) {
@@ -441,6 +526,36 @@ func (_u *NetworkLinkUpdateOne) sqlSave(ctx context.Context) (_node *NetworkLink
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networklink.TenantTable,
+			Columns: []string{networklink.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networklink.TenantTable,
+			Columns: []string{networklink.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &NetworkLink{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

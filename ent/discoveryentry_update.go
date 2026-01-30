@@ -19,8 +19,9 @@ import (
 // DiscoveryEntryUpdate is the builder for updating DiscoveryEntry entities.
 type DiscoveryEntryUpdate struct {
 	config
-	hooks    []Hook
-	mutation *DiscoveryEntryMutation
+	hooks     []Hook
+	mutation  *DiscoveryEntryMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the DiscoveryEntryUpdate builder.
@@ -54,6 +55,66 @@ func (_u *DiscoveryEntryUpdate) SetNillableName(v *string) *DiscoveryEntryUpdate
 	if v != nil {
 		_u.SetName(*v)
 	}
+	return _u
+}
+
+// SetHostname sets the "hostname" field.
+func (_u *DiscoveryEntryUpdate) SetHostname(v string) *DiscoveryEntryUpdate {
+	_u.mutation.SetHostname(v)
+	return _u
+}
+
+// SetNillableHostname sets the "hostname" field if the given value is not nil.
+func (_u *DiscoveryEntryUpdate) SetNillableHostname(v *string) *DiscoveryEntryUpdate {
+	if v != nil {
+		_u.SetHostname(*v)
+	}
+	return _u
+}
+
+// ClearHostname clears the value of the "hostname" field.
+func (_u *DiscoveryEntryUpdate) ClearHostname() *DiscoveryEntryUpdate {
+	_u.mutation.ClearHostname()
+	return _u
+}
+
+// SetIP sets the "ip" field.
+func (_u *DiscoveryEntryUpdate) SetIP(v string) *DiscoveryEntryUpdate {
+	_u.mutation.SetIP(v)
+	return _u
+}
+
+// SetNillableIP sets the "ip" field if the given value is not nil.
+func (_u *DiscoveryEntryUpdate) SetNillableIP(v *string) *DiscoveryEntryUpdate {
+	if v != nil {
+		_u.SetIP(*v)
+	}
+	return _u
+}
+
+// ClearIP clears the value of the "ip" field.
+func (_u *DiscoveryEntryUpdate) ClearIP() *DiscoveryEntryUpdate {
+	_u.mutation.ClearIP()
+	return _u
+}
+
+// SetMAC sets the "mac" field.
+func (_u *DiscoveryEntryUpdate) SetMAC(v string) *DiscoveryEntryUpdate {
+	_u.mutation.SetMAC(v)
+	return _u
+}
+
+// SetNillableMAC sets the "mac" field if the given value is not nil.
+func (_u *DiscoveryEntryUpdate) SetNillableMAC(v *string) *DiscoveryEntryUpdate {
+	if v != nil {
+		_u.SetMAC(*v)
+	}
+	return _u
+}
+
+// ClearMAC clears the value of the "mac" field.
+func (_u *DiscoveryEntryUpdate) ClearMAC() *DiscoveryEntryUpdate {
+	_u.mutation.ClearMAC()
 	return _u
 }
 
@@ -167,6 +228,12 @@ func (_u *DiscoveryEntryUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *DiscoveryEntryUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *DiscoveryEntryUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *DiscoveryEntryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -184,6 +251,24 @@ func (_u *DiscoveryEntryUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(discoveryentry.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Hostname(); ok {
+		_spec.SetField(discoveryentry.FieldHostname, field.TypeString, value)
+	}
+	if _u.mutation.HostnameCleared() {
+		_spec.ClearField(discoveryentry.FieldHostname, field.TypeString)
+	}
+	if value, ok := _u.mutation.IP(); ok {
+		_spec.SetField(discoveryentry.FieldIP, field.TypeString, value)
+	}
+	if _u.mutation.IPCleared() {
+		_spec.ClearField(discoveryentry.FieldIP, field.TypeString)
+	}
+	if value, ok := _u.mutation.MAC(); ok {
+		_spec.SetField(discoveryentry.FieldMAC, field.TypeString, value)
+	}
+	if _u.mutation.MACCleared() {
+		_spec.ClearField(discoveryentry.FieldMAC, field.TypeString)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(discoveryentry.FieldType, field.TypeString, value)
@@ -226,6 +311,7 @@ func (_u *DiscoveryEntryUpdate) sqlSave(ctx context.Context) (_node int, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{discoveryentry.Label}
@@ -241,9 +327,10 @@ func (_u *DiscoveryEntryUpdate) sqlSave(ctx context.Context) (_node int, err err
 // DiscoveryEntryUpdateOne is the builder for updating a single DiscoveryEntry entity.
 type DiscoveryEntryUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *DiscoveryEntryMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *DiscoveryEntryMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetHardwareID sets the "hardware_id" field.
@@ -271,6 +358,66 @@ func (_u *DiscoveryEntryUpdateOne) SetNillableName(v *string) *DiscoveryEntryUpd
 	if v != nil {
 		_u.SetName(*v)
 	}
+	return _u
+}
+
+// SetHostname sets the "hostname" field.
+func (_u *DiscoveryEntryUpdateOne) SetHostname(v string) *DiscoveryEntryUpdateOne {
+	_u.mutation.SetHostname(v)
+	return _u
+}
+
+// SetNillableHostname sets the "hostname" field if the given value is not nil.
+func (_u *DiscoveryEntryUpdateOne) SetNillableHostname(v *string) *DiscoveryEntryUpdateOne {
+	if v != nil {
+		_u.SetHostname(*v)
+	}
+	return _u
+}
+
+// ClearHostname clears the value of the "hostname" field.
+func (_u *DiscoveryEntryUpdateOne) ClearHostname() *DiscoveryEntryUpdateOne {
+	_u.mutation.ClearHostname()
+	return _u
+}
+
+// SetIP sets the "ip" field.
+func (_u *DiscoveryEntryUpdateOne) SetIP(v string) *DiscoveryEntryUpdateOne {
+	_u.mutation.SetIP(v)
+	return _u
+}
+
+// SetNillableIP sets the "ip" field if the given value is not nil.
+func (_u *DiscoveryEntryUpdateOne) SetNillableIP(v *string) *DiscoveryEntryUpdateOne {
+	if v != nil {
+		_u.SetIP(*v)
+	}
+	return _u
+}
+
+// ClearIP clears the value of the "ip" field.
+func (_u *DiscoveryEntryUpdateOne) ClearIP() *DiscoveryEntryUpdateOne {
+	_u.mutation.ClearIP()
+	return _u
+}
+
+// SetMAC sets the "mac" field.
+func (_u *DiscoveryEntryUpdateOne) SetMAC(v string) *DiscoveryEntryUpdateOne {
+	_u.mutation.SetMAC(v)
+	return _u
+}
+
+// SetNillableMAC sets the "mac" field if the given value is not nil.
+func (_u *DiscoveryEntryUpdateOne) SetNillableMAC(v *string) *DiscoveryEntryUpdateOne {
+	if v != nil {
+		_u.SetMAC(*v)
+	}
+	return _u
+}
+
+// ClearMAC clears the value of the "mac" field.
+func (_u *DiscoveryEntryUpdateOne) ClearMAC() *DiscoveryEntryUpdateOne {
+	_u.mutation.ClearMAC()
 	return _u
 }
 
@@ -397,6 +544,12 @@ func (_u *DiscoveryEntryUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *DiscoveryEntryUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *DiscoveryEntryUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *DiscoveryEntryUpdateOne) sqlSave(ctx context.Context) (_node *DiscoveryEntry, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -431,6 +584,24 @@ func (_u *DiscoveryEntryUpdateOne) sqlSave(ctx context.Context) (_node *Discover
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(discoveryentry.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Hostname(); ok {
+		_spec.SetField(discoveryentry.FieldHostname, field.TypeString, value)
+	}
+	if _u.mutation.HostnameCleared() {
+		_spec.ClearField(discoveryentry.FieldHostname, field.TypeString)
+	}
+	if value, ok := _u.mutation.IP(); ok {
+		_spec.SetField(discoveryentry.FieldIP, field.TypeString, value)
+	}
+	if _u.mutation.IPCleared() {
+		_spec.ClearField(discoveryentry.FieldIP, field.TypeString)
+	}
+	if value, ok := _u.mutation.MAC(); ok {
+		_spec.SetField(discoveryentry.FieldMAC, field.TypeString, value)
+	}
+	if _u.mutation.MACCleared() {
+		_spec.ClearField(discoveryentry.FieldMAC, field.TypeString)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(discoveryentry.FieldType, field.TypeString, value)
@@ -473,6 +644,7 @@ func (_u *DiscoveryEntryUpdateOne) sqlSave(ctx context.Context) (_node *Discover
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &DiscoveryEntry{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

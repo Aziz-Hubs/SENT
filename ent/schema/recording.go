@@ -26,5 +26,10 @@ func (Recording) Fields() []ent.Field {
 func (Recording) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("camera", Camera.Type).Ref("recordings").Unique().Required(),
+		edge.From("tenant", Tenant.Type).
+			Ref("recordings").
+			Unique().
+			Required(),
 	}
 }
+

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sent/ent/department"
 	"sent/ent/employee"
+	"sent/ent/tenant"
 	"strings"
 
 	"entgo.io/ent"
@@ -28,6 +29,7 @@ type Department struct {
 	Edges               DepartmentEdges `json:"edges"`
 	department_children *int
 	department_head     *int
+	tenant_departments  *int
 	selectValues        sql.SelectValues
 }
 
@@ -41,9 +43,11 @@ type DepartmentEdges struct {
 	Members []*Employee `json:"members,omitempty"`
 	// Head holds the value of the head edge.
 	Head *Employee `json:"head,omitempty"`
+	// Tenant holds the value of the tenant edge.
+	Tenant *Tenant `json:"tenant,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // ParentOrErr returns the Parent value or an error if the edge
@@ -86,6 +90,17 @@ func (e DepartmentEdges) HeadOrErr() (*Employee, error) {
 	return nil, &NotLoadedError{edge: "head"}
 }
 
+// TenantOrErr returns the Tenant value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e DepartmentEdges) TenantOrErr() (*Tenant, error) {
+	if e.Tenant != nil {
+		return e.Tenant, nil
+	} else if e.loadedTypes[4] {
+		return nil, &NotFoundError{label: tenant.Label}
+	}
+	return nil, &NotLoadedError{edge: "tenant"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Department) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -98,6 +113,8 @@ func (*Department) scanValues(columns []string) ([]any, error) {
 		case department.ForeignKeys[0]: // department_children
 			values[i] = new(sql.NullInt64)
 		case department.ForeignKeys[1]: // department_head
+			values[i] = new(sql.NullInt64)
+		case department.ForeignKeys[2]: // tenant_departments
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -152,6 +169,13 @@ func (_m *Department) assignValues(columns []string, values []any) error {
 				_m.department_head = new(int)
 				*_m.department_head = int(value.Int64)
 			}
+		case department.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field tenant_departments", value)
+			} else if value.Valid {
+				_m.tenant_departments = new(int)
+				*_m.tenant_departments = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -183,6 +207,11 @@ func (_m *Department) QueryMembers() *EmployeeQuery {
 // QueryHead queries the "head" edge of the Department entity.
 func (_m *Department) QueryHead() *EmployeeQuery {
 	return NewDepartmentClient(_m.config).QueryHead(_m)
+}
+
+// QueryTenant queries the "tenant" edge of the Department entity.
+func (_m *Department) QueryTenant() *TenantQuery {
+	return NewDepartmentClient(_m.config).QueryTenant(_m)
 }
 
 // Update returns a builder for updating this Department.

@@ -25,6 +25,7 @@ type StrategicRoadmapQuery struct {
 	predicates []predicate.StrategicRoadmap
 	withTenant *TenantQuery
 	withFKs    bool
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -277,8 +278,9 @@ func (_q *StrategicRoadmapQuery) Clone() *StrategicRoadmapQuery {
 		predicates: append([]predicate.StrategicRoadmap{}, _q.predicates...),
 		withTenant: _q.withTenant.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -391,6 +393,9 @@ func (_q *StrategicRoadmapQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -444,6 +449,9 @@ func (_q *StrategicRoadmapQuery) loadTenant(ctx context.Context, query *TenantQu
 
 func (_q *StrategicRoadmapQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -506,6 +514,9 @@ func (_q *StrategicRoadmapQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -521,6 +532,12 @@ func (_q *StrategicRoadmapQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *StrategicRoadmapQuery) Modify(modifiers ...func(s *sql.Selector)) *StrategicRoadmapSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // StrategicRoadmapGroupBy is the group-by builder for StrategicRoadmap entities.
@@ -611,4 +628,10 @@ func (_s *StrategicRoadmapSelect) sqlScan(ctx context.Context, root *StrategicRo
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *StrategicRoadmapSelect) Modify(modifiers ...func(s *sql.Selector)) *StrategicRoadmapSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

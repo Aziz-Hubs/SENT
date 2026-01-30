@@ -51,7 +51,7 @@ func (e *PayrollEngine) CalculateMonthlyPayout(ctx context.Context, empID int, l
 	}
 
 	agreement := emp.Edges.CompensationAgreements[0]
-	baseSalary := decimal.NewFromFloat(agreement.BaseSalary)
+	baseSalary := agreement.BaseSalary
 	baseCurrency := agreement.Currency
 
 	// 1. Convert to local payout currency
@@ -60,12 +60,16 @@ func (e *PayrollEngine) CalculateMonthlyPayout(ctx context.Context, empID int, l
 		return nil, fmt.Errorf("currency conversion failed: %w", err)
 	}
 
-	// 2. Apply local tax adapters (Mock logic for now)
-	taxRate := decimal.NewFromFloat(0.10) // 10% Flat tax for demo
-	if localCurrency == "JOD" {
-		taxRate = decimal.NewFromFloat(0.07) // 7% SS for Jordan
-	} else if localCurrency == "SAR" {
-		taxRate = decimal.NewFromFloat(0.09) // 9% GOSI for KSA
+	// 2. Apply local tax adapters
+	taxRates := map[string]decimal.Decimal{
+		"JOD": decimal.NewFromFloat(0.07), // 7% SS for Jordan
+		"SAR": decimal.NewFromFloat(0.09), // 9% GOSI for KSA
+		"USD": decimal.NewFromFloat(0.15), // 15% Federal (Simplified)
+	}
+
+	taxRate, ok := taxRates[localCurrency]
+	if !ok {
+		taxRate = decimal.NewFromFloat(0.10) // Fallback 10% Flat
 	}
 
 	taxDeductions := grossPayLocal.Mul(taxRate).RoundBank(2)

@@ -7,6 +7,10 @@ export function Checkout(arg1:stock.SaleRequest):Promise<string>;
 
 export function OpenDrawer():Promise<void>;
 
+export function OpenDrawerNoSale(arg1:string):Promise<void>;
+
 export function PrintReceipt(arg1:stock.SaleRequest):Promise<string>;
+
+export function ReserveStock(arg1:number,arg2:number):Promise<number>;
 
 export function Startup(arg1:context.Context):Promise<void>;

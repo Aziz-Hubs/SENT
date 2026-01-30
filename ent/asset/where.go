@@ -85,6 +85,16 @@ func LastCertifiedAt(v time.Time) predicate.Asset {
 	return predicate.Asset(sql.FieldEQ(FieldLastCertifiedAt, v))
 }
 
+// PurchaseDate applies equality check predicate on the "purchase_date" field. It's identical to PurchaseDateEQ.
+func PurchaseDate(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldEQ(FieldPurchaseDate, v))
+}
+
+// WarrantyExpiry applies equality check predicate on the "warranty_expiry" field. It's identical to WarrantyExpiryEQ.
+func WarrantyExpiry(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldEQ(FieldWarrantyExpiry, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Asset {
 	return predicate.Asset(sql.FieldEQ(FieldCreatedAt, v))
@@ -480,6 +490,16 @@ func StatusNotIn(vs ...Status) predicate.Asset {
 	return predicate.Asset(sql.FieldNotIn(FieldStatus, vs...))
 }
 
+// MetadataIsNil applies the IsNil predicate on the "metadata" field.
+func MetadataIsNil() predicate.Asset {
+	return predicate.Asset(sql.FieldIsNull(FieldMetadata))
+}
+
+// MetadataNotNil applies the NotNil predicate on the "metadata" field.
+func MetadataNotNil() predicate.Asset {
+	return predicate.Asset(sql.FieldNotNull(FieldMetadata))
+}
+
 // LastCertifiedAtEQ applies the EQ predicate on the "last_certified_at" field.
 func LastCertifiedAtEQ(v time.Time) predicate.Asset {
 	return predicate.Asset(sql.FieldEQ(FieldLastCertifiedAt, v))
@@ -528,6 +548,106 @@ func LastCertifiedAtIsNil() predicate.Asset {
 // LastCertifiedAtNotNil applies the NotNil predicate on the "last_certified_at" field.
 func LastCertifiedAtNotNil() predicate.Asset {
 	return predicate.Asset(sql.FieldNotNull(FieldLastCertifiedAt))
+}
+
+// PurchaseDateEQ applies the EQ predicate on the "purchase_date" field.
+func PurchaseDateEQ(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldEQ(FieldPurchaseDate, v))
+}
+
+// PurchaseDateNEQ applies the NEQ predicate on the "purchase_date" field.
+func PurchaseDateNEQ(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldNEQ(FieldPurchaseDate, v))
+}
+
+// PurchaseDateIn applies the In predicate on the "purchase_date" field.
+func PurchaseDateIn(vs ...time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldIn(FieldPurchaseDate, vs...))
+}
+
+// PurchaseDateNotIn applies the NotIn predicate on the "purchase_date" field.
+func PurchaseDateNotIn(vs ...time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldNotIn(FieldPurchaseDate, vs...))
+}
+
+// PurchaseDateGT applies the GT predicate on the "purchase_date" field.
+func PurchaseDateGT(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldGT(FieldPurchaseDate, v))
+}
+
+// PurchaseDateGTE applies the GTE predicate on the "purchase_date" field.
+func PurchaseDateGTE(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldGTE(FieldPurchaseDate, v))
+}
+
+// PurchaseDateLT applies the LT predicate on the "purchase_date" field.
+func PurchaseDateLT(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldLT(FieldPurchaseDate, v))
+}
+
+// PurchaseDateLTE applies the LTE predicate on the "purchase_date" field.
+func PurchaseDateLTE(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldLTE(FieldPurchaseDate, v))
+}
+
+// PurchaseDateIsNil applies the IsNil predicate on the "purchase_date" field.
+func PurchaseDateIsNil() predicate.Asset {
+	return predicate.Asset(sql.FieldIsNull(FieldPurchaseDate))
+}
+
+// PurchaseDateNotNil applies the NotNil predicate on the "purchase_date" field.
+func PurchaseDateNotNil() predicate.Asset {
+	return predicate.Asset(sql.FieldNotNull(FieldPurchaseDate))
+}
+
+// WarrantyExpiryEQ applies the EQ predicate on the "warranty_expiry" field.
+func WarrantyExpiryEQ(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldEQ(FieldWarrantyExpiry, v))
+}
+
+// WarrantyExpiryNEQ applies the NEQ predicate on the "warranty_expiry" field.
+func WarrantyExpiryNEQ(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldNEQ(FieldWarrantyExpiry, v))
+}
+
+// WarrantyExpiryIn applies the In predicate on the "warranty_expiry" field.
+func WarrantyExpiryIn(vs ...time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldIn(FieldWarrantyExpiry, vs...))
+}
+
+// WarrantyExpiryNotIn applies the NotIn predicate on the "warranty_expiry" field.
+func WarrantyExpiryNotIn(vs ...time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldNotIn(FieldWarrantyExpiry, vs...))
+}
+
+// WarrantyExpiryGT applies the GT predicate on the "warranty_expiry" field.
+func WarrantyExpiryGT(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldGT(FieldWarrantyExpiry, v))
+}
+
+// WarrantyExpiryGTE applies the GTE predicate on the "warranty_expiry" field.
+func WarrantyExpiryGTE(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldGTE(FieldWarrantyExpiry, v))
+}
+
+// WarrantyExpiryLT applies the LT predicate on the "warranty_expiry" field.
+func WarrantyExpiryLT(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldLT(FieldWarrantyExpiry, v))
+}
+
+// WarrantyExpiryLTE applies the LTE predicate on the "warranty_expiry" field.
+func WarrantyExpiryLTE(v time.Time) predicate.Asset {
+	return predicate.Asset(sql.FieldLTE(FieldWarrantyExpiry, v))
+}
+
+// WarrantyExpiryIsNil applies the IsNil predicate on the "warranty_expiry" field.
+func WarrantyExpiryIsNil() predicate.Asset {
+	return predicate.Asset(sql.FieldIsNull(FieldWarrantyExpiry))
+}
+
+// WarrantyExpiryNotNil applies the NotNil predicate on the "warranty_expiry" field.
+func WarrantyExpiryNotNil() predicate.Asset {
+	return predicate.Asset(sql.FieldNotNull(FieldWarrantyExpiry))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

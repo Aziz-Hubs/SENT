@@ -9,6 +9,7 @@ import (
 	"sent/ent/networkbackup"
 	"sent/ent/networkdevice"
 	"sent/ent/networkport"
+	"sent/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -160,6 +161,25 @@ func (_c *NetworkDeviceCreate) AddBackups(v ...*NetworkBackup) *NetworkDeviceCre
 		ids[i] = v[i].ID
 	}
 	return _c.AddBackupIDs(ids...)
+}
+
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_c *NetworkDeviceCreate) SetTenantID(id int) *NetworkDeviceCreate {
+	_c.mutation.SetTenantID(id)
+	return _c
+}
+
+// SetNillableTenantID sets the "tenant" edge to the Tenant entity by ID if the given value is not nil.
+func (_c *NetworkDeviceCreate) SetNillableTenantID(id *int) *NetworkDeviceCreate {
+	if id != nil {
+		_c = _c.SetTenantID(*id)
+	}
+	return _c
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_c *NetworkDeviceCreate) SetTenant(v *Tenant) *NetworkDeviceCreate {
+	return _c.SetTenantID(v.ID)
 }
 
 // Mutation returns the NetworkDeviceMutation object of the builder.
@@ -332,6 +352,23 @@ func (_c *NetworkDeviceCreate) createSpec() (*NetworkDevice, *sqlgraph.CreateSpe
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   networkdevice.TenantTable,
+			Columns: []string{networkdevice.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.tenant_network_devices = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

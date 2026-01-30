@@ -11,6 +11,7 @@ import (
 	"sent/ent/networkdevice"
 	"sent/ent/networkport"
 	"sent/ent/predicate"
+	"sent/ent/tenant"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -27,6 +28,9 @@ type NetworkDeviceQuery struct {
 	predicates  []predicate.NetworkDevice
 	withPorts   *NetworkPortQuery
 	withBackups *NetworkBackupQuery
+	withTenant  *TenantQuery
+	withFKs     bool
+	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -100,6 +104,28 @@ func (_q *NetworkDeviceQuery) QueryBackups() *NetworkBackupQuery {
 			sqlgraph.From(networkdevice.Table, networkdevice.FieldID, selector),
 			sqlgraph.To(networkbackup.Table, networkbackup.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, networkdevice.BackupsTable, networkdevice.BackupsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTenant chains the current query on the "tenant" edge.
+func (_q *NetworkDeviceQuery) QueryTenant() *TenantQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(networkdevice.Table, networkdevice.FieldID, selector),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, networkdevice.TenantTable, networkdevice.TenantColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -301,9 +327,11 @@ func (_q *NetworkDeviceQuery) Clone() *NetworkDeviceQuery {
 		predicates:  append([]predicate.NetworkDevice{}, _q.predicates...),
 		withPorts:   _q.withPorts.Clone(),
 		withBackups: _q.withBackups.Clone(),
+		withTenant:  _q.withTenant.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -326,6 +354,17 @@ func (_q *NetworkDeviceQuery) WithBackups(opts ...func(*NetworkBackupQuery)) *Ne
 		opt(query)
 	}
 	_q.withBackups = query
+	return _q
+}
+
+// WithTenant tells the query-builder to eager-load the nodes that are connected to
+// the "tenant" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *NetworkDeviceQuery) WithTenant(opts ...func(*TenantQuery)) *NetworkDeviceQuery {
+	query := (&TenantClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTenant = query
 	return _q
 }
 
@@ -406,12 +445,20 @@ func (_q *NetworkDeviceQuery) prepareQuery(ctx context.Context) error {
 func (_q *NetworkDeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*NetworkDevice, error) {
 	var (
 		nodes       = []*NetworkDevice{}
+		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			_q.withPorts != nil,
 			_q.withBackups != nil,
+			_q.withTenant != nil,
 		}
 	)
+	if _q.withTenant != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, networkdevice.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*NetworkDevice).scanValues(nil, columns)
 	}
@@ -420,6 +467,9 @@ func (_q *NetworkDeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -441,6 +491,12 @@ func (_q *NetworkDeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 		if err := _q.loadBackups(ctx, query, nodes,
 			func(n *NetworkDevice) { n.Edges.Backups = []*NetworkBackup{} },
 			func(n *NetworkDevice, e *NetworkBackup) { n.Edges.Backups = append(n.Edges.Backups, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTenant; query != nil {
+		if err := _q.loadTenant(ctx, query, nodes, nil,
+			func(n *NetworkDevice, e *Tenant) { n.Edges.Tenant = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -509,9 +565,44 @@ func (_q *NetworkDeviceQuery) loadBackups(ctx context.Context, query *NetworkBac
 	}
 	return nil
 }
+func (_q *NetworkDeviceQuery) loadTenant(ctx context.Context, query *TenantQuery, nodes []*NetworkDevice, init func(*NetworkDevice), assign func(*NetworkDevice, *Tenant)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*NetworkDevice)
+	for i := range nodes {
+		if nodes[i].tenant_network_devices == nil {
+			continue
+		}
+		fk := *nodes[i].tenant_network_devices
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(tenant.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tenant_network_devices" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (_q *NetworkDeviceQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -574,6 +665,9 @@ func (_q *NetworkDeviceQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -589,6 +683,12 @@ func (_q *NetworkDeviceQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *NetworkDeviceQuery) Modify(modifiers ...func(s *sql.Selector)) *NetworkDeviceSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // NetworkDeviceGroupBy is the group-by builder for NetworkDevice entities.
@@ -679,4 +779,10 @@ func (_s *NetworkDeviceSelect) sqlScan(ctx context.Context, root *NetworkDeviceQ
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *NetworkDeviceSelect) Modify(modifiers ...func(s *sql.Selector)) *NetworkDeviceSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

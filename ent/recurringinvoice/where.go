@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 // ID filters vertices based on their ID field.
@@ -61,7 +62,7 @@ func Description(v string) predicate.RecurringInvoice {
 }
 
 // Amount applies equality check predicate on the "amount" field. It's identical to AmountEQ.
-func Amount(v float64) predicate.RecurringInvoice {
+func Amount(v decimal.Decimal) predicate.RecurringInvoice {
 	return predicate.RecurringInvoice(sql.FieldEQ(FieldAmount, v))
 }
 
@@ -161,42 +162,42 @@ func DescriptionContainsFold(v string) predicate.RecurringInvoice {
 }
 
 // AmountEQ applies the EQ predicate on the "amount" field.
-func AmountEQ(v float64) predicate.RecurringInvoice {
+func AmountEQ(v decimal.Decimal) predicate.RecurringInvoice {
 	return predicate.RecurringInvoice(sql.FieldEQ(FieldAmount, v))
 }
 
 // AmountNEQ applies the NEQ predicate on the "amount" field.
-func AmountNEQ(v float64) predicate.RecurringInvoice {
+func AmountNEQ(v decimal.Decimal) predicate.RecurringInvoice {
 	return predicate.RecurringInvoice(sql.FieldNEQ(FieldAmount, v))
 }
 
 // AmountIn applies the In predicate on the "amount" field.
-func AmountIn(vs ...float64) predicate.RecurringInvoice {
+func AmountIn(vs ...decimal.Decimal) predicate.RecurringInvoice {
 	return predicate.RecurringInvoice(sql.FieldIn(FieldAmount, vs...))
 }
 
 // AmountNotIn applies the NotIn predicate on the "amount" field.
-func AmountNotIn(vs ...float64) predicate.RecurringInvoice {
+func AmountNotIn(vs ...decimal.Decimal) predicate.RecurringInvoice {
 	return predicate.RecurringInvoice(sql.FieldNotIn(FieldAmount, vs...))
 }
 
 // AmountGT applies the GT predicate on the "amount" field.
-func AmountGT(v float64) predicate.RecurringInvoice {
+func AmountGT(v decimal.Decimal) predicate.RecurringInvoice {
 	return predicate.RecurringInvoice(sql.FieldGT(FieldAmount, v))
 }
 
 // AmountGTE applies the GTE predicate on the "amount" field.
-func AmountGTE(v float64) predicate.RecurringInvoice {
+func AmountGTE(v decimal.Decimal) predicate.RecurringInvoice {
 	return predicate.RecurringInvoice(sql.FieldGTE(FieldAmount, v))
 }
 
 // AmountLT applies the LT predicate on the "amount" field.
-func AmountLT(v float64) predicate.RecurringInvoice {
+func AmountLT(v decimal.Decimal) predicate.RecurringInvoice {
 	return predicate.RecurringInvoice(sql.FieldLT(FieldAmount, v))
 }
 
 // AmountLTE applies the LTE predicate on the "amount" field.
-func AmountLTE(v float64) predicate.RecurringInvoice {
+func AmountLTE(v decimal.Decimal) predicate.RecurringInvoice {
 	return predicate.RecurringInvoice(sql.FieldLTE(FieldAmount, v))
 }
 

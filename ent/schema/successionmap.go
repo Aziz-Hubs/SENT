@@ -33,5 +33,10 @@ func (SuccessionMap) Edges() []ent.Edge {
 			Ref("backup_for").
 			Unique().
 			Required(),
+		edge.From("tenant", Tenant.Type).
+			Ref("succession_maps").
+			Unique().
+			Required(),
 	}
 }
+

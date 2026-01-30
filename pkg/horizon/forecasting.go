@@ -4,6 +4,7 @@ import (
 	"context"
 	"math"
 	"sent/ent"
+	"github.com/shopspring/decimal"
 )
 
 // LinearRegression predicts Y given X using a simple model.
@@ -55,7 +56,7 @@ func (e *ForecastingEngine) GenerateForecast(ctx context.Context, tenantID int) 
 			SetTenant(t).
 			SetYear(2026).
 			SetMonth(i).
-			SetProjectedAmount(math.Max(projected, 0)).
+			SetProjectedAmount(decimal.NewFromFloat(math.Max(projected, 0))).
 			Save(ctx)
 		
 		forecasts = append(forecasts, f)

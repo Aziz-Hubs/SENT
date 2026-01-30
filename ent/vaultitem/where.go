@@ -75,6 +75,16 @@ func Hash(v string) predicate.VaultItem {
 	return predicate.VaultItem(sql.FieldEQ(FieldHash, v))
 }
 
+// FileType applies equality check predicate on the "file_type" field. It's identical to FileTypeEQ.
+func FileType(v string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldEQ(FieldFileType, v))
+}
+
+// Encrypted applies equality check predicate on the "encrypted" field. It's identical to EncryptedEQ.
+func Encrypted(v bool) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldEQ(FieldEncrypted, v))
+}
+
 // Content applies equality check predicate on the "content" field. It's identical to ContentEQ.
 func Content(v string) predicate.VaultItem {
 	return predicate.VaultItem(sql.FieldEQ(FieldContent, v))
@@ -328,6 +338,101 @@ func HashEqualFold(v string) predicate.VaultItem {
 // HashContainsFold applies the ContainsFold predicate on the "hash" field.
 func HashContainsFold(v string) predicate.VaultItem {
 	return predicate.VaultItem(sql.FieldContainsFold(FieldHash, v))
+}
+
+// FileTypeEQ applies the EQ predicate on the "file_type" field.
+func FileTypeEQ(v string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldEQ(FieldFileType, v))
+}
+
+// FileTypeNEQ applies the NEQ predicate on the "file_type" field.
+func FileTypeNEQ(v string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldNEQ(FieldFileType, v))
+}
+
+// FileTypeIn applies the In predicate on the "file_type" field.
+func FileTypeIn(vs ...string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldIn(FieldFileType, vs...))
+}
+
+// FileTypeNotIn applies the NotIn predicate on the "file_type" field.
+func FileTypeNotIn(vs ...string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldNotIn(FieldFileType, vs...))
+}
+
+// FileTypeGT applies the GT predicate on the "file_type" field.
+func FileTypeGT(v string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldGT(FieldFileType, v))
+}
+
+// FileTypeGTE applies the GTE predicate on the "file_type" field.
+func FileTypeGTE(v string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldGTE(FieldFileType, v))
+}
+
+// FileTypeLT applies the LT predicate on the "file_type" field.
+func FileTypeLT(v string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldLT(FieldFileType, v))
+}
+
+// FileTypeLTE applies the LTE predicate on the "file_type" field.
+func FileTypeLTE(v string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldLTE(FieldFileType, v))
+}
+
+// FileTypeContains applies the Contains predicate on the "file_type" field.
+func FileTypeContains(v string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldContains(FieldFileType, v))
+}
+
+// FileTypeHasPrefix applies the HasPrefix predicate on the "file_type" field.
+func FileTypeHasPrefix(v string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldHasPrefix(FieldFileType, v))
+}
+
+// FileTypeHasSuffix applies the HasSuffix predicate on the "file_type" field.
+func FileTypeHasSuffix(v string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldHasSuffix(FieldFileType, v))
+}
+
+// FileTypeIsNil applies the IsNil predicate on the "file_type" field.
+func FileTypeIsNil() predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldIsNull(FieldFileType))
+}
+
+// FileTypeNotNil applies the NotNil predicate on the "file_type" field.
+func FileTypeNotNil() predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldNotNull(FieldFileType))
+}
+
+// FileTypeEqualFold applies the EqualFold predicate on the "file_type" field.
+func FileTypeEqualFold(v string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldEqualFold(FieldFileType, v))
+}
+
+// FileTypeContainsFold applies the ContainsFold predicate on the "file_type" field.
+func FileTypeContainsFold(v string) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldContainsFold(FieldFileType, v))
+}
+
+// EncryptedEQ applies the EQ predicate on the "encrypted" field.
+func EncryptedEQ(v bool) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldEQ(FieldEncrypted, v))
+}
+
+// EncryptedNEQ applies the NEQ predicate on the "encrypted" field.
+func EncryptedNEQ(v bool) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldNEQ(FieldEncrypted, v))
+}
+
+// MetadataIsNil applies the IsNil predicate on the "metadata" field.
+func MetadataIsNil() predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldIsNull(FieldMetadata))
+}
+
+// MetadataNotNil applies the NotNil predicate on the "metadata" field.
+func MetadataNotNil() predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldNotNull(FieldMetadata))
 }
 
 // ContentEQ applies the EQ predicate on the "content" field.

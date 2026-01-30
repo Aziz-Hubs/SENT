@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 // ID filters vertices based on their ID field.
@@ -66,12 +67,12 @@ func Month(v int) predicate.BudgetForecast {
 }
 
 // ProjectedAmount applies equality check predicate on the "projected_amount" field. It's identical to ProjectedAmountEQ.
-func ProjectedAmount(v float64) predicate.BudgetForecast {
+func ProjectedAmount(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldEQ(FieldProjectedAmount, v))
 }
 
 // ActualSpent applies equality check predicate on the "actual_spent" field. It's identical to ActualSpentEQ.
-func ActualSpent(v float64) predicate.BudgetForecast {
+func ActualSpent(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldEQ(FieldActualSpent, v))
 }
 
@@ -161,82 +162,82 @@ func MonthLTE(v int) predicate.BudgetForecast {
 }
 
 // ProjectedAmountEQ applies the EQ predicate on the "projected_amount" field.
-func ProjectedAmountEQ(v float64) predicate.BudgetForecast {
+func ProjectedAmountEQ(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldEQ(FieldProjectedAmount, v))
 }
 
 // ProjectedAmountNEQ applies the NEQ predicate on the "projected_amount" field.
-func ProjectedAmountNEQ(v float64) predicate.BudgetForecast {
+func ProjectedAmountNEQ(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldNEQ(FieldProjectedAmount, v))
 }
 
 // ProjectedAmountIn applies the In predicate on the "projected_amount" field.
-func ProjectedAmountIn(vs ...float64) predicate.BudgetForecast {
+func ProjectedAmountIn(vs ...decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldIn(FieldProjectedAmount, vs...))
 }
 
 // ProjectedAmountNotIn applies the NotIn predicate on the "projected_amount" field.
-func ProjectedAmountNotIn(vs ...float64) predicate.BudgetForecast {
+func ProjectedAmountNotIn(vs ...decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldNotIn(FieldProjectedAmount, vs...))
 }
 
 // ProjectedAmountGT applies the GT predicate on the "projected_amount" field.
-func ProjectedAmountGT(v float64) predicate.BudgetForecast {
+func ProjectedAmountGT(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldGT(FieldProjectedAmount, v))
 }
 
 // ProjectedAmountGTE applies the GTE predicate on the "projected_amount" field.
-func ProjectedAmountGTE(v float64) predicate.BudgetForecast {
+func ProjectedAmountGTE(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldGTE(FieldProjectedAmount, v))
 }
 
 // ProjectedAmountLT applies the LT predicate on the "projected_amount" field.
-func ProjectedAmountLT(v float64) predicate.BudgetForecast {
+func ProjectedAmountLT(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldLT(FieldProjectedAmount, v))
 }
 
 // ProjectedAmountLTE applies the LTE predicate on the "projected_amount" field.
-func ProjectedAmountLTE(v float64) predicate.BudgetForecast {
+func ProjectedAmountLTE(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldLTE(FieldProjectedAmount, v))
 }
 
 // ActualSpentEQ applies the EQ predicate on the "actual_spent" field.
-func ActualSpentEQ(v float64) predicate.BudgetForecast {
+func ActualSpentEQ(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldEQ(FieldActualSpent, v))
 }
 
 // ActualSpentNEQ applies the NEQ predicate on the "actual_spent" field.
-func ActualSpentNEQ(v float64) predicate.BudgetForecast {
+func ActualSpentNEQ(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldNEQ(FieldActualSpent, v))
 }
 
 // ActualSpentIn applies the In predicate on the "actual_spent" field.
-func ActualSpentIn(vs ...float64) predicate.BudgetForecast {
+func ActualSpentIn(vs ...decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldIn(FieldActualSpent, vs...))
 }
 
 // ActualSpentNotIn applies the NotIn predicate on the "actual_spent" field.
-func ActualSpentNotIn(vs ...float64) predicate.BudgetForecast {
+func ActualSpentNotIn(vs ...decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldNotIn(FieldActualSpent, vs...))
 }
 
 // ActualSpentGT applies the GT predicate on the "actual_spent" field.
-func ActualSpentGT(v float64) predicate.BudgetForecast {
+func ActualSpentGT(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldGT(FieldActualSpent, v))
 }
 
 // ActualSpentGTE applies the GTE predicate on the "actual_spent" field.
-func ActualSpentGTE(v float64) predicate.BudgetForecast {
+func ActualSpentGTE(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldGTE(FieldActualSpent, v))
 }
 
 // ActualSpentLT applies the LT predicate on the "actual_spent" field.
-func ActualSpentLT(v float64) predicate.BudgetForecast {
+func ActualSpentLT(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldLT(FieldActualSpent, v))
 }
 
 // ActualSpentLTE applies the LTE predicate on the "actual_spent" field.
-func ActualSpentLTE(v float64) predicate.BudgetForecast {
+func ActualSpentLTE(v decimal.Decimal) predicate.BudgetForecast {
 	return predicate.BudgetForecast(sql.FieldLTE(FieldActualSpent, v))
 }
 

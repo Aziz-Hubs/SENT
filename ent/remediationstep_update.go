@@ -18,8 +18,9 @@ import (
 // RemediationStepUpdate is the builder for updating RemediationStep entities.
 type RemediationStepUpdate struct {
 	config
-	hooks    []Hook
-	mutation *RemediationStepMutation
+	hooks     []Hook
+	mutation  *RemediationStepMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the RemediationStepUpdate builder.
@@ -171,6 +172,12 @@ func (_u *RemediationStepUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *RemediationStepUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *RemediationStepUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *RemediationStepUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -236,6 +243,7 @@ func (_u *RemediationStepUpdate) sqlSave(ctx context.Context) (_node int, err er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{remediationstep.Label}
@@ -251,9 +259,10 @@ func (_u *RemediationStepUpdate) sqlSave(ctx context.Context) (_node int, err er
 // RemediationStepUpdateOne is the builder for updating a single RemediationStep entity.
 type RemediationStepUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *RemediationStepMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *RemediationStepMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetActionName sets the "action_name" field.
@@ -412,6 +421,12 @@ func (_u *RemediationStepUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *RemediationStepUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *RemediationStepUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *RemediationStepUpdateOne) sqlSave(ctx context.Context) (_node *RemediationStep, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -494,6 +509,7 @@ func (_u *RemediationStepUpdateOne) sqlSave(ctx context.Context) (_node *Remedia
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &RemediationStep{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

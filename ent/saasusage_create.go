@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sent/ent/saasidentity"
 	"sent/ent/saasusage"
+	"sent/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -70,6 +71,17 @@ func (_c *SaaSUsageCreate) SetIdentityID(id int) *SaaSUsageCreate {
 // SetIdentity sets the "identity" edge to the SaaSIdentity entity.
 func (_c *SaaSUsageCreate) SetIdentity(v *SaaSIdentity) *SaaSUsageCreate {
 	return _c.SetIdentityID(v.ID)
+}
+
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_c *SaaSUsageCreate) SetTenantID(id int) *SaaSUsageCreate {
+	_c.mutation.SetTenantID(id)
+	return _c
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_c *SaaSUsageCreate) SetTenant(v *Tenant) *SaaSUsageCreate {
+	return _c.SetTenantID(v.ID)
 }
 
 // Mutation returns the SaaSUsageMutation object of the builder.
@@ -143,6 +155,9 @@ func (_c *SaaSUsageCreate) check() error {
 	if len(_c.mutation.IdentityIDs()) == 0 {
 		return &ValidationError{Name: "identity", err: errors.New(`ent: missing required edge "SaaSUsage.identity"`)}
 	}
+	if len(_c.mutation.TenantIDs()) == 0 {
+		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "SaaSUsage.tenant"`)}
+	}
 	return nil
 }
 
@@ -200,6 +215,23 @@ func (_c *SaaSUsageCreate) createSpec() (*SaaSUsage, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.saa_sidentity_usages = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   saasusage.TenantTable,
+			Columns: []string{saasusage.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.tenant_saas_usages = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

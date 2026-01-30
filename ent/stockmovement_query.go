@@ -27,6 +27,7 @@ type StockMovementQuery struct {
 	withProduct *ProductQuery
 	withTenant  *TenantQuery
 	withFKs     bool
+	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -302,8 +303,9 @@ func (_q *StockMovementQuery) Clone() *StockMovementQuery {
 		withProduct: _q.withProduct.Clone(),
 		withTenant:  _q.withTenant.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -335,7 +337,7 @@ func (_q *StockMovementQuery) WithTenant(opts ...func(*TenantQuery)) *StockMovem
 // Example:
 //
 //	var v []struct {
-//		Quantity float64 `json:"quantity,omitempty"`
+//		Quantity decimal.Decimal `json:"quantity,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -358,7 +360,7 @@ func (_q *StockMovementQuery) GroupBy(field string, fields ...string) *StockMove
 // Example:
 //
 //	var v []struct {
-//		Quantity float64 `json:"quantity,omitempty"`
+//		Quantity decimal.Decimal `json:"quantity,omitempty"`
 //	}
 //
 //	client.StockMovement.Query().
@@ -427,6 +429,9 @@ func (_q *StockMovementQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -519,6 +524,9 @@ func (_q *StockMovementQuery) loadTenant(ctx context.Context, query *TenantQuery
 
 func (_q *StockMovementQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -581,6 +589,9 @@ func (_q *StockMovementQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -596,6 +607,12 @@ func (_q *StockMovementQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *StockMovementQuery) Modify(modifiers ...func(s *sql.Selector)) *StockMovementSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // StockMovementGroupBy is the group-by builder for StockMovement entities.
@@ -686,4 +703,10 @@ func (_s *StockMovementSelect) sqlScan(ctx context.Context, root *StockMovementQ
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *StockMovementSelect) Modify(modifiers ...func(s *sql.Selector)) *StockMovementSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

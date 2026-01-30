@@ -19,6 +19,7 @@ func (Voicemail) Fields() []ent.Field {
 		field.String("audio_path"), // Path in SENTvault
 		field.String("transcription").Optional(),
 		field.Time("created_at").Default(time.Now),
+		field.Int("duration").Default(0), // in seconds
 		field.Time("read_at").Optional(),
 	}
 }

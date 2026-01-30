@@ -49,9 +49,11 @@ type Agent struct {
 type AgentEdges struct {
 	// Tenant holds the value of the tenant edge.
 	Tenant *Tenant `json:"tenant,omitempty"`
+	// JobExecutions holds the value of the job_executions edge.
+	JobExecutions []*JobExecution `json:"job_executions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // TenantOrErr returns the Tenant value or an error if the edge
@@ -63,6 +65,15 @@ func (e AgentEdges) TenantOrErr() (*Tenant, error) {
 		return nil, &NotFoundError{label: tenant.Label}
 	}
 	return nil, &NotLoadedError{edge: "tenant"}
+}
+
+// JobExecutionsOrErr returns the JobExecutions value or an error if the edge
+// was not loaded in eager-loading.
+func (e AgentEdges) JobExecutionsOrErr() ([]*JobExecution, error) {
+	if e.loadedTypes[1] {
+		return e.JobExecutions, nil
+	}
+	return nil, &NotLoadedError{edge: "job_executions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -182,6 +193,11 @@ func (_m *Agent) Value(name string) (ent.Value, error) {
 // QueryTenant queries the "tenant" edge of the Agent entity.
 func (_m *Agent) QueryTenant() *TenantQuery {
 	return NewAgentClient(_m.config).QueryTenant(_m)
+}
+
+// QueryJobExecutions queries the "job_executions" edge of the Agent entity.
+func (_m *Agent) QueryJobExecutions() *JobExecutionQuery {
+	return NewAgentClient(_m.config).QueryJobExecutions(_m)
 }
 
 // Update returns a builder for updating this Agent.

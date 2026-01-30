@@ -1,0 +1,75 @@
+# SENT Project - Persistent Instruction Requirements
+
+## 🏗 Core Mandates
+- **Single Binary:** Everything must compile into one `sent` executable. Worker services (SFUs, Scanners, Collectors) are triggered via `sent --mode=worker --service=X`.
+- **Native Bridge:** Use the Wails IPC bridge for ALL internal communication. Do NOT use HTTP/REST for frontend-to-backend calls.
+- **Omnibar (Cmd+K):** Every app must integrate with the global search bridge. Results must be returned as `CategorizedResult[]` to the Go kernel.
+- **Database:** PostgreSQL 16 is mandatory. Use Ent ORM for all data persistence and graph-aware relationships.
+- **No Mock Data:** Static mock data is strictly forbidden in production logic. All features must be wired to the live database from day one.
+- **Identity:** Zitadel (OIDC) is the primary identity provider. Multi-tenancy must be enforced via `Tenant` relationships in all schemas.
+
+## 🛠 Tech Stack & Engine Registry
+- **Backend:** Go 1.24+ (Ent ORM, Atlas Migrations, Cobra CLI, Afero FS).
+- **Frontend:** React 19, TypeScript, Vite, Zustand (State), Immer, React Flow (Graphs).
+    - **State Management:** Use `useAppStore` (Zustand + Immer) for global state (Auth, Division, Context).
+- **UI:** Tailwind CSS v4, ShadCN UI, Lucide Icons. Forced Dark Mode with high-contrast variables.
+    - **Standard:** Use `PageHeader`, `EmptyState`, and `Skeleton` loaders from the design system.
+    - **Standard:** Hardcoded colors are forbidden; use Tailwind variables (`--primary`, etc.).
+- **Real-time:** Centrifugo (WebSockets) for messaging and telemetry streams.
+- **Jobs:** River (Postgres-backed queue) for all background orchestration and retries.
+- **Specialized Engines:**
+    - **Finance:** `shopspring/decimal` for fixed-point math (SENTcapital, SENTpeople).
+    - **Media:** Pion WebRTC + MediaMTX for Video/VoIP (SENTmeet, SENTwave, SENToptic).
+    - **Security:** Expr + Sigma (SENTradar), Nuclei (SENTprobe), Suricata (SENTsonar), Gopacket (SENTguard).
+    - **Reporting:** Maroto v2 for programmatic PDF generation (SENTshield, SENTpeople, SENThorizon).
+    - **BI/Analytics:** TimescaleDB (Hypertables) for metrics; DuckDB for local OLAP (SENTprism).
+    - **Spreadsheet:** Univer SDK for Excel-parity editing (SENTsheet).
+
+## 🔒 Security & Identity Implementation
+- **Token Storage:** Encrypted tokens are persisted in the OS-native keyring via `github.com/zalando/go-keyring` (Service: `sent-core-app`, Key: `auth-token`).
+- **OIDC Flow:** Automated login via Zitadel OIDC. Callback listener runs locally on `http://localhost:4242/auth/callback`.
+- **Agent Identity:** Agents generate a unique UUID and persist it locally (currently in `.agent_id`).
+- **Encryption:** All PII and sensitive fields (Passwords, Payroll) MUST use hardware-accelerated **AES-256-GCM** encryption.
+
+## 📡 Pulse Agent & Telemetry
+- **Hybrid Cache:** Standalone agents MUST use a local SQLite ring-buffer (`agent_cache.db`) to persist telemetry during network partitions.
+- **Polling:** Default metric collection interval is 5 seconds.
+- **Drain Logic:** Cached telemetry must be drained and published to the central hub immediately upon reconnection.
+
+## ⚖️ Engineering Standards (Section 11 Compliance)
+- **Financials:** Zero-rounding error math is non-negotiable. Double-entry integrity must be enforced at the database level.
+- **Audit:** Every "Write" operation MUST trigger an immutable entry in the `AuditLog` table via the global `ent.Mutator` hook.
+- **Migrations:** Use **Atlas** for declarative schema management (`sent/ent/schema`).
+- **Latency:** Core API/Bridge responses must remain below 50ms (P95).
+- **Isolation:** Multi-tenant data fencing is enforced at the ORM level via `Tenant` filtering.
+- **Worker Init:** Background tasks (KioskSync, FIFOWorker, AuditObserver) must be initialized in the Wails `OnStartup` lifecycle.
+- **Linux Specifics:** Use `linux.WebviewGpuPolicyAlways` for high-performance rendering.
+
+## 🏢 Product Ecosystem
+### 🔹 SENTmsp (Infrastructure)
+- **SENTpulse:** RMM with standalone Go-Sysinfo agents and TimescaleDB ingestion.
+- **SENTpilot:** Context-aware PSA/Ticketing with seniority-based WIP limits and remediation playbooks.
+- **SENTnexus:** Graph-based IT Documentation CMDB with 3-hop blast radius analysis.
+- **SENTgrid:** Network orchestration via high-concurrency SSH/Netconf worker pools.
+- **SENThorizon:** vCIO strategic planning with holistic health scoring (40/40/20).
+- **SENTcontrol:** SaaS lifecycle management (M365/Google SDK) with SNI-based egress blocking.
+
+### 🔹 SENTsec (Security)
+- **SENTradar:** SIEM using Sigma rules for sub-10ms real-time log matching.
+- **SENTshield:** GRC manager with automated evidence collection and Maroto-generated audit reports.
+- **SENTreflex:** SOAR automation engine for machine-speed threat containment (River-based).
+- **SENTprobe:** Continuous vulnerability scanning utilizing embedded Nuclei templates.
+- **SENTsonar:** NDR packet analysis and JA3 fingerprinting via Suricata wrapper.
+
+### 🔹 SENTerp (Business)
+- **SENTcapital:** Double-entry immutable ledger with zero-drift decimal math.
+- **SENTpeople:** Multi-currency HRIS/Payroll with succession planning and Maroto-based contracts.
+- **SENTorbit:** CRM with sales pipeline automation and lead enrichment scrapers.
+- **SENTstock:** Barcode-based (React-Zxing) inventory with FIFO/LIFO COGS engines.
+- **SENTvault:** Versioned DMS using Afero with mandatory SHA-256 integrity verification.
+- **SENTchat:** Threaded messaging sidebar embedded globally across all applications.
+
+## 📚 Workflow
+- **Docs First:** Read the corresponding module `.md` in `Docs/Apps/` before any code changes.
+- **Convention:** Mimic existing Ent schema patterns, River job definitions, and Wails bridge naming conventions.
+- **Quality:** Automated tests (Go testing + Vitest) are required for all service logic and UI components.

@@ -4,9 +4,11 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 	"sent/ent/agent"
+	"sent/ent/jobexecution"
 	"sent/ent/predicate"
 	"sent/ent/tenant"
 
@@ -19,12 +21,14 @@ import (
 // AgentQuery is the builder for querying Agent entities.
 type AgentQuery struct {
 	config
-	ctx        *QueryContext
-	order      []agent.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Agent
-	withTenant *TenantQuery
-	withFKs    bool
+	ctx               *QueryContext
+	order             []agent.OrderOption
+	inters            []Interceptor
+	predicates        []predicate.Agent
+	withTenant        *TenantQuery
+	withJobExecutions *JobExecutionQuery
+	withFKs           bool
+	modifiers         []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +80,28 @@ func (_q *AgentQuery) QueryTenant() *TenantQuery {
 			sqlgraph.From(agent.Table, agent.FieldID, selector),
 			sqlgraph.To(tenant.Table, tenant.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, agent.TenantTable, agent.TenantColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryJobExecutions chains the current query on the "job_executions" edge.
+func (_q *AgentQuery) QueryJobExecutions() *JobExecutionQuery {
+	query := (&JobExecutionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(agent.Table, agent.FieldID, selector),
+			sqlgraph.To(jobexecution.Table, jobexecution.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, agent.JobExecutionsTable, agent.JobExecutionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -270,15 +296,17 @@ func (_q *AgentQuery) Clone() *AgentQuery {
 		return nil
 	}
 	return &AgentQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]agent.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.Agent{}, _q.predicates...),
-		withTenant: _q.withTenant.Clone(),
+		config:            _q.config,
+		ctx:               _q.ctx.Clone(),
+		order:             append([]agent.OrderOption{}, _q.order...),
+		inters:            append([]Interceptor{}, _q.inters...),
+		predicates:        append([]predicate.Agent{}, _q.predicates...),
+		withTenant:        _q.withTenant.Clone(),
+		withJobExecutions: _q.withJobExecutions.Clone(),
 		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -290,6 +318,17 @@ func (_q *AgentQuery) WithTenant(opts ...func(*TenantQuery)) *AgentQuery {
 		opt(query)
 	}
 	_q.withTenant = query
+	return _q
+}
+
+// WithJobExecutions tells the query-builder to eager-load the nodes that are connected to
+// the "job_executions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *AgentQuery) WithJobExecutions(opts ...func(*JobExecutionQuery)) *AgentQuery {
+	query := (&JobExecutionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withJobExecutions = query
 	return _q
 }
 
@@ -372,8 +411,9 @@ func (_q *AgentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Agent,
 		nodes       = []*Agent{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			_q.withTenant != nil,
+			_q.withJobExecutions != nil,
 		}
 	)
 	if _q.withTenant != nil {
@@ -391,6 +431,9 @@ func (_q *AgentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Agent,
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -403,6 +446,13 @@ func (_q *AgentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Agent,
 	if query := _q.withTenant; query != nil {
 		if err := _q.loadTenant(ctx, query, nodes, nil,
 			func(n *Agent, e *Tenant) { n.Edges.Tenant = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withJobExecutions; query != nil {
+		if err := _q.loadJobExecutions(ctx, query, nodes,
+			func(n *Agent) { n.Edges.JobExecutions = []*JobExecution{} },
+			func(n *Agent, e *JobExecution) { n.Edges.JobExecutions = append(n.Edges.JobExecutions, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -441,9 +491,43 @@ func (_q *AgentQuery) loadTenant(ctx context.Context, query *TenantQuery, nodes 
 	}
 	return nil
 }
+func (_q *AgentQuery) loadJobExecutions(ctx context.Context, query *JobExecutionQuery, nodes []*Agent, init func(*Agent), assign func(*Agent, *JobExecution)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Agent)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.JobExecution(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(agent.JobExecutionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.agent_job_executions
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "agent_job_executions" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "agent_job_executions" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 
 func (_q *AgentQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -506,6 +590,9 @@ func (_q *AgentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -521,6 +608,12 @@ func (_q *AgentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_q *AgentQuery) Modify(modifiers ...func(s *sql.Selector)) *AgentSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // AgentGroupBy is the group-by builder for Agent entities.
@@ -611,4 +704,10 @@ func (_s *AgentSelect) sqlScan(ctx context.Context, root *AgentQuery, v any) err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (_s *AgentSelect) Modify(modifiers ...func(s *sql.Selector)) *AgentSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

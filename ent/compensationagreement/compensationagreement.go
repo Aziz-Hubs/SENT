@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 const (
@@ -80,6 +81,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultBaseSalary holds the default value on creation for the "base_salary" field.
+	DefaultBaseSalary decimal.Decimal
 	// DefaultCurrency holds the default value on creation for the "currency" field.
 	DefaultCurrency string
 	// DefaultEffectiveDate holds the default value on creation for the "effective_date" field.

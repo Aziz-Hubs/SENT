@@ -22,6 +22,8 @@ const (
 	FieldPasswordEncrypted = "password_encrypted"
 	// FieldLastRevealedAt holds the string denoting the last_revealed_at field in the database.
 	FieldLastRevealedAt = "last_revealed_at"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// EdgeTenant holds the string denoting the tenant edge name in mutations.
@@ -62,6 +64,7 @@ var Columns = []string{
 	FieldUsername,
 	FieldPasswordEncrypted,
 	FieldLastRevealedAt,
+	FieldMetadata,
 	FieldCreatedAt,
 }
 

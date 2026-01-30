@@ -18,13 +18,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // TransactionUpdate is the builder for updating Transaction entities.
 type TransactionUpdate struct {
 	config
-	hooks    []Hook
-	mutation *TransactionMutation
+	hooks     []Hook
+	mutation  *TransactionMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the TransactionUpdate builder.
@@ -62,23 +64,30 @@ func (_u *TransactionUpdate) SetNillableDate(v *time.Time) *TransactionUpdate {
 }
 
 // SetTotalAmount sets the "total_amount" field.
-func (_u *TransactionUpdate) SetTotalAmount(v float64) *TransactionUpdate {
-	_u.mutation.ResetTotalAmount()
+func (_u *TransactionUpdate) SetTotalAmount(v decimal.Decimal) *TransactionUpdate {
 	_u.mutation.SetTotalAmount(v)
 	return _u
 }
 
 // SetNillableTotalAmount sets the "total_amount" field if the given value is not nil.
-func (_u *TransactionUpdate) SetNillableTotalAmount(v *float64) *TransactionUpdate {
+func (_u *TransactionUpdate) SetNillableTotalAmount(v *decimal.Decimal) *TransactionUpdate {
 	if v != nil {
 		_u.SetTotalAmount(*v)
 	}
 	return _u
 }
 
-// AddTotalAmount adds value to the "total_amount" field.
-func (_u *TransactionUpdate) AddTotalAmount(v float64) *TransactionUpdate {
-	_u.mutation.AddTotalAmount(v)
+// SetTaxAmount sets the "tax_amount" field.
+func (_u *TransactionUpdate) SetTaxAmount(v decimal.Decimal) *TransactionUpdate {
+	_u.mutation.SetTaxAmount(v)
+	return _u
+}
+
+// SetNillableTaxAmount sets the "tax_amount" field if the given value is not nil.
+func (_u *TransactionUpdate) SetNillableTaxAmount(v *decimal.Decimal) *TransactionUpdate {
+	if v != nil {
+		_u.SetTaxAmount(*v)
+	}
 	return _u
 }
 
@@ -354,6 +363,12 @@ func (_u *TransactionUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *TransactionUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TransactionUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *TransactionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -373,10 +388,10 @@ func (_u *TransactionUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		_spec.SetField(transaction.FieldDate, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.TotalAmount(); ok {
-		_spec.SetField(transaction.FieldTotalAmount, field.TypeFloat64, value)
+		_spec.SetField(transaction.FieldTotalAmount, field.TypeOther, value)
 	}
-	if value, ok := _u.mutation.AddedTotalAmount(); ok {
-		_spec.AddField(transaction.FieldTotalAmount, field.TypeFloat64, value)
+	if value, ok := _u.mutation.TaxAmount(); ok {
+		_spec.SetField(transaction.FieldTaxAmount, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(transaction.FieldType, field.TypeString, value)
@@ -576,6 +591,7 @@ func (_u *TransactionUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{transaction.Label}
@@ -591,9 +607,10 @@ func (_u *TransactionUpdate) sqlSave(ctx context.Context) (_node int, err error)
 // TransactionUpdateOne is the builder for updating a single Transaction entity.
 type TransactionUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *TransactionMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *TransactionMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetDescription sets the "description" field.
@@ -625,23 +642,30 @@ func (_u *TransactionUpdateOne) SetNillableDate(v *time.Time) *TransactionUpdate
 }
 
 // SetTotalAmount sets the "total_amount" field.
-func (_u *TransactionUpdateOne) SetTotalAmount(v float64) *TransactionUpdateOne {
-	_u.mutation.ResetTotalAmount()
+func (_u *TransactionUpdateOne) SetTotalAmount(v decimal.Decimal) *TransactionUpdateOne {
 	_u.mutation.SetTotalAmount(v)
 	return _u
 }
 
 // SetNillableTotalAmount sets the "total_amount" field if the given value is not nil.
-func (_u *TransactionUpdateOne) SetNillableTotalAmount(v *float64) *TransactionUpdateOne {
+func (_u *TransactionUpdateOne) SetNillableTotalAmount(v *decimal.Decimal) *TransactionUpdateOne {
 	if v != nil {
 		_u.SetTotalAmount(*v)
 	}
 	return _u
 }
 
-// AddTotalAmount adds value to the "total_amount" field.
-func (_u *TransactionUpdateOne) AddTotalAmount(v float64) *TransactionUpdateOne {
-	_u.mutation.AddTotalAmount(v)
+// SetTaxAmount sets the "tax_amount" field.
+func (_u *TransactionUpdateOne) SetTaxAmount(v decimal.Decimal) *TransactionUpdateOne {
+	_u.mutation.SetTaxAmount(v)
+	return _u
+}
+
+// SetNillableTaxAmount sets the "tax_amount" field if the given value is not nil.
+func (_u *TransactionUpdateOne) SetNillableTaxAmount(v *decimal.Decimal) *TransactionUpdateOne {
+	if v != nil {
+		_u.SetTaxAmount(*v)
+	}
 	return _u
 }
 
@@ -930,6 +954,12 @@ func (_u *TransactionUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *TransactionUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TransactionUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transaction, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -966,10 +996,10 @@ func (_u *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transaction
 		_spec.SetField(transaction.FieldDate, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.TotalAmount(); ok {
-		_spec.SetField(transaction.FieldTotalAmount, field.TypeFloat64, value)
+		_spec.SetField(transaction.FieldTotalAmount, field.TypeOther, value)
 	}
-	if value, ok := _u.mutation.AddedTotalAmount(); ok {
-		_spec.AddField(transaction.FieldTotalAmount, field.TypeFloat64, value)
+	if value, ok := _u.mutation.TaxAmount(); ok {
+		_spec.SetField(transaction.FieldTaxAmount, field.TypeOther, value)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(transaction.FieldType, field.TypeString, value)
@@ -1169,6 +1199,7 @@ func (_u *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transaction
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &Transaction{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

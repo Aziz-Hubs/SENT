@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/shopspring/decimal"
 )
 
 // StrategicRoadmap is the model entity for the StrategicRoadmap schema.
@@ -27,7 +28,7 @@ type StrategicRoadmap struct {
 	// Status holds the value of the "status" field.
 	Status strategicroadmap.Status `json:"status,omitempty"`
 	// EstimatedCost holds the value of the "estimated_cost" field.
-	EstimatedCost float64 `json:"estimated_cost,omitempty"`
+	EstimatedCost decimal.Decimal `json:"estimated_cost,omitempty"`
 	// TargetDate holds the value of the "target_date" field.
 	TargetDate time.Time `json:"target_date,omitempty"`
 	// StrategicCommentary holds the value of the "strategic_commentary" field.
@@ -69,7 +70,7 @@ func (*StrategicRoadmap) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case strategicroadmap.FieldEstimatedCost:
-			values[i] = new(sql.NullFloat64)
+			values[i] = new(decimal.Decimal)
 		case strategicroadmap.FieldID:
 			values[i] = new(sql.NullInt64)
 		case strategicroadmap.FieldProjectName, strategicroadmap.FieldDescription, strategicroadmap.FieldPriority, strategicroadmap.FieldStatus, strategicroadmap.FieldStrategicCommentary:
@@ -124,10 +125,10 @@ func (_m *StrategicRoadmap) assignValues(columns []string, values []any) error {
 				_m.Status = strategicroadmap.Status(value.String)
 			}
 		case strategicroadmap.FieldEstimatedCost:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*decimal.Decimal); !ok {
 				return fmt.Errorf("unexpected type %T for field estimated_cost", values[i])
-			} else if value.Valid {
-				_m.EstimatedCost = value.Float64
+			} else if value != nil {
+				_m.EstimatedCost = *value
 			}
 		case strategicroadmap.FieldTargetDate:
 			if value, ok := values[i].(*sql.NullTime); !ok {

@@ -6,6 +6,10 @@ export function GetUserProfile() {
   return window['go']['auth']['AuthBridge']['GetUserProfile']();
 }
 
+export function HasRole(arg1) {
+  return window['go']['auth']['AuthBridge']['HasRole'](arg1);
+}
+
 export function IsAuthenticated() {
   return window['go']['auth']['AuthBridge']['IsAuthenticated']();
 }

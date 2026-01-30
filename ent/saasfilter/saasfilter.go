@@ -15,6 +15,8 @@ const (
 	Label = "saa_sfilter"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
 	// FieldDomainPattern holds the string denoting the domain_pattern field in the database.
 	FieldDomainPattern = "domain_pattern"
 	// FieldAction holds the string denoting the action field in the database.
@@ -52,6 +54,7 @@ const (
 // Columns holds all SQL columns for saasfilter fields.
 var Columns = []string{
 	FieldID,
+	FieldName,
 	FieldDomainPattern,
 	FieldAction,
 	FieldReason,
@@ -83,6 +86,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// NameValidator is a validator for the "name" field. It is called by the builders before save.
+	NameValidator func(string) error
 	// DomainPatternValidator is a validator for the "domain_pattern" field. It is called by the builders before save.
 	DomainPatternValidator func(string) error
 	// DefaultIsSniBased holds the default value on creation for the "is_sni_based" field.
@@ -127,6 +132,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByDomainPattern orders the results by the domain_pattern field.

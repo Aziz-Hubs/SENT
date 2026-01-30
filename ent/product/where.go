@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 // ID filters vertices based on their ID field.
@@ -71,12 +72,12 @@ func Description(v string) predicate.Product {
 }
 
 // UnitCost applies equality check predicate on the "unit_cost" field. It's identical to UnitCostEQ.
-func UnitCost(v float64) predicate.Product {
+func UnitCost(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldEQ(FieldUnitCost, v))
 }
 
 // Quantity applies equality check predicate on the "quantity" field. It's identical to QuantityEQ.
-func Quantity(v float64) predicate.Product {
+func Quantity(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldEQ(FieldQuantity, v))
 }
 
@@ -296,82 +297,82 @@ func DescriptionContainsFold(v string) predicate.Product {
 }
 
 // UnitCostEQ applies the EQ predicate on the "unit_cost" field.
-func UnitCostEQ(v float64) predicate.Product {
+func UnitCostEQ(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldEQ(FieldUnitCost, v))
 }
 
 // UnitCostNEQ applies the NEQ predicate on the "unit_cost" field.
-func UnitCostNEQ(v float64) predicate.Product {
+func UnitCostNEQ(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldNEQ(FieldUnitCost, v))
 }
 
 // UnitCostIn applies the In predicate on the "unit_cost" field.
-func UnitCostIn(vs ...float64) predicate.Product {
+func UnitCostIn(vs ...decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldIn(FieldUnitCost, vs...))
 }
 
 // UnitCostNotIn applies the NotIn predicate on the "unit_cost" field.
-func UnitCostNotIn(vs ...float64) predicate.Product {
+func UnitCostNotIn(vs ...decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldNotIn(FieldUnitCost, vs...))
 }
 
 // UnitCostGT applies the GT predicate on the "unit_cost" field.
-func UnitCostGT(v float64) predicate.Product {
+func UnitCostGT(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldGT(FieldUnitCost, v))
 }
 
 // UnitCostGTE applies the GTE predicate on the "unit_cost" field.
-func UnitCostGTE(v float64) predicate.Product {
+func UnitCostGTE(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldGTE(FieldUnitCost, v))
 }
 
 // UnitCostLT applies the LT predicate on the "unit_cost" field.
-func UnitCostLT(v float64) predicate.Product {
+func UnitCostLT(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldLT(FieldUnitCost, v))
 }
 
 // UnitCostLTE applies the LTE predicate on the "unit_cost" field.
-func UnitCostLTE(v float64) predicate.Product {
+func UnitCostLTE(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldLTE(FieldUnitCost, v))
 }
 
 // QuantityEQ applies the EQ predicate on the "quantity" field.
-func QuantityEQ(v float64) predicate.Product {
+func QuantityEQ(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldEQ(FieldQuantity, v))
 }
 
 // QuantityNEQ applies the NEQ predicate on the "quantity" field.
-func QuantityNEQ(v float64) predicate.Product {
+func QuantityNEQ(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldNEQ(FieldQuantity, v))
 }
 
 // QuantityIn applies the In predicate on the "quantity" field.
-func QuantityIn(vs ...float64) predicate.Product {
+func QuantityIn(vs ...decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldIn(FieldQuantity, vs...))
 }
 
 // QuantityNotIn applies the NotIn predicate on the "quantity" field.
-func QuantityNotIn(vs ...float64) predicate.Product {
+func QuantityNotIn(vs ...decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldNotIn(FieldQuantity, vs...))
 }
 
 // QuantityGT applies the GT predicate on the "quantity" field.
-func QuantityGT(v float64) predicate.Product {
+func QuantityGT(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldGT(FieldQuantity, v))
 }
 
 // QuantityGTE applies the GTE predicate on the "quantity" field.
-func QuantityGTE(v float64) predicate.Product {
+func QuantityGTE(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldGTE(FieldQuantity, v))
 }
 
 // QuantityLT applies the LT predicate on the "quantity" field.
-func QuantityLT(v float64) predicate.Product {
+func QuantityLT(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldLT(FieldQuantity, v))
 }
 
 // QuantityLTE applies the LTE predicate on the "quantity" field.
-func QuantityLTE(v float64) predicate.Product {
+func QuantityLTE(v decimal.Decimal) predicate.Product {
 	return predicate.Product(sql.FieldLTE(FieldQuantity, v))
 }
 

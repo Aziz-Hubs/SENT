@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sent/ent/networklink"
 	"sent/ent/networkport"
+	"sent/ent/tenant"
 	"strings"
 	"time"
 
@@ -27,6 +28,7 @@ type NetworkLink struct {
 	Edges                    NetworkLinkEdges `json:"edges"`
 	network_link_target_port *int
 	source_port_id           *int
+	tenant_network_links     *int
 	selectValues             sql.SelectValues
 }
 
@@ -36,9 +38,11 @@ type NetworkLinkEdges struct {
 	SourcePort *NetworkPort `json:"source_port,omitempty"`
 	// TargetPort holds the value of the target_port edge.
 	TargetPort *NetworkPort `json:"target_port,omitempty"`
+	// Tenant holds the value of the tenant edge.
+	Tenant *Tenant `json:"tenant,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // SourcePortOrErr returns the SourcePort value or an error if the edge
@@ -63,6 +67,17 @@ func (e NetworkLinkEdges) TargetPortOrErr() (*NetworkPort, error) {
 	return nil, &NotLoadedError{edge: "target_port"}
 }
 
+// TenantOrErr returns the Tenant value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e NetworkLinkEdges) TenantOrErr() (*Tenant, error) {
+	if e.Tenant != nil {
+		return e.Tenant, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: tenant.Label}
+	}
+	return nil, &NotLoadedError{edge: "tenant"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*NetworkLink) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -77,6 +92,8 @@ func (*NetworkLink) scanValues(columns []string) ([]any, error) {
 		case networklink.ForeignKeys[0]: // network_link_target_port
 			values[i] = new(sql.NullInt64)
 		case networklink.ForeignKeys[1]: // source_port_id
+			values[i] = new(sql.NullInt64)
+		case networklink.ForeignKeys[2]: // tenant_network_links
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -125,6 +142,13 @@ func (_m *NetworkLink) assignValues(columns []string, values []any) error {
 				_m.source_port_id = new(int)
 				*_m.source_port_id = int(value.Int64)
 			}
+		case networklink.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field tenant_network_links", value)
+			} else if value.Valid {
+				_m.tenant_network_links = new(int)
+				*_m.tenant_network_links = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -146,6 +170,11 @@ func (_m *NetworkLink) QuerySourcePort() *NetworkPortQuery {
 // QueryTargetPort queries the "target_port" edge of the NetworkLink entity.
 func (_m *NetworkLink) QueryTargetPort() *NetworkPortQuery {
 	return NewNetworkLinkClient(_m.config).QueryTargetPort(_m)
+}
+
+// QueryTenant queries the "tenant" edge of the NetworkLink entity.
+func (_m *NetworkLink) QueryTenant() *TenantQuery {
+	return NewNetworkLinkClient(_m.config).QueryTenant(_m)
 }
 
 // Update returns a builder for updating this NetworkLink.

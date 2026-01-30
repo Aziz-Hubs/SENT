@@ -19,8 +19,9 @@ import (
 // HealthScoreSnapshotUpdate is the builder for updating HealthScoreSnapshot entities.
 type HealthScoreSnapshotUpdate struct {
 	config
-	hooks    []Hook
-	mutation *HealthScoreSnapshotMutation
+	hooks     []Hook
+	mutation  *HealthScoreSnapshotMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the HealthScoreSnapshotUpdate builder.
@@ -196,6 +197,12 @@ func (_u *HealthScoreSnapshotUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *HealthScoreSnapshotUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *HealthScoreSnapshotUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *HealthScoreSnapshotUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -270,6 +277,7 @@ func (_u *HealthScoreSnapshotUpdate) sqlSave(ctx context.Context) (_node int, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{healthscoresnapshot.Label}
@@ -285,9 +293,10 @@ func (_u *HealthScoreSnapshotUpdate) sqlSave(ctx context.Context) (_node int, er
 // HealthScoreSnapshotUpdateOne is the builder for updating a single HealthScoreSnapshot entity.
 type HealthScoreSnapshotUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *HealthScoreSnapshotMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *HealthScoreSnapshotMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetOverallScore sets the "overall_score" field.
@@ -470,6 +479,12 @@ func (_u *HealthScoreSnapshotUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *HealthScoreSnapshotUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *HealthScoreSnapshotUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *HealthScoreSnapshotUpdateOne) sqlSave(ctx context.Context) (_node *HealthScoreSnapshot, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -561,6 +576,7 @@ func (_u *HealthScoreSnapshotUpdateOne) sqlSave(ctx context.Context) (_node *Hea
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &HealthScoreSnapshot{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

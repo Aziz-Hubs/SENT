@@ -9,6 +9,7 @@ import (
 	"sent/ent/camera"
 	"sent/ent/predicate"
 	"sent/ent/recording"
+	"sent/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -19,8 +20,9 @@ import (
 // RecordingUpdate is the builder for updating Recording entities.
 type RecordingUpdate struct {
 	config
-	hooks    []Hook
-	mutation *RecordingMutation
+	hooks     []Hook
+	mutation  *RecordingMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the RecordingUpdate builder.
@@ -129,6 +131,17 @@ func (_u *RecordingUpdate) SetCamera(v *Camera) *RecordingUpdate {
 	return _u.SetCameraID(v.ID)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *RecordingUpdate) SetTenantID(id int) *RecordingUpdate {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *RecordingUpdate) SetTenant(v *Tenant) *RecordingUpdate {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the RecordingMutation object of the builder.
 func (_u *RecordingUpdate) Mutation() *RecordingMutation {
 	return _u.mutation
@@ -137,6 +150,12 @@ func (_u *RecordingUpdate) Mutation() *RecordingMutation {
 // ClearCamera clears the "camera" edge to the Camera entity.
 func (_u *RecordingUpdate) ClearCamera() *RecordingUpdate {
 	_u.mutation.ClearCamera()
+	return _u
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *RecordingUpdate) ClearTenant() *RecordingUpdate {
+	_u.mutation.ClearTenant()
 	return _u
 }
 
@@ -172,7 +191,16 @@ func (_u *RecordingUpdate) check() error {
 	if _u.mutation.CameraCleared() && len(_u.mutation.CameraIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Recording.camera"`)
 	}
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Recording.tenant"`)
+	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *RecordingUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *RecordingUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *RecordingUpdate) sqlSave(ctx context.Context) (_node int, err error) {
@@ -240,6 +268,36 @@ func (_u *RecordingUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   recording.TenantTable,
+			Columns: []string{recording.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   recording.TenantTable,
+			Columns: []string{recording.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{recording.Label}
@@ -255,9 +313,10 @@ func (_u *RecordingUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 // RecordingUpdateOne is the builder for updating a single Recording entity.
 type RecordingUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *RecordingMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *RecordingMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetPath sets the "path" field.
@@ -360,6 +419,17 @@ func (_u *RecordingUpdateOne) SetCamera(v *Camera) *RecordingUpdateOne {
 	return _u.SetCameraID(v.ID)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_u *RecordingUpdateOne) SetTenantID(id int) *RecordingUpdateOne {
+	_u.mutation.SetTenantID(id)
+	return _u
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_u *RecordingUpdateOne) SetTenant(v *Tenant) *RecordingUpdateOne {
+	return _u.SetTenantID(v.ID)
+}
+
 // Mutation returns the RecordingMutation object of the builder.
 func (_u *RecordingUpdateOne) Mutation() *RecordingMutation {
 	return _u.mutation
@@ -368,6 +438,12 @@ func (_u *RecordingUpdateOne) Mutation() *RecordingMutation {
 // ClearCamera clears the "camera" edge to the Camera entity.
 func (_u *RecordingUpdateOne) ClearCamera() *RecordingUpdateOne {
 	_u.mutation.ClearCamera()
+	return _u
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (_u *RecordingUpdateOne) ClearTenant() *RecordingUpdateOne {
+	_u.mutation.ClearTenant()
 	return _u
 }
 
@@ -416,7 +492,16 @@ func (_u *RecordingUpdateOne) check() error {
 	if _u.mutation.CameraCleared() && len(_u.mutation.CameraIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Recording.camera"`)
 	}
+	if _u.mutation.TenantCleared() && len(_u.mutation.TenantIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Recording.tenant"`)
+	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *RecordingUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *RecordingUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
 func (_u *RecordingUpdateOne) sqlSave(ctx context.Context) (_node *Recording, err error) {
@@ -501,6 +586,36 @@ func (_u *RecordingUpdateOne) sqlSave(ctx context.Context) (_node *Recording, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TenantCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   recording.TenantTable,
+			Columns: []string{recording.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   recording.TenantTable,
+			Columns: []string{recording.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &Recording{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

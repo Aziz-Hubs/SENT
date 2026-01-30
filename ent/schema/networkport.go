@@ -34,5 +34,9 @@ func (NetworkPort) Edges() []ent.Edge {
 			Required(),
 		edge.To("connected_to", NetworkLink.Type).
 			StorageKey(edge.Column("source_port_id")),
+		edge.From("tenant", Tenant.Type).
+			Ref("network_ports").
+			Unique().
+			Required(),
 	}
 }

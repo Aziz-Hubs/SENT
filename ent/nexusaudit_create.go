@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"sent/ent/nexusaudit"
+	"sent/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -94,6 +95,17 @@ func (_c *NexusAuditCreate) SetMetadata(v map[string]interface{}) *NexusAuditCre
 	return _c
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_c *NexusAuditCreate) SetTenantID(id int) *NexusAuditCreate {
+	_c.mutation.SetTenantID(id)
+	return _c
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_c *NexusAuditCreate) SetTenant(v *Tenant) *NexusAuditCreate {
+	return _c.SetTenantID(v.ID)
+}
+
 // Mutation returns the NexusAuditMutation object of the builder.
 func (_c *NexusAuditCreate) Mutation() *NexusAuditMutation {
 	return _c.mutation
@@ -145,6 +157,9 @@ func (_c *NexusAuditCreate) check() error {
 	}
 	if _, ok := _c.mutation.Timestamp(); !ok {
 		return &ValidationError{Name: "timestamp", err: errors.New(`ent: missing required field "NexusAudit.timestamp"`)}
+	}
+	if len(_c.mutation.TenantIDs()) == 0 {
+		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "NexusAudit.tenant"`)}
 	}
 	return nil
 }
@@ -199,6 +214,23 @@ func (_c *NexusAuditCreate) createSpec() (*NexusAudit, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Metadata(); ok {
 		_spec.SetField(nexusaudit.FieldMetadata, field.TypeJSON, value)
 		_node.Metadata = value
+	}
+	if nodes := _c.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   nexusaudit.TenantTable,
+			Columns: []string{nexusaudit.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.tenant_nexus_audits = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

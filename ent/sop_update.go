@@ -21,8 +21,9 @@ import (
 // SOPUpdate is the builder for updating SOP entities.
 type SOPUpdate struct {
 	config
-	hooks    []Hook
-	mutation *SOPMutation
+	hooks     []Hook
+	mutation  *SOPMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the SOPUpdate builder.
@@ -214,6 +215,12 @@ func (_u *SOPUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *SOPUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SOPUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *SOPUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -334,6 +341,7 @@ func (_u *SOPUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{sop.Label}
@@ -349,9 +357,10 @@ func (_u *SOPUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 // SOPUpdateOne is the builder for updating a single SOP entity.
 type SOPUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *SOPMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *SOPMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetTitle sets the "title" field.
@@ -550,6 +559,12 @@ func (_u *SOPUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (_u *SOPUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SOPUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
+}
+
 func (_u *SOPUpdateOne) sqlSave(ctx context.Context) (_node *SOP, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -687,6 +702,7 @@ func (_u *SOPUpdateOne) sqlSave(ctx context.Context) (_node *SOP, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(_u.modifiers...)
 	_node = &SOP{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

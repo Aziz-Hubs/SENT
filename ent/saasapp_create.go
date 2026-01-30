@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // SaaSAppCreate is the builder for creating a SaaSApp entity.
@@ -80,6 +81,20 @@ func (_c *SaaSAppCreate) SetNillableIsManaged(v *bool) *SaaSAppCreate {
 // SetConfig sets the "config" field.
 func (_c *SaaSAppCreate) SetConfig(v map[string]interface{}) *SaaSAppCreate {
 	_c.mutation.SetConfig(v)
+	return _c
+}
+
+// SetMonthlyPrice sets the "monthly_price" field.
+func (_c *SaaSAppCreate) SetMonthlyPrice(v decimal.Decimal) *SaaSAppCreate {
+	_c.mutation.SetMonthlyPrice(v)
+	return _c
+}
+
+// SetNillableMonthlyPrice sets the "monthly_price" field if the given value is not nil.
+func (_c *SaaSAppCreate) SetNillableMonthlyPrice(v *decimal.Decimal) *SaaSAppCreate {
+	if v != nil {
+		_c.SetMonthlyPrice(*v)
+	}
 	return _c
 }
 
@@ -195,6 +210,10 @@ func (_c *SaaSAppCreate) defaults() {
 		v := saasapp.DefaultConfig
 		_c.mutation.SetConfig(v)
 	}
+	if _, ok := _c.mutation.MonthlyPrice(); !ok {
+		v := saasapp.DefaultMonthlyPrice
+		_c.mutation.SetMonthlyPrice(v)
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := saasapp.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
@@ -287,6 +306,10 @@ func (_c *SaaSAppCreate) createSpec() (*SaaSApp, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Config(); ok {
 		_spec.SetField(saasapp.FieldConfig, field.TypeJSON, value)
 		_node.Config = value
+	}
+	if value, ok := _c.mutation.MonthlyPrice(); ok {
+		_spec.SetField(saasapp.FieldMonthlyPrice, field.TypeOther, value)
+		_node.MonthlyPrice = value
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(saasapp.FieldCreatedAt, field.TypeTime, value)

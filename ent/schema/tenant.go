@@ -2,8 +2,10 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 	"time"
 )
 
@@ -19,7 +21,11 @@ func (Tenant) Fields() []ent.Field {
 		field.String("domain").Unique(),
 		field.Time("created_at").Default(time.Now),
 		field.Bool("active").Default(true),
-		field.Float("transaction_limit").Default(1000.0),
+		field.Other("transaction_limit", decimal.Decimal{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "numeric(19,4)",
+			}).
+			Default(decimal.NewFromFloat(1000.0)),
 	}
 }
 
@@ -62,7 +68,26 @@ func (Tenant) Edges() []ent.Edge {
 		edge.To("journal_entries", JournalEntry.Type),
 		edge.To("recurring_invoices", RecurringInvoice.Type),
 		edge.To("inventory_reservations", InventoryReservation.Type),
+		edge.To("departments", Department.Type),
+		edge.To("permissions", Permission.Type),
+		edge.To("asset_types", AssetType.Type),
+		edge.To("detection_events", DetectionEvent.Type),
+		edge.To("saas_identities", SaaSIdentity.Type),
+		edge.To("saas_usages", SaaSUsage.Type),
+		edge.To("recordings", Recording.Type),
+		edge.To("network_links", NetworkLink.Type),
+		edge.To("network_ports", NetworkPort.Type),
+		edge.To("nexus_audits", NexusAudit.Type),
+		edge.To("succession_maps", SuccessionMap.Type),
 		edge.To("customer_account", Account.Type).
 			Unique(),
+		edge.To("scripts", Script.Type),
+		edge.To("jobs", Job.Type),
+		edge.To("time_off_requests", TimeOffRequest.Type),
+		edge.To("time_off_policies", TimeOffPolicy.Type),
+		edge.To("time_off_balances", TimeOffBalance.Type),
+		edge.To("review_cycles", ReviewCycle.Type),
+		edge.To("performance_reviews", PerformanceReview.Type),
+		edge.To("goals", Goal.Type),
 	}
 }

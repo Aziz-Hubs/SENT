@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shopspring/decimal"
 )
 
 const (
@@ -21,6 +22,8 @@ const (
 	FieldDate = "date"
 	// FieldTotalAmount holds the string denoting the total_amount field in the database.
 	FieldTotalAmount = "total_amount"
+	// FieldTaxAmount holds the string denoting the tax_amount field in the database.
+	FieldTaxAmount = "tax_amount"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
 	// FieldReference holds the string denoting the reference field in the database.
@@ -88,6 +91,7 @@ var Columns = []string{
 	FieldDescription,
 	FieldDate,
 	FieldTotalAmount,
+	FieldTaxAmount,
 	FieldType,
 	FieldReference,
 	FieldUUID,
@@ -122,7 +126,9 @@ var (
 	// DefaultDate holds the default value on creation for the "date" field.
 	DefaultDate func() time.Time
 	// DefaultTotalAmount holds the default value on creation for the "total_amount" field.
-	DefaultTotalAmount float64
+	DefaultTotalAmount decimal.Decimal
+	// DefaultTaxAmount holds the default value on creation for the "tax_amount" field.
+	DefaultTaxAmount decimal.Decimal
 	// DefaultUUID holds the default value on creation for the "uuid" field.
 	DefaultUUID func() string
 	// DefaultIsIntercompany holds the default value on creation for the "is_intercompany" field.
@@ -178,6 +184,11 @@ func ByDate(opts ...sql.OrderTermOption) OrderOption {
 // ByTotalAmount orders the results by the total_amount field.
 func ByTotalAmount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTotalAmount, opts...).ToFunc()
+}
+
+// ByTaxAmount orders the results by the tax_amount field.
+func ByTaxAmount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTaxAmount, opts...).ToFunc()
 }
 
 // ByType orders the results by the type field.

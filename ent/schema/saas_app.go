@@ -2,8 +2,10 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 	"time"
 )
 
@@ -21,6 +23,12 @@ func (SaaSApp) Fields() []ent.Field {
 		field.String("url").Optional(),
 		field.Bool("is_managed").Default(false),
 		field.JSON("config", map[string]interface{}{}).Default(map[string]interface{}{}),
+		field.Other("monthly_price", decimal.Decimal{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "numeric(19,4)",
+			}).
+			Default(decimal.Zero).
+			Optional(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}

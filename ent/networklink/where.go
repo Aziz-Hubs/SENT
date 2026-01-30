@@ -216,6 +216,29 @@ func HasTargetPortWith(preds ...predicate.NetworkPort) predicate.NetworkLink {
 	})
 }
 
+// HasTenant applies the HasEdge predicate on the "tenant" edge.
+func HasTenant() predicate.NetworkLink {
+	return predicate.NetworkLink(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, TenantTable, TenantColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTenantWith applies the HasEdge predicate on the "tenant" edge with a given conditions (other predicates).
+func HasTenantWith(preds ...predicate.Tenant) predicate.NetworkLink {
+	return predicate.NetworkLink(func(s *sql.Selector) {
+		step := newTenantStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.NetworkLink) predicate.NetworkLink {
 	return predicate.NetworkLink(sql.AndPredicates(predicates...))

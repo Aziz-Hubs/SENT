@@ -15,6 +15,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shopspring/decimal"
 )
 
 // JournalEntryCreate is the builder for creating a JournalEntry entity.
@@ -25,8 +26,16 @@ type JournalEntryCreate struct {
 }
 
 // SetAmount sets the "amount" field.
-func (_c *JournalEntryCreate) SetAmount(v float64) *JournalEntryCreate {
+func (_c *JournalEntryCreate) SetAmount(v decimal.Decimal) *JournalEntryCreate {
 	_c.mutation.SetAmount(v)
+	return _c
+}
+
+// SetNillableAmount sets the "amount" field if the given value is not nil.
+func (_c *JournalEntryCreate) SetNillableAmount(v *decimal.Decimal) *JournalEntryCreate {
+	if v != nil {
+		_c.SetAmount(*v)
+	}
 	return _c
 }
 
@@ -173,6 +182,10 @@ func (_c *JournalEntryCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *JournalEntryCreate) defaults() {
+	if _, ok := _c.mutation.Amount(); !ok {
+		v := journalentry.DefaultAmount
+		_c.mutation.SetAmount(v)
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := journalentry.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
@@ -240,7 +253,7 @@ func (_c *JournalEntryCreate) createSpec() (*JournalEntry, *sqlgraph.CreateSpec)
 		_spec = sqlgraph.NewCreateSpec(journalentry.Table, sqlgraph.NewFieldSpec(journalentry.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.Amount(); ok {
-		_spec.SetField(journalentry.FieldAmount, field.TypeFloat64, value)
+		_spec.SetField(journalentry.FieldAmount, field.TypeOther, value)
 		_node.Amount = value
 	}
 	if value, ok := _c.mutation.Direction(); ok {

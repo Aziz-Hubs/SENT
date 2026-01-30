@@ -17,6 +17,9 @@ func (DiscoveryEntry) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("hardware_id").Unique(),
 		field.String("name"),
+		field.String("hostname").Optional(),
+		field.String("ip").Optional(),
+		field.String("mac").Optional(),
 		field.String("type"),
 		field.JSON("metadata", map[string]interface{}{}),
 		field.Enum("status").Values("pending", "approved", "rejected").Default("pending"),

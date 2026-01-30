@@ -1,0 +1,14 @@
+Steps:
+  FirstStep:
+    instanceName: "SENT"
+    org:
+      name: "SENT LLC"
+      user:
+        userName: "aziz-admin"
+        human:
+          firstName: "Aziz"
+          lastName: "Admin"
+          email:
+            email: "admin@sent.jo"
+            isVerified: true
+        password: "Password123!"

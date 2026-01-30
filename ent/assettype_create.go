@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sent/ent/asset"
 	"sent/ent/assettype"
+	"sent/ent/tenant"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -55,6 +56,17 @@ func (_c *AssetTypeCreate) AddAssets(v ...*Asset) *AssetTypeCreate {
 	return _c.AddAssetIDs(ids...)
 }
 
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
+func (_c *AssetTypeCreate) SetTenantID(id int) *AssetTypeCreate {
+	_c.mutation.SetTenantID(id)
+	return _c
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (_c *AssetTypeCreate) SetTenant(v *Tenant) *AssetTypeCreate {
+	return _c.SetTenantID(v.ID)
+}
+
 // Mutation returns the AssetTypeMutation object of the builder.
 func (_c *AssetTypeCreate) Mutation() *AssetTypeMutation {
 	return _c.mutation
@@ -91,6 +103,9 @@ func (_c *AssetTypeCreate) ExecX(ctx context.Context) {
 func (_c *AssetTypeCreate) check() error {
 	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "AssetType.name"`)}
+	}
+	if len(_c.mutation.TenantIDs()) == 0 {
+		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "AssetType.tenant"`)}
 	}
 	return nil
 }
@@ -140,6 +155,23 @@ func (_c *AssetTypeCreate) createSpec() (*AssetType, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   assettype.TenantTable,
+			Columns: []string{assettype.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.tenant_asset_types = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

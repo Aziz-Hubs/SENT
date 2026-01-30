@@ -75,6 +75,11 @@ func CreatedAt(v time.Time) predicate.Voicemail {
 	return predicate.Voicemail(sql.FieldEQ(FieldCreatedAt, v))
 }
 
+// Duration applies equality check predicate on the "duration" field. It's identical to DurationEQ.
+func Duration(v int) predicate.Voicemail {
+	return predicate.Voicemail(sql.FieldEQ(FieldDuration, v))
+}
+
 // ReadAt applies equality check predicate on the "read_at" field. It's identical to ReadAtEQ.
 func ReadAt(v time.Time) predicate.Voicemail {
 	return predicate.Voicemail(sql.FieldEQ(FieldReadAt, v))
@@ -323,6 +328,46 @@ func CreatedAtLT(v time.Time) predicate.Voicemail {
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.Voicemail {
 	return predicate.Voicemail(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// DurationEQ applies the EQ predicate on the "duration" field.
+func DurationEQ(v int) predicate.Voicemail {
+	return predicate.Voicemail(sql.FieldEQ(FieldDuration, v))
+}
+
+// DurationNEQ applies the NEQ predicate on the "duration" field.
+func DurationNEQ(v int) predicate.Voicemail {
+	return predicate.Voicemail(sql.FieldNEQ(FieldDuration, v))
+}
+
+// DurationIn applies the In predicate on the "duration" field.
+func DurationIn(vs ...int) predicate.Voicemail {
+	return predicate.Voicemail(sql.FieldIn(FieldDuration, vs...))
+}
+
+// DurationNotIn applies the NotIn predicate on the "duration" field.
+func DurationNotIn(vs ...int) predicate.Voicemail {
+	return predicate.Voicemail(sql.FieldNotIn(FieldDuration, vs...))
+}
+
+// DurationGT applies the GT predicate on the "duration" field.
+func DurationGT(v int) predicate.Voicemail {
+	return predicate.Voicemail(sql.FieldGT(FieldDuration, v))
+}
+
+// DurationGTE applies the GTE predicate on the "duration" field.
+func DurationGTE(v int) predicate.Voicemail {
+	return predicate.Voicemail(sql.FieldGTE(FieldDuration, v))
+}
+
+// DurationLT applies the LT predicate on the "duration" field.
+func DurationLT(v int) predicate.Voicemail {
+	return predicate.Voicemail(sql.FieldLT(FieldDuration, v))
+}
+
+// DurationLTE applies the LTE predicate on the "duration" field.
+func DurationLTE(v int) predicate.Voicemail {
+	return predicate.Voicemail(sql.FieldLTE(FieldDuration, v))
 }
 
 // ReadAtEQ applies the EQ predicate on the "read_at" field.

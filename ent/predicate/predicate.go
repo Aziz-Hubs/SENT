@@ -51,6 +51,9 @@ type DiscoveryEntry func(*sql.Selector)
 // Employee is the predicate function for employee builders.
 type Employee func(*sql.Selector)
 
+// Goal is the predicate function for goal builders.
+type Goal func(*sql.Selector)
+
 // HealthScoreSnapshot is the predicate function for healthscoresnapshot builders.
 type HealthScoreSnapshot func(*sql.Selector)
 
@@ -59,6 +62,12 @@ type IVRFlow func(*sql.Selector)
 
 // InventoryReservation is the predicate function for inventoryreservation builders.
 type InventoryReservation func(*sql.Selector)
+
+// Job is the predicate function for job builders.
+type Job func(*sql.Selector)
+
+// JobExecution is the predicate function for jobexecution builders.
+type JobExecution func(*sql.Selector)
 
 // JournalEntry is the predicate function for journalentry builders.
 type JournalEntry func(*sql.Selector)
@@ -84,6 +93,9 @@ type NexusAudit func(*sql.Selector)
 // OneTimeLink is the predicate function for onetimelink builders.
 type OneTimeLink func(*sql.Selector)
 
+// PerformanceReview is the predicate function for performancereview builders.
+type PerformanceReview func(*sql.Selector)
+
 // Permission is the predicate function for permission builders.
 type Permission func(*sql.Selector)
 
@@ -99,6 +111,9 @@ type RecurringInvoice func(*sql.Selector)
 // RemediationStep is the predicate function for remediationstep builders.
 type RemediationStep func(*sql.Selector)
 
+// ReviewCycle is the predicate function for reviewcycle builders.
+type ReviewCycle func(*sql.Selector)
+
 // SOP is the predicate function for sop builders.
 type SOP func(*sql.Selector)
 
@@ -113,6 +128,9 @@ type SaaSIdentity func(*sql.Selector)
 
 // SaaSUsage is the predicate function for saasusage builders.
 type SaaSUsage func(*sql.Selector)
+
+// Script is the predicate function for script builders.
+type Script func(*sql.Selector)
 
 // ServiceRate is the predicate function for servicerate builders.
 type ServiceRate func(*sql.Selector)
@@ -134,6 +152,15 @@ type Ticket func(*sql.Selector)
 
 // TimeEntry is the predicate function for timeentry builders.
 type TimeEntry func(*sql.Selector)
+
+// TimeOffBalance is the predicate function for timeoffbalance builders.
+type TimeOffBalance func(*sql.Selector)
+
+// TimeOffPolicy is the predicate function for timeoffpolicy builders.
+type TimeOffPolicy func(*sql.Selector)
+
+// TimeOffRequest is the predicate function for timeoffrequest builders.
+type TimeOffRequest func(*sql.Selector)
 
 // Transaction is the predicate function for transaction builders.
 type Transaction func(*sql.Selector)

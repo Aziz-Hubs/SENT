@@ -12,7 +12,10 @@ import (
 	"sent/ent/account"
 	"sent/ent/journalentry"
 	"sent/ent/ledgerentry"
+	"sent/ent/tenant"
 	"sent/ent/transaction"
+	"sent/ent/user"
+	"sent/pkg/auth"
 	"github.com/shopspring/decimal"
 	"github.com/jung-kurt/gofpdf/v2"
 )
@@ -20,8 +23,9 @@ import (
 // CapitalBridge serves as the interface for financial operations.
 // It handles accounts, transactions, and reporting.
 type CapitalBridge struct {
-	ctx context.Context
-	db  *ent.Client
+	ctx  context.Context
+	db   *ent.Client
+	auth *auth.AuthBridge
 }
 
 // AccountDTO represents a financial account.
@@ -49,8 +53,8 @@ type TransactionRequest struct {
 }
 
 // NewCapitalBridge initializes a new CapitalBridge.
-func NewCapitalBridge(db *ent.Client) *CapitalBridge {
-	return &CapitalBridge{db: db}
+func NewCapitalBridge(db *ent.Client, auth *auth.AuthBridge) *CapitalBridge {
+	return &CapitalBridge{db: db, auth: auth}
 }
 
 // Startup initializes the bridge context.
@@ -59,19 +63,34 @@ func (c *CapitalBridge) Startup(ctx context.Context) {
 }
 
 // GetAccounts retrieves all financial accounts.
-// If no accounts exist, it seeds a default chart of accounts.
 func (c *CapitalBridge) GetAccounts() ([]AccountDTO, error) {
-	accounts, err := c.db.Account.Query().All(c.ctx)
+	profile, err := c.auth.GetUserProfile()
+	if err != nil {
+		return nil, err
+	}
+	tenantID := profile.TenantID
+
+	accounts, err := c.db.Account.Query().
+		Where(account.HasTenantWith(tenant.ID(tenantID))).
+		All(c.ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query accounts: %w", err)
 	}
 
 	if len(accounts) == 0 {
-		if err := c.seedDefaultAccounts(); err != nil {
+		// Fetch tenant
+		tnt, err := c.db.Tenant.Get(c.ctx, tenantID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get tenant for seeding: %w", err)
+		}
+
+		if err := c.seedDefaultAccounts(tnt); err != nil {
 			return nil, err
 		}
-		// Re-query after seeding
-		accounts, err = c.db.Account.Query().All(c.ctx)
+		// Re-query after seeding with tenant filter
+		accounts, err = c.db.Account.Query().
+			Where(account.HasTenantWith(tenant.ID(tenantID))).
+			All(c.ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -79,33 +98,29 @@ func (c *CapitalBridge) GetAccounts() ([]AccountDTO, error) {
 
 	dtos := make([]AccountDTO, len(accounts))
 	for i, a := range accounts {
+		bal, _ := a.Balance.Float64()
 		dtos[i] = AccountDTO{
 			ID:      a.ID,
 			Name:    a.Name,
 			Number:  a.Number,
 			Type:    string(a.Type),
-			Balance: a.Balance,
+			Balance: bal,
 		}
 	}
 	return dtos, nil
 }
 
 // seedDefaultAccounts creates a basic chart of accounts for a new system.
-func (c *CapitalBridge) seedDefaultAccounts() error {
-	t, err := c.db.Tenant.Query().First(c.ctx)
-	if err != nil && !ent.IsNotFound(err) {
-		return err
+func (c *CapitalBridge) seedDefaultAccounts(t *ent.Tenant) error {
+	// Check existence
+	exists, _ := c.db.Account.Query().Where(account.HasTenantWith(tenant.ID(t.ID))).Exist(c.ctx)
+	if exists {
+		return nil
 	}
-	if t == nil {
-		t, err = c.db.Tenant.Create().SetName("SENT LLC").SetDomain("sent.jo").Save(c.ctx)
-		if err != nil {
-			return err
-		}
-	}
-	
+
 	// Create default accounts
 	bulk := []*ent.AccountCreate{
-		c.db.Account.Create().SetName("Operating Cash").SetNumber("1000").SetType(account.TypeAsset).SetTenant(t).SetBalance(10000),
+		c.db.Account.Create().SetName("Operating Cash").SetNumber("1000").SetType(account.TypeAsset).SetTenant(t).SetBalance(decimal.NewFromInt(10000)),
 		c.db.Account.Create().SetName("Revenue").SetNumber("4000").SetType(account.TypeRevenue).SetTenant(t),
 		c.db.Account.Create().SetName("Rent Expense").SetNumber("5000").SetType(account.TypeExpense).SetTenant(t),
 	}
@@ -128,7 +143,14 @@ type TransactionDTO struct {
 
 // GetTransactions retrieves all transactions for the current tenant.
 func (c *CapitalBridge) GetTransactions() ([]TransactionDTO, error) {
+	profile, err := c.auth.GetUserProfile()
+	if err != nil {
+		return nil, err
+	}
+	tenantID := profile.TenantID
+
 	txs, err := c.db.Transaction.Query().
+		Where(transaction.HasTenantWith(tenant.ID(tenantID))).
 		Order(ent.Desc(transaction.FieldDate)).
 		All(c.ctx)
 	if err != nil {
@@ -137,11 +159,12 @@ func (c *CapitalBridge) GetTransactions() ([]TransactionDTO, error) {
 
 	dtos := make([]TransactionDTO, len(txs))
 	for i, t := range txs {
+		total, _ := t.TotalAmount.Float64()
 		dtos[i] = TransactionDTO{
 			ID:             t.ID,
 			Description:    t.Description,
 			Date:           t.Date,
-			TotalAmount:    t.TotalAmount,
+			TotalAmount:    total,
 			ApprovalStatus: string(t.ApprovalStatus),
 			Reference:      t.Reference,
 		}
@@ -150,22 +173,34 @@ func (c *CapitalBridge) GetTransactions() ([]TransactionDTO, error) {
 }
 
 // ApproveTransaction moves a STAGED transaction to APPROVED and updates account balances.
-// This is restricted to users with sufficient seniority (logic to be enforced via context/auth).
 func (c *CapitalBridge) ApproveTransaction(transactionID int) (string, error) {
+	// RBAC: Check for admin role or expert seniority
+	prof, err := c.auth.GetUserProfile()
+	if err != nil {
+		return "", fmt.Errorf("authentication required: %w", err)
+	}
+	
+	if prof.Role != "admin" && prof.Seniority != "expert" {
+		return "", fmt.Errorf("insufficient seniority: transaction approval requires 'expert' status")
+	}
+
 	tx, err := c.db.Tx(c.ctx)
 	if err != nil {
 		return "", err
 	}
 
 	txn, err := tx.Transaction.Query().
-		Where(transaction.ID(transactionID)).
+		Where(
+			transaction.ID(transactionID),
+			transaction.HasTenantWith(tenant.ID(prof.TenantID)),
+		).
 		WithLedgerEntries(func(q *ent.LedgerEntryQuery) {
 			q.WithAccount()
 		}).
 		Only(c.ctx)
 	if err != nil {
 		tx.Rollback()
-		return "", fmt.Errorf("transaction not found: %w", err)
+		return "", fmt.Errorf("transaction not found or access denied: %w", err)
 	}
 
 	if txn.ApprovalStatus != transaction.ApprovalStatusSTAGED {
@@ -200,11 +235,11 @@ func (c *CapitalBridge) ApproveTransaction(transactionID int) (string, error) {
 			return "", fmt.Errorf("ledger entry %d missing account edge", e.ID)
 		}
 
-		var newBalance float64
+		var newBalance decimal.Decimal
 		if e.Direction == ledgerentry.DirectionDebit {
-			newBalance = acc.Balance + e.Amount
+			newBalance = acc.Balance.Add(e.Amount)
 		} else {
-			newBalance = acc.Balance - e.Amount
+			newBalance = acc.Balance.Sub(e.Amount)
 		}
 
 		err = tx.Account.UpdateOne(acc).SetBalance(newBalance).Exec(c.ctx)
@@ -241,34 +276,45 @@ func (c *CapitalBridge) CreateTransaction(req TransactionRequest) (string, error
 		}
 	}()
 
-	tnt, err := tx.Tenant.Query().First(c.ctx)
+	prof, err := c.auth.GetUserProfile()
+	if err != nil {
+		return "", err
+	}
+	tenantID := prof.TenantID
+
+	tnt, err := tx.Tenant.Get(c.ctx, tenantID)
 	if err != nil {
 		tx.Rollback()
-		return "", fmt.Errorf("tenant not found: %w", err)
+		return "", fmt.Errorf("tenant session invalid: %w", err)
 	}
 
-	usr, err := tx.User.Get(c.ctx, req.UserID)
+	usr, err := tx.User.Query().
+		Where(
+			user.ID(req.UserID), // For auditing, but we check role from prof too
+			user.HasTenantWith(tenant.ID(tenantID)),
+		).Only(c.ctx)
+	
 	if err != nil {
 		tx.Rollback()
-		return "", fmt.Errorf("user not found: %w", err)
+		return "", fmt.Errorf("unauthorized user context: %w", err)
 	}
 
 	// Calculate total amount for limit validation (sum of debits)
-	totalAmount := 0.0
+	totalAmount := decimal.Zero
 	for _, e := range req.Entries {
 		if e.Direction == "debit" {
-			totalAmount += e.Amount
+			totalAmount = totalAmount.Add(decimal.NewFromFloat(e.Amount))
 		}
 	}
 
 	approvalStatus := "APPROVED"
 	// Financial Fraud Prevention: Intercept if amount exceeds tenant limit
-	if totalAmount > tnt.TransactionLimit {
+	if totalAmount.GreaterThan(tnt.TransactionLimit) {
 		// Only "Finance Manager" or "admin" can bypass the limit
 		if usr.Role != "Finance Manager" && usr.Role != "admin" {
 			approvalStatus = "STAGED"
 			// Notify SENTchat manager channel (Simulation)
-			fmt.Printf("[SENTchat] ALERT: Transaction '%s' ($%.2f) created by %s (%s) exceeds limit ($%.2f). Staging for manager approval.\n", 
+			fmt.Printf("[SENTchat] ALERT: Transaction '%s' ($%s) created by %s (%s) exceeds limit ($%s). Staging for manager approval.\n", 
 				req.Description, totalAmount, usr.Email, usr.Role, tnt.TransactionLimit)
 		}
 	}
@@ -286,11 +332,12 @@ func (c *CapitalBridge) CreateTransaction(req TransactionRequest) (string, error
 		return "", fmt.Errorf("failed to save transaction header: %w", err)
 	}
 
-	// 2. Create Entries and Update Balances
+		// 2. Create Entries and Update Balances
 	for _, e := range req.Entries {
+		decimalAmount := decimal.NewFromFloat(e.Amount)
 		// Create JournalEntry (The specific entity for auditing)
 		_, err := tx.JournalEntry.Create().
-			SetAmount(e.Amount).
+			SetAmount(decimalAmount).
 			SetDirection(journalentry.Direction(e.Direction)).
 			SetAccountID(e.AccountID).
 			SetTransaction(txn).
@@ -306,7 +353,7 @@ func (c *CapitalBridge) CreateTransaction(req TransactionRequest) (string, error
 		// Also create LedgerEntry for legacy/backward compatibility if needed, 
 		// but JournalEntry is the new source of truth for approvals.
 		_, err = tx.LedgerEntry.Create().
-			SetAmount(e.Amount).
+			SetAmount(decimalAmount).
 			SetDirection(ledgerentry.Direction(e.Direction)).
 			SetAccountID(e.AccountID).
 			SetTransaction(txn).
@@ -326,11 +373,11 @@ func (c *CapitalBridge) CreateTransaction(req TransactionRequest) (string, error
 				return "", err
 			}
 
-			var newBalance float64
+			var newBalance decimal.Decimal
 			if e.Direction == "debit" {
-				newBalance = acc.Balance + e.Amount
+				newBalance = acc.Balance.Add(decimalAmount)
 			} else {
-				newBalance = acc.Balance - e.Amount
+				newBalance = acc.Balance.Sub(decimalAmount)
 			}
 
 			err = tx.Account.UpdateOne(acc).SetBalance(newBalance).Exec(c.ctx)
@@ -421,7 +468,7 @@ func (c *CapitalBridge) ExportTrialBalance() (string, error) {
 	for _, a := range accounts {
 		pdf.CellFormat(30, 10, a.Number, "1", 0, "L", false, 0, "")
 		pdf.CellFormat(100, 10, a.Name, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(40, 10, fmt.Sprintf("%.2f", a.Balance), "1", 0, "R", false, 0, "")
+		pdf.CellFormat(40, 10, a.Balance.StringFixed(2), "1", 0, "R", false, 0, "")
 		pdf.Ln(10)
 	}
 
@@ -441,15 +488,16 @@ func (c *CapitalBridge) ExportProfitLoss() (string, error) {
 
 	// Calculate totals
 	var revenues, expenses []*ent.Account
-	var totalRev, totalExp float64
+	totalRev := decimal.Zero
+	totalExp := decimal.Zero
 
 	for _, a := range accounts {
 		if a.Type == account.TypeRevenue {
 			revenues = append(revenues, a)
-			totalRev += a.Balance
+			totalRev = totalRev.Add(a.Balance)
 		} else if a.Type == account.TypeExpense {
 			expenses = append(expenses, a)
-			totalExp += a.Balance
+			totalExp = totalExp.Add(a.Balance)
 		}
 	}
 
@@ -474,7 +522,7 @@ func (c *CapitalBridge) ExportProfitLoss() (string, error) {
 	pdf.SetFont("Arial", "B", 14)
 	pdf.SetFillColor(240, 240, 240)
 	pdf.CellFormat(100, 12, "NET INCOME", "1", 0, "L", true, 0, "")
-	pdf.CellFormat(40, 12, fmt.Sprintf("$%.2f", totalRev - totalExp), "1", 0, "R", true, 0, "")
+	pdf.CellFormat(40, 12, fmt.Sprintf("$%s", totalRev.Sub(totalExp).StringFixed(2)), "1", 0, "R", true, 0, "")
 
 	var buf bytes.Buffer
 	if err := pdf.Output(&buf); err != nil {
@@ -491,14 +539,14 @@ func (c *CapitalBridge) renderPdfSection(pdf *gofpdf.Fpdf, title string, account
 	pdf.SetFont("Arial", "", 10)
 	for _, a := range accounts {
 		pdf.CellFormat(100, 8, a.Name, "", 0, "L", false, 0, "")
-		pdf.CellFormat(40, 8, fmt.Sprintf("%.2f", a.Balance), "", 0, "R", false, 0, "")
+		pdf.CellFormat(40, 8, a.Balance.StringFixed(2), "", 0, "R", false, 0, "")
 		pdf.Ln(6)
 	}
 }
 
 // Helper to render a total line in the PDF.
-func (c *CapitalBridge) renderPdfTotal(pdf *gofpdf.Fpdf, label string, amount float64) {
+func (c *CapitalBridge) renderPdfTotal(pdf *gofpdf.Fpdf, label string, amount decimal.Decimal) {
 	pdf.SetFont("Arial", "B", 10)
 	pdf.CellFormat(100, 10, label, "T", 0, "L", false, 0, "")
-	pdf.CellFormat(40, 10, fmt.Sprintf("$%.2f", amount), "T", 0, "R", false, 0, "")
+	pdf.CellFormat(40, 10, fmt.Sprintf("$%s", amount.StringFixed(2)), "T", 0, "R", false, 0, "")
 }
