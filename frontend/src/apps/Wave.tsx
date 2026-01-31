@@ -50,7 +50,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
+import { useAppStore } from "@/store/useAppStore";
+
 const WaveApp: React.FC = () => {
+  const { activeTab } = useAppStore();
   const [logs, setLogs] = useState<any[]>([]);
   const [activeCall, setActiveCall] = useState<string | null>(null);
   const [dialNumber, setDialNumber] = useState("");
@@ -275,22 +278,8 @@ const WaveApp: React.FC = () => {
 
         {/* History & Logs Section */}
         <div className="lg:col-span-2 space-y-6">
-          <Tabs defaultValue="history" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-md mb-6">
-              <TabsTrigger value="history" className="gap-2">
-                <History className="h-4 w-4" />
-                Recent Calls
-              </TabsTrigger>
-              <TabsTrigger value="voicemail" className="gap-2">
-                <Voicemail className="h-4 w-4" />
-                Visual Voicemail
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent
-              value="history"
-              className="animate-in fade-in slide-in-from-right-4 duration-500"
-            >
+          {(activeTab === "history" || activeTab === "overview") && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
               {logs.length === 0 ? (
                 <EmptyState
                   icon={History}
@@ -348,16 +337,18 @@ const WaveApp: React.FC = () => {
                   </CardContent>
                 </Card>
               )}
-            </TabsContent>
+            </div>
+          )}
 
-            <TabsContent value="voicemail">
+          {activeTab === "voicemail" && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
               <EmptyState
                 icon={Voicemail}
                 title="Inbox Empty"
                 description="You don't have any new voicemail messages."
               />
-            </TabsContent>
-          </Tabs>
+            </div>
+          )}
         </div>
       </div>
       {/* SIP Provisioning Dialog */}

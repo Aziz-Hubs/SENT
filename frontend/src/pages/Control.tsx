@@ -13,7 +13,6 @@ import {
   Plus,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -32,7 +31,10 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Filter, MoreHorizontal, ArrowRightCircle } from "lucide-react";
 
+import { useAppStore } from "@/store/useAppStore";
+
 const ControlPage: React.FC = () => {
+  const { activeTab } = useAppStore();
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
@@ -169,267 +171,119 @@ const ControlPage: React.FC = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="managed" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 max-w-2xl mb-8">
-          <TabsTrigger value="managed" className="gap-2">
-            <LayoutGrid className="h-4 w-4" />
-            Managed Inventory
-          </TabsTrigger>
-          <TabsTrigger value="shadow" className="gap-2">
-            <AlertTriangle className="h-4 w-4" />
-            Shadow Discovery
-          </TabsTrigger>
-          <TabsTrigger value="compliance" className="gap-2">
-            <Shield className="h-4 w-4" />
-            FinOps & Optimization
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent
-          value="managed"
-          className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="relative w-72 group">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-indigo-500 transition-colors" />
-              <Input
-                placeholder="Search inventory..."
-                className="pl-9 h-9 border-none shadow-sm bg-background/50 backdrop-blur-sm focus-visible:ring-indigo-500/50"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            {selectedApps.length > 0 && (
-              <div className="flex gap-2 animate-in slide-in-from-right-2">
-                <Button variant="outline" size="sm" className="h-9 gap-2">
-                  <ArrowRightCircle className="h-4 w-4" /> Bulk Move
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="h-9 font-bold"
-                >
-                  Deprovision ({selectedApps.length})
-                </Button>
+      <div className="mt-8">
+        {(activeTab === "overview" || activeTab === "managed") && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between mb-4">
+              <div className="relative w-72 group">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-indigo-500 transition-colors" />
+                <Input
+                  placeholder="Search inventory..."
+                  className="pl-9 h-9 border-none shadow-sm bg-background/50 backdrop-blur-sm focus-visible:ring-indigo-500/50"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
               </div>
-            )}
-          </div>
-          <Card className="border-none shadow-md overflow-hidden bg-background/40 backdrop-blur-md">
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader className="bg-muted/30">
-                  <TableRow>
-                    <TableHead className="w-12 pl-6">
-                      <Checkbox
-                        checked={
-                          selectedApps.length === filteredApps.length &&
-                          filteredApps.length > 0
-                        }
-                        onCheckedChange={(checked) =>
-                          setSelectedApps(
-                            checked ? filteredApps.map((a) => a.name) : [],
-                          )
-                        }
-                      />
-                    </TableHead>
-                    <TableHead>Application</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Users</TableHead>
-                    <TableHead>Monthly Cost</TableHead>
-                    <TableHead className="text-right pr-6">
-                      Management
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredApps.map((app, i) => (
-                    <TableRow
-                      key={i}
-                      className={`group hover:bg-muted/50 transition-colors ${selectedApps.includes(app.name) ? "bg-indigo-500/5" : ""}`}
-                    >
-                      <TableCell className="pl-6">
-                        <Checkbox
-                          checked={selectedApps.includes(app.name)}
-                          onCheckedChange={(checked) => {
-                            setSelectedApps((prev) =>
-                              checked
-                                ? [...prev, app.name]
-                                : prev.filter((n) => n !== app.name),
-                            );
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-bold text-sm">{app.name}</div>
-                        <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
-                          {app.provider}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            app.status === "Healthy"
-                              ? "secondary"
-                              : "destructive"
-                          }
-                          className="h-5 text-[10px]"
-                        >
-                          {app.status.toUpperCase()}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm font-medium">
-                        {app.users}
-                      </TableCell>
-                      <TableCell className="text-sm font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                        {app.cost}
-                      </TableCell>
-                      <TableCell className="text-right pr-6">
-                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => toast.info(`Managing ${app.name}`)}
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 text-[10px] font-bold uppercase tracking-tighter"
-                          >
-                            Optimization
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent
-          value="shadow"
-          className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-        >
-          <div className="space-y-6">
-            <Card className="bg-amber-500/5 border-amber-500/20 shadow-none">
-              <CardContent className="p-6 flex items-start gap-4">
-                <AlertTriangle className="h-8 w-8 text-amber-500 shrink-0" />
-                <div>
-                  <h3 className="font-bold text-amber-700 dark:text-amber-400">
-                    Unmanaged Assets Detected
-                  </h3>
-                  <p className="text-sm text-amber-600 dark:text-amber-500/80 max-w-2xl mt-1">
-                    The Discovery Engine has correlated SENTcapital financial
-                    records with SENTgrid SNI flow logs. The following
-                    applications are being used without corporate oversight.
-                  </p>
+              {selectedApps.length > 0 && (
+                <div className="flex gap-2 animate-in slide-in-from-right-2">
+                  <Button variant="outline" size="sm" className="h-9 gap-2">
+                    <ArrowRightCircle className="h-4 w-4" /> Bulk Move
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="h-9 font-bold"
+                  >
+                    Deprovision ({selectedApps.length})
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-lg overflow-hidden">
-              <CardHeader className="bg-muted/30 border-b">
-                <CardTitle className="text-sm font-bold flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-amber-500" /> Risk Scoring
-                  Matrix (Forensic Discovery)
-                </CardTitle>
-              </CardHeader>
+              )}
+            </div>
+            <Card className="border-none shadow-md overflow-hidden bg-background/40 backdrop-blur-md">
               <CardContent className="p-0">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="bg-muted/30">
                     <TableRow>
-                      <TableHead className="pl-6">
-                        Unvetted Application
+                      <TableHead className="w-12 pl-6">
+                        <Checkbox
+                          checked={
+                            selectedApps.length === filteredApps.length &&
+                            filteredApps.length > 0
+                          }
+                          onCheckedChange={(checked) =>
+                            setSelectedApps(
+                              checked ? filteredApps.map((a) => a.name) : [],
+                            )
+                          }
+                        />
                       </TableHead>
-                      <TableHead>Usage Frequency</TableHead>
-                      <TableHead>Data Sensitivity</TableHead>
-                      <TableHead>Risk Score</TableHead>
+                      <TableHead>Application</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Users</TableHead>
+                      <TableHead>Monthly Cost</TableHead>
                       <TableHead className="text-right pr-6">
-                        Mitigation Action
+                        Management
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {[
-                      {
-                        name: "Dropbox",
-                        frequency: "High (200+ Requests/hr)",
-                        sensitivity: "Level 4 (PII/Client Data)",
-                        score: 88,
-                        class: "bg-red-500/10 text-red-500",
-                      },
-                      {
-                        name: "Miro",
-                        frequency: "Medium (Intermittent)",
-                        sensitivity: "Level 2 (Internal IP)",
-                        score: 42,
-                        class: "bg-yellow-500/10 text-yellow-500",
-                      },
-                      {
-                        name: "ChatGPT (Personal)",
-                        frequency: "Extreme (Continuous)",
-                        sensitivity: "Level 5 (Unauth AI Training)",
-                        score: 95,
-                        class: "bg-red-600/20 text-red-600",
-                      },
-                      {
-                        name: "Calendly",
-                        frequency: "Low (API Only)",
-                        sensitivity: "Level 1 (Public)",
-                        score: 14,
-                        class: "bg-green-500/10 text-green-500",
-                      },
-                    ].map((app, i) => (
+                    {filteredApps.map((app, i) => (
                       <TableRow
                         key={i}
-                        className="group hover:bg-muted/50 transition-colors"
+                        className={`group hover:bg-muted/50 transition-colors ${selectedApps.includes(app.name) ? "bg-indigo-500/5" : ""}`}
                       >
                         <TableCell className="pl-6">
-                          <div className="font-bold text-sm">{app.name}</div>
-                          <div className="text-[10px] text-muted-foreground font-mono">
-                            DETECTED VIA SENTGRID FLOW ANALYTICS
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-xs font-medium">
-                          {app.frequency}
-                        </TableCell>
-                        <TableCell className="text-xs font-medium">
-                          {app.sensitivity}
+                          <Checkbox
+                            checked={selectedApps.includes(app.name)}
+                            onCheckedChange={(checked) => {
+                              setSelectedApps((prev) =>
+                                checked
+                                  ? [...prev, app.name]
+                                  : prev.filter((n) => n !== app.name),
+                              );
+                            }}
+                          />
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-2 bg-muted rounded-full overflow-hidden">
-                              <div
-                                className={`h-full ${app.score > 70 ? "bg-red-500" : "bg-yellow-500"}`}
-                                style={{ width: `${app.score}%` }}
-                              />
-                            </div>
-                            <Badge
-                              className={`h-5 text-[10px] font-bold ${app.class}`}
-                            >
-                              {app.score} / 100
-                            </Badge>
+                          <div className="font-bold text-sm">{app.name}</div>
+                          <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
+                            {app.provider}
                           </div>
                         </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              app.status === "Healthy"
+                                ? "secondary"
+                                : "destructive"
+                            }
+                            className="h-5 text-[10px]"
+                          >
+                            {app.status.toUpperCase()}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm font-medium">
+                          {app.users}
+                        </TableCell>
+                        <TableCell className="text-sm font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                          {app.cost}
+                        </TableCell>
                         <TableCell className="text-right pr-6">
-                          <div className="flex justify-end gap-2">
+                          <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => toast.info(`Managing ${app.name}`)}
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-7 text-[10px] font-bold"
+                              className="h-7 text-[10px] font-bold uppercase tracking-tighter"
                             >
-                              VET ASSET
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="h-7 text-[10px] font-bold"
-                            >
-                              BLOCK FLOW
+                              Optimization
                             </Button>
                           </div>
                         </TableCell>
@@ -440,85 +294,215 @@ const ControlPage: React.FC = () => {
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
+        )}
 
-        <TabsContent
-          value="compliance"
-          className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-        >
-          <div className="space-y-6">
-            <Card className="bg-primary/5 border-primary/20 shadow-none">
-              <CardContent className="p-6 flex items-center justify-between">
-                <div className="flex gap-4 items-center">
-                  <div className="p-3 bg-primary rounded-xl text-primary-foreground">
-                    <Zap className="h-6 w-6" />
-                  </div>
+        {activeTab === "shadow" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-6">
+              <Card className="bg-amber-500/5 border-amber-500/20 shadow-none">
+                <CardContent className="p-6 flex items-start gap-4">
+                  <AlertTriangle className="h-8 w-8 text-amber-500 shrink-0" />
                   <div>
-                    <h4 className="font-bold text-primary">
-                      Automated Downgrades Active
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      SENTcontrol is automatically transitioning underutilized
-                      premium licenses to standard tiers.
+                    <h3 className="font-bold text-amber-700 dark:text-amber-400">
+                      Unmanaged Assets Detected
+                    </h3>
+                    <p className="text-sm text-amber-600 dark:text-amber-500/80 max-w-2xl mt-1">
+                      The Discovery Engine has correlated SENTcapital financial
+                      records with SENTgrid SNI flow logs. The following
+                      applications are being used without corporate oversight.
                     </p>
                   </div>
-                </div>
-                <Button variant="outline" size="sm" className="bg-background">
-                  Configure Policy
-                </Button>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <div className="grid grid-cols-1 gap-4">
-              {[
-                {
-                  user: "john.doe@company.com",
-                  app: "Microsoft 365",
-                  from: "E5",
-                  to: "E3",
-                  savings: "$23.00/mo",
-                  reason: "No advanced security features used in 60 days",
-                },
-                {
-                  user: "jane.smith@company.com",
-                  app: "Slack",
-                  from: "Enterprise",
-                  to: "Pro",
-                  savings: "$12.00/mo",
-                  reason: "User not in restricted security channels",
-                },
-              ].map((rec, i) => (
-                <Card
-                  key={i}
-                  className="hover:border-emerald-500/50 transition-colors"
-                >
-                  <CardContent className="p-4 flex justify-between items-center">
-                    <div className="flex gap-4 items-center">
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-black text-xs border">
-                        {rec.user[0].toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="font-bold text-sm">{rec.user}</div>
-                        <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
-                          {rec.app}: {rec.from} → {rec.to}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">
-                        +{rec.savings}
-                      </div>
-                      <div className="text-[10px] text-muted-foreground max-w-[250px] leading-tight mt-1 italic">
-                        {rec.reason}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              <Card className="border-none shadow-lg overflow-hidden">
+                <CardHeader className="bg-muted/30 border-b">
+                  <CardTitle className="text-sm font-bold flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-amber-500" /> Risk Scoring
+                    Matrix (Forensic Discovery)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="pl-6">
+                          Unvetted Application
+                        </TableHead>
+                        <TableHead>Usage Frequency</TableHead>
+                        <TableHead>Data Sensitivity</TableHead>
+                        <TableHead>Risk Score</TableHead>
+                        <TableHead className="text-right pr-6">
+                          Mitigation Action
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {[
+                        {
+                          name: "Dropbox",
+                          frequency: "High (200+ Requests/hr)",
+                          sensitivity: "Level 4 (PII/Client Data)",
+                          score: 88,
+                          class: "bg-red-500/10 text-red-500",
+                        },
+                        {
+                          name: "Miro",
+                          frequency: "Medium (Intermittent)",
+                          sensitivity: "Level 2 (Internal IP)",
+                          score: 42,
+                          class: "bg-yellow-500/10 text-yellow-500",
+                        },
+                        {
+                          name: "ChatGPT (Personal)",
+                          frequency: "Extreme (Continuous)",
+                          sensitivity: "Level 5 (Unauth AI Training)",
+                          score: 95,
+                          class: "bg-red-600/20 text-red-600",
+                        },
+                        {
+                          name: "Calendly",
+                          frequency: "Low (API Only)",
+                          sensitivity: "Level 1 (Public)",
+                          score: 14,
+                          class: "bg-green-500/10 text-green-500",
+                        },
+                      ].map((app, i) => (
+                        <TableRow
+                          key={i}
+                          className="group hover:bg-muted/50 transition-colors"
+                        >
+                          <TableCell className="pl-6">
+                            <div className="font-bold text-sm">{app.name}</div>
+                            <div className="text-[10px] text-muted-foreground font-mono">
+                              DETECTED VIA SENTGRID FLOW ANALYTICS
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xs font-medium">
+                            {app.frequency}
+                          </TableCell>
+                          <TableCell className="text-xs font-medium">
+                            {app.sensitivity}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-2 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full ${app.score > 70 ? "bg-red-500" : "bg-yellow-500"}`}
+                                  style={{ width: `${app.score}%` }}
+                                />
+                              </div>
+                              <Badge
+                                className={`h-5 text-[10px] font-bold ${app.class}`}
+                              >
+                                {app.score} / 100
+                              </Badge>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right pr-6">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-[10px] font-bold"
+                              >
+                                VET ASSET
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="h-7 text-[10px] font-bold"
+                              >
+                                BLOCK FLOW
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
             </div>
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+
+        {activeTab === "compliance" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-6">
+              <Card className="bg-primary/5 border-primary/20 shadow-none">
+                <CardContent className="p-6 flex items-center justify-between">
+                  <div className="flex gap-4 items-center">
+                    <div className="p-3 bg-primary rounded-xl text-primary-foreground">
+                      <Zap className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-primary">
+                        Automated Downgrades Active
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        SENTcontrol is automatically transitioning underutilized
+                        premium licenses to standard tiers.
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" className="bg-background">
+                    Configure Policy
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  {
+                    user: "john.doe@company.com",
+                    app: "Microsoft 365",
+                    from: "E5",
+                    to: "E3",
+                    savings: "$23.00/mo",
+                    reason: "No advanced security features used in 60 days",
+                  },
+                  {
+                    user: "jane.smith@company.com",
+                    app: "Slack",
+                    from: "Enterprise",
+                    to: "Pro",
+                    savings: "$12.00/mo",
+                    reason: "User not in restricted security channels",
+                  },
+                ].map((rec, i) => (
+                  <Card
+                    key={i}
+                    className="hover:border-emerald-500/50 transition-colors"
+                  >
+                    <CardContent className="p-4 flex justify-between items-center">
+                      <div className="flex gap-4 items-center">
+                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-black text-xs border">
+                          {rec.user[0].toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="font-bold text-sm">{rec.user}</div>
+                          <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
+                            {rec.app}: {rec.from} → {rec.to}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">
+                          +{rec.savings}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground max-w-[250px] leading-tight mt-1 italic">
+                          {rec.reason}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

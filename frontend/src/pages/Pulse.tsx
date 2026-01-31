@@ -32,6 +32,14 @@ import {
 import DeviceDetails from "./pulse/DeviceDetails";
 import ScriptRepository from "./pulse/ScriptRepository";
 import JobScheduler from "./pulse/JobScheduler";
+import DashboardPage from "./pulse/DashboardPage";
+import AlertsPage from "./pulse/AlertsPage";
+import PoliciesPage from "./pulse/PoliciesPage";
+import ExecutionHistoryPage from "./pulse/ExecutionHistoryPage";
+import ReportsPage from "./pulse/ReportsPage";
+import PatchesTab from "./pulse/PatchesTab";
+import SoftwareTab from "./pulse/SoftwareTab";
+import FilesTab from "./pulse/FilesTab";
 import { useAppStore } from "@/store/useAppStore";
 
 interface Agent {
@@ -244,8 +252,34 @@ const PulsePage = () => {
         return <ScriptRepository />;
       case "jobs":
         return <JobScheduler />;
+      case "dashboard":
+        return <DashboardPage />;
+      case "alerts":
+        return <AlertsPage />;
+      case "patches":
+        return <PatchesTab deviceId="fleet" />;
+      case "software":
+        return <SoftwareTab deviceId="fleet" />;
+      case "policies":
+        return <PoliciesPage />;
+      case "history":
+        return <ExecutionHistoryPage />;
+      case "remote":
+        return (
+          <div className="p-6 text-muted-foreground">
+            Select a device from the Devices tab to initiate a remote session.
+          </div>
+        );
+      case "files":
+        return <FilesTab deviceId="fleet" />;
+      case "reports":
+        return <ReportsPage />;
       default:
-        return <div>Invalid Tab</div>;
+        return (
+          <div className="p-6 text-muted-foreground">
+            Select a page from the navigation.
+          </div>
+        );
     }
   };
 

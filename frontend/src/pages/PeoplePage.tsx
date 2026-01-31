@@ -48,6 +48,7 @@ const PeoplePage: React.FC = () => {
     isContextOpen,
     privacyMode,
     togglePrivacy,
+    activeTab,
   } = useAppStore();
   const [selectedPerson, setSelectedPerson] = useState<any>(null);
 
@@ -133,55 +134,38 @@ const PeoplePage: React.FC = () => {
         </div>
       </PageHeader>
 
-      <Tabs value={currentTab} onValueChange={setTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6 max-w-5xl mb-8">
-          <TabsTrigger value="org" className="gap-2">
-            <LayoutGrid className="h-4 w-4" />
-            Org Chart
-          </TabsTrigger>
-          <TabsTrigger value="recruiting" className="gap-2">
-            <Users className="h-4 w-4" />
-            Recruiting
-          </TabsTrigger>
-          <TabsTrigger value="benefits" className="gap-2">
-            <Heart className="h-4 w-4" />
-            Benefits
-          </TabsTrigger>
-          <TabsTrigger value="engagement" className="gap-2">
-            <Heart className="h-4 w-4" />
-            Engagement
-          </TabsTrigger>
-          <TabsTrigger value="payroll" className="gap-2">
-            <Briefcase className="h-4 w-4" />
-            Payroll
-          </TabsTrigger>
-          <TabsTrigger value="onboarding" className="gap-2">
-            <FileText className="h-4 w-4" />
-            Onboarding
-          </TabsTrigger>
-        </TabsList>
-
-        <main className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <TabsContent value="org">
+      <div className="mt-8">
+        {(activeTab === "overview" || activeTab === "org") && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <OrgChart onNodeClick={handleNodeClick} />
-          </TabsContent>
-          <TabsContent value="engagement">
+          </div>
+        )}
+        {activeTab === "engagement" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <EngagementTab />
-          </TabsContent>
-          <TabsContent value="payroll">
+          </div>
+        )}
+        {activeTab === "payroll" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <PayrollDashboard />
-          </TabsContent>
-          <TabsContent value="recruiting">
+          </div>
+        )}
+        {activeTab === "recruiting" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <RecruitingTab />
-          </TabsContent>
-          <TabsContent value="benefits">
+          </div>
+        )}
+        {activeTab === "benefits" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <BenefitsTab />
-          </TabsContent>
-          <TabsContent value="onboarding">
+          </div>
+        )}
+        {activeTab === "onboarding" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <OnboardingPortal />
-          </TabsContent>
-        </main>
-      </Tabs>
+          </div>
+        )}
+      </div>
 
       {isContextOpen && (
         <div className="fixed inset-y-0 right-0 z-50 h-screen flex flex-row-reverse pointer-events-none">

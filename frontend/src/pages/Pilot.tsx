@@ -78,8 +78,8 @@ export function Pilot() {
   const [tickets, setTickets] = useState<TicketDTO[]>([]);
   const [projects, setProjects] = useState(MOCK_PROJECTS);
   const [loading, setLoading] = useState(true);
-  const { setContextSidebar, toggleContext, isContextOpen } = useAppStore();
-  const [activeTab, setActiveTab] = useState("tickets");
+  const { setContextSidebar, toggleContext, isContextOpen, activeTab } =
+    useAppStore();
   const [selectedTicket, setSelectedTicket] = useState<TicketDTO | null>(null);
 
   const fetchTickets = async () => {
@@ -186,177 +186,194 @@ export function Pilot() {
         />
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md mb-8">
-          <TabsTrigger value="tickets" className="gap-2">
-            <Ticket className="h-4 w-4" /> Service Desk
-          </TabsTrigger>
-          <TabsTrigger value="projects" className="gap-2">
-            <Briefcase className="h-4 w-4" /> Projects
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="tickets" className="space-y-4">
-          <Card className="border-none shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Ticket Queue</CardTitle>
-                <CardDescription>
-                  Manage support requests and incidents.
-                </CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                <Input placeholder="Search tickets..." className="w-64" />
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Subject</TableHead>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Assignee</TableHead>
-                    <TableHead>SLA</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {loading ? (
+      <div className="mt-8">
+        {activeTab === "overview" && (
+          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+            <Card className="border-none shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Ticket Queue</CardTitle>
+                  <CardDescription>
+                    Manage support requests and incidents.
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input placeholder="Search tickets..." className="w-64" />
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center">
-                        Loading tickets...
-                      </TableCell>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Subject</TableHead>
+                      <TableHead>Client</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Assignee</TableHead>
+                      <TableHead>SLA</TableHead>
                     </TableRow>
-                  ) : tickets.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center">
-                        No tickets matching criteria.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    tickets.map((t) => (
-                      <TableRow
-                        key={t.id}
-                        className={cn(
-                          "cursor-pointer hover:bg-muted/50",
-                          selectedTicket?.id === t.id && "bg-muted",
-                        )}
-                        onClick={() => handleTicketClick(t)}
-                      >
-                        <TableCell className="font-mono font-medium text-primary">
-                          #{t.id}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {t.subject}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {t.asset || "General Support"}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "uppercase text-[10px]",
-                              getPriorityColor(t.priority),
-                            )}
-                          >
-                            {t.priority}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "capitalize border",
-                              getStatusColor(t.status),
-                            )}
-                          >
-                            {t.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {t.assignee || "Unassigned"}
-                        </TableCell>
-                        <TableCell className="text-xs font-mono text-emerald-600">
-                          3h remaining
+                  </TableHeader>
+                  <TableBody>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="h-24 text-center">
+                          Loading tickets...
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="projects" className="space-y-4">
-          <Card className="border-none shadow-sm">
-            <CardHeader>
-              <CardTitle>Active Projects</CardTitle>
-              <CardDescription>
-                Track project timelines and milestones.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Project Name</TableHead>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Progress</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Deadline</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {projects.map((p) => (
-                    <TableRow
-                      key={p.id}
-                      className="cursor-pointer hover:bg-muted/50"
-                    >
-                      <TableCell className="font-medium">{p.name}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {p.client}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="h-2 w-24 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-primary"
-                              style={{ width: `${p.progress}%` }}
-                            />
-                          </div>
-                          <span className="text-xs text-muted-foreground">
-                            {p.progress}%
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
+                    ) : tickets.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="h-24 text-center">
+                          No tickets matching criteria.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      tickets.map((t) => (
+                        <TableRow
+                          key={t.id}
                           className={cn(
-                            "capitalize",
-                            p.status === "on_track"
-                              ? "text-emerald-600 border-emerald-200"
-                              : "text-amber-600 border-amber-200",
+                            "cursor-pointer hover:bg-muted/50",
+                            selectedTicket?.id === t.id && "bg-muted",
                           )}
+                          onClick={() => handleTicketClick(t)}
                         >
-                          {p.status.replace("_", " ")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-sm">
-                        {p.deadline}
-                      </TableCell>
+                          <TableCell className="font-mono font-medium text-primary">
+                            #{t.id}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {t.subject}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {t.asset || "General Support"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "uppercase text-[10px]",
+                                getPriorityColor(t.priority),
+                              )}
+                            >
+                              {t.priority}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "capitalize border",
+                                getStatusColor(t.status),
+                              )}
+                            >
+                              {t.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {t.assignee || "Unassigned"}
+                          </TableCell>
+                          <TableCell className="text-xs font-mono text-emerald-600">
+                            3h remaining
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === "projects" && (
+          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+            <Card className="border-none shadow-sm">
+              <CardHeader>
+                <CardTitle>Active Projects</CardTitle>
+                <CardDescription>
+                  Track project timelines and milestones.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Project Name</TableHead>
+                      <TableHead>Client</TableHead>
+                      <TableHead>Progress</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Deadline</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                  </TableHeader>
+                  <TableBody>
+                    {projects.map((p) => (
+                      <TableRow
+                        key={p.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                      >
+                        <TableCell className="font-medium">{p.name}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {p.client}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-24 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-primary"
+                                style={{ width: `${p.progress}%` }}
+                              />
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {p.progress}%
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "capitalize",
+                              p.status === "on_track"
+                                ? "text-emerald-600 border-emerald-200"
+                                : "text-amber-600 border-amber-200",
+                            )}
+                          >
+                            {p.status.replace("_", " ")}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-sm">
+                          {p.deadline}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === "slas" && (
+          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>SLA Management</CardTitle>
+                <CardDescription>
+                  Compliance Monitoring and Exceptions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center justify-center p-12 text-center">
+                  <Timer className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
+                  <h3 className="text-lg font-bold">100% SLA Compliance</h3>
+                  <p className="text-muted-foreground">
+                    No breaches recorded in the last 30 days.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

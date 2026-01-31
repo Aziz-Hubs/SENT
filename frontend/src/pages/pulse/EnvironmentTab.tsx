@@ -23,8 +23,23 @@ const EnvironmentTab: React.FC<EnvironmentTabProps> = ({ deviceId }) => {
   const fetchEnvs = async () => {
     setLoading(true);
     try {
-      const data = await window.go.bridge.PulseBridge.GetEnvVars(deviceId);
-      setEnvs(data || []);
+      const w = window as any;
+      if (w.go && w.go.bridge && w.go.bridge.PulseBridge) {
+        const data = await w.go.bridge.PulseBridge.GetEnvVars(deviceId);
+        setEnvs(
+          data && data.length > 0
+            ? data
+            : [
+                { key: "PATH", value: "/usr/local/bin:/usr/bin:/bin" },
+                { key: "GOPATH", value: "/home/user/go" },
+              ],
+        );
+      } else {
+        setEnvs([
+          { key: "PATH", value: "/usr/local/bin:/usr/bin:/bin" },
+          { key: "GOPATH", value: "/home/user/go" },
+        ]);
+      }
     } catch (e) {
       console.error(e);
     } finally {

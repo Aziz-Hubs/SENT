@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import SystemActivityChart from "./SystemActivityChart";
 import {
   Activity,
   ArrowLeft,
@@ -11,6 +12,7 @@ import {
   RotateCcw,
   Trash2,
   Monitor,
+  ShieldCheck,
 } from "lucide-react";
 import ProcessesTab from "./ProcessesTab";
 import ServicesTab from "./ServicesTab";
@@ -110,7 +112,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ device, onBack }) => {
           <TabsTrigger value="software">Software</TabsTrigger>
           <TabsTrigger value="processes">Processes</TabsTrigger>
           <TabsTrigger value="services">Services</TabsTrigger>
-          <TabsTrigger value="services">Services</TabsTrigger>
           <TabsTrigger value="logs">Event Logs</TabsTrigger>
           <TabsTrigger value="env">Env Vars</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
@@ -118,7 +119,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ device, onBack }) => {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">CPU Load</CardTitle>
@@ -178,6 +179,28 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ device, onBack }) => {
                 </p>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Security</CardTitle>
+                <ShieldCheck className="h-4 w-4 text-emerald-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-emerald-500">
+                  Protected
+                </div>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  <div className="flex justify-between">
+                    <span>Windows Defender</span>
+                    <span className="text-emerald-500">Active</span>
+                  </div>
+                  <div className="flex justify-between mt-1">
+                    <span>Definitions</span>
+                    <span>Up to date</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           <Card className="col-span-3">
@@ -185,9 +208,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ device, onBack }) => {
               <CardTitle>System Activity</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[200px] flex items-center justify-center border-2 border-dashed rounded-lg text-muted-foreground">
-                Real-time Graph Placeholder (Recharts/uPlot)
-              </div>
+              <SystemActivityChart />
             </CardContent>
           </Card>
         </TabsContent>

@@ -57,7 +57,8 @@ const NexusApp: React.FC = () => {
   const [pending, setPending] = useState<any[]>([]);
   const [saasApps, setSaasApps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { setContextSidebar, toggleContext, isContextOpen } = useAppStore();
+  const { setContextSidebar, toggleContext, isContextOpen, activeTab } =
+    useAppStore();
   const [selectedAsset, setSelectedAsset] = useState<any>(null);
 
   // Wizard States
@@ -153,104 +154,87 @@ const NexusApp: React.FC = () => {
         }}
       />
 
-      <Tabs defaultValue="graph" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 max-w-3xl mb-8">
-          <TabsTrigger value="graph" className="gap-2">
-            <Database className="h-4 w-4" />
-            Asset Graph
-          </TabsTrigger>
-          <TabsTrigger value="vault" className="gap-2">
-            <Lock className="h-4 w-4" />
-            Secure Vault
-          </TabsTrigger>
-          <TabsTrigger value="saas" className="gap-2">
-            <Globe className="h-4 w-4" />
-            SaaS Audit
-          </TabsTrigger>
-          <TabsTrigger value="discovery" className="gap-2">
-            <Search className="h-4 w-4" />
-            Discovery Inbox
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent
-          value="graph"
-          className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-        >
-          {assets.length === 0 ? (
-            <EmptyState
-              icon={Database}
-              title="Graph is Empty"
-              description="No configuration items found. Run a SENTgrid discovery or manual intake to populate the graph."
-              action={{
-                label: "Import Assets",
-                onClick: () => setIsImportOpen(true),
-              }}
-            />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {assets.map((asset) => (
-                <Card
-                  key={asset.id}
-                  className="group hover:border-primary transition-all cursor-pointer shadow-sm hover:shadow-md border-none"
-                  onClick={() => handleAssetClick(asset)}
-                >
-                  <CardHeader className="p-4 border-b bg-muted/30 flex flex-row justify-between items-center space-y-0">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                        <Network className="h-4 w-4" />
+      <div className="mt-8">
+        {(activeTab === "overview" || activeTab === "graph") && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {assets.length === 0 ? (
+              <EmptyState
+                icon={Database}
+                title="Graph is Empty"
+                description="No configuration items found. Run a SENTgrid discovery or manual intake to populate the graph."
+                action={{
+                  label: "Import Assets",
+                  onClick: () => setIsImportOpen(true),
+                }}
+              />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {assets.map((asset) => (
+                  <Card
+                    key={asset.id}
+                    className="group hover:border-primary transition-all cursor-pointer shadow-sm hover:shadow-md border-none"
+                    onClick={() => handleAssetClick(asset)}
+                  >
+                    <CardHeader className="p-4 border-b bg-muted/30 flex flex-row justify-between items-center space-y-0">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                          <Network className="h-4 w-4" />
+                        </div>
+                        <CardTitle className="text-sm font-bold truncate max-w-[150px]">
+                          {asset.name}
+                        </CardTitle>
                       </div>
-                      <CardTitle className="text-sm font-bold truncate max-w-[150px]">
-                        {asset.name}
-                      </CardTitle>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className="text-[9px] h-4 font-bold tracking-tighter"
-                    >
-                      VLAN 10
-                    </Badge>
-                  </CardHeader>
-                  <CardContent className="p-4 space-y-4">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] font-bold uppercase text-muted-foreground">
-                        Type
-                      </span>
-                      <span className="text-xs font-medium text-foreground">
-                        Infrastructure Node
-                      </span>
-                    </div>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="w-full h-8 text-[10px] uppercase font-black tracking-widest gap-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toast.success(
-                          `Calculating blast radius for ${asset.name}...`,
-                        );
-                      }}
-                    >
-                      <Zap className="h-3 w-3 text-amber-500" /> Impact Analysis
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] h-4 font-bold tracking-tighter"
+                      >
+                        VLAN 10
+                      </Badge>
+                    </CardHeader>
+                    <CardContent className="p-4 space-y-4">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] font-bold uppercase text-muted-foreground">
+                          Type
+                        </span>
+                        <span className="text-xs font-medium text-foreground">
+                          Infrastructure Node
+                        </span>
+                      </div>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full h-8 text-[10px] uppercase font-black tracking-widest gap-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast.success(
+                            `Calculating blast radius for ${asset.name}...`,
+                          );
+                        }}
+                      >
+                        <Zap className="h-3 w-3 text-amber-500" /> Impact
+                        Analysis
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-        <TabsContent value="vault">
-          <EmptyState
-            icon={Lock}
-            title="Vault Locked"
-            description="Credentials are hardware-encrypted. Reveal request must include a valid justification."
-            action={{ label: "Authenticate Vault", onClick: () => {} }}
-          />
-        </TabsContent>
+        {activeTab === "vault" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <EmptyState
+              icon={Lock}
+              title="Vault Locked"
+              description="Credentials are hardware-encrypted. Reveal request must include a valid justification."
+              action={{ label: "Authenticate Vault", onClick: () => {} }}
+            />
+          </div>
+        )}
 
-        <TabsContent value="saas">
-          <div className="space-y-6">
+        {activeTab === "saas" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-bold">SaaS Perimeter</h3>
@@ -338,10 +322,10 @@ const NexusApp: React.FC = () => {
               )}
             </div>
           </div>
-        </TabsContent>
+        )}
 
-        <TabsContent value="discovery">
-          <div className="grid gap-4">
+        {(activeTab === "discovery" || activeTab === "docs") && (
+          <div className="grid gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {pending.length === 0 ? (
               <EmptyState
                 icon={ShieldCheck}
@@ -378,8 +362,8 @@ const NexusApp: React.FC = () => {
               ))
             )}
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
 
       {isContextOpen && (
         <ContextSidebar

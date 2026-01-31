@@ -6,8 +6,10 @@ import TimeOffTab from "@/components/people/TimeOffTab";
 import PerformanceTab from "@/components/people/PerformanceTab";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+import { useAppStore } from "@/store/useAppStore";
+
 const EmployeePage: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState("dashboard");
+  const { activeTab } = useAppStore();
 
   return (
     <div className="h-full flex flex-col bg-slate-50/50">
@@ -16,28 +18,9 @@ const EmployeePage: React.FC = () => {
         description="Manage your time off, goals, and performance reviews."
       />
 
-      <Tabs
-        value={currentTab}
-        onValueChange={setCurrentTab}
-        className="w-full px-8"
-      >
-        <TabsList className="grid w-full grid-cols-3 max-w-xl mb-8">
-          <TabsTrigger value="dashboard" className="gap-2">
-            <LayoutDashboard className="h-4 w-4" />
-            Dashboard
-          </TabsTrigger>
-          <TabsTrigger value="timeoff" className="gap-2">
-            <Palmtree className="h-4 w-4" />
-            Time Off
-          </TabsTrigger>
-          <TabsTrigger value="performance" className="gap-2">
-            <Target className="h-4 w-4" />
-            Performance
-          </TabsTrigger>
-        </TabsList>
-
-        <main className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <TabsContent value="dashboard">
+      <div className="w-full px-8 mt-6">
+        {(activeTab === "overview" || activeTab === "dashboard") && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -51,17 +34,21 @@ const EmployeePage: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
+          </div>
+        )}
 
-          <TabsContent value="timeoff">
+        {(activeTab === "time" || activeTab === "timeoff") && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <TimeOffTab />
-          </TabsContent>
+          </div>
+        )}
 
-          <TabsContent value="performance">
+        {activeTab === "performance" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <PerformanceTab />
-          </TabsContent>
-        </main>
-      </Tabs>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

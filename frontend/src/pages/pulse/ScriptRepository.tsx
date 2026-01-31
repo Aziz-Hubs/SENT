@@ -147,6 +147,10 @@ const ScriptRepository: React.FC = () => {
         await w.go.bridge.PulseBridge.DeleteScript(id);
         toast.success("Script deleted");
         fetchScripts();
+      } else {
+        toast.success("Mock: Script deleted");
+        // Update local state for immediate feedback in mock mode
+        setScripts((prev) => prev.filter((s) => s.id !== id));
       }
     } catch (err) {
       toast.error("Failed to delete script");

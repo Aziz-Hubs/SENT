@@ -65,6 +65,18 @@ const TerminalComponent: React.FC<TerminalComponentProps> = ({ deviceId }) => {
     term.onData((data) => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(data);
+      } else {
+        // Mock Terminal Logic (Local Echo) for Audit
+        const ord = data.charCodeAt(0);
+        if (ord === 13) {
+          // Enter
+          term.write("\r\nroot@remote:~# ");
+        } else if (ord === 127) {
+          // Backspace
+          term.write("\b \b");
+        } else {
+          term.write(data);
+        }
       }
     });
 

@@ -38,10 +38,11 @@ func (w *FIFOWorker) Run(ctx context.Context) error {
 }
 
 func (w *FIFOWorker) ReconcileCOGS(ctx context.Context) error {
-	pending, err := w.db.StockMovement.Query().
+	// Fetch all outgoing movements. We filter for nil/zero COGS in memory
+	// to avoid potential SQL generation issues with IsNil on custom decimal types.
+	allPending, err := w.db.StockMovement.Query().
 		Where(
 			stockmovement.MovementTypeEQ(stockmovement.MovementTypeOutgoing),
-			stockmovement.CalculatedCogsIsNil(),
 		).
 		WithProduct().
 		WithTenant().
@@ -51,9 +52,13 @@ func (w *FIFOWorker) ReconcileCOGS(ctx context.Context) error {
 		return err
 	}
 
-	for _, m := range pending {
-		if err := w.processMovement(ctx, m); err != nil {
-			fmt.Printf("[STOCK] Failed to process FIFO for movement %d: %v\n", m.ID, err)
+	for _, m := range allPending {
+		// If CalculatedCogs is 0, we assume it needs calculation.
+		// Note: This assumes COGS > 0 for valid items.
+		if m.CalculatedCogs.IsZero() {
+			if err := w.processMovement(ctx, m); err != nil {
+				fmt.Printf("[STOCK] Failed to process FIFO for movement %d: %v\n", m.ID, err)
+			}
 		}
 	}
 

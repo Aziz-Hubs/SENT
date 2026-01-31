@@ -20,6 +20,9 @@ import {
   Banknote,
   HardDrive,
   Scale,
+  TrendingUp,
+  ShieldAlert,
+  UserCheck,
 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
@@ -67,11 +70,46 @@ const MODULES = [
     category: "infrastructure",
     color: "text-neon-cyan",
   },
+  {
+    id: "grid",
+    name: "Grid Net",
+    icon: Database,
+    category: "infrastructure",
+    color: "text-neon-cyan",
+  },
+  {
+    id: "horizon",
+    name: "Horizon vCIO",
+    icon: TrendingUp,
+    category: "infrastructure",
+    color: "text-neon-cyan",
+  },
+  {
+    id: "control",
+    name: "Control SMP",
+    icon: ShieldAlert,
+    category: "infrastructure",
+    color: "text-neon-cyan",
+  },
+  {
+    id: "wave",
+    name: "Wave VoIP",
+    icon: Activity,
+    category: "infrastructure",
+    color: "text-neon-cyan",
+  },
 
   {
     id: "people",
     name: "People HR",
     icon: Users,
+    category: "business",
+    color: "text-neon-emerald",
+  },
+  {
+    id: "employee",
+    name: "Employee",
+    icon: UserCheck,
     category: "business",
     color: "text-neon-emerald",
   },
