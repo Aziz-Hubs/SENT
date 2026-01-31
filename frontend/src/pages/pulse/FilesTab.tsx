@@ -10,22 +10,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Search,
   File,
   Folder,
   ArrowUp,
   Download,
   RefreshCw,
   HardDrive,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-
-declare global {
-  interface Window {
-    // Extending
-  }
-}
 
 interface FileInfo {
   name: string;
@@ -44,11 +38,9 @@ const FilesTab: React.FC<FilesTabProps> = ({ deviceId }) => {
   const [currentPath, setCurrentPath] = useState(".");
   const [loading, setLoading] = useState(false);
 
-  // Basic breadcrumb / up one level logic
   const navigateUp = () => {
     if (currentPath === "." || currentPath === "/") return;
-    // Simple path manipulation for MVP w/o robust path library
-    const parts = currentPath.split("/"); // Assuming linux/mac for simplicity or converting backslashes
+    const parts = currentPath.split("/");
     parts.pop();
     const newPath = parts.join("/") || "/";
     setCurrentPath(newPath);
@@ -61,42 +53,9 @@ const FilesTab: React.FC<FilesTabProps> = ({ deviceId }) => {
       if (w.go && w.go.bridge && w.go.bridge.PulseBridge) {
         const res = await w.go.bridge.PulseBridge.ListFiles(deviceId, path);
         setFiles(res || []);
-      } else {
-        // Mock data
-        setFiles([
-          {
-            name: "Documents",
-            size: 0,
-            mode: "drwxr-xr-x",
-            modTime: new Date().toISOString(),
-            isDir: true,
-          },
-          {
-            name: "Downloads",
-            size: 0,
-            mode: "drwxr-xr-x",
-            modTime: new Date().toISOString(),
-            isDir: true,
-          },
-          {
-            name: "config.json",
-            size: 1024,
-            mode: "-rw-r--r--",
-            modTime: new Date().toISOString(),
-            isDir: false,
-          },
-          {
-            name: "error.log",
-            size: 45002,
-            mode: "-rw-r--r--",
-            modTime: new Date(Date.now() - 3600000).toISOString(),
-            isDir: false,
-          },
-        ]);
       }
     } catch (err) {
       toast.error(`Failed to list directory: ${path}`);
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -117,6 +76,40 @@ const FilesTab: React.FC<FilesTabProps> = ({ deviceId }) => {
     }
   };
 
+  const handleDelete = async (file: FileInfo) => {
+    if (!window.confirm(`Are you sure you want to delete ${file.name}?`))
+      return;
+    try {
+      const path =
+        currentPath === "." ? file.name : `${currentPath}/${file.name}`;
+      await (window as any).go.bridge.PulseBridge.DeleteFile(deviceId, path);
+      toast.success("File deleted");
+      fetchFiles(currentPath);
+    } catch (e) {
+      toast.error("Failed to delete file");
+    }
+  };
+
+  const handleDownload = async (file: FileInfo) => {
+    try {
+      const path =
+        currentPath === "." ? file.name : `${currentPath}/${file.name}`;
+      const bytes = await (window as any).go.bridge.PulseBridge.DownloadFile(
+        deviceId,
+        path,
+      );
+      const blob = new Blob([new Uint8Array(bytes)]);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = file.name;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      toast.error("Failed to download file");
+    }
+  };
+
   const formatSize = (bytes: number) => {
     if (bytes === 0) return "--";
     const k = 1024;
@@ -126,7 +119,7 @@ const FilesTab: React.FC<FilesTabProps> = ({ deviceId }) => {
   };
 
   return (
-    <div className="space-y-4 h-full flex flex-col">
+    <div className="space-y-4 h-full flex flex-col fade-in">
       <div className="flex justify-between items-center gap-2">
         <div className="flex gap-2 flex-1 items-center">
           <Button
@@ -142,7 +135,7 @@ const FilesTab: React.FC<FilesTabProps> = ({ deviceId }) => {
             <Input
               value={currentPath}
               readOnly
-              className="pl-8 font-mono bg-muted/50"
+              className="pl-8 font-mono bg-zinc-900/50 border-zinc-800"
             />
           </div>
         </div>
@@ -159,29 +152,33 @@ const FilesTab: React.FC<FilesTabProps> = ({ deviceId }) => {
         </Button>
       </div>
 
-      <div className="border rounded-md flex-1 overflow-auto">
+      <div className="border border-zinc-800 rounded-md flex-1 overflow-auto bg-zinc-900/30">
         <Table>
-          <TableHeader>
-            <TableRow>
+          <TableHeader className="bg-zinc-900/50">
+            <TableRow className="border-zinc-800">
               <TableHead className="w-[30px]"></TableHead>
               <TableHead>Name</TableHead>
               <TableHead className="text-right">Size</TableHead>
               <TableHead className="text-right">Modified</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-[80px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {files.map((f) => (
               <TableRow
                 key={f.name}
-                className={f.isDir ? "cursor-pointer hover:bg-muted/50" : ""}
+                className={`border-zinc-800 ${
+                  f.isDir
+                    ? "cursor-pointer hover:bg-zinc-900/50"
+                    : "hover:bg-zinc-900/20"
+                }`}
                 onClick={() => handleNavigate(f)}
               >
                 <TableCell>
                   {f.isDir ? (
-                    <Folder className="h-4 w-4 text-sky-500" />
+                    <Folder className="h-4 w-4 text-blue-400" />
                   ) : (
-                    <File className="h-4 w-4 text-slate-500" />
+                    <File className="h-4 w-4 text-zinc-500" />
                   )}
                 </TableCell>
                 <TableCell className="font-medium">{f.name}</TableCell>
@@ -195,13 +192,30 @@ const FilesTab: React.FC<FilesTabProps> = ({ deviceId }) => {
                 </TableCell>
                 <TableCell>
                   {!f.isDir && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 hover:text-emerald-500"
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-1 justify-end">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 hover:text-emerald-500"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownload(f);
+                        }}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 hover:text-rose-500"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(f);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   )}
                 </TableCell>
               </TableRow>

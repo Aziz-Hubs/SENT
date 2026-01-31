@@ -39,6 +39,27 @@ func (Product) Fields() []ent.Field {
 			Optional(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+		field.Int("min_stock_level").Default(0),
+		field.Int("max_stock_level").Default(0),
+		field.String("barcode").Optional().Unique(),
+		field.String("location").Optional(), // e.g. "Aisle 1, Bin B"
+		field.Bool("is_variant_parent").Default(false),
+		// Serial number tracking
+		field.String("serial_number").Optional().Unique(),
+		// Depreciation fields
+		field.Time("purchase_date").Optional(),
+		field.Other("purchase_price", decimal.Decimal{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "numeric(19,4)",
+			}).
+			Optional(),
+		field.Int("useful_life_months").Optional(),
+		// Warranty tracking
+		field.Time("warranty_expires_at").Optional(),
+		// Disposal tracking
+		field.Time("disposal_date").Optional(),
+		field.String("disposal_reason").Optional(),
+		field.Bool("is_disposed").Default(false),
 	}
 }
 
@@ -62,5 +83,14 @@ func (Product) Edges() []ent.Edge {
 		edge.To("reservations", InventoryReservation.Type),
 		edge.To("vendor", Account.Type).
 			Unique(),
+		edge.From("supplier", Supplier.Type).Ref("products").Unique(),
+		edge.From("category", Category.Type).Ref("products").Unique(),
+		edge.From("warehouse", Warehouse.Type).Ref("products").Unique(),
+		edge.To("assignments", AssetAssignment.Type),
+		edge.To("variants", ProductVariant.Type),
+		edge.To("maintenance_schedules", MaintenanceSchedule.Type),
+		edge.To("alerts", StockAlert.Type),
+		edge.To("purchase_order_lines", PurchaseOrderLine.Type),
+		edge.To("inventory_counts", InventoryCount.Type),
 	}
 }

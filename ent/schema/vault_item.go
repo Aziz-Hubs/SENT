@@ -27,6 +27,7 @@ func (VaultItem) Fields() []ent.Field {
 		field.Bool("is_dir").Default(false),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+		field.Time("deleted_at").Optional().Nillable(), // Soft delete
 	}
 }
 
@@ -34,6 +35,11 @@ func (VaultItem) Fields() []ent.Field {
 func (VaultItem) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("tenant", Tenant.Type).Ref("vault_items").Unique().Required(),
+		edge.To("share_links", VaultShareLink.Type),
+		edge.To("versions", VaultVersion.Type),
+		edge.To("comments", VaultComment.Type),
+		edge.To("favorited_by", VaultFavorite.Type),
+		edge.From("legal_holds", LegalHold.Type).Ref("items"),
 	}
 }
 

@@ -23,6 +23,8 @@ type PerformanceReview struct {
 	ID int `json:"id,omitempty"`
 	// OverallRating holds the value of the "overall_rating" field.
 	OverallRating performancereview.OverallRating `json:"overall_rating,omitempty"`
+	// ReviewType holds the value of the "review_type" field.
+	ReviewType performancereview.ReviewType `json:"review_type,omitempty"`
 	// Strengths holds the value of the "strengths" field.
 	Strengths string `json:"strengths,omitempty"`
 	// AreasForImprovement holds the value of the "areas_for_improvement" field.
@@ -31,6 +33,8 @@ type PerformanceReview struct {
 	ManagerComments string `json:"manager_comments,omitempty"`
 	// GoalsAssessment holds the value of the "goals_assessment" field.
 	GoalsAssessment map[string]interface{} `json:"goals_assessment,omitempty"`
+	// SurveyResponses holds the value of the "survey_responses" field.
+	SurveyResponses map[string]interface{} `json:"survey_responses,omitempty"`
 	// Status holds the value of the "status" field.
 	Status performancereview.Status `json:"status,omitempty"`
 	// SubmittedAt holds the value of the "submitted_at" field.
@@ -115,11 +119,11 @@ func (*PerformanceReview) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case performancereview.FieldGoalsAssessment:
+		case performancereview.FieldGoalsAssessment, performancereview.FieldSurveyResponses:
 			values[i] = new([]byte)
 		case performancereview.FieldID:
 			values[i] = new(sql.NullInt64)
-		case performancereview.FieldOverallRating, performancereview.FieldStrengths, performancereview.FieldAreasForImprovement, performancereview.FieldManagerComments, performancereview.FieldStatus:
+		case performancereview.FieldOverallRating, performancereview.FieldReviewType, performancereview.FieldStrengths, performancereview.FieldAreasForImprovement, performancereview.FieldManagerComments, performancereview.FieldStatus:
 			values[i] = new(sql.NullString)
 		case performancereview.FieldSubmittedAt, performancereview.FieldAcknowledgedAt, performancereview.FieldCreatedAt, performancereview.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -158,6 +162,12 @@ func (_m *PerformanceReview) assignValues(columns []string, values []any) error 
 			} else if value.Valid {
 				_m.OverallRating = performancereview.OverallRating(value.String)
 			}
+		case performancereview.FieldReviewType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field review_type", values[i])
+			} else if value.Valid {
+				_m.ReviewType = performancereview.ReviewType(value.String)
+			}
 		case performancereview.FieldStrengths:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field strengths", values[i])
@@ -182,6 +192,14 @@ func (_m *PerformanceReview) assignValues(columns []string, values []any) error 
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &_m.GoalsAssessment); err != nil {
 					return fmt.Errorf("unmarshal field goals_assessment: %w", err)
+				}
+			}
+		case performancereview.FieldSurveyResponses:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field survey_responses", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.SurveyResponses); err != nil {
+					return fmt.Errorf("unmarshal field survey_responses: %w", err)
 				}
 			}
 		case performancereview.FieldStatus:
@@ -301,6 +319,9 @@ func (_m *PerformanceReview) String() string {
 	builder.WriteString("overall_rating=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OverallRating))
 	builder.WriteString(", ")
+	builder.WriteString("review_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ReviewType))
+	builder.WriteString(", ")
 	builder.WriteString("strengths=")
 	builder.WriteString(_m.Strengths)
 	builder.WriteString(", ")
@@ -312,6 +333,9 @@ func (_m *PerformanceReview) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("goals_assessment=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GoalsAssessment))
+	builder.WriteString(", ")
+	builder.WriteString("survey_responses=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SurveyResponses))
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))

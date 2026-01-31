@@ -6,8 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"sent/ent/account"
+	"sent/ent/category"
 	"sent/ent/product"
+	"sent/ent/supplier"
 	"sent/ent/tenant"
+	"sent/ent/warehouse"
 	"strings"
 	"time"
 
@@ -37,12 +40,41 @@ type Product struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// MinStockLevel holds the value of the "min_stock_level" field.
+	MinStockLevel int `json:"min_stock_level,omitempty"`
+	// MaxStockLevel holds the value of the "max_stock_level" field.
+	MaxStockLevel int `json:"max_stock_level,omitempty"`
+	// Barcode holds the value of the "barcode" field.
+	Barcode string `json:"barcode,omitempty"`
+	// Location holds the value of the "location" field.
+	Location string `json:"location,omitempty"`
+	// IsVariantParent holds the value of the "is_variant_parent" field.
+	IsVariantParent bool `json:"is_variant_parent,omitempty"`
+	// SerialNumber holds the value of the "serial_number" field.
+	SerialNumber string `json:"serial_number,omitempty"`
+	// PurchaseDate holds the value of the "purchase_date" field.
+	PurchaseDate time.Time `json:"purchase_date,omitempty"`
+	// PurchasePrice holds the value of the "purchase_price" field.
+	PurchasePrice decimal.Decimal `json:"purchase_price,omitempty"`
+	// UsefulLifeMonths holds the value of the "useful_life_months" field.
+	UsefulLifeMonths int `json:"useful_life_months,omitempty"`
+	// WarrantyExpiresAt holds the value of the "warranty_expires_at" field.
+	WarrantyExpiresAt time.Time `json:"warranty_expires_at,omitempty"`
+	// DisposalDate holds the value of the "disposal_date" field.
+	DisposalDate time.Time `json:"disposal_date,omitempty"`
+	// DisposalReason holds the value of the "disposal_reason" field.
+	DisposalReason string `json:"disposal_reason,omitempty"`
+	// IsDisposed holds the value of the "is_disposed" field.
+	IsDisposed bool `json:"is_disposed,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProductQuery when eager-loading is set.
-	Edges           ProductEdges `json:"edges"`
-	product_vendor  *int
-	tenant_products *int
-	selectValues    sql.SelectValues
+	Edges              ProductEdges `json:"edges"`
+	category_products  *int
+	product_vendor     *int
+	supplier_products  *int
+	tenant_products    *int
+	warehouse_products *int
+	selectValues       sql.SelectValues
 }
 
 // ProductEdges holds the relations/edges for other nodes in the graph.
@@ -55,9 +87,27 @@ type ProductEdges struct {
 	Reservations []*InventoryReservation `json:"reservations,omitempty"`
 	// Vendor holds the value of the vendor edge.
 	Vendor *Account `json:"vendor,omitempty"`
+	// Supplier holds the value of the supplier edge.
+	Supplier *Supplier `json:"supplier,omitempty"`
+	// Category holds the value of the category edge.
+	Category *Category `json:"category,omitempty"`
+	// Warehouse holds the value of the warehouse edge.
+	Warehouse *Warehouse `json:"warehouse,omitempty"`
+	// Assignments holds the value of the assignments edge.
+	Assignments []*AssetAssignment `json:"assignments,omitempty"`
+	// Variants holds the value of the variants edge.
+	Variants []*ProductVariant `json:"variants,omitempty"`
+	// MaintenanceSchedules holds the value of the maintenance_schedules edge.
+	MaintenanceSchedules []*MaintenanceSchedule `json:"maintenance_schedules,omitempty"`
+	// Alerts holds the value of the alerts edge.
+	Alerts []*StockAlert `json:"alerts,omitempty"`
+	// PurchaseOrderLines holds the value of the purchase_order_lines edge.
+	PurchaseOrderLines []*PurchaseOrderLine `json:"purchase_order_lines,omitempty"`
+	// InventoryCounts holds the value of the inventory_counts edge.
+	InventoryCounts []*InventoryCount `json:"inventory_counts,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [13]bool
 }
 
 // TenantOrErr returns the Tenant value or an error if the edge
@@ -100,6 +150,93 @@ func (e ProductEdges) VendorOrErr() (*Account, error) {
 	return nil, &NotLoadedError{edge: "vendor"}
 }
 
+// SupplierOrErr returns the Supplier value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ProductEdges) SupplierOrErr() (*Supplier, error) {
+	if e.Supplier != nil {
+		return e.Supplier, nil
+	} else if e.loadedTypes[4] {
+		return nil, &NotFoundError{label: supplier.Label}
+	}
+	return nil, &NotLoadedError{edge: "supplier"}
+}
+
+// CategoryOrErr returns the Category value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ProductEdges) CategoryOrErr() (*Category, error) {
+	if e.Category != nil {
+		return e.Category, nil
+	} else if e.loadedTypes[5] {
+		return nil, &NotFoundError{label: category.Label}
+	}
+	return nil, &NotLoadedError{edge: "category"}
+}
+
+// WarehouseOrErr returns the Warehouse value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ProductEdges) WarehouseOrErr() (*Warehouse, error) {
+	if e.Warehouse != nil {
+		return e.Warehouse, nil
+	} else if e.loadedTypes[6] {
+		return nil, &NotFoundError{label: warehouse.Label}
+	}
+	return nil, &NotLoadedError{edge: "warehouse"}
+}
+
+// AssignmentsOrErr returns the Assignments value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProductEdges) AssignmentsOrErr() ([]*AssetAssignment, error) {
+	if e.loadedTypes[7] {
+		return e.Assignments, nil
+	}
+	return nil, &NotLoadedError{edge: "assignments"}
+}
+
+// VariantsOrErr returns the Variants value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProductEdges) VariantsOrErr() ([]*ProductVariant, error) {
+	if e.loadedTypes[8] {
+		return e.Variants, nil
+	}
+	return nil, &NotLoadedError{edge: "variants"}
+}
+
+// MaintenanceSchedulesOrErr returns the MaintenanceSchedules value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProductEdges) MaintenanceSchedulesOrErr() ([]*MaintenanceSchedule, error) {
+	if e.loadedTypes[9] {
+		return e.MaintenanceSchedules, nil
+	}
+	return nil, &NotLoadedError{edge: "maintenance_schedules"}
+}
+
+// AlertsOrErr returns the Alerts value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProductEdges) AlertsOrErr() ([]*StockAlert, error) {
+	if e.loadedTypes[10] {
+		return e.Alerts, nil
+	}
+	return nil, &NotLoadedError{edge: "alerts"}
+}
+
+// PurchaseOrderLinesOrErr returns the PurchaseOrderLines value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProductEdges) PurchaseOrderLinesOrErr() ([]*PurchaseOrderLine, error) {
+	if e.loadedTypes[11] {
+		return e.PurchaseOrderLines, nil
+	}
+	return nil, &NotLoadedError{edge: "purchase_order_lines"}
+}
+
+// InventoryCountsOrErr returns the InventoryCounts value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProductEdges) InventoryCountsOrErr() ([]*InventoryCount, error) {
+	if e.loadedTypes[12] {
+		return e.InventoryCounts, nil
+	}
+	return nil, &NotLoadedError{edge: "inventory_counts"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Product) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -107,17 +244,25 @@ func (*Product) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case product.FieldAttributes:
 			values[i] = new([]byte)
-		case product.FieldUnitCost, product.FieldQuantity:
+		case product.FieldUnitCost, product.FieldQuantity, product.FieldPurchasePrice:
 			values[i] = new(decimal.Decimal)
-		case product.FieldID:
+		case product.FieldIsVariantParent, product.FieldIsDisposed:
+			values[i] = new(sql.NullBool)
+		case product.FieldID, product.FieldMinStockLevel, product.FieldMaxStockLevel, product.FieldUsefulLifeMonths:
 			values[i] = new(sql.NullInt64)
-		case product.FieldSku, product.FieldName, product.FieldDescription:
+		case product.FieldSku, product.FieldName, product.FieldDescription, product.FieldBarcode, product.FieldLocation, product.FieldSerialNumber, product.FieldDisposalReason:
 			values[i] = new(sql.NullString)
-		case product.FieldCreatedAt, product.FieldUpdatedAt:
+		case product.FieldCreatedAt, product.FieldUpdatedAt, product.FieldPurchaseDate, product.FieldWarrantyExpiresAt, product.FieldDisposalDate:
 			values[i] = new(sql.NullTime)
-		case product.ForeignKeys[0]: // product_vendor
+		case product.ForeignKeys[0]: // category_products
 			values[i] = new(sql.NullInt64)
-		case product.ForeignKeys[1]: // tenant_products
+		case product.ForeignKeys[1]: // product_vendor
+			values[i] = new(sql.NullInt64)
+		case product.ForeignKeys[2]: // supplier_products
+			values[i] = new(sql.NullInt64)
+		case product.ForeignKeys[3]: // tenant_products
+			values[i] = new(sql.NullInt64)
+		case product.ForeignKeys[4]: // warehouse_products
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -190,19 +335,118 @@ func (_m *Product) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
+		case product.FieldMinStockLevel:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field min_stock_level", values[i])
+			} else if value.Valid {
+				_m.MinStockLevel = int(value.Int64)
+			}
+		case product.FieldMaxStockLevel:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field max_stock_level", values[i])
+			} else if value.Valid {
+				_m.MaxStockLevel = int(value.Int64)
+			}
+		case product.FieldBarcode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field barcode", values[i])
+			} else if value.Valid {
+				_m.Barcode = value.String
+			}
+		case product.FieldLocation:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field location", values[i])
+			} else if value.Valid {
+				_m.Location = value.String
+			}
+		case product.FieldIsVariantParent:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_variant_parent", values[i])
+			} else if value.Valid {
+				_m.IsVariantParent = value.Bool
+			}
+		case product.FieldSerialNumber:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field serial_number", values[i])
+			} else if value.Valid {
+				_m.SerialNumber = value.String
+			}
+		case product.FieldPurchaseDate:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field purchase_date", values[i])
+			} else if value.Valid {
+				_m.PurchaseDate = value.Time
+			}
+		case product.FieldPurchasePrice:
+			if value, ok := values[i].(*decimal.Decimal); !ok {
+				return fmt.Errorf("unexpected type %T for field purchase_price", values[i])
+			} else if value != nil {
+				_m.PurchasePrice = *value
+			}
+		case product.FieldUsefulLifeMonths:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field useful_life_months", values[i])
+			} else if value.Valid {
+				_m.UsefulLifeMonths = int(value.Int64)
+			}
+		case product.FieldWarrantyExpiresAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field warranty_expires_at", values[i])
+			} else if value.Valid {
+				_m.WarrantyExpiresAt = value.Time
+			}
+		case product.FieldDisposalDate:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field disposal_date", values[i])
+			} else if value.Valid {
+				_m.DisposalDate = value.Time
+			}
+		case product.FieldDisposalReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field disposal_reason", values[i])
+			} else if value.Valid {
+				_m.DisposalReason = value.String
+			}
+		case product.FieldIsDisposed:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_disposed", values[i])
+			} else if value.Valid {
+				_m.IsDisposed = value.Bool
+			}
 		case product.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field category_products", value)
+			} else if value.Valid {
+				_m.category_products = new(int)
+				*_m.category_products = int(value.Int64)
+			}
+		case product.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field product_vendor", value)
 			} else if value.Valid {
 				_m.product_vendor = new(int)
 				*_m.product_vendor = int(value.Int64)
 			}
-		case product.ForeignKeys[1]:
+		case product.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field supplier_products", value)
+			} else if value.Valid {
+				_m.supplier_products = new(int)
+				*_m.supplier_products = int(value.Int64)
+			}
+		case product.ForeignKeys[3]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field tenant_products", value)
 			} else if value.Valid {
 				_m.tenant_products = new(int)
 				*_m.tenant_products = int(value.Int64)
+			}
+		case product.ForeignKeys[4]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field warehouse_products", value)
+			} else if value.Valid {
+				_m.warehouse_products = new(int)
+				*_m.warehouse_products = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -235,6 +479,51 @@ func (_m *Product) QueryReservations() *InventoryReservationQuery {
 // QueryVendor queries the "vendor" edge of the Product entity.
 func (_m *Product) QueryVendor() *AccountQuery {
 	return NewProductClient(_m.config).QueryVendor(_m)
+}
+
+// QuerySupplier queries the "supplier" edge of the Product entity.
+func (_m *Product) QuerySupplier() *SupplierQuery {
+	return NewProductClient(_m.config).QuerySupplier(_m)
+}
+
+// QueryCategory queries the "category" edge of the Product entity.
+func (_m *Product) QueryCategory() *CategoryQuery {
+	return NewProductClient(_m.config).QueryCategory(_m)
+}
+
+// QueryWarehouse queries the "warehouse" edge of the Product entity.
+func (_m *Product) QueryWarehouse() *WarehouseQuery {
+	return NewProductClient(_m.config).QueryWarehouse(_m)
+}
+
+// QueryAssignments queries the "assignments" edge of the Product entity.
+func (_m *Product) QueryAssignments() *AssetAssignmentQuery {
+	return NewProductClient(_m.config).QueryAssignments(_m)
+}
+
+// QueryVariants queries the "variants" edge of the Product entity.
+func (_m *Product) QueryVariants() *ProductVariantQuery {
+	return NewProductClient(_m.config).QueryVariants(_m)
+}
+
+// QueryMaintenanceSchedules queries the "maintenance_schedules" edge of the Product entity.
+func (_m *Product) QueryMaintenanceSchedules() *MaintenanceScheduleQuery {
+	return NewProductClient(_m.config).QueryMaintenanceSchedules(_m)
+}
+
+// QueryAlerts queries the "alerts" edge of the Product entity.
+func (_m *Product) QueryAlerts() *StockAlertQuery {
+	return NewProductClient(_m.config).QueryAlerts(_m)
+}
+
+// QueryPurchaseOrderLines queries the "purchase_order_lines" edge of the Product entity.
+func (_m *Product) QueryPurchaseOrderLines() *PurchaseOrderLineQuery {
+	return NewProductClient(_m.config).QueryPurchaseOrderLines(_m)
+}
+
+// QueryInventoryCounts queries the "inventory_counts" edge of the Product entity.
+func (_m *Product) QueryInventoryCounts() *InventoryCountQuery {
+	return NewProductClient(_m.config).QueryInventoryCounts(_m)
 }
 
 // Update returns a builder for updating this Product.
@@ -283,6 +572,45 @@ func (_m *Product) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("min_stock_level=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MinStockLevel))
+	builder.WriteString(", ")
+	builder.WriteString("max_stock_level=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MaxStockLevel))
+	builder.WriteString(", ")
+	builder.WriteString("barcode=")
+	builder.WriteString(_m.Barcode)
+	builder.WriteString(", ")
+	builder.WriteString("location=")
+	builder.WriteString(_m.Location)
+	builder.WriteString(", ")
+	builder.WriteString("is_variant_parent=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsVariantParent))
+	builder.WriteString(", ")
+	builder.WriteString("serial_number=")
+	builder.WriteString(_m.SerialNumber)
+	builder.WriteString(", ")
+	builder.WriteString("purchase_date=")
+	builder.WriteString(_m.PurchaseDate.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("purchase_price=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PurchasePrice))
+	builder.WriteString(", ")
+	builder.WriteString("useful_life_months=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UsefulLifeMonths))
+	builder.WriteString(", ")
+	builder.WriteString("warranty_expires_at=")
+	builder.WriteString(_m.WarrantyExpiresAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("disposal_date=")
+	builder.WriteString(_m.DisposalDate.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("disposal_reason=")
+	builder.WriteString(_m.DisposalReason)
+	builder.WriteString(", ")
+	builder.WriteString("is_disposed=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsDisposed))
 	builder.WriteByte(')')
 	return builder.String()
 }

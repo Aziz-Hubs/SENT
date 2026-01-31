@@ -9,13 +9,20 @@ import (
 	"math"
 	"sent/ent/account"
 	"sent/ent/agent"
+	"sent/ent/application"
 	"sent/ent/asset"
+	"sent/ent/assetassignment"
 	"sent/ent/assettype"
 	"sent/ent/auditlog"
+	"sent/ent/benefitenrollment"
+	"sent/ent/benefitplan"
 	"sent/ent/budgetforecast"
 	"sent/ent/calllog"
 	"sent/ent/camera"
+	"sent/ent/candidate"
+	"sent/ent/category"
 	"sent/ent/compensationagreement"
+	"sent/ent/contact"
 	"sent/ent/contract"
 	"sent/ent/credential"
 	"sent/ent/department"
@@ -24,11 +31,16 @@ import (
 	"sent/ent/employee"
 	"sent/ent/goal"
 	"sent/ent/healthscoresnapshot"
+	"sent/ent/interview"
+	"sent/ent/inventorycount"
 	"sent/ent/inventoryreservation"
 	"sent/ent/ivrflow"
 	"sent/ent/job"
+	"sent/ent/jobposting"
 	"sent/ent/journalentry"
 	"sent/ent/ledgerentry"
+	"sent/ent/legalhold"
+	"sent/ent/maintenanceschedule"
 	"sent/ent/networkbackup"
 	"sent/ent/networkdevice"
 	"sent/ent/networklink"
@@ -39,8 +51,10 @@ import (
 	"sent/ent/permission"
 	"sent/ent/predicate"
 	"sent/ent/product"
+	"sent/ent/purchaseorder"
 	"sent/ent/recording"
 	"sent/ent/recurringinvoice"
+	"sent/ent/retentionpolicy"
 	"sent/ent/reviewcycle"
 	"sent/ent/saasapp"
 	"sent/ent/saasfilter"
@@ -49,9 +63,12 @@ import (
 	"sent/ent/script"
 	"sent/ent/servicerate"
 	"sent/ent/sop"
+	"sent/ent/stockalert"
+	"sent/ent/stockauditlog"
 	"sent/ent/stockmovement"
 	"sent/ent/strategicroadmap"
 	"sent/ent/successionmap"
+	"sent/ent/supplier"
 	"sent/ent/tenant"
 	"sent/ent/ticket"
 	"sent/ent/timeoffbalance"
@@ -60,7 +77,10 @@ import (
 	"sent/ent/transaction"
 	"sent/ent/user"
 	"sent/ent/vaultitem"
+	"sent/ent/vaultsharelink"
+	"sent/ent/vaulttemplate"
 	"sent/ent/voicemail"
+	"sent/ent/warehouse"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -107,6 +127,7 @@ type TenantQuery struct {
 	withEmployees              *EmployeeQuery
 	withCompensationAgreements *CompensationAgreementQuery
 	withVaultItems             *VaultItemQuery
+	withVaultShareLinks        *VaultShareLinkQuery
 	withJournalEntries         *JournalEntryQuery
 	withRecurringInvoices      *RecurringInvoiceQuery
 	withInventoryReservations  *InventoryReservationQuery
@@ -130,6 +151,25 @@ type TenantQuery struct {
 	withReviewCycles           *ReviewCycleQuery
 	withPerformanceReviews     *PerformanceReviewQuery
 	withGoals                  *GoalQuery
+	withSuppliers              *SupplierQuery
+	withCategories             *CategoryQuery
+	withWarehouses             *WarehouseQuery
+	withAssetAssignments       *AssetAssignmentQuery
+	withContacts               *ContactQuery
+	withLegalHolds             *LegalHoldQuery
+	withRetentionPolicies      *RetentionPolicyQuery
+	withVaultTemplates         *VaultTemplateQuery
+	withStockAuditLogs         *StockAuditLogQuery
+	withMaintenanceSchedules   *MaintenanceScheduleQuery
+	withStockAlerts            *StockAlertQuery
+	withPurchaseOrders         *PurchaseOrderQuery
+	withInventoryCounts        *InventoryCountQuery
+	withJobPostings            *JobPostingQuery
+	withCandidates             *CandidateQuery
+	withApplications           *ApplicationQuery
+	withInterviews             *InterviewQuery
+	withBenefitPlans           *BenefitPlanQuery
+	withBenefitEnrollments     *BenefitEnrollmentQuery
 	withFKs                    bool
 	modifiers                  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -872,6 +912,28 @@ func (_q *TenantQuery) QueryVaultItems() *VaultItemQuery {
 	return query
 }
 
+// QueryVaultShareLinks chains the current query on the "vault_share_links" edge.
+func (_q *TenantQuery) QueryVaultShareLinks() *VaultShareLinkQuery {
+	query := (&VaultShareLinkClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(vaultsharelink.Table, vaultsharelink.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.VaultShareLinksTable, tenant.VaultShareLinksColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryJournalEntries chains the current query on the "journal_entries" edge.
 func (_q *TenantQuery) QueryJournalEntries() *JournalEntryQuery {
 	query := (&JournalEntryClient{config: _q.config}).Query()
@@ -1378,6 +1440,424 @@ func (_q *TenantQuery) QueryGoals() *GoalQuery {
 	return query
 }
 
+// QuerySuppliers chains the current query on the "suppliers" edge.
+func (_q *TenantQuery) QuerySuppliers() *SupplierQuery {
+	query := (&SupplierClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(supplier.Table, supplier.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.SuppliersTable, tenant.SuppliersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCategories chains the current query on the "categories" edge.
+func (_q *TenantQuery) QueryCategories() *CategoryQuery {
+	query := (&CategoryClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(category.Table, category.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.CategoriesTable, tenant.CategoriesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryWarehouses chains the current query on the "warehouses" edge.
+func (_q *TenantQuery) QueryWarehouses() *WarehouseQuery {
+	query := (&WarehouseClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(warehouse.Table, warehouse.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.WarehousesTable, tenant.WarehousesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAssetAssignments chains the current query on the "asset_assignments" edge.
+func (_q *TenantQuery) QueryAssetAssignments() *AssetAssignmentQuery {
+	query := (&AssetAssignmentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(assetassignment.Table, assetassignment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.AssetAssignmentsTable, tenant.AssetAssignmentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryContacts chains the current query on the "contacts" edge.
+func (_q *TenantQuery) QueryContacts() *ContactQuery {
+	query := (&ContactClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(contact.Table, contact.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.ContactsTable, tenant.ContactsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLegalHolds chains the current query on the "legal_holds" edge.
+func (_q *TenantQuery) QueryLegalHolds() *LegalHoldQuery {
+	query := (&LegalHoldClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(legalhold.Table, legalhold.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.LegalHoldsTable, tenant.LegalHoldsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRetentionPolicies chains the current query on the "retention_policies" edge.
+func (_q *TenantQuery) QueryRetentionPolicies() *RetentionPolicyQuery {
+	query := (&RetentionPolicyClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(retentionpolicy.Table, retentionpolicy.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.RetentionPoliciesTable, tenant.RetentionPoliciesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryVaultTemplates chains the current query on the "vault_templates" edge.
+func (_q *TenantQuery) QueryVaultTemplates() *VaultTemplateQuery {
+	query := (&VaultTemplateClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(vaulttemplate.Table, vaulttemplate.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.VaultTemplatesTable, tenant.VaultTemplatesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryStockAuditLogs chains the current query on the "stock_audit_logs" edge.
+func (_q *TenantQuery) QueryStockAuditLogs() *StockAuditLogQuery {
+	query := (&StockAuditLogClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(stockauditlog.Table, stockauditlog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.StockAuditLogsTable, tenant.StockAuditLogsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMaintenanceSchedules chains the current query on the "maintenance_schedules" edge.
+func (_q *TenantQuery) QueryMaintenanceSchedules() *MaintenanceScheduleQuery {
+	query := (&MaintenanceScheduleClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(maintenanceschedule.Table, maintenanceschedule.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.MaintenanceSchedulesTable, tenant.MaintenanceSchedulesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryStockAlerts chains the current query on the "stock_alerts" edge.
+func (_q *TenantQuery) QueryStockAlerts() *StockAlertQuery {
+	query := (&StockAlertClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(stockalert.Table, stockalert.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.StockAlertsTable, tenant.StockAlertsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPurchaseOrders chains the current query on the "purchase_orders" edge.
+func (_q *TenantQuery) QueryPurchaseOrders() *PurchaseOrderQuery {
+	query := (&PurchaseOrderClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(purchaseorder.Table, purchaseorder.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.PurchaseOrdersTable, tenant.PurchaseOrdersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryInventoryCounts chains the current query on the "inventory_counts" edge.
+func (_q *TenantQuery) QueryInventoryCounts() *InventoryCountQuery {
+	query := (&InventoryCountClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(inventorycount.Table, inventorycount.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.InventoryCountsTable, tenant.InventoryCountsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryJobPostings chains the current query on the "job_postings" edge.
+func (_q *TenantQuery) QueryJobPostings() *JobPostingQuery {
+	query := (&JobPostingClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(jobposting.Table, jobposting.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.JobPostingsTable, tenant.JobPostingsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCandidates chains the current query on the "candidates" edge.
+func (_q *TenantQuery) QueryCandidates() *CandidateQuery {
+	query := (&CandidateClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(candidate.Table, candidate.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.CandidatesTable, tenant.CandidatesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryApplications chains the current query on the "applications" edge.
+func (_q *TenantQuery) QueryApplications() *ApplicationQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(application.Table, application.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.ApplicationsTable, tenant.ApplicationsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryInterviews chains the current query on the "interviews" edge.
+func (_q *TenantQuery) QueryInterviews() *InterviewQuery {
+	query := (&InterviewClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(interview.Table, interview.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.InterviewsTable, tenant.InterviewsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBenefitPlans chains the current query on the "benefit_plans" edge.
+func (_q *TenantQuery) QueryBenefitPlans() *BenefitPlanQuery {
+	query := (&BenefitPlanClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(benefitplan.Table, benefitplan.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.BenefitPlansTable, tenant.BenefitPlansColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBenefitEnrollments chains the current query on the "benefit_enrollments" edge.
+func (_q *TenantQuery) QueryBenefitEnrollments() *BenefitEnrollmentQuery {
+	query := (&BenefitEnrollmentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(benefitenrollment.Table, benefitenrollment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.BenefitEnrollmentsTable, tenant.BenefitEnrollmentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Tenant entity from the query.
 // Returns a *NotFoundError when no Tenant was found.
 func (_q *TenantQuery) First(ctx context.Context) (*Tenant, error) {
@@ -1602,6 +2082,7 @@ func (_q *TenantQuery) Clone() *TenantQuery {
 		withEmployees:              _q.withEmployees.Clone(),
 		withCompensationAgreements: _q.withCompensationAgreements.Clone(),
 		withVaultItems:             _q.withVaultItems.Clone(),
+		withVaultShareLinks:        _q.withVaultShareLinks.Clone(),
 		withJournalEntries:         _q.withJournalEntries.Clone(),
 		withRecurringInvoices:      _q.withRecurringInvoices.Clone(),
 		withInventoryReservations:  _q.withInventoryReservations.Clone(),
@@ -1625,6 +2106,25 @@ func (_q *TenantQuery) Clone() *TenantQuery {
 		withReviewCycles:           _q.withReviewCycles.Clone(),
 		withPerformanceReviews:     _q.withPerformanceReviews.Clone(),
 		withGoals:                  _q.withGoals.Clone(),
+		withSuppliers:              _q.withSuppliers.Clone(),
+		withCategories:             _q.withCategories.Clone(),
+		withWarehouses:             _q.withWarehouses.Clone(),
+		withAssetAssignments:       _q.withAssetAssignments.Clone(),
+		withContacts:               _q.withContacts.Clone(),
+		withLegalHolds:             _q.withLegalHolds.Clone(),
+		withRetentionPolicies:      _q.withRetentionPolicies.Clone(),
+		withVaultTemplates:         _q.withVaultTemplates.Clone(),
+		withStockAuditLogs:         _q.withStockAuditLogs.Clone(),
+		withMaintenanceSchedules:   _q.withMaintenanceSchedules.Clone(),
+		withStockAlerts:            _q.withStockAlerts.Clone(),
+		withPurchaseOrders:         _q.withPurchaseOrders.Clone(),
+		withInventoryCounts:        _q.withInventoryCounts.Clone(),
+		withJobPostings:            _q.withJobPostings.Clone(),
+		withCandidates:             _q.withCandidates.Clone(),
+		withApplications:           _q.withApplications.Clone(),
+		withInterviews:             _q.withInterviews.Clone(),
+		withBenefitPlans:           _q.withBenefitPlans.Clone(),
+		withBenefitEnrollments:     _q.withBenefitEnrollments.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -1984,6 +2484,17 @@ func (_q *TenantQuery) WithVaultItems(opts ...func(*VaultItemQuery)) *TenantQuer
 	return _q
 }
 
+// WithVaultShareLinks tells the query-builder to eager-load the nodes that are connected to
+// the "vault_share_links" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithVaultShareLinks(opts ...func(*VaultShareLinkQuery)) *TenantQuery {
+	query := (&VaultShareLinkClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withVaultShareLinks = query
+	return _q
+}
+
 // WithJournalEntries tells the query-builder to eager-load the nodes that are connected to
 // the "journal_entries" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TenantQuery) WithJournalEntries(opts ...func(*JournalEntryQuery)) *TenantQuery {
@@ -2237,6 +2748,215 @@ func (_q *TenantQuery) WithGoals(opts ...func(*GoalQuery)) *TenantQuery {
 	return _q
 }
 
+// WithSuppliers tells the query-builder to eager-load the nodes that are connected to
+// the "suppliers" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithSuppliers(opts ...func(*SupplierQuery)) *TenantQuery {
+	query := (&SupplierClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSuppliers = query
+	return _q
+}
+
+// WithCategories tells the query-builder to eager-load the nodes that are connected to
+// the "categories" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithCategories(opts ...func(*CategoryQuery)) *TenantQuery {
+	query := (&CategoryClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCategories = query
+	return _q
+}
+
+// WithWarehouses tells the query-builder to eager-load the nodes that are connected to
+// the "warehouses" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithWarehouses(opts ...func(*WarehouseQuery)) *TenantQuery {
+	query := (&WarehouseClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withWarehouses = query
+	return _q
+}
+
+// WithAssetAssignments tells the query-builder to eager-load the nodes that are connected to
+// the "asset_assignments" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithAssetAssignments(opts ...func(*AssetAssignmentQuery)) *TenantQuery {
+	query := (&AssetAssignmentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withAssetAssignments = query
+	return _q
+}
+
+// WithContacts tells the query-builder to eager-load the nodes that are connected to
+// the "contacts" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithContacts(opts ...func(*ContactQuery)) *TenantQuery {
+	query := (&ContactClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withContacts = query
+	return _q
+}
+
+// WithLegalHolds tells the query-builder to eager-load the nodes that are connected to
+// the "legal_holds" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithLegalHolds(opts ...func(*LegalHoldQuery)) *TenantQuery {
+	query := (&LegalHoldClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLegalHolds = query
+	return _q
+}
+
+// WithRetentionPolicies tells the query-builder to eager-load the nodes that are connected to
+// the "retention_policies" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithRetentionPolicies(opts ...func(*RetentionPolicyQuery)) *TenantQuery {
+	query := (&RetentionPolicyClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withRetentionPolicies = query
+	return _q
+}
+
+// WithVaultTemplates tells the query-builder to eager-load the nodes that are connected to
+// the "vault_templates" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithVaultTemplates(opts ...func(*VaultTemplateQuery)) *TenantQuery {
+	query := (&VaultTemplateClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withVaultTemplates = query
+	return _q
+}
+
+// WithStockAuditLogs tells the query-builder to eager-load the nodes that are connected to
+// the "stock_audit_logs" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithStockAuditLogs(opts ...func(*StockAuditLogQuery)) *TenantQuery {
+	query := (&StockAuditLogClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withStockAuditLogs = query
+	return _q
+}
+
+// WithMaintenanceSchedules tells the query-builder to eager-load the nodes that are connected to
+// the "maintenance_schedules" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithMaintenanceSchedules(opts ...func(*MaintenanceScheduleQuery)) *TenantQuery {
+	query := (&MaintenanceScheduleClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withMaintenanceSchedules = query
+	return _q
+}
+
+// WithStockAlerts tells the query-builder to eager-load the nodes that are connected to
+// the "stock_alerts" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithStockAlerts(opts ...func(*StockAlertQuery)) *TenantQuery {
+	query := (&StockAlertClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withStockAlerts = query
+	return _q
+}
+
+// WithPurchaseOrders tells the query-builder to eager-load the nodes that are connected to
+// the "purchase_orders" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithPurchaseOrders(opts ...func(*PurchaseOrderQuery)) *TenantQuery {
+	query := (&PurchaseOrderClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPurchaseOrders = query
+	return _q
+}
+
+// WithInventoryCounts tells the query-builder to eager-load the nodes that are connected to
+// the "inventory_counts" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithInventoryCounts(opts ...func(*InventoryCountQuery)) *TenantQuery {
+	query := (&InventoryCountClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withInventoryCounts = query
+	return _q
+}
+
+// WithJobPostings tells the query-builder to eager-load the nodes that are connected to
+// the "job_postings" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithJobPostings(opts ...func(*JobPostingQuery)) *TenantQuery {
+	query := (&JobPostingClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withJobPostings = query
+	return _q
+}
+
+// WithCandidates tells the query-builder to eager-load the nodes that are connected to
+// the "candidates" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithCandidates(opts ...func(*CandidateQuery)) *TenantQuery {
+	query := (&CandidateClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCandidates = query
+	return _q
+}
+
+// WithApplications tells the query-builder to eager-load the nodes that are connected to
+// the "applications" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithApplications(opts ...func(*ApplicationQuery)) *TenantQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withApplications = query
+	return _q
+}
+
+// WithInterviews tells the query-builder to eager-load the nodes that are connected to
+// the "interviews" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithInterviews(opts ...func(*InterviewQuery)) *TenantQuery {
+	query := (&InterviewClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withInterviews = query
+	return _q
+}
+
+// WithBenefitPlans tells the query-builder to eager-load the nodes that are connected to
+// the "benefit_plans" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithBenefitPlans(opts ...func(*BenefitPlanQuery)) *TenantQuery {
+	query := (&BenefitPlanClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withBenefitPlans = query
+	return _q
+}
+
+// WithBenefitEnrollments tells the query-builder to eager-load the nodes that are connected to
+// the "benefit_enrollments" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantQuery) WithBenefitEnrollments(opts ...func(*BenefitEnrollmentQuery)) *TenantQuery {
+	query := (&BenefitEnrollmentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withBenefitEnrollments = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -2316,7 +3036,7 @@ func (_q *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 		nodes       = []*Tenant{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [55]bool{
+		loadedTypes = [75]bool{
 			_q.withParent != nil,
 			_q.withChildren != nil,
 			_q.withUsers != nil,
@@ -2349,6 +3069,7 @@ func (_q *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 			_q.withEmployees != nil,
 			_q.withCompensationAgreements != nil,
 			_q.withVaultItems != nil,
+			_q.withVaultShareLinks != nil,
 			_q.withJournalEntries != nil,
 			_q.withRecurringInvoices != nil,
 			_q.withInventoryReservations != nil,
@@ -2372,6 +3093,25 @@ func (_q *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 			_q.withReviewCycles != nil,
 			_q.withPerformanceReviews != nil,
 			_q.withGoals != nil,
+			_q.withSuppliers != nil,
+			_q.withCategories != nil,
+			_q.withWarehouses != nil,
+			_q.withAssetAssignments != nil,
+			_q.withContacts != nil,
+			_q.withLegalHolds != nil,
+			_q.withRetentionPolicies != nil,
+			_q.withVaultTemplates != nil,
+			_q.withStockAuditLogs != nil,
+			_q.withMaintenanceSchedules != nil,
+			_q.withStockAlerts != nil,
+			_q.withPurchaseOrders != nil,
+			_q.withInventoryCounts != nil,
+			_q.withJobPostings != nil,
+			_q.withCandidates != nil,
+			_q.withApplications != nil,
+			_q.withInterviews != nil,
+			_q.withBenefitPlans != nil,
+			_q.withBenefitEnrollments != nil,
 		}
 	)
 	if _q.withParent != nil || _q.withCustomerAccount != nil {
@@ -2626,6 +3366,13 @@ func (_q *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 			return nil, err
 		}
 	}
+	if query := _q.withVaultShareLinks; query != nil {
+		if err := _q.loadVaultShareLinks(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.VaultShareLinks = []*VaultShareLink{} },
+			func(n *Tenant, e *VaultShareLink) { n.Edges.VaultShareLinks = append(n.Edges.VaultShareLinks, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := _q.withJournalEntries; query != nil {
 		if err := _q.loadJournalEntries(ctx, query, nodes,
 			func(n *Tenant) { n.Edges.JournalEntries = []*JournalEntry{} },
@@ -2787,6 +3534,143 @@ func (_q *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 		if err := _q.loadGoals(ctx, query, nodes,
 			func(n *Tenant) { n.Edges.Goals = []*Goal{} },
 			func(n *Tenant, e *Goal) { n.Edges.Goals = append(n.Edges.Goals, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSuppliers; query != nil {
+		if err := _q.loadSuppliers(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Suppliers = []*Supplier{} },
+			func(n *Tenant, e *Supplier) { n.Edges.Suppliers = append(n.Edges.Suppliers, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCategories; query != nil {
+		if err := _q.loadCategories(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Categories = []*Category{} },
+			func(n *Tenant, e *Category) { n.Edges.Categories = append(n.Edges.Categories, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withWarehouses; query != nil {
+		if err := _q.loadWarehouses(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Warehouses = []*Warehouse{} },
+			func(n *Tenant, e *Warehouse) { n.Edges.Warehouses = append(n.Edges.Warehouses, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withAssetAssignments; query != nil {
+		if err := _q.loadAssetAssignments(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.AssetAssignments = []*AssetAssignment{} },
+			func(n *Tenant, e *AssetAssignment) { n.Edges.AssetAssignments = append(n.Edges.AssetAssignments, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withContacts; query != nil {
+		if err := _q.loadContacts(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Contacts = []*Contact{} },
+			func(n *Tenant, e *Contact) { n.Edges.Contacts = append(n.Edges.Contacts, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLegalHolds; query != nil {
+		if err := _q.loadLegalHolds(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.LegalHolds = []*LegalHold{} },
+			func(n *Tenant, e *LegalHold) { n.Edges.LegalHolds = append(n.Edges.LegalHolds, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withRetentionPolicies; query != nil {
+		if err := _q.loadRetentionPolicies(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.RetentionPolicies = []*RetentionPolicy{} },
+			func(n *Tenant, e *RetentionPolicy) { n.Edges.RetentionPolicies = append(n.Edges.RetentionPolicies, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withVaultTemplates; query != nil {
+		if err := _q.loadVaultTemplates(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.VaultTemplates = []*VaultTemplate{} },
+			func(n *Tenant, e *VaultTemplate) { n.Edges.VaultTemplates = append(n.Edges.VaultTemplates, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withStockAuditLogs; query != nil {
+		if err := _q.loadStockAuditLogs(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.StockAuditLogs = []*StockAuditLog{} },
+			func(n *Tenant, e *StockAuditLog) { n.Edges.StockAuditLogs = append(n.Edges.StockAuditLogs, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withMaintenanceSchedules; query != nil {
+		if err := _q.loadMaintenanceSchedules(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.MaintenanceSchedules = []*MaintenanceSchedule{} },
+			func(n *Tenant, e *MaintenanceSchedule) {
+				n.Edges.MaintenanceSchedules = append(n.Edges.MaintenanceSchedules, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withStockAlerts; query != nil {
+		if err := _q.loadStockAlerts(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.StockAlerts = []*StockAlert{} },
+			func(n *Tenant, e *StockAlert) { n.Edges.StockAlerts = append(n.Edges.StockAlerts, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withPurchaseOrders; query != nil {
+		if err := _q.loadPurchaseOrders(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.PurchaseOrders = []*PurchaseOrder{} },
+			func(n *Tenant, e *PurchaseOrder) { n.Edges.PurchaseOrders = append(n.Edges.PurchaseOrders, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withInventoryCounts; query != nil {
+		if err := _q.loadInventoryCounts(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.InventoryCounts = []*InventoryCount{} },
+			func(n *Tenant, e *InventoryCount) { n.Edges.InventoryCounts = append(n.Edges.InventoryCounts, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withJobPostings; query != nil {
+		if err := _q.loadJobPostings(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.JobPostings = []*JobPosting{} },
+			func(n *Tenant, e *JobPosting) { n.Edges.JobPostings = append(n.Edges.JobPostings, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCandidates; query != nil {
+		if err := _q.loadCandidates(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Candidates = []*Candidate{} },
+			func(n *Tenant, e *Candidate) { n.Edges.Candidates = append(n.Edges.Candidates, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withApplications; query != nil {
+		if err := _q.loadApplications(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Applications = []*Application{} },
+			func(n *Tenant, e *Application) { n.Edges.Applications = append(n.Edges.Applications, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withInterviews; query != nil {
+		if err := _q.loadInterviews(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Interviews = []*Interview{} },
+			func(n *Tenant, e *Interview) { n.Edges.Interviews = append(n.Edges.Interviews, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withBenefitPlans; query != nil {
+		if err := _q.loadBenefitPlans(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.BenefitPlans = []*BenefitPlan{} },
+			func(n *Tenant, e *BenefitPlan) { n.Edges.BenefitPlans = append(n.Edges.BenefitPlans, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withBenefitEnrollments; query != nil {
+		if err := _q.loadBenefitEnrollments(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.BenefitEnrollments = []*BenefitEnrollment{} },
+			func(n *Tenant, e *BenefitEnrollment) {
+				n.Edges.BenefitEnrollments = append(n.Edges.BenefitEnrollments, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -3786,6 +4670,37 @@ func (_q *TenantQuery) loadVaultItems(ctx context.Context, query *VaultItemQuery
 	}
 	return nil
 }
+func (_q *TenantQuery) loadVaultShareLinks(ctx context.Context, query *VaultShareLinkQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *VaultShareLink)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.VaultShareLink(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.VaultShareLinksColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_vault_share_links
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_vault_share_links" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_vault_share_links" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 func (_q *TenantQuery) loadJournalEntries(ctx context.Context, query *JournalEntryQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *JournalEntry)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Tenant)
@@ -4495,6 +5410,595 @@ func (_q *TenantQuery) loadGoals(ctx context.Context, query *GoalQuery, nodes []
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "tenant_goals" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadSuppliers(ctx context.Context, query *SupplierQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Supplier)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Supplier(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.SuppliersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_suppliers
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_suppliers" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_suppliers" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadCategories(ctx context.Context, query *CategoryQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Category)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Category(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.CategoriesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_categories
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_categories" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_categories" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadWarehouses(ctx context.Context, query *WarehouseQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Warehouse)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Warehouse(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.WarehousesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_warehouses
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_warehouses" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_warehouses" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadAssetAssignments(ctx context.Context, query *AssetAssignmentQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *AssetAssignment)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.AssetAssignment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.AssetAssignmentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_asset_assignments
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_asset_assignments" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_asset_assignments" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadContacts(ctx context.Context, query *ContactQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Contact)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Contact(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.ContactsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_contacts
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_contacts" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_contacts" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadLegalHolds(ctx context.Context, query *LegalHoldQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *LegalHold)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.LegalHold(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.LegalHoldsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_legal_holds
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_legal_holds" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_legal_holds" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadRetentionPolicies(ctx context.Context, query *RetentionPolicyQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *RetentionPolicy)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.RetentionPolicy(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.RetentionPoliciesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_retention_policies
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_retention_policies" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_retention_policies" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadVaultTemplates(ctx context.Context, query *VaultTemplateQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *VaultTemplate)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.VaultTemplate(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.VaultTemplatesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_vault_templates
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_vault_templates" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_vault_templates" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadStockAuditLogs(ctx context.Context, query *StockAuditLogQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *StockAuditLog)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.StockAuditLog(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.StockAuditLogsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_stock_audit_logs
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_stock_audit_logs" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_stock_audit_logs" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadMaintenanceSchedules(ctx context.Context, query *MaintenanceScheduleQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *MaintenanceSchedule)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.MaintenanceSchedule(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.MaintenanceSchedulesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_maintenance_schedules
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_maintenance_schedules" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_maintenance_schedules" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadStockAlerts(ctx context.Context, query *StockAlertQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *StockAlert)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.StockAlert(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.StockAlertsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_stock_alerts
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_stock_alerts" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_stock_alerts" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadPurchaseOrders(ctx context.Context, query *PurchaseOrderQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *PurchaseOrder)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.PurchaseOrder(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.PurchaseOrdersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_purchase_orders
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_purchase_orders" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_purchase_orders" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadInventoryCounts(ctx context.Context, query *InventoryCountQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *InventoryCount)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.InventoryCount(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.InventoryCountsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_inventory_counts
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_inventory_counts" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_inventory_counts" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadJobPostings(ctx context.Context, query *JobPostingQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *JobPosting)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.JobPosting(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.JobPostingsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_job_postings
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_job_postings" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_job_postings" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadCandidates(ctx context.Context, query *CandidateQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Candidate)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Candidate(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.CandidatesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_candidates
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_candidates" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_candidates" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadApplications(ctx context.Context, query *ApplicationQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Application)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Application(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.ApplicationsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_applications
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_applications" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_applications" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadInterviews(ctx context.Context, query *InterviewQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Interview)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Interview(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.InterviewsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_interviews
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_interviews" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_interviews" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadBenefitPlans(ctx context.Context, query *BenefitPlanQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *BenefitPlan)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.BenefitPlan(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.BenefitPlansColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_benefit_plans
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_benefit_plans" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_benefit_plans" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TenantQuery) loadBenefitEnrollments(ctx context.Context, query *BenefitEnrollmentQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *BenefitEnrollment)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.BenefitEnrollment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.BenefitEnrollmentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tenant_benefit_enrollments
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tenant_benefit_enrollments" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_benefit_enrollments" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

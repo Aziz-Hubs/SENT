@@ -11,6 +11,9 @@ import (
 	"github.com/google/uuid"
 )
 
+// Global state for RDP session
+var currentRDP *RemoteDesktopSession
+
 // Run starts the SENT agent.
 func Run() {
 	fmt.Println("[AGENT] Starting SENT pulse agent...")
@@ -42,6 +45,26 @@ func Run() {
 		case "reboot":
 			log.Println("[AGENT] Rebooting system via command...")
 			// exec.Command("reboot").Run() // Commented for safety in MVP
+		case "start_rdp":
+			log.Println("[AGENT] Starting Remote Desktop Session...")
+			go func() {
+				// Stop any existing session first
+				if currentRDP != nil {
+					currentRDP.Stop()
+				}
+				// Start new session
+				// Assuming backend runs on localhost:8000 for development. 
+				// In production this would be the actual server IP.
+				url := fmt.Sprintf("ws://localhost:8000/rdp/stream?agent_id=%s", agentID)
+				currentRDP = NewRemoteDesktopSession(url, agentID)
+				currentRDP.Start()
+			}()
+		case "stop_rdp":
+			log.Println("[AGENT] Stopping Remote Desktop Session...")
+			if currentRDP != nil {
+				currentRDP.Stop()
+				currentRDP = nil
+			}
 		case "shell_connect":
 			log.Println("[AGENT] Spawning reverse shell session...")
             // For MVP, we just start it locally to test logic. 

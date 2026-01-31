@@ -15,59 +15,64 @@ const (
 	Label = "time_entry"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldDurationHours holds the string denoting the duration_hours field in the database.
-	FieldDurationHours = "duration_hours"
-	// FieldNote holds the string denoting the note field in the database.
-	FieldNote = "note"
-	// FieldStartedAt holds the string denoting the started_at field in the database.
-	FieldStartedAt = "started_at"
-	// FieldIsBillable holds the string denoting the is_billable field in the database.
-	FieldIsBillable = "is_billable"
+	// FieldStartTime holds the string denoting the start_time field in the database.
+	FieldStartTime = "start_time"
+	// FieldEndTime holds the string denoting the end_time field in the database.
+	FieldEndTime = "end_time"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldTicketID holds the string denoting the ticket_id field in the database.
+	FieldTicketID = "ticket_id"
+	// FieldTechnicianID holds the string denoting the technician_id field in the database.
+	FieldTechnicianID = "technician_id"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldWorkType holds the string denoting the work_type field in the database.
 	FieldWorkType = "work_type"
+	// FieldDurationHours holds the string denoting the duration_hours field in the database.
+	FieldDurationHours = "duration_hours"
 	// FieldInvoiceID holds the string denoting the invoice_id field in the database.
 	FieldInvoiceID = "invoice_id"
+	// EdgeEmployee holds the string denoting the employee edge name in mutations.
+	EdgeEmployee = "employee"
 	// EdgeTicket holds the string denoting the ticket edge name in mutations.
 	EdgeTicket = "ticket"
-	// EdgeTechnician holds the string denoting the technician edge name in mutations.
-	EdgeTechnician = "technician"
 	// Table holds the table name of the timeentry in the database.
 	Table = "time_entries"
+	// EmployeeTable is the table that holds the employee relation/edge.
+	EmployeeTable = "time_entries"
+	// EmployeeInverseTable is the table name for the Employee entity.
+	// It exists in this package in order to avoid circular dependency with the "employee" package.
+	EmployeeInverseTable = "employees"
+	// EmployeeColumn is the table column denoting the employee relation/edge.
+	EmployeeColumn = "employee_time_entries"
 	// TicketTable is the table that holds the ticket relation/edge.
 	TicketTable = "time_entries"
 	// TicketInverseTable is the table name for the Ticket entity.
 	// It exists in this package in order to avoid circular dependency with the "ticket" package.
 	TicketInverseTable = "tickets"
 	// TicketColumn is the table column denoting the ticket relation/edge.
-	TicketColumn = "ticket_time_entries"
-	// TechnicianTable is the table that holds the technician relation/edge.
-	TechnicianTable = "time_entries"
-	// TechnicianInverseTable is the table name for the User entity.
-	// It exists in this package in order to avoid circular dependency with the "user" package.
-	TechnicianInverseTable = "users"
-	// TechnicianColumn is the table column denoting the technician relation/edge.
-	TechnicianColumn = "user_time_entries"
+	TicketColumn = "ticket_id"
 )
 
 // Columns holds all SQL columns for timeentry fields.
 var Columns = []string{
 	FieldID,
-	FieldDurationHours,
-	FieldNote,
-	FieldStartedAt,
-	FieldIsBillable,
+	FieldStartTime,
+	FieldEndTime,
+	FieldCreatedAt,
+	FieldTicketID,
+	FieldTechnicianID,
 	FieldStatus,
 	FieldWorkType,
+	FieldDurationHours,
 	FieldInvoiceID,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "time_entries"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"ticket_time_entries",
-	"user_time_entries",
+	"employee_time_entries",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -86,10 +91,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultStartedAt holds the default value on creation for the "started_at" field.
-	DefaultStartedAt func() time.Time
-	// DefaultIsBillable holds the default value on creation for the "is_billable" field.
-	DefaultIsBillable bool
+	// DefaultStartTime holds the default value on creation for the "start_time" field.
+	DefaultStartTime func() time.Time
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
 	// DefaultWorkType holds the default value on creation for the "work_type" field.
 	DefaultWorkType string
 )
@@ -129,24 +134,29 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByDurationHours orders the results by the duration_hours field.
-func ByDurationHours(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDurationHours, opts...).ToFunc()
+// ByStartTime orders the results by the start_time field.
+func ByStartTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStartTime, opts...).ToFunc()
 }
 
-// ByNote orders the results by the note field.
-func ByNote(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldNote, opts...).ToFunc()
+// ByEndTime orders the results by the end_time field.
+func ByEndTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEndTime, opts...).ToFunc()
 }
 
-// ByStartedAt orders the results by the started_at field.
-func ByStartedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldStartedAt, opts...).ToFunc()
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
-// ByIsBillable orders the results by the is_billable field.
-func ByIsBillable(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsBillable, opts...).ToFunc()
+// ByTicketID orders the results by the ticket_id field.
+func ByTicketID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTicketID, opts...).ToFunc()
+}
+
+// ByTechnicianID orders the results by the technician_id field.
+func ByTechnicianID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTechnicianID, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.
@@ -159,9 +169,21 @@ func ByWorkType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWorkType, opts...).ToFunc()
 }
 
+// ByDurationHours orders the results by the duration_hours field.
+func ByDurationHours(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDurationHours, opts...).ToFunc()
+}
+
 // ByInvoiceID orders the results by the invoice_id field.
 func ByInvoiceID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldInvoiceID, opts...).ToFunc()
+}
+
+// ByEmployeeField orders the results by employee field.
+func ByEmployeeField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newEmployeeStep(), sql.OrderByField(field, opts...))
+	}
 }
 
 // ByTicketField orders the results by ticket field.
@@ -170,24 +192,17 @@ func ByTicketField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTicketStep(), sql.OrderByField(field, opts...))
 	}
 }
-
-// ByTechnicianField orders the results by technician field.
-func ByTechnicianField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTechnicianStep(), sql.OrderByField(field, opts...))
-	}
+func newEmployeeStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(EmployeeInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, EmployeeTable, EmployeeColumn),
+	)
 }
 func newTicketStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TicketInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, TicketTable, TicketColumn),
-	)
-}
-func newTechnicianStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TechnicianInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, TechnicianTable, TechnicianColumn),
+		sqlgraph.Edge(sqlgraph.M2O, false, TicketTable, TicketColumn),
 	)
 }

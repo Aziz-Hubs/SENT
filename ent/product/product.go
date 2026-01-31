@@ -31,6 +31,32 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldMinStockLevel holds the string denoting the min_stock_level field in the database.
+	FieldMinStockLevel = "min_stock_level"
+	// FieldMaxStockLevel holds the string denoting the max_stock_level field in the database.
+	FieldMaxStockLevel = "max_stock_level"
+	// FieldBarcode holds the string denoting the barcode field in the database.
+	FieldBarcode = "barcode"
+	// FieldLocation holds the string denoting the location field in the database.
+	FieldLocation = "location"
+	// FieldIsVariantParent holds the string denoting the is_variant_parent field in the database.
+	FieldIsVariantParent = "is_variant_parent"
+	// FieldSerialNumber holds the string denoting the serial_number field in the database.
+	FieldSerialNumber = "serial_number"
+	// FieldPurchaseDate holds the string denoting the purchase_date field in the database.
+	FieldPurchaseDate = "purchase_date"
+	// FieldPurchasePrice holds the string denoting the purchase_price field in the database.
+	FieldPurchasePrice = "purchase_price"
+	// FieldUsefulLifeMonths holds the string denoting the useful_life_months field in the database.
+	FieldUsefulLifeMonths = "useful_life_months"
+	// FieldWarrantyExpiresAt holds the string denoting the warranty_expires_at field in the database.
+	FieldWarrantyExpiresAt = "warranty_expires_at"
+	// FieldDisposalDate holds the string denoting the disposal_date field in the database.
+	FieldDisposalDate = "disposal_date"
+	// FieldDisposalReason holds the string denoting the disposal_reason field in the database.
+	FieldDisposalReason = "disposal_reason"
+	// FieldIsDisposed holds the string denoting the is_disposed field in the database.
+	FieldIsDisposed = "is_disposed"
 	// EdgeTenant holds the string denoting the tenant edge name in mutations.
 	EdgeTenant = "tenant"
 	// EdgeMovements holds the string denoting the movements edge name in mutations.
@@ -39,6 +65,24 @@ const (
 	EdgeReservations = "reservations"
 	// EdgeVendor holds the string denoting the vendor edge name in mutations.
 	EdgeVendor = "vendor"
+	// EdgeSupplier holds the string denoting the supplier edge name in mutations.
+	EdgeSupplier = "supplier"
+	// EdgeCategory holds the string denoting the category edge name in mutations.
+	EdgeCategory = "category"
+	// EdgeWarehouse holds the string denoting the warehouse edge name in mutations.
+	EdgeWarehouse = "warehouse"
+	// EdgeAssignments holds the string denoting the assignments edge name in mutations.
+	EdgeAssignments = "assignments"
+	// EdgeVariants holds the string denoting the variants edge name in mutations.
+	EdgeVariants = "variants"
+	// EdgeMaintenanceSchedules holds the string denoting the maintenance_schedules edge name in mutations.
+	EdgeMaintenanceSchedules = "maintenance_schedules"
+	// EdgeAlerts holds the string denoting the alerts edge name in mutations.
+	EdgeAlerts = "alerts"
+	// EdgePurchaseOrderLines holds the string denoting the purchase_order_lines edge name in mutations.
+	EdgePurchaseOrderLines = "purchase_order_lines"
+	// EdgeInventoryCounts holds the string denoting the inventory_counts edge name in mutations.
+	EdgeInventoryCounts = "inventory_counts"
 	// Table holds the table name of the product in the database.
 	Table = "products"
 	// TenantTable is the table that holds the tenant relation/edge.
@@ -69,6 +113,69 @@ const (
 	VendorInverseTable = "accounts"
 	// VendorColumn is the table column denoting the vendor relation/edge.
 	VendorColumn = "product_vendor"
+	// SupplierTable is the table that holds the supplier relation/edge.
+	SupplierTable = "products"
+	// SupplierInverseTable is the table name for the Supplier entity.
+	// It exists in this package in order to avoid circular dependency with the "supplier" package.
+	SupplierInverseTable = "suppliers"
+	// SupplierColumn is the table column denoting the supplier relation/edge.
+	SupplierColumn = "supplier_products"
+	// CategoryTable is the table that holds the category relation/edge.
+	CategoryTable = "products"
+	// CategoryInverseTable is the table name for the Category entity.
+	// It exists in this package in order to avoid circular dependency with the "category" package.
+	CategoryInverseTable = "categories"
+	// CategoryColumn is the table column denoting the category relation/edge.
+	CategoryColumn = "category_products"
+	// WarehouseTable is the table that holds the warehouse relation/edge.
+	WarehouseTable = "products"
+	// WarehouseInverseTable is the table name for the Warehouse entity.
+	// It exists in this package in order to avoid circular dependency with the "warehouse" package.
+	WarehouseInverseTable = "warehouses"
+	// WarehouseColumn is the table column denoting the warehouse relation/edge.
+	WarehouseColumn = "warehouse_products"
+	// AssignmentsTable is the table that holds the assignments relation/edge.
+	AssignmentsTable = "asset_assignments"
+	// AssignmentsInverseTable is the table name for the AssetAssignment entity.
+	// It exists in this package in order to avoid circular dependency with the "assetassignment" package.
+	AssignmentsInverseTable = "asset_assignments"
+	// AssignmentsColumn is the table column denoting the assignments relation/edge.
+	AssignmentsColumn = "product_assignments"
+	// VariantsTable is the table that holds the variants relation/edge.
+	VariantsTable = "product_variants"
+	// VariantsInverseTable is the table name for the ProductVariant entity.
+	// It exists in this package in order to avoid circular dependency with the "productvariant" package.
+	VariantsInverseTable = "product_variants"
+	// VariantsColumn is the table column denoting the variants relation/edge.
+	VariantsColumn = "product_variants"
+	// MaintenanceSchedulesTable is the table that holds the maintenance_schedules relation/edge.
+	MaintenanceSchedulesTable = "maintenance_schedules"
+	// MaintenanceSchedulesInverseTable is the table name for the MaintenanceSchedule entity.
+	// It exists in this package in order to avoid circular dependency with the "maintenanceschedule" package.
+	MaintenanceSchedulesInverseTable = "maintenance_schedules"
+	// MaintenanceSchedulesColumn is the table column denoting the maintenance_schedules relation/edge.
+	MaintenanceSchedulesColumn = "product_maintenance_schedules"
+	// AlertsTable is the table that holds the alerts relation/edge.
+	AlertsTable = "stock_alerts"
+	// AlertsInverseTable is the table name for the StockAlert entity.
+	// It exists in this package in order to avoid circular dependency with the "stockalert" package.
+	AlertsInverseTable = "stock_alerts"
+	// AlertsColumn is the table column denoting the alerts relation/edge.
+	AlertsColumn = "product_alerts"
+	// PurchaseOrderLinesTable is the table that holds the purchase_order_lines relation/edge.
+	PurchaseOrderLinesTable = "purchase_order_lines"
+	// PurchaseOrderLinesInverseTable is the table name for the PurchaseOrderLine entity.
+	// It exists in this package in order to avoid circular dependency with the "purchaseorderline" package.
+	PurchaseOrderLinesInverseTable = "purchase_order_lines"
+	// PurchaseOrderLinesColumn is the table column denoting the purchase_order_lines relation/edge.
+	PurchaseOrderLinesColumn = "product_purchase_order_lines"
+	// InventoryCountsTable is the table that holds the inventory_counts relation/edge.
+	InventoryCountsTable = "inventory_counts"
+	// InventoryCountsInverseTable is the table name for the InventoryCount entity.
+	// It exists in this package in order to avoid circular dependency with the "inventorycount" package.
+	InventoryCountsInverseTable = "inventory_counts"
+	// InventoryCountsColumn is the table column denoting the inventory_counts relation/edge.
+	InventoryCountsColumn = "product_inventory_counts"
 )
 
 // Columns holds all SQL columns for product fields.
@@ -82,13 +189,29 @@ var Columns = []string{
 	FieldAttributes,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldMinStockLevel,
+	FieldMaxStockLevel,
+	FieldBarcode,
+	FieldLocation,
+	FieldIsVariantParent,
+	FieldSerialNumber,
+	FieldPurchaseDate,
+	FieldPurchasePrice,
+	FieldUsefulLifeMonths,
+	FieldWarrantyExpiresAt,
+	FieldDisposalDate,
+	FieldDisposalReason,
+	FieldIsDisposed,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "products"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"category_products",
 	"product_vendor",
+	"supplier_products",
 	"tenant_products",
+	"warehouse_products",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -117,6 +240,14 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultMinStockLevel holds the default value on creation for the "min_stock_level" field.
+	DefaultMinStockLevel int
+	// DefaultMaxStockLevel holds the default value on creation for the "max_stock_level" field.
+	DefaultMaxStockLevel int
+	// DefaultIsVariantParent holds the default value on creation for the "is_variant_parent" field.
+	DefaultIsVariantParent bool
+	// DefaultIsDisposed holds the default value on creation for the "is_disposed" field.
+	DefaultIsDisposed bool
 )
 
 // OrderOption defines the ordering options for the Product queries.
@@ -162,6 +293,71 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
+// ByMinStockLevel orders the results by the min_stock_level field.
+func ByMinStockLevel(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMinStockLevel, opts...).ToFunc()
+}
+
+// ByMaxStockLevel orders the results by the max_stock_level field.
+func ByMaxStockLevel(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMaxStockLevel, opts...).ToFunc()
+}
+
+// ByBarcode orders the results by the barcode field.
+func ByBarcode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBarcode, opts...).ToFunc()
+}
+
+// ByLocation orders the results by the location field.
+func ByLocation(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLocation, opts...).ToFunc()
+}
+
+// ByIsVariantParent orders the results by the is_variant_parent field.
+func ByIsVariantParent(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsVariantParent, opts...).ToFunc()
+}
+
+// BySerialNumber orders the results by the serial_number field.
+func BySerialNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSerialNumber, opts...).ToFunc()
+}
+
+// ByPurchaseDate orders the results by the purchase_date field.
+func ByPurchaseDate(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPurchaseDate, opts...).ToFunc()
+}
+
+// ByPurchasePrice orders the results by the purchase_price field.
+func ByPurchasePrice(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPurchasePrice, opts...).ToFunc()
+}
+
+// ByUsefulLifeMonths orders the results by the useful_life_months field.
+func ByUsefulLifeMonths(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUsefulLifeMonths, opts...).ToFunc()
+}
+
+// ByWarrantyExpiresAt orders the results by the warranty_expires_at field.
+func ByWarrantyExpiresAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWarrantyExpiresAt, opts...).ToFunc()
+}
+
+// ByDisposalDate orders the results by the disposal_date field.
+func ByDisposalDate(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisposalDate, opts...).ToFunc()
+}
+
+// ByDisposalReason orders the results by the disposal_reason field.
+func ByDisposalReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisposalReason, opts...).ToFunc()
+}
+
+// ByIsDisposed orders the results by the is_disposed field.
+func ByIsDisposed(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsDisposed, opts...).ToFunc()
+}
+
 // ByTenantField orders the results by tenant field.
 func ByTenantField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -203,6 +399,111 @@ func ByVendorField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newVendorStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// BySupplierField orders the results by supplier field.
+func BySupplierField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSupplierStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByCategoryField orders the results by category field.
+func ByCategoryField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCategoryStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByWarehouseField orders the results by warehouse field.
+func ByWarehouseField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWarehouseStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByAssignmentsCount orders the results by assignments count.
+func ByAssignmentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAssignmentsStep(), opts...)
+	}
+}
+
+// ByAssignments orders the results by assignments terms.
+func ByAssignments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAssignmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByVariantsCount orders the results by variants count.
+func ByVariantsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVariantsStep(), opts...)
+	}
+}
+
+// ByVariants orders the results by variants terms.
+func ByVariants(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVariantsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByMaintenanceSchedulesCount orders the results by maintenance_schedules count.
+func ByMaintenanceSchedulesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newMaintenanceSchedulesStep(), opts...)
+	}
+}
+
+// ByMaintenanceSchedules orders the results by maintenance_schedules terms.
+func ByMaintenanceSchedules(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newMaintenanceSchedulesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByAlertsCount orders the results by alerts count.
+func ByAlertsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAlertsStep(), opts...)
+	}
+}
+
+// ByAlerts orders the results by alerts terms.
+func ByAlerts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAlertsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPurchaseOrderLinesCount orders the results by purchase_order_lines count.
+func ByPurchaseOrderLinesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPurchaseOrderLinesStep(), opts...)
+	}
+}
+
+// ByPurchaseOrderLines orders the results by purchase_order_lines terms.
+func ByPurchaseOrderLines(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPurchaseOrderLinesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByInventoryCountsCount orders the results by inventory_counts count.
+func ByInventoryCountsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newInventoryCountsStep(), opts...)
+	}
+}
+
+// ByInventoryCounts orders the results by inventory_counts terms.
+func ByInventoryCounts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newInventoryCountsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newTenantStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -229,5 +530,68 @@ func newVendorStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(VendorInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, VendorTable, VendorColumn),
+	)
+}
+func newSupplierStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SupplierInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, SupplierTable, SupplierColumn),
+	)
+}
+func newCategoryStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CategoryInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, CategoryTable, CategoryColumn),
+	)
+}
+func newWarehouseStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WarehouseInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, WarehouseTable, WarehouseColumn),
+	)
+}
+func newAssignmentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AssignmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AssignmentsTable, AssignmentsColumn),
+	)
+}
+func newVariantsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VariantsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, VariantsTable, VariantsColumn),
+	)
+}
+func newMaintenanceSchedulesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(MaintenanceSchedulesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, MaintenanceSchedulesTable, MaintenanceSchedulesColumn),
+	)
+}
+func newAlertsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AlertsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AlertsTable, AlertsColumn),
+	)
+}
+func newPurchaseOrderLinesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PurchaseOrderLinesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PurchaseOrderLinesTable, PurchaseOrderLinesColumn),
+	)
+}
+func newInventoryCountsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(InventoryCountsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, InventoryCountsTable, InventoryCountsColumn),
 	)
 }

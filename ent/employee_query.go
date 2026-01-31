@@ -8,14 +8,18 @@ import (
 	"fmt"
 	"math"
 	"sent/ent/account"
+	"sent/ent/assetassignment"
+	"sent/ent/benefitenrollment"
 	"sent/ent/compensationagreement"
 	"sent/ent/department"
 	"sent/ent/employee"
 	"sent/ent/goal"
+	"sent/ent/interview"
 	"sent/ent/performancereview"
 	"sent/ent/predicate"
 	"sent/ent/successionmap"
 	"sent/ent/tenant"
+	"sent/ent/timeentry"
 	"sent/ent/timeoffbalance"
 	"sent/ent/timeoffrequest"
 
@@ -46,6 +50,10 @@ type EmployeeQuery struct {
 	withPerformanceReviews     *PerformanceReviewQuery
 	withConductedReviews       *PerformanceReviewQuery
 	withGoals                  *GoalQuery
+	withAssetAssignments       *AssetAssignmentQuery
+	withTimeEntries            *TimeEntryQuery
+	withConductedInterviews    *InterviewQuery
+	withBenefitEnrollments     *BenefitEnrollmentQuery
 	withFKs                    bool
 	modifiers                  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -392,6 +400,94 @@ func (_q *EmployeeQuery) QueryGoals() *GoalQuery {
 	return query
 }
 
+// QueryAssetAssignments chains the current query on the "asset_assignments" edge.
+func (_q *EmployeeQuery) QueryAssetAssignments() *AssetAssignmentQuery {
+	query := (&AssetAssignmentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, selector),
+			sqlgraph.To(assetassignment.Table, assetassignment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.AssetAssignmentsTable, employee.AssetAssignmentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTimeEntries chains the current query on the "time_entries" edge.
+func (_q *EmployeeQuery) QueryTimeEntries() *TimeEntryQuery {
+	query := (&TimeEntryClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, selector),
+			sqlgraph.To(timeentry.Table, timeentry.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.TimeEntriesTable, employee.TimeEntriesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryConductedInterviews chains the current query on the "conducted_interviews" edge.
+func (_q *EmployeeQuery) QueryConductedInterviews() *InterviewQuery {
+	query := (&InterviewClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, selector),
+			sqlgraph.To(interview.Table, interview.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, employee.ConductedInterviewsTable, employee.ConductedInterviewsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBenefitEnrollments chains the current query on the "benefit_enrollments" edge.
+func (_q *EmployeeQuery) QueryBenefitEnrollments() *BenefitEnrollmentQuery {
+	query := (&BenefitEnrollmentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(employee.Table, employee.FieldID, selector),
+			sqlgraph.To(benefitenrollment.Table, benefitenrollment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, employee.BenefitEnrollmentsTable, employee.BenefitEnrollmentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Employee entity from the query.
 // Returns a *NotFoundError when no Employee was found.
 func (_q *EmployeeQuery) First(ctx context.Context) (*Employee, error) {
@@ -598,6 +694,10 @@ func (_q *EmployeeQuery) Clone() *EmployeeQuery {
 		withPerformanceReviews:     _q.withPerformanceReviews.Clone(),
 		withConductedReviews:       _q.withConductedReviews.Clone(),
 		withGoals:                  _q.withGoals.Clone(),
+		withAssetAssignments:       _q.withAssetAssignments.Clone(),
+		withTimeEntries:            _q.withTimeEntries.Clone(),
+		withConductedInterviews:    _q.withConductedInterviews.Clone(),
+		withBenefitEnrollments:     _q.withBenefitEnrollments.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -759,6 +859,50 @@ func (_q *EmployeeQuery) WithGoals(opts ...func(*GoalQuery)) *EmployeeQuery {
 	return _q
 }
 
+// WithAssetAssignments tells the query-builder to eager-load the nodes that are connected to
+// the "asset_assignments" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *EmployeeQuery) WithAssetAssignments(opts ...func(*AssetAssignmentQuery)) *EmployeeQuery {
+	query := (&AssetAssignmentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withAssetAssignments = query
+	return _q
+}
+
+// WithTimeEntries tells the query-builder to eager-load the nodes that are connected to
+// the "time_entries" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *EmployeeQuery) WithTimeEntries(opts ...func(*TimeEntryQuery)) *EmployeeQuery {
+	query := (&TimeEntryClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTimeEntries = query
+	return _q
+}
+
+// WithConductedInterviews tells the query-builder to eager-load the nodes that are connected to
+// the "conducted_interviews" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *EmployeeQuery) WithConductedInterviews(opts ...func(*InterviewQuery)) *EmployeeQuery {
+	query := (&InterviewClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withConductedInterviews = query
+	return _q
+}
+
+// WithBenefitEnrollments tells the query-builder to eager-load the nodes that are connected to
+// the "benefit_enrollments" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *EmployeeQuery) WithBenefitEnrollments(opts ...func(*BenefitEnrollmentQuery)) *EmployeeQuery {
+	query := (&BenefitEnrollmentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withBenefitEnrollments = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -838,7 +982,7 @@ func (_q *EmployeeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Emp
 		nodes       = []*Employee{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [14]bool{
+		loadedTypes = [18]bool{
 			_q.withTenant != nil,
 			_q.withDepartment != nil,
 			_q.withManager != nil,
@@ -853,6 +997,10 @@ func (_q *EmployeeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Emp
 			_q.withPerformanceReviews != nil,
 			_q.withConductedReviews != nil,
 			_q.withGoals != nil,
+			_q.withAssetAssignments != nil,
+			_q.withTimeEntries != nil,
+			_q.withConductedInterviews != nil,
+			_q.withBenefitEnrollments != nil,
 		}
 	)
 	if _q.withTenant != nil || _q.withDepartment != nil || _q.withManager != nil || _q.withExpenseAccount != nil {
@@ -979,6 +1127,36 @@ func (_q *EmployeeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Emp
 		if err := _q.loadGoals(ctx, query, nodes,
 			func(n *Employee) { n.Edges.Goals = []*Goal{} },
 			func(n *Employee, e *Goal) { n.Edges.Goals = append(n.Edges.Goals, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withAssetAssignments; query != nil {
+		if err := _q.loadAssetAssignments(ctx, query, nodes,
+			func(n *Employee) { n.Edges.AssetAssignments = []*AssetAssignment{} },
+			func(n *Employee, e *AssetAssignment) { n.Edges.AssetAssignments = append(n.Edges.AssetAssignments, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTimeEntries; query != nil {
+		if err := _q.loadTimeEntries(ctx, query, nodes,
+			func(n *Employee) { n.Edges.TimeEntries = []*TimeEntry{} },
+			func(n *Employee, e *TimeEntry) { n.Edges.TimeEntries = append(n.Edges.TimeEntries, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withConductedInterviews; query != nil {
+		if err := _q.loadConductedInterviews(ctx, query, nodes,
+			func(n *Employee) { n.Edges.ConductedInterviews = []*Interview{} },
+			func(n *Employee, e *Interview) { n.Edges.ConductedInterviews = append(n.Edges.ConductedInterviews, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withBenefitEnrollments; query != nil {
+		if err := _q.loadBenefitEnrollments(ctx, query, nodes,
+			func(n *Employee) { n.Edges.BenefitEnrollments = []*BenefitEnrollment{} },
+			func(n *Employee, e *BenefitEnrollment) {
+				n.Edges.BenefitEnrollments = append(n.Edges.BenefitEnrollments, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -1418,6 +1596,160 @@ func (_q *EmployeeQuery) loadGoals(ctx context.Context, query *GoalQuery, nodes 
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "employee_goals" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *EmployeeQuery) loadAssetAssignments(ctx context.Context, query *AssetAssignmentQuery, nodes []*Employee, init func(*Employee), assign func(*Employee, *AssetAssignment)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Employee)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.AssetAssignment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(employee.AssetAssignmentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.employee_asset_assignments
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "employee_asset_assignments" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "employee_asset_assignments" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *EmployeeQuery) loadTimeEntries(ctx context.Context, query *TimeEntryQuery, nodes []*Employee, init func(*Employee), assign func(*Employee, *TimeEntry)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Employee)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.TimeEntry(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(employee.TimeEntriesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.employee_time_entries
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "employee_time_entries" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "employee_time_entries" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *EmployeeQuery) loadConductedInterviews(ctx context.Context, query *InterviewQuery, nodes []*Employee, init func(*Employee), assign func(*Employee, *Interview)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Employee)
+	nids := make(map[int]map[*Employee]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(employee.ConductedInterviewsTable)
+		s.Join(joinT).On(s.C(interview.FieldID), joinT.C(employee.ConductedInterviewsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(employee.ConductedInterviewsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(employee.ConductedInterviewsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Employee]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Interview](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "conducted_interviews" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (_q *EmployeeQuery) loadBenefitEnrollments(ctx context.Context, query *BenefitEnrollmentQuery, nodes []*Employee, init func(*Employee), assign func(*Employee, *BenefitEnrollment)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Employee)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.BenefitEnrollment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(employee.BenefitEnrollmentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.employee_benefit_enrollments
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "employee_benefit_enrollments" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "employee_benefit_enrollments" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

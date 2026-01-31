@@ -39,39 +39,20 @@ import { useAppStore } from "@/store/useAppStore";
 import { ContextSidebar } from "@/components/layout/ContextSidebar";
 import { cn } from "@/lib/utils";
 
-// Mock Data for Tickets
-const MOCK_TICKETS = [
-  {
-    id: "TICK-1024",
-    title: "Server Offline: DB-PROD-01",
-    client: "Acme Corp",
-    priority: "critical",
-    status: "open",
-    assignedTo: "Aziz",
-    created: "2 hrs ago",
-    sla: "1 hr remaining",
-  },
-  {
-    id: "TICK-1025",
-    title: "User cannot reset password",
-    client: "Globex Inc",
-    priority: "medium",
-    status: "in_progress",
-    assignedTo: "Sarah",
-    created: "4 hrs ago",
-    sla: "4 hrs remaining",
-  },
-  {
-    id: "TICK-1026",
-    title: "New Employee Onboarding",
-    client: "Soylent Corp",
-    priority: "low",
-    status: "open",
-    assignedTo: "Unassigned",
-    created: "1 day ago",
-    sla: "2 days remaining",
-  },
-];
+// DTOs
+interface TicketDTO {
+  id: number;
+  subject: string;
+  description: string;
+  status: string;
+  priority: string;
+  requester: string;
+  assignee: string;
+  asset: string;
+  createdAt: string;
+  deepLink: string;
+  executionPlan: any;
+}
 
 // Mock Projects
 const MOCK_PROJECTS = [
@@ -94,13 +75,41 @@ const MOCK_PROJECTS = [
 ];
 
 export function Pilot() {
-  const [tickets, setTickets] = useState(MOCK_TICKETS);
+  const [tickets, setTickets] = useState<TicketDTO[]>([]);
   const [projects, setProjects] = useState(MOCK_PROJECTS);
+  const [loading, setLoading] = useState(true);
   const { setContextSidebar, toggleContext, isContextOpen } = useAppStore();
   const [activeTab, setActiveTab] = useState("tickets");
+  const [selectedTicket, setSelectedTicket] = useState<TicketDTO | null>(null);
 
-  const handleTicketClick = (ticket: any) => {
-    toast.info(`Opening Ticket ${ticket.id}`);
+  const fetchTickets = async () => {
+    setLoading(true);
+    try {
+      const w = window as any;
+      if (w.go && w.go.pilot && w.go.pilot.PilotBridge) {
+        const res = await w.go.pilot.PilotBridge.GetTickets();
+        setTickets(res || []);
+      }
+    } catch (err) {
+      toast.error("Failed to fetch tickets");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const handleTicketClick = (ticket: TicketDTO) => {
+    setSelectedTicket(ticket);
+    setContextSidebar(
+      <TicketRemediationPanel
+        ticket={ticket}
+        onActionExecuted={fetchTickets}
+      />,
+    );
+    if (!isContextOpen) toggleContext();
   };
 
   const getPriorityColor = (priority: string) => {
@@ -214,54 +223,68 @@ export function Pilot() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tickets.map((t) => (
-                    <TableRow
-                      key={t.id}
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => handleTicketClick(t)}
-                    >
-                      <TableCell className="font-mono font-medium text-primary">
-                        {t.id}
-                      </TableCell>
-                      <TableCell className="font-medium">{t.title}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {t.client}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "uppercase text-[10px]",
-                            getPriorityColor(t.priority),
-                          )}
-                        >
-                          {t.priority}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "capitalize border",
-                            getStatusColor(t.status),
-                          )}
-                        >
-                          {t.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm">{t.assignedTo}</TableCell>
-                      <TableCell
-                        className={cn(
-                          "text-xs font-mono",
-                          t.sla.includes("remaining")
-                            ? "text-emerald-600"
-                            : "text-red-500",
-                        )}
-                      >
-                        {t.sla}
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center">
+                        Loading tickets...
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : tickets.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center">
+                        No tickets matching criteria.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    tickets.map((t) => (
+                      <TableRow
+                        key={t.id}
+                        className={cn(
+                          "cursor-pointer hover:bg-muted/50",
+                          selectedTicket?.id === t.id && "bg-muted",
+                        )}
+                        onClick={() => handleTicketClick(t)}
+                      >
+                        <TableCell className="font-mono font-medium text-primary">
+                          #{t.id}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {t.subject}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {t.asset || "General Support"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "uppercase text-[10px]",
+                              getPriorityColor(t.priority),
+                            )}
+                          >
+                            {t.priority}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "capitalize border",
+                              getStatusColor(t.status),
+                            )}
+                          >
+                            {t.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {t.assignee || "Unassigned"}
+                        </TableCell>
+                        <TableCell className="text-xs font-mono text-emerald-600">
+                          3h remaining
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -352,5 +375,113 @@ function StatsCard({ title, value, icon: Icon, color, footer }: any) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function TicketRemediationPanel({
+  ticket,
+  onActionExecuted,
+}: {
+  ticket: TicketDTO;
+  onActionExecuted: () => void;
+}) {
+  const [executing, setExecuting] = useState<number | null>(null);
+
+  const handleExecute = async (index: number) => {
+    setExecuting(index);
+    try {
+      const w = window as any;
+      if (w.go && w.go.pilot && w.go.pilot.PilotBridge) {
+        await w.go.pilot.PilotBridge.ExecuteRemediation(ticket.id, index);
+        toast.success("Remediation job enqueued");
+        onActionExecuted();
+      }
+    } catch (err) {
+      toast.error("Failed to execute remediation");
+    } finally {
+      setExecuting(null);
+    }
+  };
+
+  const plan = ticket.executionPlan?.suggested_actions || [];
+
+  return (
+    <div className="p-4 space-y-6">
+      <div>
+        <h3 className="text-lg font-bold mb-1">#{ticket.id} Remediation</h3>
+        <p className="text-sm text-muted-foreground">{ticket.subject}</p>
+      </div>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-sm font-medium text-emerald-600">
+          <AlertCircle className="h-4 w-4" /> Recommended Actions
+        </div>
+
+        {plan.length > 0 ? (
+          <div className="space-y-2">
+            {plan.map((action: any, i: number) => (
+              <Card key={i} className="bg-muted/30 border-dashed">
+                <CardContent className="p-3 flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">{action.name}</p>
+                    <p className="text-xs text-muted-foreground uppercase">
+                      {action.type}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={executing !== null}
+                    onClick={() => handleExecute(i)}
+                  >
+                    {executing === i ? "Running..." : "Execute"}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground italic">
+            No automated actions available for this incident.
+          </p>
+        )}
+      </div>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
+          <Search className="h-4 w-4" /> Live Investigation
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start gap-2"
+            onClick={() => (window.location.href = ticket.deepLink)}
+          >
+            <LayoutDashboard className="h-3 w-3" /> Process Manager
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start gap-2"
+          >
+            <Timer className="h-3 w-3" /> Services Tab
+          </Button>
+        </div>
+      </div>
+
+      <div className="pt-4">
+        <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-4">
+          Description
+        </h4>
+        <div className="text-sm bg-muted/50 p-3 rounded-md whitespace-pre-wrap">
+          {ticket.description}
+        </div>
+      </div>
+    </div>
   );
 }

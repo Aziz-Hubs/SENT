@@ -26,6 +26,8 @@ func (Ticket) Fields() []ent.Field {
 		field.Time("due_date").Optional().Nillable(),
 		field.String("claim_lease_owner").Optional(),
 		field.Time("claim_lease_expires_at").Optional().Nillable(),
+		field.String("deep_link").Optional(), // Link to external systems (e.g. SENTpulse Process Manager)
+		field.JSON("execution_plan", map[string]interface{}{}).Optional(), // Suggested fixes/steps
 	}
 }
 
@@ -36,17 +38,17 @@ func (Ticket) Edges() []ent.Edge {
 		edge.From("requester", User.Type).Ref("requested_tickets").Unique().Required(),
 		edge.From("assignee", User.Type).Ref("assigned_tickets").Unique(),
 		edge.From("asset", Asset.Type).Ref("tickets").Unique(),
-		edge.To("time_entries", TimeEntry.Type),
+		edge.To("work_logs", WorkLog.Type),
 		edge.To("remediation_steps", RemediationStep.Type),
 	}
 }
 
-// TimeEntry tracks work performed on a ticket.
-type TimeEntry struct {
+// WorkLog tracks work performed on a ticket.
+type WorkLog struct {
 	ent.Schema
 }
 
-func (TimeEntry) Fields() []ent.Field {
+func (WorkLog) Fields() []ent.Field {
 	return []ent.Field{
 		field.Float("duration_hours"),
 		field.Text("note"),
@@ -58,10 +60,10 @@ func (TimeEntry) Fields() []ent.Field {
 	}
 }
 
-func (TimeEntry) Edges() []ent.Edge {
+func (WorkLog) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("ticket", Ticket.Type).Ref("time_entries").Unique().Required(),
-		edge.From("technician", User.Type).Ref("time_entries").Unique().Required(),
+		edge.From("ticket", Ticket.Type).Ref("work_logs").Unique().Required(),
+		edge.From("technician", User.Type).Ref("work_logs").Unique().Required(),
 	}
 }
 
@@ -77,6 +79,8 @@ func (RemediationStep) Fields() []ent.Field {
 		field.Enum("status").Values("pending", "running", "success", "failed").Default("pending"),
 		field.Text("output").Optional(),
 		field.JSON("execution_context", map[string]interface{}{}).Optional(),
+		field.String("source_id").Optional(),   // ID in external system (e.g. Script ID)
+		field.String("source_app").Optional(),  // e.g. "pulse"
 	}
 }
 

@@ -17,6 +17,8 @@ const (
 	FieldID = "id"
 	// FieldOverallRating holds the string denoting the overall_rating field in the database.
 	FieldOverallRating = "overall_rating"
+	// FieldReviewType holds the string denoting the review_type field in the database.
+	FieldReviewType = "review_type"
 	// FieldStrengths holds the string denoting the strengths field in the database.
 	FieldStrengths = "strengths"
 	// FieldAreasForImprovement holds the string denoting the areas_for_improvement field in the database.
@@ -25,6 +27,8 @@ const (
 	FieldManagerComments = "manager_comments"
 	// FieldGoalsAssessment holds the string denoting the goals_assessment field in the database.
 	FieldGoalsAssessment = "goals_assessment"
+	// FieldSurveyResponses holds the string denoting the survey_responses field in the database.
+	FieldSurveyResponses = "survey_responses"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldSubmittedAt holds the string denoting the submitted_at field in the database.
@@ -79,10 +83,12 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldOverallRating,
+	FieldReviewType,
 	FieldStrengths,
 	FieldAreasForImprovement,
 	FieldManagerComments,
 	FieldGoalsAssessment,
+	FieldSurveyResponses,
 	FieldStatus,
 	FieldSubmittedAt,
 	FieldAcknowledgedAt,
@@ -149,6 +155,34 @@ func OverallRatingValidator(or OverallRating) error {
 	}
 }
 
+// ReviewType defines the type for the "review_type" enum field.
+type ReviewType string
+
+// ReviewTypeMANAGER is the default value of the ReviewType enum.
+const DefaultReviewType = ReviewTypeMANAGER
+
+// ReviewType values.
+const (
+	ReviewTypeMANAGER       ReviewType = "MANAGER"
+	ReviewTypeSELF          ReviewType = "SELF"
+	ReviewTypePEER          ReviewType = "PEER"
+	ReviewTypeDIRECT_REPORT ReviewType = "DIRECT_REPORT"
+)
+
+func (rt ReviewType) String() string {
+	return string(rt)
+}
+
+// ReviewTypeValidator is a validator for the "review_type" field enum values. It is called by the builders before save.
+func ReviewTypeValidator(rt ReviewType) error {
+	switch rt {
+	case ReviewTypeMANAGER, ReviewTypeSELF, ReviewTypePEER, ReviewTypeDIRECT_REPORT:
+		return nil
+	default:
+		return fmt.Errorf("performancereview: invalid enum value for review_type field: %q", rt)
+	}
+}
+
 // Status defines the type for the "status" enum field.
 type Status string
 
@@ -188,6 +222,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByOverallRating orders the results by the overall_rating field.
 func ByOverallRating(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOverallRating, opts...).ToFunc()
+}
+
+// ByReviewType orders the results by the review_type field.
+func ByReviewType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReviewType, opts...).ToFunc()
 }
 
 // ByStrengths orders the results by the strengths field.

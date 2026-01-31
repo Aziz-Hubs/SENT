@@ -182,8 +182,9 @@ func runClient(db *ent.Client) {
 	taxBridge := tax.NewTaxBridge(db, authBridge)
 	pulseBridge := bridge.NewPulseBridge(db)
 	
-	// Set River Client for Vault (Now handled via central)
+	// Set River Client for Vault and Pulse
 	vaultBridge.SetRiverClient(centralOrchestrator.GetClient())
+	pulseBridge.SetRiverClient(centralOrchestrator.GetClient())
 	
 	opticBridge := optic.NewOpticBridge(db, authBridge)
 	pilotBridge := pilot.NewPilotBridge(db, authBridge)

@@ -7,9 +7,10 @@ import (
 	"os"
 
 	"sent/ent"
+	"entgo.io/ent/dialect/sql"
 
-	// Import the Postgres driver for Ent.
-	_ "github.com/lib/pq"
+	// Import the pgx driver for Ent.
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 // NewPostgresClient initializes and returns a new Ent client connected to the PostgreSQL database.
@@ -23,13 +24,15 @@ func NewPostgresClient() *ent.Client {
 	pass := getEnv("DB_PASS", "postgres")
 	dbname := getEnv("DB_NAME", "sent")
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", 
-		host, port, user, pass, dbname)
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", 
+		user, pass, host, port, dbname)
 	
-	client, err := ent.Open("postgres", dsn)
+	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
+
+	client := ent.NewClient(ent.Driver(db))
 
 	// Add Global Audit Hook to log all mutations to the immutable AuditLog hypertable
 	client.Use(func(next ent.Mutator) ent.Mutator {
@@ -58,7 +61,7 @@ func NewPostgresClient() *ent.Client {
 
 	// Run auto-migration
 	if err := client.Schema.Create(context.Background()); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
+		log.Printf("Warning: failed creating schema resources: %v", err)
 	}
 
 	return client

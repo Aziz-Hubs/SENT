@@ -37,6 +37,10 @@ const (
 	FieldClaimLeaseOwner = "claim_lease_owner"
 	// FieldClaimLeaseExpiresAt holds the string denoting the claim_lease_expires_at field in the database.
 	FieldClaimLeaseExpiresAt = "claim_lease_expires_at"
+	// FieldDeepLink holds the string denoting the deep_link field in the database.
+	FieldDeepLink = "deep_link"
+	// FieldExecutionPlan holds the string denoting the execution_plan field in the database.
+	FieldExecutionPlan = "execution_plan"
 	// EdgeTenant holds the string denoting the tenant edge name in mutations.
 	EdgeTenant = "tenant"
 	// EdgeRequester holds the string denoting the requester edge name in mutations.
@@ -45,8 +49,8 @@ const (
 	EdgeAssignee = "assignee"
 	// EdgeAsset holds the string denoting the asset edge name in mutations.
 	EdgeAsset = "asset"
-	// EdgeTimeEntries holds the string denoting the time_entries edge name in mutations.
-	EdgeTimeEntries = "time_entries"
+	// EdgeWorkLogs holds the string denoting the work_logs edge name in mutations.
+	EdgeWorkLogs = "work_logs"
 	// EdgeRemediationSteps holds the string denoting the remediation_steps edge name in mutations.
 	EdgeRemediationSteps = "remediation_steps"
 	// Table holds the table name of the ticket in the database.
@@ -79,13 +83,13 @@ const (
 	AssetInverseTable = "assets"
 	// AssetColumn is the table column denoting the asset relation/edge.
 	AssetColumn = "asset_tickets"
-	// TimeEntriesTable is the table that holds the time_entries relation/edge.
-	TimeEntriesTable = "time_entries"
-	// TimeEntriesInverseTable is the table name for the TimeEntry entity.
-	// It exists in this package in order to avoid circular dependency with the "timeentry" package.
-	TimeEntriesInverseTable = "time_entries"
-	// TimeEntriesColumn is the table column denoting the time_entries relation/edge.
-	TimeEntriesColumn = "ticket_time_entries"
+	// WorkLogsTable is the table that holds the work_logs relation/edge.
+	WorkLogsTable = "work_logs"
+	// WorkLogsInverseTable is the table name for the WorkLog entity.
+	// It exists in this package in order to avoid circular dependency with the "worklog" package.
+	WorkLogsInverseTable = "work_logs"
+	// WorkLogsColumn is the table column denoting the work_logs relation/edge.
+	WorkLogsColumn = "ticket_work_logs"
 	// RemediationStepsTable is the table that holds the remediation_steps relation/edge.
 	RemediationStepsTable = "remediation_steps"
 	// RemediationStepsInverseTable is the table name for the RemediationStep entity.
@@ -109,6 +113,8 @@ var Columns = []string{
 	FieldDueDate,
 	FieldClaimLeaseOwner,
 	FieldClaimLeaseExpiresAt,
+	FieldDeepLink,
+	FieldExecutionPlan,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tickets"
@@ -264,6 +270,11 @@ func ByClaimLeaseExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldClaimLeaseExpiresAt, opts...).ToFunc()
 }
 
+// ByDeepLink orders the results by the deep_link field.
+func ByDeepLink(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeepLink, opts...).ToFunc()
+}
+
 // ByTenantField orders the results by tenant field.
 func ByTenantField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -292,17 +303,17 @@ func ByAssetField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByTimeEntriesCount orders the results by time_entries count.
-func ByTimeEntriesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByWorkLogsCount orders the results by work_logs count.
+func ByWorkLogsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTimeEntriesStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newWorkLogsStep(), opts...)
 	}
 }
 
-// ByTimeEntries orders the results by time_entries terms.
-func ByTimeEntries(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByWorkLogs orders the results by work_logs terms.
+func ByWorkLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTimeEntriesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newWorkLogsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -347,11 +358,11 @@ func newAssetStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, AssetTable, AssetColumn),
 	)
 }
-func newTimeEntriesStep() *sqlgraph.Step {
+func newWorkLogsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TimeEntriesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, TimeEntriesTable, TimeEntriesColumn),
+		sqlgraph.To(WorkLogsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WorkLogsTable, WorkLogsColumn),
 	)
 }
 func newRemediationStepsStep() *sqlgraph.Step {

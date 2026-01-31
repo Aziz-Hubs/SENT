@@ -43,6 +43,8 @@ type IncidentResponseArgs struct {
 	DeviceID   int    `json:"device_id"`
 	AlertName  string `json:"alert_name"`
 	Details    string `json:"details"`
+	DeepLink   string `json:"deep_link,omitempty"`
+	ExecutionPlan map[string]interface{} `json:"execution_plan,omitempty"`
 }
 
 func (IncidentResponseArgs) Kind() string { return "pilot.incident_response" }
@@ -76,3 +78,26 @@ type BillingSyncArgs struct {
 }
 
 func (BillingSyncArgs) Kind() string { return "pilot.billing_sync" }
+
+// RemediationArgs executes a specific fix action on a device.
+type RemediationArgs struct {
+	TenantID   int                    `json:"tenant_id"`
+	TicketID   int                    `json:"ticket_id"`
+	StepID     int                    `json:"step_id"`
+	ActionName string                 `json:"action_name"`
+	Params     map[string]interface{} `json:"params"`
+}
+
+func (RemediationArgs) Kind() string { return "pilot.remediation" }
+
+// PulseDiscoveryArgs triggers asset reconciliation in Nexus.
+type PulseDiscoveryArgs struct {
+	TenantID int                    `json:"tenant_id"`
+	Hostname string                 `json:"hostname"`
+	IP       string                 `json:"ip"`
+	MAC      string                 `json:"mac"`
+	OS       string                 `json:"os"`
+	Metadata map[string]interface{} `json:"metadata"`
+}
+
+func (PulseDiscoveryArgs) Kind() string { return "nexus.pulse_discovery" }

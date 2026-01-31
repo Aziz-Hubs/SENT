@@ -11,9 +11,19 @@ type HostInfo struct {
 	PlatformVersion string `json:"platform_version"`
 	KernelVersion string   `json:"kernel_version"`
 	Arch          string   `json:"arch"`
-	MAC           []string `json:"mac"`
-	IP            []string `json:"ip"`
-	AgentVersion  string   `json:"agent_version"`
+    MAC           []string `json:"mac"`
+    IP            []string `json:"ip"`
+    AgentVersion  string   `json:"agent_version"`
+	AvName        string   `json:"av_name,omitempty"`
+	AvStatus      string   `json:"av_status,omitempty"` // "Active", "Disabled", "Outdated"
+    Software      []SoftwareInfo `json:"software,omitempty"`
+}
+
+type SoftwareInfo struct {
+    Name        string `json:"name"`
+    Version     string `json:"version"`
+    InstallDate string `json:"install_date"`
+    Publisher   string `json:"publisher"`
 }
 
 // SystemMetrics contains dynamic system telemetry.
@@ -27,4 +37,5 @@ type SystemMetrics struct {
 	Load1       float64   `json:"load_1"`
 	Load5       float64   `json:"load_5"`
 	Load15      float64   `json:"load_15"`
+    ActiveUser  string    `json:"active_user,omitempty"`
 }

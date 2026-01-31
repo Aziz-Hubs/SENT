@@ -36,12 +36,15 @@ func NewOrchestrator(db *ent.Client) *Orchestrator {
 	river.AddWorker(workers, tax.NewTaxSubmissionWorker(db))
 	
 	// Register Orchestrator-specific workers
-	river.AddWorker(workers, &TerminationWorker{db: db})
+	terminationW := &TerminationWorker{db: db}
+	river.AddWorker(workers, terminationW)
 	river.AddWorker(workers, &RevokeSaaSWorker{db: db})
 	river.AddWorker(workers, &AssetCleanupWorker{db: db})
 	river.AddWorker(workers, &IncidentResponseWorker{db: db})
 	river.AddWorker(workers, &CallRedirectionWorker{db: db})
 	river.AddWorker(workers, &HealthUpdateWorker{db: db})
+	river.AddWorker(workers, &RemediationWorker{db: db})
+	river.AddWorker(workers, &PulseDiscoveryWorker{db: db})
 
 	riverClient, err := river.NewClient(riverpgxv5.New(pool), &river.Config{
 		Workers: workers,
@@ -49,6 +52,9 @@ func NewOrchestrator(db *ent.Client) *Orchestrator {
 	if err != nil {
 		log.Printf("Warning: Failed to create River client: %v", err)
 	}
+
+	// Inject river client into workers that need to enqueue child jobs
+	terminationW.river = riverClient
 
 	return &Orchestrator{
 		db:          db,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sent/ent"
+	"time"
 	"sent/ent/contract"
 	"sent/ent/tenant"
 )
@@ -54,7 +55,7 @@ func (s *BillingService) LogTime(ctx context.Context, ticketID int, technicianID
 		SetTicketID(ticketID).
 		SetTechnicianID(technicianID).
 		SetDurationHours(hours).
-		SetStartedAt(cnt.StartDate). // Mock
+		SetStartTime(time.Now()). // Mock
 		Save(ctx)
 	if err != nil {
 		return err

@@ -6,8 +6,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sent/ent/legalhold"
 	"sent/ent/tenant"
+	"sent/ent/vaultcomment"
+	"sent/ent/vaultfavorite"
 	"sent/ent/vaultitem"
+	"sent/ent/vaultsharelink"
+	"sent/ent/vaultversion"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -143,6 +148,20 @@ func (_c *VaultItemCreate) SetNillableUpdatedAt(v *time.Time) *VaultItemCreate {
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *VaultItemCreate) SetDeletedAt(v time.Time) *VaultItemCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *VaultItemCreate) SetNillableDeletedAt(v *time.Time) *VaultItemCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetTenantID sets the "tenant" edge to the Tenant entity by ID.
 func (_c *VaultItemCreate) SetTenantID(id int) *VaultItemCreate {
 	_c.mutation.SetTenantID(id)
@@ -152,6 +171,81 @@ func (_c *VaultItemCreate) SetTenantID(id int) *VaultItemCreate {
 // SetTenant sets the "tenant" edge to the Tenant entity.
 func (_c *VaultItemCreate) SetTenant(v *Tenant) *VaultItemCreate {
 	return _c.SetTenantID(v.ID)
+}
+
+// AddShareLinkIDs adds the "share_links" edge to the VaultShareLink entity by IDs.
+func (_c *VaultItemCreate) AddShareLinkIDs(ids ...int) *VaultItemCreate {
+	_c.mutation.AddShareLinkIDs(ids...)
+	return _c
+}
+
+// AddShareLinks adds the "share_links" edges to the VaultShareLink entity.
+func (_c *VaultItemCreate) AddShareLinks(v ...*VaultShareLink) *VaultItemCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddShareLinkIDs(ids...)
+}
+
+// AddVersionIDs adds the "versions" edge to the VaultVersion entity by IDs.
+func (_c *VaultItemCreate) AddVersionIDs(ids ...int) *VaultItemCreate {
+	_c.mutation.AddVersionIDs(ids...)
+	return _c
+}
+
+// AddVersions adds the "versions" edges to the VaultVersion entity.
+func (_c *VaultItemCreate) AddVersions(v ...*VaultVersion) *VaultItemCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddVersionIDs(ids...)
+}
+
+// AddCommentIDs adds the "comments" edge to the VaultComment entity by IDs.
+func (_c *VaultItemCreate) AddCommentIDs(ids ...int) *VaultItemCreate {
+	_c.mutation.AddCommentIDs(ids...)
+	return _c
+}
+
+// AddComments adds the "comments" edges to the VaultComment entity.
+func (_c *VaultItemCreate) AddComments(v ...*VaultComment) *VaultItemCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCommentIDs(ids...)
+}
+
+// AddFavoritedByIDs adds the "favorited_by" edge to the VaultFavorite entity by IDs.
+func (_c *VaultItemCreate) AddFavoritedByIDs(ids ...int) *VaultItemCreate {
+	_c.mutation.AddFavoritedByIDs(ids...)
+	return _c
+}
+
+// AddFavoritedBy adds the "favorited_by" edges to the VaultFavorite entity.
+func (_c *VaultItemCreate) AddFavoritedBy(v ...*VaultFavorite) *VaultItemCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddFavoritedByIDs(ids...)
+}
+
+// AddLegalHoldIDs adds the "legal_holds" edge to the LegalHold entity by IDs.
+func (_c *VaultItemCreate) AddLegalHoldIDs(ids ...int) *VaultItemCreate {
+	_c.mutation.AddLegalHoldIDs(ids...)
+	return _c
+}
+
+// AddLegalHolds adds the "legal_holds" edges to the LegalHold entity.
+func (_c *VaultItemCreate) AddLegalHolds(v ...*LegalHold) *VaultItemCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLegalHoldIDs(ids...)
 }
 
 // Mutation returns the VaultItemMutation object of the builder.
@@ -325,6 +419,10 @@ func (_c *VaultItemCreate) createSpec() (*VaultItem, *sqlgraph.CreateSpec) {
 		_spec.SetField(vaultitem.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(vaultitem.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if nodes := _c.mutation.TenantIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -340,6 +438,86 @@ func (_c *VaultItemCreate) createSpec() (*VaultItem, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.tenant_vault_items = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ShareLinksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   vaultitem.ShareLinksTable,
+			Columns: []string{vaultitem.ShareLinksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vaultsharelink.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.VersionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   vaultitem.VersionsTable,
+			Columns: []string{vaultitem.VersionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vaultversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CommentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   vaultitem.CommentsTable,
+			Columns: []string{vaultitem.CommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vaultcomment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.FavoritedByIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   vaultitem.FavoritedByTable,
+			Columns: []string{vaultitem.FavoritedByColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vaultfavorite.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LegalHoldsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   vaultitem.LegalHoldsTable,
+			Columns: vaultitem.LegalHoldsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(legalhold.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

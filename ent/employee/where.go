@@ -1217,6 +1217,98 @@ func HasGoalsWith(preds ...predicate.Goal) predicate.Employee {
 	})
 }
 
+// HasAssetAssignments applies the HasEdge predicate on the "asset_assignments" edge.
+func HasAssetAssignments() predicate.Employee {
+	return predicate.Employee(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AssetAssignmentsTable, AssetAssignmentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAssetAssignmentsWith applies the HasEdge predicate on the "asset_assignments" edge with a given conditions (other predicates).
+func HasAssetAssignmentsWith(preds ...predicate.AssetAssignment) predicate.Employee {
+	return predicate.Employee(func(s *sql.Selector) {
+		step := newAssetAssignmentsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasTimeEntries applies the HasEdge predicate on the "time_entries" edge.
+func HasTimeEntries() predicate.Employee {
+	return predicate.Employee(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TimeEntriesTable, TimeEntriesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTimeEntriesWith applies the HasEdge predicate on the "time_entries" edge with a given conditions (other predicates).
+func HasTimeEntriesWith(preds ...predicate.TimeEntry) predicate.Employee {
+	return predicate.Employee(func(s *sql.Selector) {
+		step := newTimeEntriesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasConductedInterviews applies the HasEdge predicate on the "conducted_interviews" edge.
+func HasConductedInterviews() predicate.Employee {
+	return predicate.Employee(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, ConductedInterviewsTable, ConductedInterviewsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasConductedInterviewsWith applies the HasEdge predicate on the "conducted_interviews" edge with a given conditions (other predicates).
+func HasConductedInterviewsWith(preds ...predicate.Interview) predicate.Employee {
+	return predicate.Employee(func(s *sql.Selector) {
+		step := newConductedInterviewsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasBenefitEnrollments applies the HasEdge predicate on the "benefit_enrollments" edge.
+func HasBenefitEnrollments() predicate.Employee {
+	return predicate.Employee(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, BenefitEnrollmentsTable, BenefitEnrollmentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBenefitEnrollmentsWith applies the HasEdge predicate on the "benefit_enrollments" edge with a given conditions (other predicates).
+func HasBenefitEnrollmentsWith(preds ...predicate.BenefitEnrollment) predicate.Employee {
+	return predicate.Employee(func(s *sql.Selector) {
+		step := newBenefitEnrollmentsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Employee) predicate.Employee {
 	return predicate.Employee(sql.AndPredicates(predicates...))

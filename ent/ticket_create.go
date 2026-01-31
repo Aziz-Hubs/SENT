@@ -10,8 +10,8 @@ import (
 	"sent/ent/remediationstep"
 	"sent/ent/tenant"
 	"sent/ent/ticket"
-	"sent/ent/timeentry"
 	"sent/ent/user"
+	"sent/ent/worklog"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -163,6 +163,26 @@ func (_c *TicketCreate) SetNillableClaimLeaseExpiresAt(v *time.Time) *TicketCrea
 	return _c
 }
 
+// SetDeepLink sets the "deep_link" field.
+func (_c *TicketCreate) SetDeepLink(v string) *TicketCreate {
+	_c.mutation.SetDeepLink(v)
+	return _c
+}
+
+// SetNillableDeepLink sets the "deep_link" field if the given value is not nil.
+func (_c *TicketCreate) SetNillableDeepLink(v *string) *TicketCreate {
+	if v != nil {
+		_c.SetDeepLink(*v)
+	}
+	return _c
+}
+
+// SetExecutionPlan sets the "execution_plan" field.
+func (_c *TicketCreate) SetExecutionPlan(v map[string]interface{}) *TicketCreate {
+	_c.mutation.SetExecutionPlan(v)
+	return _c
+}
+
 // SetTenantID sets the "tenant" edge to the Tenant entity by ID.
 func (_c *TicketCreate) SetTenantID(id int) *TicketCreate {
 	_c.mutation.SetTenantID(id)
@@ -223,19 +243,19 @@ func (_c *TicketCreate) SetAsset(v *Asset) *TicketCreate {
 	return _c.SetAssetID(v.ID)
 }
 
-// AddTimeEntryIDs adds the "time_entries" edge to the TimeEntry entity by IDs.
-func (_c *TicketCreate) AddTimeEntryIDs(ids ...int) *TicketCreate {
-	_c.mutation.AddTimeEntryIDs(ids...)
+// AddWorkLogIDs adds the "work_logs" edge to the WorkLog entity by IDs.
+func (_c *TicketCreate) AddWorkLogIDs(ids ...int) *TicketCreate {
+	_c.mutation.AddWorkLogIDs(ids...)
 	return _c
 }
 
-// AddTimeEntries adds the "time_entries" edges to the TimeEntry entity.
-func (_c *TicketCreate) AddTimeEntries(v ...*TimeEntry) *TicketCreate {
+// AddWorkLogs adds the "work_logs" edges to the WorkLog entity.
+func (_c *TicketCreate) AddWorkLogs(v ...*WorkLog) *TicketCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddTimeEntryIDs(ids...)
+	return _c.AddWorkLogIDs(ids...)
 }
 
 // AddRemediationStepIDs adds the "remediation_steps" edge to the RemediationStep entity by IDs.
@@ -412,6 +432,14 @@ func (_c *TicketCreate) createSpec() (*Ticket, *sqlgraph.CreateSpec) {
 		_spec.SetField(ticket.FieldClaimLeaseExpiresAt, field.TypeTime, value)
 		_node.ClaimLeaseExpiresAt = &value
 	}
+	if value, ok := _c.mutation.DeepLink(); ok {
+		_spec.SetField(ticket.FieldDeepLink, field.TypeString, value)
+		_node.DeepLink = value
+	}
+	if value, ok := _c.mutation.ExecutionPlan(); ok {
+		_spec.SetField(ticket.FieldExecutionPlan, field.TypeJSON, value)
+		_node.ExecutionPlan = value
+	}
 	if nodes := _c.mutation.TenantIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -480,15 +508,15 @@ func (_c *TicketCreate) createSpec() (*Ticket, *sqlgraph.CreateSpec) {
 		_node.asset_tickets = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.TimeEntriesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.WorkLogsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   ticket.TimeEntriesTable,
-			Columns: []string{ticket.TimeEntriesColumn},
+			Table:   ticket.WorkLogsTable,
+			Columns: []string{ticket.WorkLogsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(worklog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

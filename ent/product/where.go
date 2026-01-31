@@ -91,6 +91,71 @@ func UpdatedAt(v time.Time) predicate.Product {
 	return predicate.Product(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
+// MinStockLevel applies equality check predicate on the "min_stock_level" field. It's identical to MinStockLevelEQ.
+func MinStockLevel(v int) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldMinStockLevel, v))
+}
+
+// MaxStockLevel applies equality check predicate on the "max_stock_level" field. It's identical to MaxStockLevelEQ.
+func MaxStockLevel(v int) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldMaxStockLevel, v))
+}
+
+// Barcode applies equality check predicate on the "barcode" field. It's identical to BarcodeEQ.
+func Barcode(v string) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldBarcode, v))
+}
+
+// Location applies equality check predicate on the "location" field. It's identical to LocationEQ.
+func Location(v string) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldLocation, v))
+}
+
+// IsVariantParent applies equality check predicate on the "is_variant_parent" field. It's identical to IsVariantParentEQ.
+func IsVariantParent(v bool) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldIsVariantParent, v))
+}
+
+// SerialNumber applies equality check predicate on the "serial_number" field. It's identical to SerialNumberEQ.
+func SerialNumber(v string) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldSerialNumber, v))
+}
+
+// PurchaseDate applies equality check predicate on the "purchase_date" field. It's identical to PurchaseDateEQ.
+func PurchaseDate(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldPurchaseDate, v))
+}
+
+// PurchasePrice applies equality check predicate on the "purchase_price" field. It's identical to PurchasePriceEQ.
+func PurchasePrice(v decimal.Decimal) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldPurchasePrice, v))
+}
+
+// UsefulLifeMonths applies equality check predicate on the "useful_life_months" field. It's identical to UsefulLifeMonthsEQ.
+func UsefulLifeMonths(v int) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldUsefulLifeMonths, v))
+}
+
+// WarrantyExpiresAt applies equality check predicate on the "warranty_expires_at" field. It's identical to WarrantyExpiresAtEQ.
+func WarrantyExpiresAt(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldWarrantyExpiresAt, v))
+}
+
+// DisposalDate applies equality check predicate on the "disposal_date" field. It's identical to DisposalDateEQ.
+func DisposalDate(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldDisposalDate, v))
+}
+
+// DisposalReason applies equality check predicate on the "disposal_reason" field. It's identical to DisposalReasonEQ.
+func DisposalReason(v string) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldDisposalReason, v))
+}
+
+// IsDisposed applies equality check predicate on the "is_disposed" field. It's identical to IsDisposedEQ.
+func IsDisposed(v bool) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldIsDisposed, v))
+}
+
 // SkuEQ applies the EQ predicate on the "sku" field.
 func SkuEQ(v string) predicate.Product {
 	return predicate.Product(sql.FieldEQ(FieldSku, v))
@@ -466,6 +531,656 @@ func UpdatedAtLTE(v time.Time) predicate.Product {
 	return predicate.Product(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
+// MinStockLevelEQ applies the EQ predicate on the "min_stock_level" field.
+func MinStockLevelEQ(v int) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldMinStockLevel, v))
+}
+
+// MinStockLevelNEQ applies the NEQ predicate on the "min_stock_level" field.
+func MinStockLevelNEQ(v int) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldMinStockLevel, v))
+}
+
+// MinStockLevelIn applies the In predicate on the "min_stock_level" field.
+func MinStockLevelIn(vs ...int) predicate.Product {
+	return predicate.Product(sql.FieldIn(FieldMinStockLevel, vs...))
+}
+
+// MinStockLevelNotIn applies the NotIn predicate on the "min_stock_level" field.
+func MinStockLevelNotIn(vs ...int) predicate.Product {
+	return predicate.Product(sql.FieldNotIn(FieldMinStockLevel, vs...))
+}
+
+// MinStockLevelGT applies the GT predicate on the "min_stock_level" field.
+func MinStockLevelGT(v int) predicate.Product {
+	return predicate.Product(sql.FieldGT(FieldMinStockLevel, v))
+}
+
+// MinStockLevelGTE applies the GTE predicate on the "min_stock_level" field.
+func MinStockLevelGTE(v int) predicate.Product {
+	return predicate.Product(sql.FieldGTE(FieldMinStockLevel, v))
+}
+
+// MinStockLevelLT applies the LT predicate on the "min_stock_level" field.
+func MinStockLevelLT(v int) predicate.Product {
+	return predicate.Product(sql.FieldLT(FieldMinStockLevel, v))
+}
+
+// MinStockLevelLTE applies the LTE predicate on the "min_stock_level" field.
+func MinStockLevelLTE(v int) predicate.Product {
+	return predicate.Product(sql.FieldLTE(FieldMinStockLevel, v))
+}
+
+// MaxStockLevelEQ applies the EQ predicate on the "max_stock_level" field.
+func MaxStockLevelEQ(v int) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldMaxStockLevel, v))
+}
+
+// MaxStockLevelNEQ applies the NEQ predicate on the "max_stock_level" field.
+func MaxStockLevelNEQ(v int) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldMaxStockLevel, v))
+}
+
+// MaxStockLevelIn applies the In predicate on the "max_stock_level" field.
+func MaxStockLevelIn(vs ...int) predicate.Product {
+	return predicate.Product(sql.FieldIn(FieldMaxStockLevel, vs...))
+}
+
+// MaxStockLevelNotIn applies the NotIn predicate on the "max_stock_level" field.
+func MaxStockLevelNotIn(vs ...int) predicate.Product {
+	return predicate.Product(sql.FieldNotIn(FieldMaxStockLevel, vs...))
+}
+
+// MaxStockLevelGT applies the GT predicate on the "max_stock_level" field.
+func MaxStockLevelGT(v int) predicate.Product {
+	return predicate.Product(sql.FieldGT(FieldMaxStockLevel, v))
+}
+
+// MaxStockLevelGTE applies the GTE predicate on the "max_stock_level" field.
+func MaxStockLevelGTE(v int) predicate.Product {
+	return predicate.Product(sql.FieldGTE(FieldMaxStockLevel, v))
+}
+
+// MaxStockLevelLT applies the LT predicate on the "max_stock_level" field.
+func MaxStockLevelLT(v int) predicate.Product {
+	return predicate.Product(sql.FieldLT(FieldMaxStockLevel, v))
+}
+
+// MaxStockLevelLTE applies the LTE predicate on the "max_stock_level" field.
+func MaxStockLevelLTE(v int) predicate.Product {
+	return predicate.Product(sql.FieldLTE(FieldMaxStockLevel, v))
+}
+
+// BarcodeEQ applies the EQ predicate on the "barcode" field.
+func BarcodeEQ(v string) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldBarcode, v))
+}
+
+// BarcodeNEQ applies the NEQ predicate on the "barcode" field.
+func BarcodeNEQ(v string) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldBarcode, v))
+}
+
+// BarcodeIn applies the In predicate on the "barcode" field.
+func BarcodeIn(vs ...string) predicate.Product {
+	return predicate.Product(sql.FieldIn(FieldBarcode, vs...))
+}
+
+// BarcodeNotIn applies the NotIn predicate on the "barcode" field.
+func BarcodeNotIn(vs ...string) predicate.Product {
+	return predicate.Product(sql.FieldNotIn(FieldBarcode, vs...))
+}
+
+// BarcodeGT applies the GT predicate on the "barcode" field.
+func BarcodeGT(v string) predicate.Product {
+	return predicate.Product(sql.FieldGT(FieldBarcode, v))
+}
+
+// BarcodeGTE applies the GTE predicate on the "barcode" field.
+func BarcodeGTE(v string) predicate.Product {
+	return predicate.Product(sql.FieldGTE(FieldBarcode, v))
+}
+
+// BarcodeLT applies the LT predicate on the "barcode" field.
+func BarcodeLT(v string) predicate.Product {
+	return predicate.Product(sql.FieldLT(FieldBarcode, v))
+}
+
+// BarcodeLTE applies the LTE predicate on the "barcode" field.
+func BarcodeLTE(v string) predicate.Product {
+	return predicate.Product(sql.FieldLTE(FieldBarcode, v))
+}
+
+// BarcodeContains applies the Contains predicate on the "barcode" field.
+func BarcodeContains(v string) predicate.Product {
+	return predicate.Product(sql.FieldContains(FieldBarcode, v))
+}
+
+// BarcodeHasPrefix applies the HasPrefix predicate on the "barcode" field.
+func BarcodeHasPrefix(v string) predicate.Product {
+	return predicate.Product(sql.FieldHasPrefix(FieldBarcode, v))
+}
+
+// BarcodeHasSuffix applies the HasSuffix predicate on the "barcode" field.
+func BarcodeHasSuffix(v string) predicate.Product {
+	return predicate.Product(sql.FieldHasSuffix(FieldBarcode, v))
+}
+
+// BarcodeIsNil applies the IsNil predicate on the "barcode" field.
+func BarcodeIsNil() predicate.Product {
+	return predicate.Product(sql.FieldIsNull(FieldBarcode))
+}
+
+// BarcodeNotNil applies the NotNil predicate on the "barcode" field.
+func BarcodeNotNil() predicate.Product {
+	return predicate.Product(sql.FieldNotNull(FieldBarcode))
+}
+
+// BarcodeEqualFold applies the EqualFold predicate on the "barcode" field.
+func BarcodeEqualFold(v string) predicate.Product {
+	return predicate.Product(sql.FieldEqualFold(FieldBarcode, v))
+}
+
+// BarcodeContainsFold applies the ContainsFold predicate on the "barcode" field.
+func BarcodeContainsFold(v string) predicate.Product {
+	return predicate.Product(sql.FieldContainsFold(FieldBarcode, v))
+}
+
+// LocationEQ applies the EQ predicate on the "location" field.
+func LocationEQ(v string) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldLocation, v))
+}
+
+// LocationNEQ applies the NEQ predicate on the "location" field.
+func LocationNEQ(v string) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldLocation, v))
+}
+
+// LocationIn applies the In predicate on the "location" field.
+func LocationIn(vs ...string) predicate.Product {
+	return predicate.Product(sql.FieldIn(FieldLocation, vs...))
+}
+
+// LocationNotIn applies the NotIn predicate on the "location" field.
+func LocationNotIn(vs ...string) predicate.Product {
+	return predicate.Product(sql.FieldNotIn(FieldLocation, vs...))
+}
+
+// LocationGT applies the GT predicate on the "location" field.
+func LocationGT(v string) predicate.Product {
+	return predicate.Product(sql.FieldGT(FieldLocation, v))
+}
+
+// LocationGTE applies the GTE predicate on the "location" field.
+func LocationGTE(v string) predicate.Product {
+	return predicate.Product(sql.FieldGTE(FieldLocation, v))
+}
+
+// LocationLT applies the LT predicate on the "location" field.
+func LocationLT(v string) predicate.Product {
+	return predicate.Product(sql.FieldLT(FieldLocation, v))
+}
+
+// LocationLTE applies the LTE predicate on the "location" field.
+func LocationLTE(v string) predicate.Product {
+	return predicate.Product(sql.FieldLTE(FieldLocation, v))
+}
+
+// LocationContains applies the Contains predicate on the "location" field.
+func LocationContains(v string) predicate.Product {
+	return predicate.Product(sql.FieldContains(FieldLocation, v))
+}
+
+// LocationHasPrefix applies the HasPrefix predicate on the "location" field.
+func LocationHasPrefix(v string) predicate.Product {
+	return predicate.Product(sql.FieldHasPrefix(FieldLocation, v))
+}
+
+// LocationHasSuffix applies the HasSuffix predicate on the "location" field.
+func LocationHasSuffix(v string) predicate.Product {
+	return predicate.Product(sql.FieldHasSuffix(FieldLocation, v))
+}
+
+// LocationIsNil applies the IsNil predicate on the "location" field.
+func LocationIsNil() predicate.Product {
+	return predicate.Product(sql.FieldIsNull(FieldLocation))
+}
+
+// LocationNotNil applies the NotNil predicate on the "location" field.
+func LocationNotNil() predicate.Product {
+	return predicate.Product(sql.FieldNotNull(FieldLocation))
+}
+
+// LocationEqualFold applies the EqualFold predicate on the "location" field.
+func LocationEqualFold(v string) predicate.Product {
+	return predicate.Product(sql.FieldEqualFold(FieldLocation, v))
+}
+
+// LocationContainsFold applies the ContainsFold predicate on the "location" field.
+func LocationContainsFold(v string) predicate.Product {
+	return predicate.Product(sql.FieldContainsFold(FieldLocation, v))
+}
+
+// IsVariantParentEQ applies the EQ predicate on the "is_variant_parent" field.
+func IsVariantParentEQ(v bool) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldIsVariantParent, v))
+}
+
+// IsVariantParentNEQ applies the NEQ predicate on the "is_variant_parent" field.
+func IsVariantParentNEQ(v bool) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldIsVariantParent, v))
+}
+
+// SerialNumberEQ applies the EQ predicate on the "serial_number" field.
+func SerialNumberEQ(v string) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldSerialNumber, v))
+}
+
+// SerialNumberNEQ applies the NEQ predicate on the "serial_number" field.
+func SerialNumberNEQ(v string) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldSerialNumber, v))
+}
+
+// SerialNumberIn applies the In predicate on the "serial_number" field.
+func SerialNumberIn(vs ...string) predicate.Product {
+	return predicate.Product(sql.FieldIn(FieldSerialNumber, vs...))
+}
+
+// SerialNumberNotIn applies the NotIn predicate on the "serial_number" field.
+func SerialNumberNotIn(vs ...string) predicate.Product {
+	return predicate.Product(sql.FieldNotIn(FieldSerialNumber, vs...))
+}
+
+// SerialNumberGT applies the GT predicate on the "serial_number" field.
+func SerialNumberGT(v string) predicate.Product {
+	return predicate.Product(sql.FieldGT(FieldSerialNumber, v))
+}
+
+// SerialNumberGTE applies the GTE predicate on the "serial_number" field.
+func SerialNumberGTE(v string) predicate.Product {
+	return predicate.Product(sql.FieldGTE(FieldSerialNumber, v))
+}
+
+// SerialNumberLT applies the LT predicate on the "serial_number" field.
+func SerialNumberLT(v string) predicate.Product {
+	return predicate.Product(sql.FieldLT(FieldSerialNumber, v))
+}
+
+// SerialNumberLTE applies the LTE predicate on the "serial_number" field.
+func SerialNumberLTE(v string) predicate.Product {
+	return predicate.Product(sql.FieldLTE(FieldSerialNumber, v))
+}
+
+// SerialNumberContains applies the Contains predicate on the "serial_number" field.
+func SerialNumberContains(v string) predicate.Product {
+	return predicate.Product(sql.FieldContains(FieldSerialNumber, v))
+}
+
+// SerialNumberHasPrefix applies the HasPrefix predicate on the "serial_number" field.
+func SerialNumberHasPrefix(v string) predicate.Product {
+	return predicate.Product(sql.FieldHasPrefix(FieldSerialNumber, v))
+}
+
+// SerialNumberHasSuffix applies the HasSuffix predicate on the "serial_number" field.
+func SerialNumberHasSuffix(v string) predicate.Product {
+	return predicate.Product(sql.FieldHasSuffix(FieldSerialNumber, v))
+}
+
+// SerialNumberIsNil applies the IsNil predicate on the "serial_number" field.
+func SerialNumberIsNil() predicate.Product {
+	return predicate.Product(sql.FieldIsNull(FieldSerialNumber))
+}
+
+// SerialNumberNotNil applies the NotNil predicate on the "serial_number" field.
+func SerialNumberNotNil() predicate.Product {
+	return predicate.Product(sql.FieldNotNull(FieldSerialNumber))
+}
+
+// SerialNumberEqualFold applies the EqualFold predicate on the "serial_number" field.
+func SerialNumberEqualFold(v string) predicate.Product {
+	return predicate.Product(sql.FieldEqualFold(FieldSerialNumber, v))
+}
+
+// SerialNumberContainsFold applies the ContainsFold predicate on the "serial_number" field.
+func SerialNumberContainsFold(v string) predicate.Product {
+	return predicate.Product(sql.FieldContainsFold(FieldSerialNumber, v))
+}
+
+// PurchaseDateEQ applies the EQ predicate on the "purchase_date" field.
+func PurchaseDateEQ(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldPurchaseDate, v))
+}
+
+// PurchaseDateNEQ applies the NEQ predicate on the "purchase_date" field.
+func PurchaseDateNEQ(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldPurchaseDate, v))
+}
+
+// PurchaseDateIn applies the In predicate on the "purchase_date" field.
+func PurchaseDateIn(vs ...time.Time) predicate.Product {
+	return predicate.Product(sql.FieldIn(FieldPurchaseDate, vs...))
+}
+
+// PurchaseDateNotIn applies the NotIn predicate on the "purchase_date" field.
+func PurchaseDateNotIn(vs ...time.Time) predicate.Product {
+	return predicate.Product(sql.FieldNotIn(FieldPurchaseDate, vs...))
+}
+
+// PurchaseDateGT applies the GT predicate on the "purchase_date" field.
+func PurchaseDateGT(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldGT(FieldPurchaseDate, v))
+}
+
+// PurchaseDateGTE applies the GTE predicate on the "purchase_date" field.
+func PurchaseDateGTE(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldGTE(FieldPurchaseDate, v))
+}
+
+// PurchaseDateLT applies the LT predicate on the "purchase_date" field.
+func PurchaseDateLT(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldLT(FieldPurchaseDate, v))
+}
+
+// PurchaseDateLTE applies the LTE predicate on the "purchase_date" field.
+func PurchaseDateLTE(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldLTE(FieldPurchaseDate, v))
+}
+
+// PurchaseDateIsNil applies the IsNil predicate on the "purchase_date" field.
+func PurchaseDateIsNil() predicate.Product {
+	return predicate.Product(sql.FieldIsNull(FieldPurchaseDate))
+}
+
+// PurchaseDateNotNil applies the NotNil predicate on the "purchase_date" field.
+func PurchaseDateNotNil() predicate.Product {
+	return predicate.Product(sql.FieldNotNull(FieldPurchaseDate))
+}
+
+// PurchasePriceEQ applies the EQ predicate on the "purchase_price" field.
+func PurchasePriceEQ(v decimal.Decimal) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldPurchasePrice, v))
+}
+
+// PurchasePriceNEQ applies the NEQ predicate on the "purchase_price" field.
+func PurchasePriceNEQ(v decimal.Decimal) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldPurchasePrice, v))
+}
+
+// PurchasePriceIn applies the In predicate on the "purchase_price" field.
+func PurchasePriceIn(vs ...decimal.Decimal) predicate.Product {
+	return predicate.Product(sql.FieldIn(FieldPurchasePrice, vs...))
+}
+
+// PurchasePriceNotIn applies the NotIn predicate on the "purchase_price" field.
+func PurchasePriceNotIn(vs ...decimal.Decimal) predicate.Product {
+	return predicate.Product(sql.FieldNotIn(FieldPurchasePrice, vs...))
+}
+
+// PurchasePriceGT applies the GT predicate on the "purchase_price" field.
+func PurchasePriceGT(v decimal.Decimal) predicate.Product {
+	return predicate.Product(sql.FieldGT(FieldPurchasePrice, v))
+}
+
+// PurchasePriceGTE applies the GTE predicate on the "purchase_price" field.
+func PurchasePriceGTE(v decimal.Decimal) predicate.Product {
+	return predicate.Product(sql.FieldGTE(FieldPurchasePrice, v))
+}
+
+// PurchasePriceLT applies the LT predicate on the "purchase_price" field.
+func PurchasePriceLT(v decimal.Decimal) predicate.Product {
+	return predicate.Product(sql.FieldLT(FieldPurchasePrice, v))
+}
+
+// PurchasePriceLTE applies the LTE predicate on the "purchase_price" field.
+func PurchasePriceLTE(v decimal.Decimal) predicate.Product {
+	return predicate.Product(sql.FieldLTE(FieldPurchasePrice, v))
+}
+
+// PurchasePriceIsNil applies the IsNil predicate on the "purchase_price" field.
+func PurchasePriceIsNil() predicate.Product {
+	return predicate.Product(sql.FieldIsNull(FieldPurchasePrice))
+}
+
+// PurchasePriceNotNil applies the NotNil predicate on the "purchase_price" field.
+func PurchasePriceNotNil() predicate.Product {
+	return predicate.Product(sql.FieldNotNull(FieldPurchasePrice))
+}
+
+// UsefulLifeMonthsEQ applies the EQ predicate on the "useful_life_months" field.
+func UsefulLifeMonthsEQ(v int) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldUsefulLifeMonths, v))
+}
+
+// UsefulLifeMonthsNEQ applies the NEQ predicate on the "useful_life_months" field.
+func UsefulLifeMonthsNEQ(v int) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldUsefulLifeMonths, v))
+}
+
+// UsefulLifeMonthsIn applies the In predicate on the "useful_life_months" field.
+func UsefulLifeMonthsIn(vs ...int) predicate.Product {
+	return predicate.Product(sql.FieldIn(FieldUsefulLifeMonths, vs...))
+}
+
+// UsefulLifeMonthsNotIn applies the NotIn predicate on the "useful_life_months" field.
+func UsefulLifeMonthsNotIn(vs ...int) predicate.Product {
+	return predicate.Product(sql.FieldNotIn(FieldUsefulLifeMonths, vs...))
+}
+
+// UsefulLifeMonthsGT applies the GT predicate on the "useful_life_months" field.
+func UsefulLifeMonthsGT(v int) predicate.Product {
+	return predicate.Product(sql.FieldGT(FieldUsefulLifeMonths, v))
+}
+
+// UsefulLifeMonthsGTE applies the GTE predicate on the "useful_life_months" field.
+func UsefulLifeMonthsGTE(v int) predicate.Product {
+	return predicate.Product(sql.FieldGTE(FieldUsefulLifeMonths, v))
+}
+
+// UsefulLifeMonthsLT applies the LT predicate on the "useful_life_months" field.
+func UsefulLifeMonthsLT(v int) predicate.Product {
+	return predicate.Product(sql.FieldLT(FieldUsefulLifeMonths, v))
+}
+
+// UsefulLifeMonthsLTE applies the LTE predicate on the "useful_life_months" field.
+func UsefulLifeMonthsLTE(v int) predicate.Product {
+	return predicate.Product(sql.FieldLTE(FieldUsefulLifeMonths, v))
+}
+
+// UsefulLifeMonthsIsNil applies the IsNil predicate on the "useful_life_months" field.
+func UsefulLifeMonthsIsNil() predicate.Product {
+	return predicate.Product(sql.FieldIsNull(FieldUsefulLifeMonths))
+}
+
+// UsefulLifeMonthsNotNil applies the NotNil predicate on the "useful_life_months" field.
+func UsefulLifeMonthsNotNil() predicate.Product {
+	return predicate.Product(sql.FieldNotNull(FieldUsefulLifeMonths))
+}
+
+// WarrantyExpiresAtEQ applies the EQ predicate on the "warranty_expires_at" field.
+func WarrantyExpiresAtEQ(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldWarrantyExpiresAt, v))
+}
+
+// WarrantyExpiresAtNEQ applies the NEQ predicate on the "warranty_expires_at" field.
+func WarrantyExpiresAtNEQ(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldWarrantyExpiresAt, v))
+}
+
+// WarrantyExpiresAtIn applies the In predicate on the "warranty_expires_at" field.
+func WarrantyExpiresAtIn(vs ...time.Time) predicate.Product {
+	return predicate.Product(sql.FieldIn(FieldWarrantyExpiresAt, vs...))
+}
+
+// WarrantyExpiresAtNotIn applies the NotIn predicate on the "warranty_expires_at" field.
+func WarrantyExpiresAtNotIn(vs ...time.Time) predicate.Product {
+	return predicate.Product(sql.FieldNotIn(FieldWarrantyExpiresAt, vs...))
+}
+
+// WarrantyExpiresAtGT applies the GT predicate on the "warranty_expires_at" field.
+func WarrantyExpiresAtGT(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldGT(FieldWarrantyExpiresAt, v))
+}
+
+// WarrantyExpiresAtGTE applies the GTE predicate on the "warranty_expires_at" field.
+func WarrantyExpiresAtGTE(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldGTE(FieldWarrantyExpiresAt, v))
+}
+
+// WarrantyExpiresAtLT applies the LT predicate on the "warranty_expires_at" field.
+func WarrantyExpiresAtLT(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldLT(FieldWarrantyExpiresAt, v))
+}
+
+// WarrantyExpiresAtLTE applies the LTE predicate on the "warranty_expires_at" field.
+func WarrantyExpiresAtLTE(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldLTE(FieldWarrantyExpiresAt, v))
+}
+
+// WarrantyExpiresAtIsNil applies the IsNil predicate on the "warranty_expires_at" field.
+func WarrantyExpiresAtIsNil() predicate.Product {
+	return predicate.Product(sql.FieldIsNull(FieldWarrantyExpiresAt))
+}
+
+// WarrantyExpiresAtNotNil applies the NotNil predicate on the "warranty_expires_at" field.
+func WarrantyExpiresAtNotNil() predicate.Product {
+	return predicate.Product(sql.FieldNotNull(FieldWarrantyExpiresAt))
+}
+
+// DisposalDateEQ applies the EQ predicate on the "disposal_date" field.
+func DisposalDateEQ(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldDisposalDate, v))
+}
+
+// DisposalDateNEQ applies the NEQ predicate on the "disposal_date" field.
+func DisposalDateNEQ(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldDisposalDate, v))
+}
+
+// DisposalDateIn applies the In predicate on the "disposal_date" field.
+func DisposalDateIn(vs ...time.Time) predicate.Product {
+	return predicate.Product(sql.FieldIn(FieldDisposalDate, vs...))
+}
+
+// DisposalDateNotIn applies the NotIn predicate on the "disposal_date" field.
+func DisposalDateNotIn(vs ...time.Time) predicate.Product {
+	return predicate.Product(sql.FieldNotIn(FieldDisposalDate, vs...))
+}
+
+// DisposalDateGT applies the GT predicate on the "disposal_date" field.
+func DisposalDateGT(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldGT(FieldDisposalDate, v))
+}
+
+// DisposalDateGTE applies the GTE predicate on the "disposal_date" field.
+func DisposalDateGTE(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldGTE(FieldDisposalDate, v))
+}
+
+// DisposalDateLT applies the LT predicate on the "disposal_date" field.
+func DisposalDateLT(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldLT(FieldDisposalDate, v))
+}
+
+// DisposalDateLTE applies the LTE predicate on the "disposal_date" field.
+func DisposalDateLTE(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldLTE(FieldDisposalDate, v))
+}
+
+// DisposalDateIsNil applies the IsNil predicate on the "disposal_date" field.
+func DisposalDateIsNil() predicate.Product {
+	return predicate.Product(sql.FieldIsNull(FieldDisposalDate))
+}
+
+// DisposalDateNotNil applies the NotNil predicate on the "disposal_date" field.
+func DisposalDateNotNil() predicate.Product {
+	return predicate.Product(sql.FieldNotNull(FieldDisposalDate))
+}
+
+// DisposalReasonEQ applies the EQ predicate on the "disposal_reason" field.
+func DisposalReasonEQ(v string) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldDisposalReason, v))
+}
+
+// DisposalReasonNEQ applies the NEQ predicate on the "disposal_reason" field.
+func DisposalReasonNEQ(v string) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldDisposalReason, v))
+}
+
+// DisposalReasonIn applies the In predicate on the "disposal_reason" field.
+func DisposalReasonIn(vs ...string) predicate.Product {
+	return predicate.Product(sql.FieldIn(FieldDisposalReason, vs...))
+}
+
+// DisposalReasonNotIn applies the NotIn predicate on the "disposal_reason" field.
+func DisposalReasonNotIn(vs ...string) predicate.Product {
+	return predicate.Product(sql.FieldNotIn(FieldDisposalReason, vs...))
+}
+
+// DisposalReasonGT applies the GT predicate on the "disposal_reason" field.
+func DisposalReasonGT(v string) predicate.Product {
+	return predicate.Product(sql.FieldGT(FieldDisposalReason, v))
+}
+
+// DisposalReasonGTE applies the GTE predicate on the "disposal_reason" field.
+func DisposalReasonGTE(v string) predicate.Product {
+	return predicate.Product(sql.FieldGTE(FieldDisposalReason, v))
+}
+
+// DisposalReasonLT applies the LT predicate on the "disposal_reason" field.
+func DisposalReasonLT(v string) predicate.Product {
+	return predicate.Product(sql.FieldLT(FieldDisposalReason, v))
+}
+
+// DisposalReasonLTE applies the LTE predicate on the "disposal_reason" field.
+func DisposalReasonLTE(v string) predicate.Product {
+	return predicate.Product(sql.FieldLTE(FieldDisposalReason, v))
+}
+
+// DisposalReasonContains applies the Contains predicate on the "disposal_reason" field.
+func DisposalReasonContains(v string) predicate.Product {
+	return predicate.Product(sql.FieldContains(FieldDisposalReason, v))
+}
+
+// DisposalReasonHasPrefix applies the HasPrefix predicate on the "disposal_reason" field.
+func DisposalReasonHasPrefix(v string) predicate.Product {
+	return predicate.Product(sql.FieldHasPrefix(FieldDisposalReason, v))
+}
+
+// DisposalReasonHasSuffix applies the HasSuffix predicate on the "disposal_reason" field.
+func DisposalReasonHasSuffix(v string) predicate.Product {
+	return predicate.Product(sql.FieldHasSuffix(FieldDisposalReason, v))
+}
+
+// DisposalReasonIsNil applies the IsNil predicate on the "disposal_reason" field.
+func DisposalReasonIsNil() predicate.Product {
+	return predicate.Product(sql.FieldIsNull(FieldDisposalReason))
+}
+
+// DisposalReasonNotNil applies the NotNil predicate on the "disposal_reason" field.
+func DisposalReasonNotNil() predicate.Product {
+	return predicate.Product(sql.FieldNotNull(FieldDisposalReason))
+}
+
+// DisposalReasonEqualFold applies the EqualFold predicate on the "disposal_reason" field.
+func DisposalReasonEqualFold(v string) predicate.Product {
+	return predicate.Product(sql.FieldEqualFold(FieldDisposalReason, v))
+}
+
+// DisposalReasonContainsFold applies the ContainsFold predicate on the "disposal_reason" field.
+func DisposalReasonContainsFold(v string) predicate.Product {
+	return predicate.Product(sql.FieldContainsFold(FieldDisposalReason, v))
+}
+
+// IsDisposedEQ applies the EQ predicate on the "is_disposed" field.
+func IsDisposedEQ(v bool) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldIsDisposed, v))
+}
+
+// IsDisposedNEQ applies the NEQ predicate on the "is_disposed" field.
+func IsDisposedNEQ(v bool) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldIsDisposed, v))
+}
+
 // HasTenant applies the HasEdge predicate on the "tenant" edge.
 func HasTenant() predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
@@ -550,6 +1265,213 @@ func HasVendor() predicate.Product {
 func HasVendorWith(preds ...predicate.Account) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		step := newVendorStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSupplier applies the HasEdge predicate on the "supplier" edge.
+func HasSupplier() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, SupplierTable, SupplierColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSupplierWith applies the HasEdge predicate on the "supplier" edge with a given conditions (other predicates).
+func HasSupplierWith(preds ...predicate.Supplier) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := newSupplierStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCategory applies the HasEdge predicate on the "category" edge.
+func HasCategory() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, CategoryTable, CategoryColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCategoryWith applies the HasEdge predicate on the "category" edge with a given conditions (other predicates).
+func HasCategoryWith(preds ...predicate.Category) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := newCategoryStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasWarehouse applies the HasEdge predicate on the "warehouse" edge.
+func HasWarehouse() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, WarehouseTable, WarehouseColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasWarehouseWith applies the HasEdge predicate on the "warehouse" edge with a given conditions (other predicates).
+func HasWarehouseWith(preds ...predicate.Warehouse) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := newWarehouseStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasAssignments applies the HasEdge predicate on the "assignments" edge.
+func HasAssignments() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AssignmentsTable, AssignmentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAssignmentsWith applies the HasEdge predicate on the "assignments" edge with a given conditions (other predicates).
+func HasAssignmentsWith(preds ...predicate.AssetAssignment) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := newAssignmentsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasVariants applies the HasEdge predicate on the "variants" edge.
+func HasVariants() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, VariantsTable, VariantsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVariantsWith applies the HasEdge predicate on the "variants" edge with a given conditions (other predicates).
+func HasVariantsWith(preds ...predicate.ProductVariant) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := newVariantsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasMaintenanceSchedules applies the HasEdge predicate on the "maintenance_schedules" edge.
+func HasMaintenanceSchedules() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, MaintenanceSchedulesTable, MaintenanceSchedulesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMaintenanceSchedulesWith applies the HasEdge predicate on the "maintenance_schedules" edge with a given conditions (other predicates).
+func HasMaintenanceSchedulesWith(preds ...predicate.MaintenanceSchedule) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := newMaintenanceSchedulesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasAlerts applies the HasEdge predicate on the "alerts" edge.
+func HasAlerts() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AlertsTable, AlertsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAlertsWith applies the HasEdge predicate on the "alerts" edge with a given conditions (other predicates).
+func HasAlertsWith(preds ...predicate.StockAlert) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := newAlertsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPurchaseOrderLines applies the HasEdge predicate on the "purchase_order_lines" edge.
+func HasPurchaseOrderLines() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PurchaseOrderLinesTable, PurchaseOrderLinesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPurchaseOrderLinesWith applies the HasEdge predicate on the "purchase_order_lines" edge with a given conditions (other predicates).
+func HasPurchaseOrderLinesWith(preds ...predicate.PurchaseOrderLine) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := newPurchaseOrderLinesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasInventoryCounts applies the HasEdge predicate on the "inventory_counts" edge.
+func HasInventoryCounts() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, InventoryCountsTable, InventoryCountsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasInventoryCountsWith applies the HasEdge predicate on the "inventory_counts" edge with a given conditions (other predicates).
+func HasInventoryCountsWith(preds ...predicate.InventoryCount) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := newInventoryCountsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

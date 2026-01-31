@@ -14,16 +14,48 @@ export function CreateScript(arg1, arg2, arg3, arg4) {
   return window['go']['bridge']['PulseBridge']['CreateScript'](arg1, arg2, arg3, arg4);
 }
 
+export function DeleteFile(arg1, arg2) {
+  return window['go']['bridge']['PulseBridge']['DeleteFile'](arg1, arg2);
+}
+
 export function DeleteScript(arg1) {
   return window['go']['bridge']['PulseBridge']['DeleteScript'](arg1);
+}
+
+export function DownloadFile(arg1, arg2) {
+  return window['go']['bridge']['PulseBridge']['DownloadFile'](arg1, arg2);
 }
 
 export function GetAgents() {
   return window['go']['bridge']['PulseBridge']['GetAgents']();
 }
 
+export function GetEnvVars(arg1) {
+  return window['go']['bridge']['PulseBridge']['GetEnvVars'](arg1);
+}
+
+export function GetEventLogs(arg1) {
+  return window['go']['bridge']['PulseBridge']['GetEventLogs'](arg1);
+}
+
+export function GetProcesses(arg1) {
+  return window['go']['bridge']['PulseBridge']['GetProcesses'](arg1);
+}
+
 export function GetServices(arg1) {
   return window['go']['bridge']['PulseBridge']['GetServices'](arg1);
+}
+
+export function GetSoftwareInventory(arg1) {
+  return window['go']['bridge']['PulseBridge']['GetSoftwareInventory'](arg1);
+}
+
+export function HandleRDPStream(arg1, arg2) {
+  return window['go']['bridge']['PulseBridge']['HandleRDPStream'](arg1, arg2);
+}
+
+export function HandleRDPView(arg1, arg2) {
+  return window['go']['bridge']['PulseBridge']['HandleRDPView'](arg1, arg2);
 }
 
 export function HandleTerminalConnect(arg1, arg2) {
@@ -32,6 +64,10 @@ export function HandleTerminalConnect(arg1, arg2) {
 
 export function InstallPatches(arg1, arg2) {
   return window['go']['bridge']['PulseBridge']['InstallPatches'](arg1, arg2);
+}
+
+export function KillProcess(arg1, arg2) {
+  return window['go']['bridge']['PulseBridge']['KillProcess'](arg1, arg2);
 }
 
 export function ListFiles(arg1, arg2) {
@@ -46,12 +82,24 @@ export function ListScripts() {
   return window['go']['bridge']['PulseBridge']['ListScripts']();
 }
 
+export function RebootDevice(arg1) {
+  return window['go']['bridge']['PulseBridge']['RebootDevice'](arg1);
+}
+
 export function ScanPatches(arg1) {
   return window['go']['bridge']['PulseBridge']['ScanPatches'](arg1);
 }
 
 export function SendCommand(arg1, arg2) {
   return window['go']['bridge']['PulseBridge']['SendCommand'](arg1, arg2);
+}
+
+export function SetRiverClient(arg1) {
+  return window['go']['bridge']['PulseBridge']['SetRiverClient'](arg1);
+}
+
+export function ShutdownDevice(arg1) {
+  return window['go']['bridge']['PulseBridge']['ShutdownDevice'](arg1);
 }
 
 export function Startup(arg1) {

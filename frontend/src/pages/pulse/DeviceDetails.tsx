@@ -10,12 +10,18 @@ import {
   Play,
   RotateCcw,
   Trash2,
+  Monitor,
 } from "lucide-react";
 import ProcessesTab from "./ProcessesTab";
 import ServicesTab from "./ServicesTab";
 import FilesTab from "./FilesTab";
 import PatchesTab from "./PatchesTab";
+import NetworkTab from "./NetworkTab";
+import SoftwareTab from "./SoftwareTab";
 import TerminalComponent from "./TerminalComponent";
+import RemoteDesktopComponent from "./RemoteDesktopComponent";
+import LogsTab from "./LogsTab";
+import EnvironmentTab from "./EnvironmentTab";
 // ... existing imports
 
 // ... existing code ...
@@ -74,8 +80,20 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ device, onBack }) => {
           </div>
         </div>
         <div className="ml-auto flex gap-2">
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={() => window.go.bridge.PulseBridge.RebootDevice(device.id)}
+          >
             <RotateCcw className="mr-2 h-4 w-4" /> Reboot
+          </Button>
+          <Button
+            variant="outline"
+            className="text-red-400 hover:text-red-500 hover:bg-red-500/10"
+            onClick={() =>
+              window.go.bridge.PulseBridge.ShutdownDevice(device.id)
+            }
+          >
+            <Monitor className="mr-2 h-4 w-4" /> Shutdown
           </Button>
           <Button variant="default">
             <Terminal className="mr-2 h-4 w-4" /> Remote Shell
@@ -86,9 +104,15 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ device, onBack }) => {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="remote">Remote Desktop</TabsTrigger>
           <TabsTrigger value="console">Terminal</TabsTrigger>
+          <TabsTrigger value="network">Network (SNMP)</TabsTrigger>
+          <TabsTrigger value="software">Software</TabsTrigger>
           <TabsTrigger value="processes">Processes</TabsTrigger>
           <TabsTrigger value="services">Services</TabsTrigger>
+          <TabsTrigger value="services">Services</TabsTrigger>
+          <TabsTrigger value="logs">Event Logs</TabsTrigger>
+          <TabsTrigger value="env">Env Vars</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
           <TabsTrigger value="patches">Patches</TabsTrigger>
         </TabsList>
@@ -172,12 +196,30 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ device, onBack }) => {
           <ProcessesTab deviceId={device.id} />
         </TabsContent>
 
+        <TabsContent value="remote" className="h-[600px]">
+          <RemoteDesktopComponent deviceId={device.id} />
+        </TabsContent>
+
+        <TabsContent value="network" className="h-[500px]">
+          <NetworkTab deviceId={device.id} />
+        </TabsContent>
+
+        <TabsContent value="software" className="h-[500px]">
+          <SoftwareTab deviceId={device.id} />
+        </TabsContent>
+
         <TabsContent value="console" className="h-[500px]">
           <TerminalComponent deviceId={device.id} />
         </TabsContent>
 
         <TabsContent value="services" className="h-[500px]">
           <ServicesTab deviceId={device.id} />
+        </TabsContent>
+        <TabsContent value="logs" className="h-[500px]">
+          <LogsTab deviceId={device.id} />
+        </TabsContent>
+        <TabsContent value="env" className="h-[500px]">
+          <EnvironmentTab deviceId={device.id} />
         </TabsContent>
         <TabsContent value="files" className="h-[500px]">
           <FilesTab deviceId={device.id} />

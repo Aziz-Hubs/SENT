@@ -37,6 +37,20 @@ func (_c *PerformanceReviewCreate) SetNillableOverallRating(v *performancereview
 	return _c
 }
 
+// SetReviewType sets the "review_type" field.
+func (_c *PerformanceReviewCreate) SetReviewType(v performancereview.ReviewType) *PerformanceReviewCreate {
+	_c.mutation.SetReviewType(v)
+	return _c
+}
+
+// SetNillableReviewType sets the "review_type" field if the given value is not nil.
+func (_c *PerformanceReviewCreate) SetNillableReviewType(v *performancereview.ReviewType) *PerformanceReviewCreate {
+	if v != nil {
+		_c.SetReviewType(*v)
+	}
+	return _c
+}
+
 // SetStrengths sets the "strengths" field.
 func (_c *PerformanceReviewCreate) SetStrengths(v string) *PerformanceReviewCreate {
 	_c.mutation.SetStrengths(v)
@@ -82,6 +96,12 @@ func (_c *PerformanceReviewCreate) SetNillableManagerComments(v *string) *Perfor
 // SetGoalsAssessment sets the "goals_assessment" field.
 func (_c *PerformanceReviewCreate) SetGoalsAssessment(v map[string]interface{}) *PerformanceReviewCreate {
 	_c.mutation.SetGoalsAssessment(v)
+	return _c
+}
+
+// SetSurveyResponses sets the "survey_responses" field.
+func (_c *PerformanceReviewCreate) SetSurveyResponses(v map[string]interface{}) *PerformanceReviewCreate {
+	_c.mutation.SetSurveyResponses(v)
 	return _c
 }
 
@@ -242,6 +262,10 @@ func (_c *PerformanceReviewCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *PerformanceReviewCreate) defaults() {
+	if _, ok := _c.mutation.ReviewType(); !ok {
+		v := performancereview.DefaultReviewType
+		_c.mutation.SetReviewType(v)
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := performancereview.DefaultStatus
 		_c.mutation.SetStatus(v)
@@ -261,6 +285,14 @@ func (_c *PerformanceReviewCreate) check() error {
 	if v, ok := _c.mutation.OverallRating(); ok {
 		if err := performancereview.OverallRatingValidator(v); err != nil {
 			return &ValidationError{Name: "overall_rating", err: fmt.Errorf(`ent: validator failed for field "PerformanceReview.overall_rating": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ReviewType(); !ok {
+		return &ValidationError{Name: "review_type", err: errors.New(`ent: missing required field "PerformanceReview.review_type"`)}
+	}
+	if v, ok := _c.mutation.ReviewType(); ok {
+		if err := performancereview.ReviewTypeValidator(v); err != nil {
+			return &ValidationError{Name: "review_type", err: fmt.Errorf(`ent: validator failed for field "PerformanceReview.review_type": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Status(); !ok {
@@ -316,6 +348,10 @@ func (_c *PerformanceReviewCreate) createSpec() (*PerformanceReview, *sqlgraph.C
 		_spec.SetField(performancereview.FieldOverallRating, field.TypeEnum, value)
 		_node.OverallRating = value
 	}
+	if value, ok := _c.mutation.ReviewType(); ok {
+		_spec.SetField(performancereview.FieldReviewType, field.TypeEnum, value)
+		_node.ReviewType = value
+	}
 	if value, ok := _c.mutation.Strengths(); ok {
 		_spec.SetField(performancereview.FieldStrengths, field.TypeString, value)
 		_node.Strengths = value
@@ -331,6 +367,10 @@ func (_c *PerformanceReviewCreate) createSpec() (*PerformanceReview, *sqlgraph.C
 	if value, ok := _c.mutation.GoalsAssessment(); ok {
 		_spec.SetField(performancereview.FieldGoalsAssessment, field.TypeJSON, value)
 		_node.GoalsAssessment = value
+	}
+	if value, ok := _c.mutation.SurveyResponses(); ok {
+		_spec.SetField(performancereview.FieldSurveyResponses, field.TypeJSON, value)
+		_node.SurveyResponses = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(performancereview.FieldStatus, field.TypeEnum, value)

@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"path/filepath"
 	"sent/ent"
 	"sent/ent/vaultitem"
 	"sent/pkg/orchestrator"
+	"sent/pkg/vault/ai"
 
 	"github.com/riverqueue/river"
 )
@@ -27,19 +29,39 @@ func (w *OCRWorker) Work(ctx context.Context, job *river.Job[orchestrator.OCRArg
 	log.Printf("[OCR] Processing VaultItem %d (Hash: %s)", vaultItemID, hash)
 
 	// 1. Get the file from storage/blocks/<hash>
-	// 2. Perform OCR (Mocked for now)
-	extractedText := fmt.Sprintf("Extracted text for block %s. Real OCR implementation would go here.", hash)
+	blockPath := filepath.Join(StorageRoot, BlocksDir, hash)
 
-	// 3. Update VaultItem with extracted text
-	err := w.db.VaultItem.Update().
+	// 2. Perform OCR using abstracted engine
+	if currentOCREngine == nil {
+		log.Printf("[OCR] No OCR engine available")
+		return nil
+	}
+
+	text, err := currentOCREngine.ExtractText(blockPath)
+	if err != nil {
+		return fmt.Errorf("failed to extract text: %w", err)
+	}
+
+	if text == "" {
+		log.Printf("[OCR] No text found for VaultItem %d, skipping update", vaultItemID)
+		return nil
+	}
+
+	// 3. AI Classification
+	classification := ai.ClassifyDocument(text)
+	log.Printf("[OCR] Classified VaultItem %d as %s (Confidence: %.2f)", vaultItemID, classification.FileType, classification.Confidence)
+
+	// 4. Update VaultItem with extracted text and AI tags
+	err = w.db.VaultItem.Update().
 		Where(vaultitem.ID(vaultItemID)).
-		SetContent(extractedText).
+		SetContent(text).
+		SetFileType(classification.FileType).
 		Exec(ctx)
 
 	if err != nil {
-		return fmt.Errorf("failed to update vault item content: %w", err)
+		return fmt.Errorf("failed to update vault item: %w", err)
 	}
 
-	log.Printf("[OCR] Successfully processed VaultItem %d", vaultItemID)
+	log.Printf("[OCR] Successfully processed VaultItem %d (Extracted %d chars)", vaultItemID, len(text))
 	return nil
 }

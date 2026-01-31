@@ -17,6 +17,9 @@ import {
   CheckCircle2,
   PauseCircle,
   Percent,
+  Split,
+  FileText,
+  StickyNote,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -41,10 +44,25 @@ import { Product } from "@/lib/types";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ModifierModal } from "@/components/kiosk/ModifierModal";
+import { LineItemModal } from "@/components/kiosk/LineItemModal";
+import { ProductVariant } from "@/lib/types";
+import {
+  User,
+  QrCode,
+  Clock,
+  Star,
+  Archive,
+  ShieldAlert,
+  LogOut,
+  LogIn,
+} from "lucide-react";
 
 // CartItem extends Product with sales-specific fields
 interface CartItem extends Product {
   qty: number;
+  variant?: ProductVariant;
+  note?: string;
 }
 
 /**
@@ -53,9 +71,43 @@ interface CartItem extends Product {
  */
 export function Kiosk() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const categories = [
+    "All",
+    ...Array.from(
+      new Set(products.map((p) => p.categoryName || "Uncategorized")),
+    ),
+  ];
+  const filteredProducts =
+    activeCategory === "All"
+      ? products
+      : products.filter(
+          (p) => (p.categoryName || "Uncategorized") === activeCategory,
+        );
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Line Item Edit State
+  const [selectedCartIndex, setSelectedCartIndex] = useState<number | null>(
+    null,
+  );
+  const [isLineItemOpen, setIsLineItemOpen] = useState(false);
+
+  // Favorites
+  const [favorites] = useState<number[]>([1, 2, 3]); // Mock IDs for favorites
+
+  // Parked Orders State
+  const [isParkedListOpen, setIsParkedListOpen] = useState(false);
+  const [parkedOrders, setParkedOrders] = useState<any[]>([]);
+
+  // Drawer/Manager State
+  const [isPinOpen, setIsPinOpen] = useState(false);
+  const [pinAction, setPinAction] = useState<"z-report" | "drawer">("z-report");
+  const [pinInput, setPinInput] = useState("");
+  const [isDrawerOpsOpen, setIsDrawerOpsOpen] = useState(false);
+  const [drawerOpType, setDrawerOpType] = useState<"in" | "out">("out");
+  const [drawerAmount, setDrawerAmount] = useState("");
 
   // Receipt State
   const [receipt, setReceipt] = useState<string | null>(null);
@@ -66,6 +118,13 @@ export function Kiosk() {
   const [tendered, setTendered] = useState("");
   const [change, setChange] = useState(0);
 
+  // Split Payment State
+  const [isSplitOpen, setIsSplitOpen] = useState(false);
+  const [splitPayments, setSplitPayments] = useState<
+    { method: string; amount: number }[]
+  >([]);
+  const [splitAmount, setSplitAmount] = useState("");
+
   // Discount State
   const [isDiscountOpen, setIsDiscountOpen] = useState(false);
   const [discountType, setDiscountType] = useState<"percent" | "amount">(
@@ -73,9 +132,66 @@ export function Kiosk() {
   );
   const [discountValue, setDiscountValue] = useState("");
 
+  // Return Mode State
+  const [isReturnMode, setIsReturnMode] = useState(false);
+
+  // Modifiers State
+  const [selectedProductForModifier, setSelectedProductForModifier] =
+    useState<Product | null>(null);
+  const [isModifierOpen, setIsModifierOpen] = useState(false);
+
+  // Scanner State
+  const [barcodeBuffer, setBarcodeBuffer] = useState("");
+  const [lastKeyTime, setLastKeyTime] = useState(0);
+
+  // Shift/Customer State (Placeholder for now)
+  const [shiftActive, setShiftActive] = useState(false);
+  const [customer, setCustomer] = useState<string | null>(null);
+
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  // Barcode Scanner Listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if input focused
+      if (
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA"
+      ) {
+        return;
+      }
+
+      const now = Date.now();
+      if (now - lastKeyTime > 100) {
+        setBarcodeBuffer(""); // Reset if gap too long (manual typing)
+      }
+      setLastKeyTime(now);
+
+      if (e.key === "Enter") {
+        if (barcodeBuffer.length > 0) {
+          handleScan(barcodeBuffer);
+          setBarcodeBuffer("");
+        }
+      } else if (e.key.length === 1) {
+        setBarcodeBuffer((prev) => prev + e.key);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [barcodeBuffer, lastKeyTime, products]);
+
+  const handleScan = (code: string) => {
+    const product = products.find((p) => p.sku === code || p.barcode === code);
+    if (product) {
+      handleProductCheck(product);
+      toast.success(`Scanned: ${product.name}`);
+    } else {
+      toast.error(`Unknown barcode: ${code}`);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -105,31 +221,67 @@ export function Kiosk() {
     }
   };
 
-  const addToCart = (product: Product) => {
-    const existing = cart.find((item) => item.id === product.id);
-    const currentQty = existing ? existing.qty : 0;
+  // Helper to generate unique cart key (id + variantId)
+  const getCartItemKey = (item: CartItem) => {
+    return `${item.id}-${item.variant?.id || "base"}`;
+  };
 
-    if (currentQty + 1 > product.quantity) {
-      toast.error(`Insufficient stock! Only ${product.quantity} available.`);
-      return;
-    }
+  // Override addToCart logic for variants
+  const processAddToCart = (
+    product: Product,
+    variant?: ProductVariant | null,
+  ) => {
+    const newItemKey = `${product.id}-${variant?.id || "base"}`;
+    const existingIndex = cart.findIndex(
+      (item) => getCartItemKey(item) === newItemKey,
+    );
 
-    if (existing) {
-      setCart(
-        cart.map((item) =>
-          item.id === product.id ? { ...item, qty: item.qty + 1 } : item,
-        ),
-      );
+    const stockAvailable = variant ? variant.stock : product.quantity;
+
+    if (existingIndex >= 0) {
+      const item = cart[existingIndex];
+      if (item.qty + 1 > stockAvailable) {
+        toast.error(`Insufficient stock! Only ${stockAvailable} available.`);
+        return;
+      }
+      const newCart = [...cart];
+      newCart[existingIndex].qty += 1;
+      setCart(newCart);
     } else {
-      setCart([...cart, { ...product, qty: 1 }]);
+      let price = variant
+        ? product.unitCost + variant.priceAdjustment
+        : product.unitCost;
+      // Invert price if in return mode
+      if (isReturnMode) {
+        price = -Math.abs(price);
+      }
+
+      const sku = variant ? variant.sku : product.sku;
+      const name = variant ? `${product.name} (${variant.name})` : product.name;
+
+      const newItem: CartItem = {
+        ...product,
+        qty: isReturnMode ? -1 : 1, // Negative qty for returns
+        variant: variant || undefined,
+        unitCost: price, // Override price
+        sku: sku, // Override SKU
+        name: name, // Override name for display
+      };
+      setCart([...cart, newItem]);
     }
   };
 
+  const addToCart = (product: Product, variant?: ProductVariant | null) => {
+    processAddToCart(product, variant);
+  };
+
   const decrementCart = (index: number) => {
-    const item = cart[index];
-    if (item.qty > 1) {
-      const newCart = [...cart];
-      newCart[index].qty--;
+    const newCart = [...cart];
+    if (Math.abs(newCart[index].qty) > 1) {
+      newCart[index].qty =
+        newCart[index].qty > 0
+          ? newCart[index].qty - 1
+          : newCart[index].qty + 1;
       setCart(newCart);
     } else {
       removeFromCart(index);
@@ -140,6 +292,15 @@ export function Kiosk() {
     const newCart = [...cart];
     newCart.splice(index, 1);
     setCart(newCart);
+  };
+
+  const handleProductCheck = (product: Product) => {
+    if (product.hasVariants) {
+      setSelectedProductForModifier(product);
+      setIsModifierOpen(true);
+    } else {
+      addToCart(product);
+    }
   };
 
   const applyDiscount = () => {
@@ -171,21 +332,55 @@ export function Kiosk() {
   };
 
   const holdCart = () => {
-    if (cart.length === 0) {
-      // Try to restore
-      const saved = localStorage.getItem("held_cart");
-      if (saved) {
-        setCart(JSON.parse(saved));
-        localStorage.removeItem("held_cart");
-        toast.success("Cart restored from hold.");
-      } else {
-        toast.error("No held cart found.");
-      }
-      return;
-    }
-    localStorage.setItem("held_cart", JSON.stringify(cart));
+    if (cart.length === 0) return;
+
+    // Auto-name based on time/customer
+    const name = customer || `Order #${Math.floor(Math.random() * 1000)}`;
+    const newOrder = {
+      id: Date.now(),
+      name: name,
+      cart: cart,
+      date: new Date().toLocaleString(),
+    };
+
+    const updated = [...parkedOrders, newOrder];
+    setParkedOrders(updated);
+    // Persist to local storage in real app
     setCart([]);
-    toast.success("Cart placed on hold.");
+    toast.success(`Order parked: ${name}`);
+  };
+
+  const restoreParkedOrder = (index: number) => {
+    setCart(parkedOrders[index].cart);
+    const newParked = [...parkedOrders];
+    newParked.splice(index, 1);
+    setParkedOrders(newParked);
+    setIsParkedListOpen(false);
+    toast.success("Order retrieved");
+  };
+
+  const handleManagerAction = (action: "z-report" | "drawer") => {
+    setPinAction(action);
+    setPinInput("");
+    setIsPinOpen(true);
+  };
+
+  const submitPin = () => {
+    if (pinInput === "1234") {
+      setIsPinOpen(false);
+      if (pinAction === "z-report") handleZReport();
+      if (pinAction === "drawer") setIsDrawerOpsOpen(true);
+    } else {
+      toast.error("Invalid PIN");
+      setPinInput("");
+    }
+  };
+
+  const handleDrawerLog = () => {
+    // Mock log
+    toast.success(`Drawer ${drawerOpType.toUpperCase()}: $${drawerAmount}`);
+    setIsDrawerOpsOpen(false);
+    setDrawerAmount("");
   };
 
   const total = cart.reduce((acc, item) => acc + item.unitCost * item.qty, 0);
@@ -236,6 +431,75 @@ export function Kiosk() {
     }
   };
 
+  const handleSplitPayment = async () => {
+    // Validate total
+    const paid = splitPayments.reduce((acc, p) => acc + p.amount, 0);
+    if (paid < total) {
+      toast.error(`Remaining balance: $${(total - paid).toFixed(2)}`);
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // Mocking checkout for split payments as bridge might not support it yet
+      // In production, we'd send the 'payments' array to a new bridge endpoint
+      const payload = {
+        items: cart.map((i) => ({
+          productId: i.id,
+          quantity: i.qty,
+          price: i.unitCost,
+        })),
+        total: total,
+        paymentMethod: "split", // Simplified for now
+      };
+
+      // @ts-ignore
+      await Checkout(payload);
+      // @ts-ignore
+      const text = await PrintReceipt(payload);
+      setReceipt(text);
+      setIsReceiptOpen(true);
+      setCart([]);
+      setIsSplitOpen(false);
+      setSplitPayments([]);
+      fetchProducts();
+      toast.success("Split Payment Successful");
+    } catch (err: any) {
+      toast.error(err.toString());
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const addSplitPayment = (method: string) => {
+    const val = parseFloat(splitAmount);
+    if (isNaN(val) || val <= 0) return;
+    setSplitPayments([...splitPayments, { method, amount: val }]);
+    setSplitAmount("");
+  };
+
+  /* Z-Report is now protected */
+  const handleZReport = () => {
+    // Mock Z-Report
+    const date = new Date().toLocaleDateString();
+    const report = `
+      === Z-REPORT ===
+      Date: ${date}
+      Shift ID: SHIFT-${Math.floor(Math.random() * 1000)}
+      
+      Total Sales: $${(Math.random() * 5000).toFixed(2)}
+      Cash in Drawer: $${(Math.random() * 1000).toFixed(2)}
+      Card Sales: $${(Math.random() * 4000).toFixed(2)}
+      
+      Returns: $0.00
+      Discounts: $0.00
+      
+      --- END REPORT ---
+    `;
+    setReceipt(report);
+    setIsReceiptOpen(true);
+  };
+
   const breadcrumbs = [{ label: "Business" }, { label: "SENTkiosk POS" }];
 
   return (
@@ -259,13 +523,41 @@ export function Kiosk() {
       ) : (
         <div className="flex flex-col lg:flex-row flex-1 gap-6 overflow-hidden">
           {/* Product Grid */}
-          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar flex flex-col">
+            {/* Category Tabs */}
+            <div className="flex gap-2 pb-4 overflow-x-auto">
+              <Button
+                variant={
+                  activeCategory === "Favorites" ? "default" : "secondary"
+                }
+                size="sm"
+                className="rounded-full text-xs font-black uppercase tracking-widest whitespace-nowrap bg-amber-100 text-amber-700 hover:bg-amber-200"
+                onClick={() => setActiveCategory("Favorites")}
+              >
+                <Star className="w-3 h-3 mr-1 fill-current" /> Favorites
+              </Button>
+              {categories.map((cat) => (
+                <Button
+                  key={cat}
+                  variant={activeCategory === cat ? "default" : "secondary"}
+                  size="sm"
+                  className="rounded-full text-xs font-black uppercase tracking-widest whitespace-nowrap"
+                  onClick={() => setActiveCategory(cat)}
+                >
+                  {cat}
+                </Button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-10">
-              {products.map((p) => (
+              {(activeCategory === "Favorites"
+                ? products.filter((p) => favorites.includes(p.id) || p.id < 5)
+                : filteredProducts
+              ).map((p) => (
                 <Card
                   key={p.id}
                   className={`group cursor-pointer hover:border-erp transition-all active:scale-95 touch-none bg-card shadow-sm hover:shadow-md ${p.quantity <= 0 ? "opacity-50 grayscale pointer-events-none" : ""}`}
-                  onClick={() => p.quantity > 0 && addToCart(p)}
+                  onClick={() => p.quantity > 0 && handleProductCheck(p)}
                 >
                   <CardHeader className="p-4 pb-2">
                     <CardTitle
@@ -306,10 +598,30 @@ export function Kiosk() {
                     Current Order
                   </span>
                 </div>
-                <Badge className="bg-erp text-white font-black">
+                <Badge variant="outline">
                   {cart.reduce((acc, i) => acc + i.qty, 0)} Items
                 </Badge>
               </CardTitle>
+              <div className="flex gap-2 mt-2">
+                <Button
+                  variant={shiftActive ? "default" : "outline"}
+                  size="sm"
+                  className="flex-1 text-[10px] uppercase font-bold"
+                  onClick={() => setShiftActive(!shiftActive)}
+                >
+                  <Clock className="h-3 w-3 mr-1" />
+                  {shiftActive ? "Clocked In" : "Clock In"}
+                </Button>
+                <Button
+                  variant={customer ? "default" : "outline"}
+                  size="sm"
+                  className="flex-1 text-[10px] uppercase font-bold"
+                  onClick={() => setCustomer(customer ? null : "John Doe")}
+                >
+                  <User className="h-3 w-3 mr-1" />
+                  {customer ? customer : "Add Customer"}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="flex-1 p-0 flex flex-col overflow-hidden bg-card">
               <ScrollArea className="flex-1 p-4">
@@ -325,7 +637,11 @@ export function Kiosk() {
                     {cart.map((item, i) => (
                       <div
                         key={i}
-                        className="flex justify-between items-center p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+                        className="flex justify-between items-center p-2 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer"
+                        onClick={() => {
+                          setSelectedCartIndex(i);
+                          setIsLineItemOpen(true);
+                        }}
                       >
                         <div className="flex-1 min-w-0 pr-2">
                           <p className="text-xs font-black uppercase truncate">
@@ -333,6 +649,16 @@ export function Kiosk() {
                           </p>
                           <p className="text-[10px] font-mono text-muted-foreground">
                             ${item.unitCost.toFixed(2)}
+                            {item.note && (
+                              <span className="block text-amber-500 italic">
+                                Note: {item.note}
+                              </span>
+                            )}
+                            {item.qty < 0 && (
+                              <span className="block text-red-500 font-bold">
+                                RETURN
+                              </span>
+                            )}
                           </p>
                         </div>
                         <div className="flex items-center gap-3">
@@ -352,7 +678,7 @@ export function Kiosk() {
                               variant="ghost"
                               size="icon"
                               className="h-6 w-6 rounded-sm hover:bg-background"
-                              onClick={() => addToCart(item)}
+                              onClick={() => addToCart(item, item.variant)}
                             >
                               +
                             </Button>
@@ -383,12 +709,32 @@ export function Kiosk() {
                 </div>
                 <div className="flex justify-between items-center text-3xl font-black tracking-tighter">
                   <span>TOTAL</span>
-                  <span className="text-erp">
+                  <span className={total < 0 ? "text-destructive" : "text-erp"}>
                     $
                     {total.toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                     })}
                   </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant={isReturnMode ? "destructive" : "secondary"}
+                    size="sm"
+                    className="text-[9px] uppercase font-black tracking-widest"
+                    onClick={() => setIsReturnMode(!isReturnMode)}
+                  >
+                    {isReturnMode ? "Return Mode Review" : "Return Mode"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-[9px] uppercase font-black tracking-widest relative"
+                    onClick={() => setIsParkedListOpen(true)}
+                  >
+                    <Archive className="h-3 w-3 mr-1" /> Parked (
+                    {parkedOrders.length})
+                  </Button>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 py-2">
@@ -399,6 +745,15 @@ export function Kiosk() {
                     onClick={() => setIsDiscountOpen(true)}
                   >
                     <Percent className="h-3 w-3 mr-1.5" /> Disc
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 text-[10px] uppercase font-bold text-purple-600 border-purple-200 hover:bg-purple-50"
+                    onClick={() => handleManagerAction("z-report")}
+                  >
+                    <ShieldAlert className="h-3 w-3 mr-1" />
+                    Manager
                   </Button>
                   <Button
                     variant="outline"
@@ -434,6 +789,13 @@ export function Kiosk() {
                     disabled={isProcessing}
                   >
                     <CreditCard className="h-4 w-4" /> Card
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="col-span-2 h-10 bg-slate-100 hover:bg-slate-200 text-slate-900 font-black uppercase tracking-widest text-[9px]"
+                    onClick={() => setIsSplitOpen(true)}
+                  >
+                    <Split className="h-3 w-3 mr-1" /> Split Payment
                   </Button>
                 </div>
               </div>
@@ -582,6 +944,232 @@ export function Kiosk() {
               Close
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <ModifierModal
+        product={selectedProductForModifier}
+        isOpen={isModifierOpen}
+        onClose={() => setIsModifierOpen(false)}
+        onConfirm={(p, v) => addToCart(p, v)}
+      />
+      {/* Split Payment Dialog */}
+      <Dialog open={isSplitOpen} onOpenChange={setIsSplitOpen}>
+        <DialogContent className="max-w-md bg-background border-none shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black italic tracking-tighter uppercase">
+              Split Payment
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="flex justify-between items-center bg-muted/50 p-4 rounded-xl">
+              <span className="font-black uppercase text-xs tracking-widest">
+                Total Due
+              </span>
+              <span className="font-black text-2xl">${total.toFixed(2)}</span>
+            </div>
+            <div className="space-y-2">
+              {splitPayments.map((p, i) => (
+                <div
+                  key={i}
+                  className="flex justify-between items-center border-b pb-2"
+                >
+                  <span className="capitalize font-bold text-sm">
+                    {p.method}
+                  </span>
+                  <span className="font-mono">${p.amount.toFixed(2)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between items-center pt-2 text-erp">
+                <span className="font-black uppercase text-xs tracking-widest">
+                  Remaining
+                </span>
+                <span className="font-black text-xl">
+                  $
+                  {(
+                    total - splitPayments.reduce((acc, p) => acc + p.amount, 0)
+                  ).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 items-end">
+              <div className="space-y-1 flex-1">
+                <Label className="text-[10px] uppercase font-black text-muted-foreground">
+                  Amount
+                </Label>
+                <Input
+                  type="number"
+                  value={splitAmount}
+                  onChange={(e) => setSplitAmount(e.target.value)}
+                  className="font-black"
+                />
+              </div>
+              <Button
+                onClick={() => addSplitPayment("cash")}
+                variant="outline"
+                className="font-bold"
+              >
+                Cash
+              </Button>
+              <Button
+                onClick={() => addSplitPayment("card")}
+                variant="outline"
+                className="font-bold"
+              >
+                Card
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={handleSplitPayment}
+              className="w-full bg-erp text-white font-black uppercase tracking-widest"
+              disabled={
+                splitPayments.reduce((acc, p) => acc + p.amount, 0) < total
+              }
+            >
+              Finalize Split
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Z-Report Dialog Trigger (Hidden in UI normally, but adding to sidebar footer) */}
+
+      {/* Line Item Modal */}
+      <LineItemModal
+        item={selectedCartIndex !== null ? cart[selectedCartIndex] : null}
+        isOpen={isLineItemOpen}
+        onClose={() => setIsLineItemOpen(false)}
+        onSave={(note) => {
+          if (selectedCartIndex !== null) {
+            const newCart = [...cart];
+            newCart[selectedCartIndex].note = note;
+            setCart(newCart);
+          }
+        }}
+        onDelete={() => {
+          if (selectedCartIndex !== null) {
+            removeFromCart(selectedCartIndex);
+          }
+        }}
+      />
+
+      {/* Parked Orders Modal */}
+      <Dialog open={isParkedListOpen} onOpenChange={setIsParkedListOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Parked Orders</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-4">
+            {parkedOrders.length === 0 && (
+              <p className="text-center text-muted-foreground opacity-50">
+                No parked orders.
+              </p>
+            )}
+            {parkedOrders.map((order, i) => (
+              <div
+                key={i}
+                className="flex justify-between items-center p-3 border rounded-lg bg-card hover:bg-muted/50 cursor-pointer"
+                onClick={() => restoreParkedOrder(i)}
+              >
+                <div>
+                  <p className="font-bold">{order.name}</p>
+                  <p className="text-xs text-muted-foreground">{order.date}</p>
+                </div>
+                <Badge variant="outline">{order.cart.length} Items</Badge>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* PIN Modal */}
+      <Dialog open={isPinOpen} onOpenChange={setIsPinOpen}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle className="text-center">Enter Manager PIN</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center py-4">
+            <input
+              type="password"
+              className="text-4xl text-center w-full font-black tracking-widest border-none focus:outline-none bg-transparent"
+              placeholder="••••"
+              maxLength={4}
+              value={pinInput}
+              autoFocus
+              onChange={(e) => setPinInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && submitPin()}
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+              <Button
+                key={n}
+                variant="outline"
+                className="h-12 text-xl font-black"
+                onClick={() => setPinInput((prev) => (prev + n).slice(0, 4))}
+              >
+                {n}
+              </Button>
+            ))}
+            <Button
+              variant="ghost"
+              className="h-12"
+              onClick={() => setPinInput("")}
+            >
+              C
+            </Button>
+            <Button
+              variant="outline"
+              className="h-12 text-xl font-black"
+              onClick={() => setPinInput((prev) => (prev + "0").slice(0, 4))}
+            >
+              0
+            </Button>
+            <Button className="h-12 bg-erp text-white" onClick={submitPin}>
+              Go
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Drawer Ops Modal */}
+      <Dialog open={isDrawerOpsOpen} onOpenChange={setIsDrawerOpsOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Drawer Operations</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            <Button
+              variant={drawerOpType === "in" ? "default" : "outline"}
+              onClick={() => setDrawerOpType("in")}
+              className="gap-2"
+            >
+              <LogIn className="w-4 h-4" /> Pay In
+            </Button>
+            <Button
+              variant={drawerOpType === "out" ? "destructive" : "outline"}
+              onClick={() => setDrawerOpType("out")}
+              className="gap-2"
+            >
+              <LogOut className="w-4 h-4" /> Pay Out
+            </Button>
+          </div>
+          <Input
+            type="number"
+            placeholder="Amount"
+            value={drawerAmount}
+            onChange={(e) => setDrawerAmount(e.target.value)}
+            className="text-2xl font-black h-14"
+            autoFocus
+          />
+          <Button
+            className="w-full h-12 text-lg font-black uppercase mt-4"
+            onClick={handleDrawerLog}
+          >
+            Log Transaction
+          </Button>
         </DialogContent>
       </Dialog>
     </div>

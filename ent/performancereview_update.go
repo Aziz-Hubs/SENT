@@ -52,6 +52,20 @@ func (_u *PerformanceReviewUpdate) ClearOverallRating() *PerformanceReviewUpdate
 	return _u
 }
 
+// SetReviewType sets the "review_type" field.
+func (_u *PerformanceReviewUpdate) SetReviewType(v performancereview.ReviewType) *PerformanceReviewUpdate {
+	_u.mutation.SetReviewType(v)
+	return _u
+}
+
+// SetNillableReviewType sets the "review_type" field if the given value is not nil.
+func (_u *PerformanceReviewUpdate) SetNillableReviewType(v *performancereview.ReviewType) *PerformanceReviewUpdate {
+	if v != nil {
+		_u.SetReviewType(*v)
+	}
+	return _u
+}
+
 // SetStrengths sets the "strengths" field.
 func (_u *PerformanceReviewUpdate) SetStrengths(v string) *PerformanceReviewUpdate {
 	_u.mutation.SetStrengths(v)
@@ -121,6 +135,18 @@ func (_u *PerformanceReviewUpdate) SetGoalsAssessment(v map[string]interface{}) 
 // ClearGoalsAssessment clears the value of the "goals_assessment" field.
 func (_u *PerformanceReviewUpdate) ClearGoalsAssessment() *PerformanceReviewUpdate {
 	_u.mutation.ClearGoalsAssessment()
+	return _u
+}
+
+// SetSurveyResponses sets the "survey_responses" field.
+func (_u *PerformanceReviewUpdate) SetSurveyResponses(v map[string]interface{}) *PerformanceReviewUpdate {
+	_u.mutation.SetSurveyResponses(v)
+	return _u
+}
+
+// ClearSurveyResponses clears the value of the "survey_responses" field.
+func (_u *PerformanceReviewUpdate) ClearSurveyResponses() *PerformanceReviewUpdate {
+	_u.mutation.ClearSurveyResponses()
 	return _u
 }
 
@@ -308,6 +334,11 @@ func (_u *PerformanceReviewUpdate) check() error {
 			return &ValidationError{Name: "overall_rating", err: fmt.Errorf(`ent: validator failed for field "PerformanceReview.overall_rating": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ReviewType(); ok {
+		if err := performancereview.ReviewTypeValidator(v); err != nil {
+			return &ValidationError{Name: "review_type", err: fmt.Errorf(`ent: validator failed for field "PerformanceReview.review_type": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := performancereview.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "PerformanceReview.status": %w`, err)}
@@ -349,6 +380,9 @@ func (_u *PerformanceReviewUpdate) sqlSave(ctx context.Context) (_node int, err 
 	if _u.mutation.OverallRatingCleared() {
 		_spec.ClearField(performancereview.FieldOverallRating, field.TypeEnum)
 	}
+	if value, ok := _u.mutation.ReviewType(); ok {
+		_spec.SetField(performancereview.FieldReviewType, field.TypeEnum, value)
+	}
 	if value, ok := _u.mutation.Strengths(); ok {
 		_spec.SetField(performancereview.FieldStrengths, field.TypeString, value)
 	}
@@ -372,6 +406,12 @@ func (_u *PerformanceReviewUpdate) sqlSave(ctx context.Context) (_node int, err 
 	}
 	if _u.mutation.GoalsAssessmentCleared() {
 		_spec.ClearField(performancereview.FieldGoalsAssessment, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SurveyResponses(); ok {
+		_spec.SetField(performancereview.FieldSurveyResponses, field.TypeJSON, value)
+	}
+	if _u.mutation.SurveyResponsesCleared() {
+		_spec.ClearField(performancereview.FieldSurveyResponses, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(performancereview.FieldStatus, field.TypeEnum, value)
@@ -549,6 +589,20 @@ func (_u *PerformanceReviewUpdateOne) ClearOverallRating() *PerformanceReviewUpd
 	return _u
 }
 
+// SetReviewType sets the "review_type" field.
+func (_u *PerformanceReviewUpdateOne) SetReviewType(v performancereview.ReviewType) *PerformanceReviewUpdateOne {
+	_u.mutation.SetReviewType(v)
+	return _u
+}
+
+// SetNillableReviewType sets the "review_type" field if the given value is not nil.
+func (_u *PerformanceReviewUpdateOne) SetNillableReviewType(v *performancereview.ReviewType) *PerformanceReviewUpdateOne {
+	if v != nil {
+		_u.SetReviewType(*v)
+	}
+	return _u
+}
+
 // SetStrengths sets the "strengths" field.
 func (_u *PerformanceReviewUpdateOne) SetStrengths(v string) *PerformanceReviewUpdateOne {
 	_u.mutation.SetStrengths(v)
@@ -618,6 +672,18 @@ func (_u *PerformanceReviewUpdateOne) SetGoalsAssessment(v map[string]interface{
 // ClearGoalsAssessment clears the value of the "goals_assessment" field.
 func (_u *PerformanceReviewUpdateOne) ClearGoalsAssessment() *PerformanceReviewUpdateOne {
 	_u.mutation.ClearGoalsAssessment()
+	return _u
+}
+
+// SetSurveyResponses sets the "survey_responses" field.
+func (_u *PerformanceReviewUpdateOne) SetSurveyResponses(v map[string]interface{}) *PerformanceReviewUpdateOne {
+	_u.mutation.SetSurveyResponses(v)
+	return _u
+}
+
+// ClearSurveyResponses clears the value of the "survey_responses" field.
+func (_u *PerformanceReviewUpdateOne) ClearSurveyResponses() *PerformanceReviewUpdateOne {
+	_u.mutation.ClearSurveyResponses()
 	return _u
 }
 
@@ -818,6 +884,11 @@ func (_u *PerformanceReviewUpdateOne) check() error {
 			return &ValidationError{Name: "overall_rating", err: fmt.Errorf(`ent: validator failed for field "PerformanceReview.overall_rating": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ReviewType(); ok {
+		if err := performancereview.ReviewTypeValidator(v); err != nil {
+			return &ValidationError{Name: "review_type", err: fmt.Errorf(`ent: validator failed for field "PerformanceReview.review_type": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := performancereview.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "PerformanceReview.status": %w`, err)}
@@ -876,6 +947,9 @@ func (_u *PerformanceReviewUpdateOne) sqlSave(ctx context.Context) (_node *Perfo
 	if _u.mutation.OverallRatingCleared() {
 		_spec.ClearField(performancereview.FieldOverallRating, field.TypeEnum)
 	}
+	if value, ok := _u.mutation.ReviewType(); ok {
+		_spec.SetField(performancereview.FieldReviewType, field.TypeEnum, value)
+	}
 	if value, ok := _u.mutation.Strengths(); ok {
 		_spec.SetField(performancereview.FieldStrengths, field.TypeString, value)
 	}
@@ -899,6 +973,12 @@ func (_u *PerformanceReviewUpdateOne) sqlSave(ctx context.Context) (_node *Perfo
 	}
 	if _u.mutation.GoalsAssessmentCleared() {
 		_spec.ClearField(performancereview.FieldGoalsAssessment, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SurveyResponses(); ok {
+		_spec.SetField(performancereview.FieldSurveyResponses, field.TypeJSON, value)
+	}
+	if _u.mutation.SurveyResponsesCleared() {
+		_spec.ClearField(performancereview.FieldSurveyResponses, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(performancereview.FieldStatus, field.TypeEnum, value)

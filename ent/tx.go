@@ -16,20 +16,34 @@ type Tx struct {
 	Account *AccountClient
 	// Agent is the client for interacting with the Agent builders.
 	Agent *AgentClient
+	// Application is the client for interacting with the Application builders.
+	Application *ApplicationClient
 	// Asset is the client for interacting with the Asset builders.
 	Asset *AssetClient
+	// AssetAssignment is the client for interacting with the AssetAssignment builders.
+	AssetAssignment *AssetAssignmentClient
 	// AssetType is the client for interacting with the AssetType builders.
 	AssetType *AssetTypeClient
 	// AuditLog is the client for interacting with the AuditLog builders.
 	AuditLog *AuditLogClient
+	// BenefitEnrollment is the client for interacting with the BenefitEnrollment builders.
+	BenefitEnrollment *BenefitEnrollmentClient
+	// BenefitPlan is the client for interacting with the BenefitPlan builders.
+	BenefitPlan *BenefitPlanClient
 	// BudgetForecast is the client for interacting with the BudgetForecast builders.
 	BudgetForecast *BudgetForecastClient
 	// CallLog is the client for interacting with the CallLog builders.
 	CallLog *CallLogClient
 	// Camera is the client for interacting with the Camera builders.
 	Camera *CameraClient
+	// Candidate is the client for interacting with the Candidate builders.
+	Candidate *CandidateClient
+	// Category is the client for interacting with the Category builders.
+	Category *CategoryClient
 	// CompensationAgreement is the client for interacting with the CompensationAgreement builders.
 	CompensationAgreement *CompensationAgreementClient
+	// Contact is the client for interacting with the Contact builders.
+	Contact *ContactClient
 	// Contract is the client for interacting with the Contract builders.
 	Contract *ContractClient
 	// Credential is the client for interacting with the Credential builders.
@@ -48,16 +62,26 @@ type Tx struct {
 	HealthScoreSnapshot *HealthScoreSnapshotClient
 	// IVRFlow is the client for interacting with the IVRFlow builders.
 	IVRFlow *IVRFlowClient
+	// Interview is the client for interacting with the Interview builders.
+	Interview *InterviewClient
+	// InventoryCount is the client for interacting with the InventoryCount builders.
+	InventoryCount *InventoryCountClient
 	// InventoryReservation is the client for interacting with the InventoryReservation builders.
 	InventoryReservation *InventoryReservationClient
 	// Job is the client for interacting with the Job builders.
 	Job *JobClient
 	// JobExecution is the client for interacting with the JobExecution builders.
 	JobExecution *JobExecutionClient
+	// JobPosting is the client for interacting with the JobPosting builders.
+	JobPosting *JobPostingClient
 	// JournalEntry is the client for interacting with the JournalEntry builders.
 	JournalEntry *JournalEntryClient
 	// LedgerEntry is the client for interacting with the LedgerEntry builders.
 	LedgerEntry *LedgerEntryClient
+	// LegalHold is the client for interacting with the LegalHold builders.
+	LegalHold *LegalHoldClient
+	// MaintenanceSchedule is the client for interacting with the MaintenanceSchedule builders.
+	MaintenanceSchedule *MaintenanceScheduleClient
 	// NetworkBackup is the client for interacting with the NetworkBackup builders.
 	NetworkBackup *NetworkBackupClient
 	// NetworkDevice is the client for interacting with the NetworkDevice builders.
@@ -76,12 +100,20 @@ type Tx struct {
 	Permission *PermissionClient
 	// Product is the client for interacting with the Product builders.
 	Product *ProductClient
+	// ProductVariant is the client for interacting with the ProductVariant builders.
+	ProductVariant *ProductVariantClient
+	// PurchaseOrder is the client for interacting with the PurchaseOrder builders.
+	PurchaseOrder *PurchaseOrderClient
+	// PurchaseOrderLine is the client for interacting with the PurchaseOrderLine builders.
+	PurchaseOrderLine *PurchaseOrderLineClient
 	// Recording is the client for interacting with the Recording builders.
 	Recording *RecordingClient
 	// RecurringInvoice is the client for interacting with the RecurringInvoice builders.
 	RecurringInvoice *RecurringInvoiceClient
 	// RemediationStep is the client for interacting with the RemediationStep builders.
 	RemediationStep *RemediationStepClient
+	// RetentionPolicy is the client for interacting with the RetentionPolicy builders.
+	RetentionPolicy *RetentionPolicyClient
 	// ReviewCycle is the client for interacting with the ReviewCycle builders.
 	ReviewCycle *ReviewCycleClient
 	// SOP is the client for interacting with the SOP builders.
@@ -98,12 +130,18 @@ type Tx struct {
 	Script *ScriptClient
 	// ServiceRate is the client for interacting with the ServiceRate builders.
 	ServiceRate *ServiceRateClient
+	// StockAlert is the client for interacting with the StockAlert builders.
+	StockAlert *StockAlertClient
+	// StockAuditLog is the client for interacting with the StockAuditLog builders.
+	StockAuditLog *StockAuditLogClient
 	// StockMovement is the client for interacting with the StockMovement builders.
 	StockMovement *StockMovementClient
 	// StrategicRoadmap is the client for interacting with the StrategicRoadmap builders.
 	StrategicRoadmap *StrategicRoadmapClient
 	// SuccessionMap is the client for interacting with the SuccessionMap builders.
 	SuccessionMap *SuccessionMapClient
+	// Supplier is the client for interacting with the Supplier builders.
+	Supplier *SupplierClient
 	// Tenant is the client for interacting with the Tenant builders.
 	Tenant *TenantClient
 	// Ticket is the client for interacting with the Ticket builders.
@@ -120,10 +158,24 @@ type Tx struct {
 	Transaction *TransactionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// VaultComment is the client for interacting with the VaultComment builders.
+	VaultComment *VaultCommentClient
+	// VaultFavorite is the client for interacting with the VaultFavorite builders.
+	VaultFavorite *VaultFavoriteClient
 	// VaultItem is the client for interacting with the VaultItem builders.
 	VaultItem *VaultItemClient
+	// VaultShareLink is the client for interacting with the VaultShareLink builders.
+	VaultShareLink *VaultShareLinkClient
+	// VaultTemplate is the client for interacting with the VaultTemplate builders.
+	VaultTemplate *VaultTemplateClient
+	// VaultVersion is the client for interacting with the VaultVersion builders.
+	VaultVersion *VaultVersionClient
 	// Voicemail is the client for interacting with the Voicemail builders.
 	Voicemail *VoicemailClient
+	// Warehouse is the client for interacting with the Warehouse builders.
+	Warehouse *WarehouseClient
+	// WorkLog is the client for interacting with the WorkLog builders.
+	WorkLog *WorkLogClient
 
 	// lazily loaded.
 	client     *Client
@@ -257,13 +309,20 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
 	tx.Agent = NewAgentClient(tx.config)
+	tx.Application = NewApplicationClient(tx.config)
 	tx.Asset = NewAssetClient(tx.config)
+	tx.AssetAssignment = NewAssetAssignmentClient(tx.config)
 	tx.AssetType = NewAssetTypeClient(tx.config)
 	tx.AuditLog = NewAuditLogClient(tx.config)
+	tx.BenefitEnrollment = NewBenefitEnrollmentClient(tx.config)
+	tx.BenefitPlan = NewBenefitPlanClient(tx.config)
 	tx.BudgetForecast = NewBudgetForecastClient(tx.config)
 	tx.CallLog = NewCallLogClient(tx.config)
 	tx.Camera = NewCameraClient(tx.config)
+	tx.Candidate = NewCandidateClient(tx.config)
+	tx.Category = NewCategoryClient(tx.config)
 	tx.CompensationAgreement = NewCompensationAgreementClient(tx.config)
+	tx.Contact = NewContactClient(tx.config)
 	tx.Contract = NewContractClient(tx.config)
 	tx.Credential = NewCredentialClient(tx.config)
 	tx.Department = NewDepartmentClient(tx.config)
@@ -273,11 +332,16 @@ func (tx *Tx) init() {
 	tx.Goal = NewGoalClient(tx.config)
 	tx.HealthScoreSnapshot = NewHealthScoreSnapshotClient(tx.config)
 	tx.IVRFlow = NewIVRFlowClient(tx.config)
+	tx.Interview = NewInterviewClient(tx.config)
+	tx.InventoryCount = NewInventoryCountClient(tx.config)
 	tx.InventoryReservation = NewInventoryReservationClient(tx.config)
 	tx.Job = NewJobClient(tx.config)
 	tx.JobExecution = NewJobExecutionClient(tx.config)
+	tx.JobPosting = NewJobPostingClient(tx.config)
 	tx.JournalEntry = NewJournalEntryClient(tx.config)
 	tx.LedgerEntry = NewLedgerEntryClient(tx.config)
+	tx.LegalHold = NewLegalHoldClient(tx.config)
+	tx.MaintenanceSchedule = NewMaintenanceScheduleClient(tx.config)
 	tx.NetworkBackup = NewNetworkBackupClient(tx.config)
 	tx.NetworkDevice = NewNetworkDeviceClient(tx.config)
 	tx.NetworkLink = NewNetworkLinkClient(tx.config)
@@ -287,9 +351,13 @@ func (tx *Tx) init() {
 	tx.PerformanceReview = NewPerformanceReviewClient(tx.config)
 	tx.Permission = NewPermissionClient(tx.config)
 	tx.Product = NewProductClient(tx.config)
+	tx.ProductVariant = NewProductVariantClient(tx.config)
+	tx.PurchaseOrder = NewPurchaseOrderClient(tx.config)
+	tx.PurchaseOrderLine = NewPurchaseOrderLineClient(tx.config)
 	tx.Recording = NewRecordingClient(tx.config)
 	tx.RecurringInvoice = NewRecurringInvoiceClient(tx.config)
 	tx.RemediationStep = NewRemediationStepClient(tx.config)
+	tx.RetentionPolicy = NewRetentionPolicyClient(tx.config)
 	tx.ReviewCycle = NewReviewCycleClient(tx.config)
 	tx.SOP = NewSOPClient(tx.config)
 	tx.SaaSApp = NewSaaSAppClient(tx.config)
@@ -298,9 +366,12 @@ func (tx *Tx) init() {
 	tx.SaaSUsage = NewSaaSUsageClient(tx.config)
 	tx.Script = NewScriptClient(tx.config)
 	tx.ServiceRate = NewServiceRateClient(tx.config)
+	tx.StockAlert = NewStockAlertClient(tx.config)
+	tx.StockAuditLog = NewStockAuditLogClient(tx.config)
 	tx.StockMovement = NewStockMovementClient(tx.config)
 	tx.StrategicRoadmap = NewStrategicRoadmapClient(tx.config)
 	tx.SuccessionMap = NewSuccessionMapClient(tx.config)
+	tx.Supplier = NewSupplierClient(tx.config)
 	tx.Tenant = NewTenantClient(tx.config)
 	tx.Ticket = NewTicketClient(tx.config)
 	tx.TimeEntry = NewTimeEntryClient(tx.config)
@@ -309,8 +380,15 @@ func (tx *Tx) init() {
 	tx.TimeOffRequest = NewTimeOffRequestClient(tx.config)
 	tx.Transaction = NewTransactionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.VaultComment = NewVaultCommentClient(tx.config)
+	tx.VaultFavorite = NewVaultFavoriteClient(tx.config)
 	tx.VaultItem = NewVaultItemClient(tx.config)
+	tx.VaultShareLink = NewVaultShareLinkClient(tx.config)
+	tx.VaultTemplate = NewVaultTemplateClient(tx.config)
+	tx.VaultVersion = NewVaultVersionClient(tx.config)
 	tx.Voicemail = NewVoicemailClient(tx.config)
+	tx.Warehouse = NewWarehouseClient(tx.config)
+	tx.WorkLog = NewWorkLogClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

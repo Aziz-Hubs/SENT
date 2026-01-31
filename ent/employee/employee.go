@@ -71,6 +71,14 @@ const (
 	EdgeConductedReviews = "conducted_reviews"
 	// EdgeGoals holds the string denoting the goals edge name in mutations.
 	EdgeGoals = "goals"
+	// EdgeAssetAssignments holds the string denoting the asset_assignments edge name in mutations.
+	EdgeAssetAssignments = "asset_assignments"
+	// EdgeTimeEntries holds the string denoting the time_entries edge name in mutations.
+	EdgeTimeEntries = "time_entries"
+	// EdgeConductedInterviews holds the string denoting the conducted_interviews edge name in mutations.
+	EdgeConductedInterviews = "conducted_interviews"
+	// EdgeBenefitEnrollments holds the string denoting the benefit_enrollments edge name in mutations.
+	EdgeBenefitEnrollments = "benefit_enrollments"
 	// Table holds the table name of the employee in the database.
 	Table = "employees"
 	// TenantTable is the table that holds the tenant relation/edge.
@@ -165,6 +173,32 @@ const (
 	GoalsInverseTable = "goals"
 	// GoalsColumn is the table column denoting the goals relation/edge.
 	GoalsColumn = "employee_goals"
+	// AssetAssignmentsTable is the table that holds the asset_assignments relation/edge.
+	AssetAssignmentsTable = "asset_assignments"
+	// AssetAssignmentsInverseTable is the table name for the AssetAssignment entity.
+	// It exists in this package in order to avoid circular dependency with the "assetassignment" package.
+	AssetAssignmentsInverseTable = "asset_assignments"
+	// AssetAssignmentsColumn is the table column denoting the asset_assignments relation/edge.
+	AssetAssignmentsColumn = "employee_asset_assignments"
+	// TimeEntriesTable is the table that holds the time_entries relation/edge.
+	TimeEntriesTable = "time_entries"
+	// TimeEntriesInverseTable is the table name for the TimeEntry entity.
+	// It exists in this package in order to avoid circular dependency with the "timeentry" package.
+	TimeEntriesInverseTable = "time_entries"
+	// TimeEntriesColumn is the table column denoting the time_entries relation/edge.
+	TimeEntriesColumn = "employee_time_entries"
+	// ConductedInterviewsTable is the table that holds the conducted_interviews relation/edge. The primary key declared below.
+	ConductedInterviewsTable = "employee_conducted_interviews"
+	// ConductedInterviewsInverseTable is the table name for the Interview entity.
+	// It exists in this package in order to avoid circular dependency with the "interview" package.
+	ConductedInterviewsInverseTable = "interviews"
+	// BenefitEnrollmentsTable is the table that holds the benefit_enrollments relation/edge.
+	BenefitEnrollmentsTable = "benefit_enrollments"
+	// BenefitEnrollmentsInverseTable is the table name for the BenefitEnrollment entity.
+	// It exists in this package in order to avoid circular dependency with the "benefitenrollment" package.
+	BenefitEnrollmentsInverseTable = "benefit_enrollments"
+	// BenefitEnrollmentsColumn is the table column denoting the benefit_enrollments relation/edge.
+	BenefitEnrollmentsColumn = "employee_benefit_enrollments"
 )
 
 // Columns holds all SQL columns for employee fields.
@@ -194,6 +228,12 @@ var ForeignKeys = []string{
 	"employee_expense_account",
 	"tenant_employees",
 }
+
+var (
+	// ConductedInterviewsPrimaryKey and ConductedInterviewsColumn2 are the table columns denoting the
+	// primary key for the conducted_interviews relation (M2M).
+	ConductedInterviewsPrimaryKey = []string{"employee_id", "interview_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -493,6 +533,62 @@ func ByGoals(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newGoalsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByAssetAssignmentsCount orders the results by asset_assignments count.
+func ByAssetAssignmentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAssetAssignmentsStep(), opts...)
+	}
+}
+
+// ByAssetAssignments orders the results by asset_assignments terms.
+func ByAssetAssignments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAssetAssignmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByTimeEntriesCount orders the results by time_entries count.
+func ByTimeEntriesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTimeEntriesStep(), opts...)
+	}
+}
+
+// ByTimeEntries orders the results by time_entries terms.
+func ByTimeEntries(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTimeEntriesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByConductedInterviewsCount orders the results by conducted_interviews count.
+func ByConductedInterviewsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newConductedInterviewsStep(), opts...)
+	}
+}
+
+// ByConductedInterviews orders the results by conducted_interviews terms.
+func ByConductedInterviews(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newConductedInterviewsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByBenefitEnrollmentsCount orders the results by benefit_enrollments count.
+func ByBenefitEnrollmentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newBenefitEnrollmentsStep(), opts...)
+	}
+}
+
+// ByBenefitEnrollments orders the results by benefit_enrollments terms.
+func ByBenefitEnrollments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBenefitEnrollmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newTenantStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -589,5 +685,33 @@ func newGoalsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(GoalsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, GoalsTable, GoalsColumn),
+	)
+}
+func newAssetAssignmentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AssetAssignmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AssetAssignmentsTable, AssetAssignmentsColumn),
+	)
+}
+func newTimeEntriesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TimeEntriesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TimeEntriesTable, TimeEntriesColumn),
+	)
+}
+func newConductedInterviewsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ConductedInterviewsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, ConductedInterviewsTable, ConductedInterviewsPrimaryKey...),
+	)
+}
+func newBenefitEnrollmentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(BenefitEnrollmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, BenefitEnrollmentsTable, BenefitEnrollmentsColumn),
 	)
 }

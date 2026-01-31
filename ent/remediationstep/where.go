@@ -69,6 +69,16 @@ func Output(v string) predicate.RemediationStep {
 	return predicate.RemediationStep(sql.FieldEQ(FieldOutput, v))
 }
 
+// SourceID applies equality check predicate on the "source_id" field. It's identical to SourceIDEQ.
+func SourceID(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldEQ(FieldSourceID, v))
+}
+
+// SourceApp applies equality check predicate on the "source_app" field. It's identical to SourceAppEQ.
+func SourceApp(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldEQ(FieldSourceApp, v))
+}
+
 // ActionNameEQ applies the EQ predicate on the "action_name" field.
 func ActionNameEQ(v string) predicate.RemediationStep {
 	return predicate.RemediationStep(sql.FieldEQ(FieldActionName, v))
@@ -277,6 +287,156 @@ func ExecutionContextIsNil() predicate.RemediationStep {
 // ExecutionContextNotNil applies the NotNil predicate on the "execution_context" field.
 func ExecutionContextNotNil() predicate.RemediationStep {
 	return predicate.RemediationStep(sql.FieldNotNull(FieldExecutionContext))
+}
+
+// SourceIDEQ applies the EQ predicate on the "source_id" field.
+func SourceIDEQ(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldEQ(FieldSourceID, v))
+}
+
+// SourceIDNEQ applies the NEQ predicate on the "source_id" field.
+func SourceIDNEQ(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldNEQ(FieldSourceID, v))
+}
+
+// SourceIDIn applies the In predicate on the "source_id" field.
+func SourceIDIn(vs ...string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldIn(FieldSourceID, vs...))
+}
+
+// SourceIDNotIn applies the NotIn predicate on the "source_id" field.
+func SourceIDNotIn(vs ...string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldNotIn(FieldSourceID, vs...))
+}
+
+// SourceIDGT applies the GT predicate on the "source_id" field.
+func SourceIDGT(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldGT(FieldSourceID, v))
+}
+
+// SourceIDGTE applies the GTE predicate on the "source_id" field.
+func SourceIDGTE(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldGTE(FieldSourceID, v))
+}
+
+// SourceIDLT applies the LT predicate on the "source_id" field.
+func SourceIDLT(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldLT(FieldSourceID, v))
+}
+
+// SourceIDLTE applies the LTE predicate on the "source_id" field.
+func SourceIDLTE(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldLTE(FieldSourceID, v))
+}
+
+// SourceIDContains applies the Contains predicate on the "source_id" field.
+func SourceIDContains(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldContains(FieldSourceID, v))
+}
+
+// SourceIDHasPrefix applies the HasPrefix predicate on the "source_id" field.
+func SourceIDHasPrefix(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldHasPrefix(FieldSourceID, v))
+}
+
+// SourceIDHasSuffix applies the HasSuffix predicate on the "source_id" field.
+func SourceIDHasSuffix(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldHasSuffix(FieldSourceID, v))
+}
+
+// SourceIDIsNil applies the IsNil predicate on the "source_id" field.
+func SourceIDIsNil() predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldIsNull(FieldSourceID))
+}
+
+// SourceIDNotNil applies the NotNil predicate on the "source_id" field.
+func SourceIDNotNil() predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldNotNull(FieldSourceID))
+}
+
+// SourceIDEqualFold applies the EqualFold predicate on the "source_id" field.
+func SourceIDEqualFold(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldEqualFold(FieldSourceID, v))
+}
+
+// SourceIDContainsFold applies the ContainsFold predicate on the "source_id" field.
+func SourceIDContainsFold(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldContainsFold(FieldSourceID, v))
+}
+
+// SourceAppEQ applies the EQ predicate on the "source_app" field.
+func SourceAppEQ(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldEQ(FieldSourceApp, v))
+}
+
+// SourceAppNEQ applies the NEQ predicate on the "source_app" field.
+func SourceAppNEQ(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldNEQ(FieldSourceApp, v))
+}
+
+// SourceAppIn applies the In predicate on the "source_app" field.
+func SourceAppIn(vs ...string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldIn(FieldSourceApp, vs...))
+}
+
+// SourceAppNotIn applies the NotIn predicate on the "source_app" field.
+func SourceAppNotIn(vs ...string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldNotIn(FieldSourceApp, vs...))
+}
+
+// SourceAppGT applies the GT predicate on the "source_app" field.
+func SourceAppGT(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldGT(FieldSourceApp, v))
+}
+
+// SourceAppGTE applies the GTE predicate on the "source_app" field.
+func SourceAppGTE(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldGTE(FieldSourceApp, v))
+}
+
+// SourceAppLT applies the LT predicate on the "source_app" field.
+func SourceAppLT(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldLT(FieldSourceApp, v))
+}
+
+// SourceAppLTE applies the LTE predicate on the "source_app" field.
+func SourceAppLTE(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldLTE(FieldSourceApp, v))
+}
+
+// SourceAppContains applies the Contains predicate on the "source_app" field.
+func SourceAppContains(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldContains(FieldSourceApp, v))
+}
+
+// SourceAppHasPrefix applies the HasPrefix predicate on the "source_app" field.
+func SourceAppHasPrefix(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldHasPrefix(FieldSourceApp, v))
+}
+
+// SourceAppHasSuffix applies the HasSuffix predicate on the "source_app" field.
+func SourceAppHasSuffix(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldHasSuffix(FieldSourceApp, v))
+}
+
+// SourceAppIsNil applies the IsNil predicate on the "source_app" field.
+func SourceAppIsNil() predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldIsNull(FieldSourceApp))
+}
+
+// SourceAppNotNil applies the NotNil predicate on the "source_app" field.
+func SourceAppNotNil() predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldNotNull(FieldSourceApp))
+}
+
+// SourceAppEqualFold applies the EqualFold predicate on the "source_app" field.
+func SourceAppEqualFold(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldEqualFold(FieldSourceApp, v))
+}
+
+// SourceAppContainsFold applies the ContainsFold predicate on the "source_app" field.
+func SourceAppContainsFold(v string) predicate.RemediationStep {
+	return predicate.RemediationStep(sql.FieldContainsFold(FieldSourceApp, v))
 }
 
 // HasTicket applies the HasEdge predicate on the "ticket" edge.

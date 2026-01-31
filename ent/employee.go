@@ -88,9 +88,17 @@ type EmployeeEdges struct {
 	ConductedReviews []*PerformanceReview `json:"conducted_reviews,omitempty"`
 	// Goals holds the value of the goals edge.
 	Goals []*Goal `json:"goals,omitempty"`
+	// AssetAssignments holds the value of the asset_assignments edge.
+	AssetAssignments []*AssetAssignment `json:"asset_assignments,omitempty"`
+	// TimeEntries holds the value of the time_entries edge.
+	TimeEntries []*TimeEntry `json:"time_entries,omitempty"`
+	// ConductedInterviews holds the value of the conducted_interviews edge.
+	ConductedInterviews []*Interview `json:"conducted_interviews,omitempty"`
+	// BenefitEnrollments holds the value of the benefit_enrollments edge.
+	BenefitEnrollments []*BenefitEnrollment `json:"benefit_enrollments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [14]bool
+	loadedTypes [18]bool
 }
 
 // TenantOrErr returns the Tenant value or an error if the edge
@@ -225,6 +233,42 @@ func (e EmployeeEdges) GoalsOrErr() ([]*Goal, error) {
 		return e.Goals, nil
 	}
 	return nil, &NotLoadedError{edge: "goals"}
+}
+
+// AssetAssignmentsOrErr returns the AssetAssignments value or an error if the edge
+// was not loaded in eager-loading.
+func (e EmployeeEdges) AssetAssignmentsOrErr() ([]*AssetAssignment, error) {
+	if e.loadedTypes[14] {
+		return e.AssetAssignments, nil
+	}
+	return nil, &NotLoadedError{edge: "asset_assignments"}
+}
+
+// TimeEntriesOrErr returns the TimeEntries value or an error if the edge
+// was not loaded in eager-loading.
+func (e EmployeeEdges) TimeEntriesOrErr() ([]*TimeEntry, error) {
+	if e.loadedTypes[15] {
+		return e.TimeEntries, nil
+	}
+	return nil, &NotLoadedError{edge: "time_entries"}
+}
+
+// ConductedInterviewsOrErr returns the ConductedInterviews value or an error if the edge
+// was not loaded in eager-loading.
+func (e EmployeeEdges) ConductedInterviewsOrErr() ([]*Interview, error) {
+	if e.loadedTypes[16] {
+		return e.ConductedInterviews, nil
+	}
+	return nil, &NotLoadedError{edge: "conducted_interviews"}
+}
+
+// BenefitEnrollmentsOrErr returns the BenefitEnrollments value or an error if the edge
+// was not loaded in eager-loading.
+func (e EmployeeEdges) BenefitEnrollmentsOrErr() ([]*BenefitEnrollment, error) {
+	if e.loadedTypes[17] {
+		return e.BenefitEnrollments, nil
+	}
+	return nil, &NotLoadedError{edge: "benefit_enrollments"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -462,6 +506,26 @@ func (_m *Employee) QueryConductedReviews() *PerformanceReviewQuery {
 // QueryGoals queries the "goals" edge of the Employee entity.
 func (_m *Employee) QueryGoals() *GoalQuery {
 	return NewEmployeeClient(_m.config).QueryGoals(_m)
+}
+
+// QueryAssetAssignments queries the "asset_assignments" edge of the Employee entity.
+func (_m *Employee) QueryAssetAssignments() *AssetAssignmentQuery {
+	return NewEmployeeClient(_m.config).QueryAssetAssignments(_m)
+}
+
+// QueryTimeEntries queries the "time_entries" edge of the Employee entity.
+func (_m *Employee) QueryTimeEntries() *TimeEntryQuery {
+	return NewEmployeeClient(_m.config).QueryTimeEntries(_m)
+}
+
+// QueryConductedInterviews queries the "conducted_interviews" edge of the Employee entity.
+func (_m *Employee) QueryConductedInterviews() *InterviewQuery {
+	return NewEmployeeClient(_m.config).QueryConductedInterviews(_m)
+}
+
+// QueryBenefitEnrollments queries the "benefit_enrollments" edge of the Employee entity.
+func (_m *Employee) QueryBenefitEnrollments() *BenefitEnrollmentQuery {
+	return NewEmployeeClient(_m.config).QueryBenefitEnrollments(_m)
 }
 
 // Update returns a builder for updating this Employee.

@@ -1,0 +1,26 @@
+# Binaries
+bin/
+build/bin/
+sent_check
+pos_offline.db
+
+# Go
+core
+*.out
+*.test
+*.prof
+
+# Frontend
+frontend/dist/
+frontend/node_modules/
+frontend/src/wailsjs/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

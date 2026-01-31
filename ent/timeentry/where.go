@@ -55,24 +55,29 @@ func IDLTE(id int) predicate.TimeEntry {
 	return predicate.TimeEntry(sql.FieldLTE(FieldID, id))
 }
 
-// DurationHours applies equality check predicate on the "duration_hours" field. It's identical to DurationHoursEQ.
-func DurationHours(v float64) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldEQ(FieldDurationHours, v))
+// StartTime applies equality check predicate on the "start_time" field. It's identical to StartTimeEQ.
+func StartTime(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldEQ(FieldStartTime, v))
 }
 
-// Note applies equality check predicate on the "note" field. It's identical to NoteEQ.
-func Note(v string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldEQ(FieldNote, v))
+// EndTime applies equality check predicate on the "end_time" field. It's identical to EndTimeEQ.
+func EndTime(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldEQ(FieldEndTime, v))
 }
 
-// StartedAt applies equality check predicate on the "started_at" field. It's identical to StartedAtEQ.
-func StartedAt(v time.Time) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldEQ(FieldStartedAt, v))
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldEQ(FieldCreatedAt, v))
 }
 
-// IsBillable applies equality check predicate on the "is_billable" field. It's identical to IsBillableEQ.
-func IsBillable(v bool) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldEQ(FieldIsBillable, v))
+// TicketID applies equality check predicate on the "ticket_id" field. It's identical to TicketIDEQ.
+func TicketID(v int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldEQ(FieldTicketID, v))
+}
+
+// TechnicianID applies equality check predicate on the "technician_id" field. It's identical to TechnicianIDEQ.
+func TechnicianID(v int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldEQ(FieldTechnicianID, v))
 }
 
 // WorkType applies equality check predicate on the "work_type" field. It's identical to WorkTypeEQ.
@@ -80,164 +85,224 @@ func WorkType(v string) predicate.TimeEntry {
 	return predicate.TimeEntry(sql.FieldEQ(FieldWorkType, v))
 }
 
+// DurationHours applies equality check predicate on the "duration_hours" field. It's identical to DurationHoursEQ.
+func DurationHours(v float64) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldEQ(FieldDurationHours, v))
+}
+
 // InvoiceID applies equality check predicate on the "invoice_id" field. It's identical to InvoiceIDEQ.
 func InvoiceID(v int) predicate.TimeEntry {
 	return predicate.TimeEntry(sql.FieldEQ(FieldInvoiceID, v))
 }
 
-// DurationHoursEQ applies the EQ predicate on the "duration_hours" field.
-func DurationHoursEQ(v float64) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldEQ(FieldDurationHours, v))
+// StartTimeEQ applies the EQ predicate on the "start_time" field.
+func StartTimeEQ(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldEQ(FieldStartTime, v))
 }
 
-// DurationHoursNEQ applies the NEQ predicate on the "duration_hours" field.
-func DurationHoursNEQ(v float64) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldNEQ(FieldDurationHours, v))
+// StartTimeNEQ applies the NEQ predicate on the "start_time" field.
+func StartTimeNEQ(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNEQ(FieldStartTime, v))
 }
 
-// DurationHoursIn applies the In predicate on the "duration_hours" field.
-func DurationHoursIn(vs ...float64) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldIn(FieldDurationHours, vs...))
+// StartTimeIn applies the In predicate on the "start_time" field.
+func StartTimeIn(vs ...time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldIn(FieldStartTime, vs...))
 }
 
-// DurationHoursNotIn applies the NotIn predicate on the "duration_hours" field.
-func DurationHoursNotIn(vs ...float64) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldNotIn(FieldDurationHours, vs...))
+// StartTimeNotIn applies the NotIn predicate on the "start_time" field.
+func StartTimeNotIn(vs ...time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNotIn(FieldStartTime, vs...))
 }
 
-// DurationHoursGT applies the GT predicate on the "duration_hours" field.
-func DurationHoursGT(v float64) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldGT(FieldDurationHours, v))
+// StartTimeGT applies the GT predicate on the "start_time" field.
+func StartTimeGT(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldGT(FieldStartTime, v))
 }
 
-// DurationHoursGTE applies the GTE predicate on the "duration_hours" field.
-func DurationHoursGTE(v float64) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldGTE(FieldDurationHours, v))
+// StartTimeGTE applies the GTE predicate on the "start_time" field.
+func StartTimeGTE(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldGTE(FieldStartTime, v))
 }
 
-// DurationHoursLT applies the LT predicate on the "duration_hours" field.
-func DurationHoursLT(v float64) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldLT(FieldDurationHours, v))
+// StartTimeLT applies the LT predicate on the "start_time" field.
+func StartTimeLT(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldLT(FieldStartTime, v))
 }
 
-// DurationHoursLTE applies the LTE predicate on the "duration_hours" field.
-func DurationHoursLTE(v float64) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldLTE(FieldDurationHours, v))
+// StartTimeLTE applies the LTE predicate on the "start_time" field.
+func StartTimeLTE(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldLTE(FieldStartTime, v))
 }
 
-// NoteEQ applies the EQ predicate on the "note" field.
-func NoteEQ(v string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldEQ(FieldNote, v))
+// EndTimeEQ applies the EQ predicate on the "end_time" field.
+func EndTimeEQ(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldEQ(FieldEndTime, v))
 }
 
-// NoteNEQ applies the NEQ predicate on the "note" field.
-func NoteNEQ(v string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldNEQ(FieldNote, v))
+// EndTimeNEQ applies the NEQ predicate on the "end_time" field.
+func EndTimeNEQ(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNEQ(FieldEndTime, v))
 }
 
-// NoteIn applies the In predicate on the "note" field.
-func NoteIn(vs ...string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldIn(FieldNote, vs...))
+// EndTimeIn applies the In predicate on the "end_time" field.
+func EndTimeIn(vs ...time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldIn(FieldEndTime, vs...))
 }
 
-// NoteNotIn applies the NotIn predicate on the "note" field.
-func NoteNotIn(vs ...string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldNotIn(FieldNote, vs...))
+// EndTimeNotIn applies the NotIn predicate on the "end_time" field.
+func EndTimeNotIn(vs ...time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNotIn(FieldEndTime, vs...))
 }
 
-// NoteGT applies the GT predicate on the "note" field.
-func NoteGT(v string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldGT(FieldNote, v))
+// EndTimeGT applies the GT predicate on the "end_time" field.
+func EndTimeGT(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldGT(FieldEndTime, v))
 }
 
-// NoteGTE applies the GTE predicate on the "note" field.
-func NoteGTE(v string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldGTE(FieldNote, v))
+// EndTimeGTE applies the GTE predicate on the "end_time" field.
+func EndTimeGTE(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldGTE(FieldEndTime, v))
 }
 
-// NoteLT applies the LT predicate on the "note" field.
-func NoteLT(v string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldLT(FieldNote, v))
+// EndTimeLT applies the LT predicate on the "end_time" field.
+func EndTimeLT(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldLT(FieldEndTime, v))
 }
 
-// NoteLTE applies the LTE predicate on the "note" field.
-func NoteLTE(v string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldLTE(FieldNote, v))
+// EndTimeLTE applies the LTE predicate on the "end_time" field.
+func EndTimeLTE(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldLTE(FieldEndTime, v))
 }
 
-// NoteContains applies the Contains predicate on the "note" field.
-func NoteContains(v string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldContains(FieldNote, v))
+// EndTimeIsNil applies the IsNil predicate on the "end_time" field.
+func EndTimeIsNil() predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldIsNull(FieldEndTime))
 }
 
-// NoteHasPrefix applies the HasPrefix predicate on the "note" field.
-func NoteHasPrefix(v string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldHasPrefix(FieldNote, v))
+// EndTimeNotNil applies the NotNil predicate on the "end_time" field.
+func EndTimeNotNil() predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNotNull(FieldEndTime))
 }
 
-// NoteHasSuffix applies the HasSuffix predicate on the "note" field.
-func NoteHasSuffix(v string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldHasSuffix(FieldNote, v))
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldEQ(FieldCreatedAt, v))
 }
 
-// NoteEqualFold applies the EqualFold predicate on the "note" field.
-func NoteEqualFold(v string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldEqualFold(FieldNote, v))
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
-// NoteContainsFold applies the ContainsFold predicate on the "note" field.
-func NoteContainsFold(v string) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldContainsFold(FieldNote, v))
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
-// StartedAtEQ applies the EQ predicate on the "started_at" field.
-func StartedAtEQ(v time.Time) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldEQ(FieldStartedAt, v))
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
-// StartedAtNEQ applies the NEQ predicate on the "started_at" field.
-func StartedAtNEQ(v time.Time) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldNEQ(FieldStartedAt, v))
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldGT(FieldCreatedAt, v))
 }
 
-// StartedAtIn applies the In predicate on the "started_at" field.
-func StartedAtIn(vs ...time.Time) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldIn(FieldStartedAt, vs...))
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldGTE(FieldCreatedAt, v))
 }
 
-// StartedAtNotIn applies the NotIn predicate on the "started_at" field.
-func StartedAtNotIn(vs ...time.Time) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldNotIn(FieldStartedAt, vs...))
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldLT(FieldCreatedAt, v))
 }
 
-// StartedAtGT applies the GT predicate on the "started_at" field.
-func StartedAtGT(v time.Time) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldGT(FieldStartedAt, v))
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldLTE(FieldCreatedAt, v))
 }
 
-// StartedAtGTE applies the GTE predicate on the "started_at" field.
-func StartedAtGTE(v time.Time) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldGTE(FieldStartedAt, v))
+// TicketIDEQ applies the EQ predicate on the "ticket_id" field.
+func TicketIDEQ(v int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldEQ(FieldTicketID, v))
 }
 
-// StartedAtLT applies the LT predicate on the "started_at" field.
-func StartedAtLT(v time.Time) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldLT(FieldStartedAt, v))
+// TicketIDNEQ applies the NEQ predicate on the "ticket_id" field.
+func TicketIDNEQ(v int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNEQ(FieldTicketID, v))
 }
 
-// StartedAtLTE applies the LTE predicate on the "started_at" field.
-func StartedAtLTE(v time.Time) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldLTE(FieldStartedAt, v))
+// TicketIDIn applies the In predicate on the "ticket_id" field.
+func TicketIDIn(vs ...int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldIn(FieldTicketID, vs...))
 }
 
-// IsBillableEQ applies the EQ predicate on the "is_billable" field.
-func IsBillableEQ(v bool) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldEQ(FieldIsBillable, v))
+// TicketIDNotIn applies the NotIn predicate on the "ticket_id" field.
+func TicketIDNotIn(vs ...int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNotIn(FieldTicketID, vs...))
 }
 
-// IsBillableNEQ applies the NEQ predicate on the "is_billable" field.
-func IsBillableNEQ(v bool) predicate.TimeEntry {
-	return predicate.TimeEntry(sql.FieldNEQ(FieldIsBillable, v))
+// TicketIDIsNil applies the IsNil predicate on the "ticket_id" field.
+func TicketIDIsNil() predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldIsNull(FieldTicketID))
+}
+
+// TicketIDNotNil applies the NotNil predicate on the "ticket_id" field.
+func TicketIDNotNil() predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNotNull(FieldTicketID))
+}
+
+// TechnicianIDEQ applies the EQ predicate on the "technician_id" field.
+func TechnicianIDEQ(v int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldEQ(FieldTechnicianID, v))
+}
+
+// TechnicianIDNEQ applies the NEQ predicate on the "technician_id" field.
+func TechnicianIDNEQ(v int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNEQ(FieldTechnicianID, v))
+}
+
+// TechnicianIDIn applies the In predicate on the "technician_id" field.
+func TechnicianIDIn(vs ...int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldIn(FieldTechnicianID, vs...))
+}
+
+// TechnicianIDNotIn applies the NotIn predicate on the "technician_id" field.
+func TechnicianIDNotIn(vs ...int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNotIn(FieldTechnicianID, vs...))
+}
+
+// TechnicianIDGT applies the GT predicate on the "technician_id" field.
+func TechnicianIDGT(v int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldGT(FieldTechnicianID, v))
+}
+
+// TechnicianIDGTE applies the GTE predicate on the "technician_id" field.
+func TechnicianIDGTE(v int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldGTE(FieldTechnicianID, v))
+}
+
+// TechnicianIDLT applies the LT predicate on the "technician_id" field.
+func TechnicianIDLT(v int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldLT(FieldTechnicianID, v))
+}
+
+// TechnicianIDLTE applies the LTE predicate on the "technician_id" field.
+func TechnicianIDLTE(v int) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldLTE(FieldTechnicianID, v))
+}
+
+// TechnicianIDIsNil applies the IsNil predicate on the "technician_id" field.
+func TechnicianIDIsNil() predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldIsNull(FieldTechnicianID))
+}
+
+// TechnicianIDNotNil applies the NotNil predicate on the "technician_id" field.
+func TechnicianIDNotNil() predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNotNull(FieldTechnicianID))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.
@@ -325,6 +390,56 @@ func WorkTypeContainsFold(v string) predicate.TimeEntry {
 	return predicate.TimeEntry(sql.FieldContainsFold(FieldWorkType, v))
 }
 
+// DurationHoursEQ applies the EQ predicate on the "duration_hours" field.
+func DurationHoursEQ(v float64) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldEQ(FieldDurationHours, v))
+}
+
+// DurationHoursNEQ applies the NEQ predicate on the "duration_hours" field.
+func DurationHoursNEQ(v float64) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNEQ(FieldDurationHours, v))
+}
+
+// DurationHoursIn applies the In predicate on the "duration_hours" field.
+func DurationHoursIn(vs ...float64) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldIn(FieldDurationHours, vs...))
+}
+
+// DurationHoursNotIn applies the NotIn predicate on the "duration_hours" field.
+func DurationHoursNotIn(vs ...float64) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNotIn(FieldDurationHours, vs...))
+}
+
+// DurationHoursGT applies the GT predicate on the "duration_hours" field.
+func DurationHoursGT(v float64) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldGT(FieldDurationHours, v))
+}
+
+// DurationHoursGTE applies the GTE predicate on the "duration_hours" field.
+func DurationHoursGTE(v float64) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldGTE(FieldDurationHours, v))
+}
+
+// DurationHoursLT applies the LT predicate on the "duration_hours" field.
+func DurationHoursLT(v float64) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldLT(FieldDurationHours, v))
+}
+
+// DurationHoursLTE applies the LTE predicate on the "duration_hours" field.
+func DurationHoursLTE(v float64) predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldLTE(FieldDurationHours, v))
+}
+
+// DurationHoursIsNil applies the IsNil predicate on the "duration_hours" field.
+func DurationHoursIsNil() predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldIsNull(FieldDurationHours))
+}
+
+// DurationHoursNotNil applies the NotNil predicate on the "duration_hours" field.
+func DurationHoursNotNil() predicate.TimeEntry {
+	return predicate.TimeEntry(sql.FieldNotNull(FieldDurationHours))
+}
+
 // InvoiceIDEQ applies the EQ predicate on the "invoice_id" field.
 func InvoiceIDEQ(v int) predicate.TimeEntry {
 	return predicate.TimeEntry(sql.FieldEQ(FieldInvoiceID, v))
@@ -375,12 +490,35 @@ func InvoiceIDNotNil() predicate.TimeEntry {
 	return predicate.TimeEntry(sql.FieldNotNull(FieldInvoiceID))
 }
 
+// HasEmployee applies the HasEdge predicate on the "employee" edge.
+func HasEmployee() predicate.TimeEntry {
+	return predicate.TimeEntry(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, EmployeeTable, EmployeeColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasEmployeeWith applies the HasEdge predicate on the "employee" edge with a given conditions (other predicates).
+func HasEmployeeWith(preds ...predicate.Employee) predicate.TimeEntry {
+	return predicate.TimeEntry(func(s *sql.Selector) {
+		step := newEmployeeStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasTicket applies the HasEdge predicate on the "ticket" edge.
 func HasTicket() predicate.TimeEntry {
 	return predicate.TimeEntry(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, TicketTable, TicketColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, TicketTable, TicketColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -390,29 +528,6 @@ func HasTicket() predicate.TimeEntry {
 func HasTicketWith(preds ...predicate.Ticket) predicate.TimeEntry {
 	return predicate.TimeEntry(func(s *sql.Selector) {
 		step := newTicketStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasTechnician applies the HasEdge predicate on the "technician" edge.
-func HasTechnician() predicate.TimeEntry {
-	return predicate.TimeEntry(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, TechnicianTable, TechnicianColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTechnicianWith applies the HasEdge predicate on the "technician" edge with a given conditions (other predicates).
-func HasTechnicianWith(preds ...predicate.User) predicate.TimeEntry {
-	return predicate.TimeEntry(func(s *sql.Selector) {
-		step := newTechnicianStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

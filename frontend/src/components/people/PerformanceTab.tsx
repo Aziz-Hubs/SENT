@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -58,14 +59,19 @@ interface Review {
   overall_rating: string;
   status: string;
   reviewer_name: string;
+  subject_name?: string;
+  type?: string;
   submitted_at: string;
 }
 
 const PerformanceTab: React.FC = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [feedbackRequests, setFeedbackRequests] = useState<Review[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [selectedPeers, setSelectedPeers] = useState<string>("");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -84,6 +90,9 @@ const PerformanceTab: React.FC = () => {
 
         const r = await w.go.bridge.PeopleBridge.GetMyReviews(1);
         setReviews(r || []);
+
+        const f = await w.go.bridge.PeopleBridge.GetFeedbackRequests(1);
+        setFeedbackRequests(f || []);
       } else {
         // Mock data
         setGoals([
@@ -133,6 +142,18 @@ const PerformanceTab: React.FC = () => {
             submitted_at: "",
           },
         ]);
+        setFeedbackRequests([
+          {
+            id: 101,
+            cycle_name: "Q1 2024 Review",
+            overall_rating: "",
+            status: "PENDING",
+            reviewer_name: "Me",
+            subject_name: "John Doe",
+            type: "PEER",
+            submitted_at: "",
+          },
+        ]);
       }
     } catch (err) {
       toast.error("Failed to fetch performance data");
@@ -165,6 +186,28 @@ const PerformanceTab: React.FC = () => {
       }
     } catch (err) {
       toast.error("Failed to create goal");
+    }
+  };
+
+  const handleRequestFeedback = async () => {
+    try {
+      const w = window as any;
+      const peerIds = selectedPeers
+        .split(",")
+        .map((id) => parseInt(id.trim()))
+        .filter((id) => !isNaN(id));
+
+      if (w.go && w.go.bridge && w.go.bridge.PeopleBridge) {
+        await w.go.bridge.PeopleBridge.RequestPeerFeedback(1, peerIds);
+        toast.success("Feedback requested");
+        setIsFeedbackModalOpen(false);
+        setSelectedPeers("");
+      } else {
+        toast.success("Mock: Feedback requested from peers");
+        setIsFeedbackModalOpen(false);
+      }
+    } catch (err) {
+      toast.error("Failed to request feedback");
     }
   };
 
@@ -302,6 +345,9 @@ const PerformanceTab: React.FC = () => {
           </TabsTrigger>
           <TabsTrigger value="reviews" className="gap-2">
             <Trophy className="h-4 w-4" /> Reviews
+          </TabsTrigger>
+          <TabsTrigger value="feedback" className="gap-2">
+            <Users className="h-4 w-4" /> Feedback
           </TabsTrigger>
         </TabsList>
 
@@ -464,6 +510,106 @@ const PerformanceTab: React.FC = () => {
                 ))}
               </TableBody>
             </Table>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="feedback" className="mt-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">360° Feedback</h3>
+            <Dialog
+              open={isFeedbackModalOpen}
+              onOpenChange={setIsFeedbackModalOpen}
+            >
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Users className="mr-2 h-4 w-4" /> Request Peer Feedback
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Request Feedback</DialogTitle>
+                  <DialogDescription>
+                    Select peers to provide feedback on your performance.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Peer IDs (Comma separated)</Label>
+                    <Input
+                      disabled={false}
+                      placeholder="e.g. 102, 105"
+                      value={selectedPeers}
+                      onChange={(e) => setSelectedPeers(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      In a real app, this would be a multi-select user picker.
+                    </p>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsFeedbackModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button onClick={handleRequestFeedback}>Send Requests</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">
+                  Incoming Requests
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="border rounded-md">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Subject</TableHead>
+                        <TableHead>Cycle</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {feedbackRequests.length === 0 ? (
+                        <TableRow>
+                          <TableCell
+                            colSpan={5}
+                            className="text-center py-4 text-muted-foreground"
+                          >
+                            No pending feedback requests.
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        feedbackRequests.map((req) => (
+                          <TableRow key={req.id}>
+                            <TableCell className="font-medium">
+                              {req.subject_name}
+                            </TableCell>
+                            <TableCell>{req.cycle_name}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{req.type}</Badge>
+                            </TableCell>
+                            <TableCell>{getStatusBadge(req.status)}</TableCell>
+                            <TableCell>
+                              <Button size="sm">Start Review</Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
       </Tabs>

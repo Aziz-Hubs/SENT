@@ -8,6 +8,8 @@ export function ApproveTimeEntry(arg1:number):Promise<void>;
 
 export function AssignTicket(arg1:number,arg2:number):Promise<void>;
 
+export function ExecuteRemediation(arg1:number,arg2:number):Promise<void>;
+
 export function GetTickets():Promise<Array<pilot.TicketDTO>>;
 
 export function SanitizeLog(arg1:string):Promise<string>;

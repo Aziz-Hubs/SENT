@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"sent/ent/employee"
 	"sent/ent/predicate"
 	"sent/ent/ticket"
 	"sent/ent/timeentry"
-	"sent/ent/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -20,14 +20,14 @@ import (
 // TimeEntryQuery is the builder for querying TimeEntry entities.
 type TimeEntryQuery struct {
 	config
-	ctx            *QueryContext
-	order          []timeentry.OrderOption
-	inters         []Interceptor
-	predicates     []predicate.TimeEntry
-	withTicket     *TicketQuery
-	withTechnician *UserQuery
-	withFKs        bool
-	modifiers      []func(*sql.Selector)
+	ctx          *QueryContext
+	order        []timeentry.OrderOption
+	inters       []Interceptor
+	predicates   []predicate.TimeEntry
+	withEmployee *EmployeeQuery
+	withTicket   *TicketQuery
+	withFKs      bool
+	modifiers    []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,6 +64,28 @@ func (_q *TimeEntryQuery) Order(o ...timeentry.OrderOption) *TimeEntryQuery {
 	return _q
 }
 
+// QueryEmployee chains the current query on the "employee" edge.
+func (_q *TimeEntryQuery) QueryEmployee() *EmployeeQuery {
+	query := (&EmployeeClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timeentry.Table, timeentry.FieldID, selector),
+			sqlgraph.To(employee.Table, employee.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, timeentry.EmployeeTable, timeentry.EmployeeColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryTicket chains the current query on the "ticket" edge.
 func (_q *TimeEntryQuery) QueryTicket() *TicketQuery {
 	query := (&TicketClient{config: _q.config}).Query()
@@ -78,29 +100,7 @@ func (_q *TimeEntryQuery) QueryTicket() *TicketQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(timeentry.Table, timeentry.FieldID, selector),
 			sqlgraph.To(ticket.Table, ticket.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, timeentry.TicketTable, timeentry.TicketColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryTechnician chains the current query on the "technician" edge.
-func (_q *TimeEntryQuery) QueryTechnician() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(timeentry.Table, timeentry.FieldID, selector),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, timeentry.TechnicianTable, timeentry.TechnicianColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, timeentry.TicketTable, timeentry.TicketColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -295,18 +295,29 @@ func (_q *TimeEntryQuery) Clone() *TimeEntryQuery {
 		return nil
 	}
 	return &TimeEntryQuery{
-		config:         _q.config,
-		ctx:            _q.ctx.Clone(),
-		order:          append([]timeentry.OrderOption{}, _q.order...),
-		inters:         append([]Interceptor{}, _q.inters...),
-		predicates:     append([]predicate.TimeEntry{}, _q.predicates...),
-		withTicket:     _q.withTicket.Clone(),
-		withTechnician: _q.withTechnician.Clone(),
+		config:       _q.config,
+		ctx:          _q.ctx.Clone(),
+		order:        append([]timeentry.OrderOption{}, _q.order...),
+		inters:       append([]Interceptor{}, _q.inters...),
+		predicates:   append([]predicate.TimeEntry{}, _q.predicates...),
+		withEmployee: _q.withEmployee.Clone(),
+		withTicket:   _q.withTicket.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
 		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
+}
+
+// WithEmployee tells the query-builder to eager-load the nodes that are connected to
+// the "employee" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TimeEntryQuery) WithEmployee(opts ...func(*EmployeeQuery)) *TimeEntryQuery {
+	query := (&EmployeeClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withEmployee = query
+	return _q
 }
 
 // WithTicket tells the query-builder to eager-load the nodes that are connected to
@@ -320,29 +331,18 @@ func (_q *TimeEntryQuery) WithTicket(opts ...func(*TicketQuery)) *TimeEntryQuery
 	return _q
 }
 
-// WithTechnician tells the query-builder to eager-load the nodes that are connected to
-// the "technician" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *TimeEntryQuery) WithTechnician(opts ...func(*UserQuery)) *TimeEntryQuery {
-	query := (&UserClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withTechnician = query
-	return _q
-}
-
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		DurationHours float64 `json:"duration_hours,omitempty"`
+//		StartTime time.Time `json:"start_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.TimeEntry.Query().
-//		GroupBy(timeentry.FieldDurationHours).
+//		GroupBy(timeentry.FieldStartTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *TimeEntryQuery) GroupBy(field string, fields ...string) *TimeEntryGroupBy {
@@ -360,11 +360,11 @@ func (_q *TimeEntryQuery) GroupBy(field string, fields ...string) *TimeEntryGrou
 // Example:
 //
 //	var v []struct {
-//		DurationHours float64 `json:"duration_hours,omitempty"`
+//		StartTime time.Time `json:"start_time,omitempty"`
 //	}
 //
 //	client.TimeEntry.Query().
-//		Select(timeentry.FieldDurationHours).
+//		Select(timeentry.FieldStartTime).
 //		Scan(ctx, &v)
 func (_q *TimeEntryQuery) Select(fields ...string) *TimeEntrySelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
@@ -411,11 +411,11 @@ func (_q *TimeEntryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ti
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
+			_q.withEmployee != nil,
 			_q.withTicket != nil,
-			_q.withTechnician != nil,
 		}
 	)
-	if _q.withTicket != nil || _q.withTechnician != nil {
+	if _q.withEmployee != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -442,29 +442,58 @@ func (_q *TimeEntryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ti
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withEmployee; query != nil {
+		if err := _q.loadEmployee(ctx, query, nodes, nil,
+			func(n *TimeEntry, e *Employee) { n.Edges.Employee = e }); err != nil {
+			return nil, err
+		}
+	}
 	if query := _q.withTicket; query != nil {
 		if err := _q.loadTicket(ctx, query, nodes, nil,
 			func(n *TimeEntry, e *Ticket) { n.Edges.Ticket = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := _q.withTechnician; query != nil {
-		if err := _q.loadTechnician(ctx, query, nodes, nil,
-			func(n *TimeEntry, e *User) { n.Edges.Technician = e }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
 }
 
+func (_q *TimeEntryQuery) loadEmployee(ctx context.Context, query *EmployeeQuery, nodes []*TimeEntry, init func(*TimeEntry), assign func(*TimeEntry, *Employee)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TimeEntry)
+	for i := range nodes {
+		if nodes[i].employee_time_entries == nil {
+			continue
+		}
+		fk := *nodes[i].employee_time_entries
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(employee.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "employee_time_entries" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 func (_q *TimeEntryQuery) loadTicket(ctx context.Context, query *TicketQuery, nodes []*TimeEntry, init func(*TimeEntry), assign func(*TimeEntry, *Ticket)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*TimeEntry)
 	for i := range nodes {
-		if nodes[i].ticket_time_entries == nil {
-			continue
-		}
-		fk := *nodes[i].ticket_time_entries
+		fk := nodes[i].TicketID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -481,39 +510,7 @@ func (_q *TimeEntryQuery) loadTicket(ctx context.Context, query *TicketQuery, no
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "ticket_time_entries" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-func (_q *TimeEntryQuery) loadTechnician(ctx context.Context, query *UserQuery, nodes []*TimeEntry, init func(*TimeEntry), assign func(*TimeEntry, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*TimeEntry)
-	for i := range nodes {
-		if nodes[i].user_time_entries == nil {
-			continue
-		}
-		fk := *nodes[i].user_time_entries
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_time_entries" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "ticket_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -549,6 +546,9 @@ func (_q *TimeEntryQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != timeentry.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withTicket != nil {
+			_spec.Node.AddColumnOnce(timeentry.FieldTicketID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

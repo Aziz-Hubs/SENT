@@ -45,8 +45,8 @@ const (
 	EdgeRequestedTickets = "requested_tickets"
 	// EdgeAssignedTickets holds the string denoting the assigned_tickets edge name in mutations.
 	EdgeAssignedTickets = "assigned_tickets"
-	// EdgeTimeEntries holds the string denoting the time_entries edge name in mutations.
-	EdgeTimeEntries = "time_entries"
+	// EdgeWorkLogs holds the string denoting the work_logs edge name in mutations.
+	EdgeWorkLogs = "work_logs"
 	// EdgeOwnedAssets holds the string denoting the owned_assets edge name in mutations.
 	EdgeOwnedAssets = "owned_assets"
 	// EdgeAuthoredSops holds the string denoting the authored_sops edge name in mutations.
@@ -57,6 +57,16 @@ const (
 	EdgeVoicemails = "voicemails"
 	// EdgeSaasIdentities holds the string denoting the saas_identities edge name in mutations.
 	EdgeSaasIdentities = "saas_identities"
+	// EdgeFavorites holds the string denoting the favorites edge name in mutations.
+	EdgeFavorites = "favorites"
+	// EdgeVaultComments holds the string denoting the vault_comments edge name in mutations.
+	EdgeVaultComments = "vault_comments"
+	// EdgeCreatedVersions holds the string denoting the created_versions edge name in mutations.
+	EdgeCreatedVersions = "created_versions"
+	// EdgeCreatedLegalHolds holds the string denoting the created_legal_holds edge name in mutations.
+	EdgeCreatedLegalHolds = "created_legal_holds"
+	// EdgeCreatedTemplates holds the string denoting the created_templates edge name in mutations.
+	EdgeCreatedTemplates = "created_templates"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// TenantTable is the table that holds the tenant relation/edge.
@@ -85,13 +95,13 @@ const (
 	AssignedTicketsInverseTable = "tickets"
 	// AssignedTicketsColumn is the table column denoting the assigned_tickets relation/edge.
 	AssignedTicketsColumn = "user_assigned_tickets"
-	// TimeEntriesTable is the table that holds the time_entries relation/edge.
-	TimeEntriesTable = "time_entries"
-	// TimeEntriesInverseTable is the table name for the TimeEntry entity.
-	// It exists in this package in order to avoid circular dependency with the "timeentry" package.
-	TimeEntriesInverseTable = "time_entries"
-	// TimeEntriesColumn is the table column denoting the time_entries relation/edge.
-	TimeEntriesColumn = "user_time_entries"
+	// WorkLogsTable is the table that holds the work_logs relation/edge.
+	WorkLogsTable = "work_logs"
+	// WorkLogsInverseTable is the table name for the WorkLog entity.
+	// It exists in this package in order to avoid circular dependency with the "worklog" package.
+	WorkLogsInverseTable = "work_logs"
+	// WorkLogsColumn is the table column denoting the work_logs relation/edge.
+	WorkLogsColumn = "user_work_logs"
 	// OwnedAssetsTable is the table that holds the owned_assets relation/edge.
 	OwnedAssetsTable = "assets"
 	// OwnedAssetsInverseTable is the table name for the Asset entity.
@@ -127,6 +137,41 @@ const (
 	SaasIdentitiesInverseTable = "saa_sidentities"
 	// SaasIdentitiesColumn is the table column denoting the saas_identities relation/edge.
 	SaasIdentitiesColumn = "user_saas_identities"
+	// FavoritesTable is the table that holds the favorites relation/edge.
+	FavoritesTable = "vault_favorites"
+	// FavoritesInverseTable is the table name for the VaultFavorite entity.
+	// It exists in this package in order to avoid circular dependency with the "vaultfavorite" package.
+	FavoritesInverseTable = "vault_favorites"
+	// FavoritesColumn is the table column denoting the favorites relation/edge.
+	FavoritesColumn = "user_favorites"
+	// VaultCommentsTable is the table that holds the vault_comments relation/edge.
+	VaultCommentsTable = "vault_comments"
+	// VaultCommentsInverseTable is the table name for the VaultComment entity.
+	// It exists in this package in order to avoid circular dependency with the "vaultcomment" package.
+	VaultCommentsInverseTable = "vault_comments"
+	// VaultCommentsColumn is the table column denoting the vault_comments relation/edge.
+	VaultCommentsColumn = "user_vault_comments"
+	// CreatedVersionsTable is the table that holds the created_versions relation/edge.
+	CreatedVersionsTable = "vault_versions"
+	// CreatedVersionsInverseTable is the table name for the VaultVersion entity.
+	// It exists in this package in order to avoid circular dependency with the "vaultversion" package.
+	CreatedVersionsInverseTable = "vault_versions"
+	// CreatedVersionsColumn is the table column denoting the created_versions relation/edge.
+	CreatedVersionsColumn = "user_created_versions"
+	// CreatedLegalHoldsTable is the table that holds the created_legal_holds relation/edge.
+	CreatedLegalHoldsTable = "legal_holds"
+	// CreatedLegalHoldsInverseTable is the table name for the LegalHold entity.
+	// It exists in this package in order to avoid circular dependency with the "legalhold" package.
+	CreatedLegalHoldsInverseTable = "legal_holds"
+	// CreatedLegalHoldsColumn is the table column denoting the created_legal_holds relation/edge.
+	CreatedLegalHoldsColumn = "user_created_legal_holds"
+	// CreatedTemplatesTable is the table that holds the created_templates relation/edge.
+	CreatedTemplatesTable = "vault_templates"
+	// CreatedTemplatesInverseTable is the table name for the VaultTemplate entity.
+	// It exists in this package in order to avoid circular dependency with the "vaulttemplate" package.
+	CreatedTemplatesInverseTable = "vault_templates"
+	// CreatedTemplatesColumn is the table column denoting the created_templates relation/edge.
+	CreatedTemplatesColumn = "user_created_templates"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -314,17 +359,17 @@ func ByAssignedTickets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByTimeEntriesCount orders the results by time_entries count.
-func ByTimeEntriesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByWorkLogsCount orders the results by work_logs count.
+func ByWorkLogsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTimeEntriesStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newWorkLogsStep(), opts...)
 	}
 }
 
-// ByTimeEntries orders the results by time_entries terms.
-func ByTimeEntries(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByWorkLogs orders the results by work_logs terms.
+func ByWorkLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTimeEntriesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newWorkLogsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -397,6 +442,76 @@ func BySaasIdentities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newSaasIdentitiesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByFavoritesCount orders the results by favorites count.
+func ByFavoritesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFavoritesStep(), opts...)
+	}
+}
+
+// ByFavorites orders the results by favorites terms.
+func ByFavorites(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFavoritesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByVaultCommentsCount orders the results by vault_comments count.
+func ByVaultCommentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVaultCommentsStep(), opts...)
+	}
+}
+
+// ByVaultComments orders the results by vault_comments terms.
+func ByVaultComments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVaultCommentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCreatedVersionsCount orders the results by created_versions count.
+func ByCreatedVersionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCreatedVersionsStep(), opts...)
+	}
+}
+
+// ByCreatedVersions orders the results by created_versions terms.
+func ByCreatedVersions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCreatedVersionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCreatedLegalHoldsCount orders the results by created_legal_holds count.
+func ByCreatedLegalHoldsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCreatedLegalHoldsStep(), opts...)
+	}
+}
+
+// ByCreatedLegalHolds orders the results by created_legal_holds terms.
+func ByCreatedLegalHolds(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCreatedLegalHoldsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCreatedTemplatesCount orders the results by created_templates count.
+func ByCreatedTemplatesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCreatedTemplatesStep(), opts...)
+	}
+}
+
+// ByCreatedTemplates orders the results by created_templates terms.
+func ByCreatedTemplates(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCreatedTemplatesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newTenantStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -425,11 +540,11 @@ func newAssignedTicketsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, AssignedTicketsTable, AssignedTicketsColumn),
 	)
 }
-func newTimeEntriesStep() *sqlgraph.Step {
+func newWorkLogsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TimeEntriesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, TimeEntriesTable, TimeEntriesColumn),
+		sqlgraph.To(WorkLogsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WorkLogsTable, WorkLogsColumn),
 	)
 }
 func newOwnedAssetsStep() *sqlgraph.Step {
@@ -465,5 +580,40 @@ func newSaasIdentitiesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SaasIdentitiesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, SaasIdentitiesTable, SaasIdentitiesColumn),
+	)
+}
+func newFavoritesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FavoritesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FavoritesTable, FavoritesColumn),
+	)
+}
+func newVaultCommentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VaultCommentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, VaultCommentsTable, VaultCommentsColumn),
+	)
+}
+func newCreatedVersionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CreatedVersionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CreatedVersionsTable, CreatedVersionsColumn),
+	)
+}
+func newCreatedLegalHoldsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CreatedLegalHoldsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CreatedLegalHoldsTable, CreatedLegalHoldsColumn),
+	)
+}
+func newCreatedTemplatesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CreatedTemplatesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CreatedTemplatesTable, CreatedTemplatesColumn),
 	)
 }

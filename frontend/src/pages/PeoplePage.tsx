@@ -5,6 +5,8 @@ import { PayrollDashboard } from "../components/people/PayrollDashboard";
 import TimeOffTab from "../components/people/TimeOffTab";
 import PerformanceTab from "../components/people/PerformanceTab";
 import { EngagementTab } from "../components/people/EngagementTab";
+import { RecruitingTab } from "../components/people/RecruitingTab";
+import { BenefitsTab } from "../components/people/BenefitsTab";
 import {
   Users,
   UserPlus,
@@ -132,10 +134,18 @@ const PeoplePage: React.FC = () => {
       </PageHeader>
 
       <Tabs value={currentTab} onValueChange={setTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 max-w-3xl mb-8">
+        <TabsList className="grid w-full grid-cols-6 max-w-5xl mb-8">
           <TabsTrigger value="org" className="gap-2">
             <LayoutGrid className="h-4 w-4" />
             Org Chart
+          </TabsTrigger>
+          <TabsTrigger value="recruiting" className="gap-2">
+            <Users className="h-4 w-4" />
+            Recruiting
+          </TabsTrigger>
+          <TabsTrigger value="benefits" className="gap-2">
+            <Heart className="h-4 w-4" />
+            Benefits
           </TabsTrigger>
           <TabsTrigger value="engagement" className="gap-2">
             <Heart className="h-4 w-4" />
@@ -160,6 +170,12 @@ const PeoplePage: React.FC = () => {
           </TabsContent>
           <TabsContent value="payroll">
             <PayrollDashboard />
+          </TabsContent>
+          <TabsContent value="recruiting">
+            <RecruitingTab />
+          </TabsContent>
+          <TabsContent value="benefits">
+            <BenefitsTab />
           </TabsContent>
           <TabsContent value="onboarding">
             <OnboardingPortal />

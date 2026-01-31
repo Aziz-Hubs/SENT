@@ -12,8 +12,8 @@ import (
 	"sent/ent/remediationstep"
 	"sent/ent/tenant"
 	"sent/ent/ticket"
-	"sent/ent/timeentry"
 	"sent/ent/user"
+	"sent/ent/worklog"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -32,7 +32,7 @@ type TicketQuery struct {
 	withRequester        *UserQuery
 	withAssignee         *UserQuery
 	withAsset            *AssetQuery
-	withTimeEntries      *TimeEntryQuery
+	withWorkLogs         *WorkLogQuery
 	withRemediationSteps *RemediationStepQuery
 	withFKs              bool
 	modifiers            []func(*sql.Selector)
@@ -160,9 +160,9 @@ func (_q *TicketQuery) QueryAsset() *AssetQuery {
 	return query
 }
 
-// QueryTimeEntries chains the current query on the "time_entries" edge.
-func (_q *TicketQuery) QueryTimeEntries() *TimeEntryQuery {
-	query := (&TimeEntryClient{config: _q.config}).Query()
+// QueryWorkLogs chains the current query on the "work_logs" edge.
+func (_q *TicketQuery) QueryWorkLogs() *WorkLogQuery {
+	query := (&WorkLogClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -173,8 +173,8 @@ func (_q *TicketQuery) QueryTimeEntries() *TimeEntryQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ticket.Table, ticket.FieldID, selector),
-			sqlgraph.To(timeentry.Table, timeentry.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ticket.TimeEntriesTable, ticket.TimeEntriesColumn),
+			sqlgraph.To(worklog.Table, worklog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ticket.WorkLogsTable, ticket.WorkLogsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -400,7 +400,7 @@ func (_q *TicketQuery) Clone() *TicketQuery {
 		withRequester:        _q.withRequester.Clone(),
 		withAssignee:         _q.withAssignee.Clone(),
 		withAsset:            _q.withAsset.Clone(),
-		withTimeEntries:      _q.withTimeEntries.Clone(),
+		withWorkLogs:         _q.withWorkLogs.Clone(),
 		withRemediationSteps: _q.withRemediationSteps.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
@@ -453,14 +453,14 @@ func (_q *TicketQuery) WithAsset(opts ...func(*AssetQuery)) *TicketQuery {
 	return _q
 }
 
-// WithTimeEntries tells the query-builder to eager-load the nodes that are connected to
-// the "time_entries" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *TicketQuery) WithTimeEntries(opts ...func(*TimeEntryQuery)) *TicketQuery {
-	query := (&TimeEntryClient{config: _q.config}).Query()
+// WithWorkLogs tells the query-builder to eager-load the nodes that are connected to
+// the "work_logs" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TicketQuery) WithWorkLogs(opts ...func(*WorkLogQuery)) *TicketQuery {
+	query := (&WorkLogClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withTimeEntries = query
+	_q.withWorkLogs = query
 	return _q
 }
 
@@ -559,7 +559,7 @@ func (_q *TicketQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ticke
 			_q.withRequester != nil,
 			_q.withAssignee != nil,
 			_q.withAsset != nil,
-			_q.withTimeEntries != nil,
+			_q.withWorkLogs != nil,
 			_q.withRemediationSteps != nil,
 		}
 	)
@@ -614,10 +614,10 @@ func (_q *TicketQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ticke
 			return nil, err
 		}
 	}
-	if query := _q.withTimeEntries; query != nil {
-		if err := _q.loadTimeEntries(ctx, query, nodes,
-			func(n *Ticket) { n.Edges.TimeEntries = []*TimeEntry{} },
-			func(n *Ticket, e *TimeEntry) { n.Edges.TimeEntries = append(n.Edges.TimeEntries, e) }); err != nil {
+	if query := _q.withWorkLogs; query != nil {
+		if err := _q.loadWorkLogs(ctx, query, nodes,
+			func(n *Ticket) { n.Edges.WorkLogs = []*WorkLog{} },
+			func(n *Ticket, e *WorkLog) { n.Edges.WorkLogs = append(n.Edges.WorkLogs, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -759,7 +759,7 @@ func (_q *TicketQuery) loadAsset(ctx context.Context, query *AssetQuery, nodes [
 	}
 	return nil
 }
-func (_q *TicketQuery) loadTimeEntries(ctx context.Context, query *TimeEntryQuery, nodes []*Ticket, init func(*Ticket), assign func(*Ticket, *TimeEntry)) error {
+func (_q *TicketQuery) loadWorkLogs(ctx context.Context, query *WorkLogQuery, nodes []*Ticket, init func(*Ticket), assign func(*Ticket, *WorkLog)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Ticket)
 	for i := range nodes {
@@ -770,21 +770,21 @@ func (_q *TicketQuery) loadTimeEntries(ctx context.Context, query *TimeEntryQuer
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.TimeEntry(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(ticket.TimeEntriesColumn), fks...))
+	query.Where(predicate.WorkLog(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(ticket.WorkLogsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.ticket_time_entries
+		fk := n.ticket_work_logs
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "ticket_time_entries" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "ticket_work_logs" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "ticket_time_entries" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "ticket_work_logs" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

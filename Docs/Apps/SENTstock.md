@@ -10,30 +10,39 @@ SENTstock is the definitive ledger for physical assets. It manages the flow of g
 
 ## **2. Core Features**
 
-### **2.1 Inventory Management**
+### **2.1 Professional Asset Management**
 
-- **Product Catalog:** Comprehensive SKU management with tracking for Unit Cost, Quantity, and Reserved Stock.
-- **Real-Time Adjustments:** "Incoming" (Receiving) and "Outgoing" (Shrinkage/Usage) workflows.
-- **Low Stock Alerts:** Automated visual warnings when stock dips below reorder points.
+- **Serial Number Tracking:** Authoritative tracking of individual items via unique serial keys.
+- **Location Mapping:** Real-time association with physical locations (Warehouses, Aisles, Bins).
+- **Asset Disposal:** Formal decommission workflow with reason tracking (Damaged, EOL, Sold).
 
-### **2.2 Warehouse Operations**
+### **2.2 Financial & Lifecycle Compliance**
 
-- **Barcode Scanning:** HID-compliant scanner integration. Supports rapid "Scan-to-Search" and "Scan-to-Add".
-- **Barcode Generation:** Built-in generator to print QR/Barcodes for unlabeled items.
-- **Location Tracking:** Aisle-level granularity (e.g., "Aisle 3") to help pickers find items fast.
+- **Financial Valuation:** Automatic **Straight-Line Depreciation** logic calculates Net Current Value based on useful life and acquisition cost.
+- **Warranty Management:** Tracking of expiration dates with automated alerts for upcoming expirations.
+- **Maintenance Scheduling:** Preventative maintenance engine for scheduling, tracking, and completing recurring service tasks.
 
-### **2.3 Reporting**
+### **2.3 Procurement & Supply Chain**
 
-- **Value Valuation:** Real-time calculation of total inventory asset value.
-- **CSV Export:** One-click export of the entire inventory ledger for external auditing.
+- **Purchase Orders (PO):** Complete procurement lifecycle from Draft to Issued.
+- **Authoritative Intake:** "Receive PO" workflow that automatically updates stock levels and updates audit trails.
+- **Supplier Directory:** Integrated management of vendors and procurement history.
+
+### **2.4 Inventory Integrity**
+
+- **Physical Cycle Counts:** Formal inventory counting tools to verify system accuracy and track variance.
+- **Audit Logging:** Immutable, tenant-scoped ledger of every stock movement, status change, and administrative action.
+- **Bulk Operations:** High-performance CSV import engine for rapid multi-SKU catalog ingestion.
 
 ## **3. Integration with SENT Ecosystem**
 
-- **SENTkiosk:** The POS system draws its product data directly from SENTstock. Sales in Kiosk immediately deduct inventory in Stock.
-- **SENTcapital:** Inventory value is synced to the Balance Sheet as a Current Asset.
-- **SENTpulse:** Hardware usage (e.g., deploying a laptop to a user) deducts it from Stock.
+- **SENTkiosk:** The POS draws real-time availability from the master stock ledger.
+- **SENTcapital:** Inventory value is synced to the Balance Sheet; Depreciation is automatically recorded in the General Ledger.
+- **SENThorizon:** Asset lifecycle data (warranty/age) informs 3-year refresh roadmaps and strategic budgeting.
+- **SENTpilot:** Support tickets can be linked directly to hardware assets from the Stock ledger for forensic tracking.
+- **SENTpulse:** Automated hardware discovery updates serial numbers and BIOS versions in the Stock records.
 
 ## **4. Future Roadmap**
 
-- **Mobile App:** Dedicated warehouse picker app for tablets.
-- **Supplier Portal:** Allow vendors to upload ASNs (Advance Shipping Notices) directly.
+- **Mobile Logistics:** Dedicated React Native app for warehouse pickers with built-in camera scanning.
+- **Predictive Restocking:** AI-driven forecasting based on historical Kiosk sales and Pilot project timelines.

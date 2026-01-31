@@ -25,7 +25,7 @@ SENTtax is the automated compliance center for the SENT ecosystem. It serves as 
 ## **3. Integration with SENT Ecosystem**
 
 - **SENTcapital:** Sources all transaction data directly from the Double-Entry Ledger.
-- **SENTvault:** Stores the immutable "Filed Return" artifacts and transmission receipts.
+- **SENTvault:** Stores the immutable "Filed Return" artifacts and transmission receipts; automatically applies **7-year mandatory retention policies** for tax compliance.
 - **SENTadmin:** Enforces RBAC so only the CFO/Finance Admin can "File" a return.
 
 ## **4. Workflow**

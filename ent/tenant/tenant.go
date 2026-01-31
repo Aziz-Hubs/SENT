@@ -89,6 +89,8 @@ const (
 	EdgeCompensationAgreements = "compensation_agreements"
 	// EdgeVaultItems holds the string denoting the vault_items edge name in mutations.
 	EdgeVaultItems = "vault_items"
+	// EdgeVaultShareLinks holds the string denoting the vault_share_links edge name in mutations.
+	EdgeVaultShareLinks = "vault_share_links"
 	// EdgeJournalEntries holds the string denoting the journal_entries edge name in mutations.
 	EdgeJournalEntries = "journal_entries"
 	// EdgeRecurringInvoices holds the string denoting the recurring_invoices edge name in mutations.
@@ -135,6 +137,44 @@ const (
 	EdgePerformanceReviews = "performance_reviews"
 	// EdgeGoals holds the string denoting the goals edge name in mutations.
 	EdgeGoals = "goals"
+	// EdgeSuppliers holds the string denoting the suppliers edge name in mutations.
+	EdgeSuppliers = "suppliers"
+	// EdgeCategories holds the string denoting the categories edge name in mutations.
+	EdgeCategories = "categories"
+	// EdgeWarehouses holds the string denoting the warehouses edge name in mutations.
+	EdgeWarehouses = "warehouses"
+	// EdgeAssetAssignments holds the string denoting the asset_assignments edge name in mutations.
+	EdgeAssetAssignments = "asset_assignments"
+	// EdgeContacts holds the string denoting the contacts edge name in mutations.
+	EdgeContacts = "contacts"
+	// EdgeLegalHolds holds the string denoting the legal_holds edge name in mutations.
+	EdgeLegalHolds = "legal_holds"
+	// EdgeRetentionPolicies holds the string denoting the retention_policies edge name in mutations.
+	EdgeRetentionPolicies = "retention_policies"
+	// EdgeVaultTemplates holds the string denoting the vault_templates edge name in mutations.
+	EdgeVaultTemplates = "vault_templates"
+	// EdgeStockAuditLogs holds the string denoting the stock_audit_logs edge name in mutations.
+	EdgeStockAuditLogs = "stock_audit_logs"
+	// EdgeMaintenanceSchedules holds the string denoting the maintenance_schedules edge name in mutations.
+	EdgeMaintenanceSchedules = "maintenance_schedules"
+	// EdgeStockAlerts holds the string denoting the stock_alerts edge name in mutations.
+	EdgeStockAlerts = "stock_alerts"
+	// EdgePurchaseOrders holds the string denoting the purchase_orders edge name in mutations.
+	EdgePurchaseOrders = "purchase_orders"
+	// EdgeInventoryCounts holds the string denoting the inventory_counts edge name in mutations.
+	EdgeInventoryCounts = "inventory_counts"
+	// EdgeJobPostings holds the string denoting the job_postings edge name in mutations.
+	EdgeJobPostings = "job_postings"
+	// EdgeCandidates holds the string denoting the candidates edge name in mutations.
+	EdgeCandidates = "candidates"
+	// EdgeApplications holds the string denoting the applications edge name in mutations.
+	EdgeApplications = "applications"
+	// EdgeInterviews holds the string denoting the interviews edge name in mutations.
+	EdgeInterviews = "interviews"
+	// EdgeBenefitPlans holds the string denoting the benefit_plans edge name in mutations.
+	EdgeBenefitPlans = "benefit_plans"
+	// EdgeBenefitEnrollments holds the string denoting the benefit_enrollments edge name in mutations.
+	EdgeBenefitEnrollments = "benefit_enrollments"
 	// Table holds the table name of the tenant in the database.
 	Table = "tenants"
 	// ParentTable is the table that holds the parent relation/edge.
@@ -355,6 +395,13 @@ const (
 	VaultItemsInverseTable = "vault_items"
 	// VaultItemsColumn is the table column denoting the vault_items relation/edge.
 	VaultItemsColumn = "tenant_vault_items"
+	// VaultShareLinksTable is the table that holds the vault_share_links relation/edge.
+	VaultShareLinksTable = "vault_share_links"
+	// VaultShareLinksInverseTable is the table name for the VaultShareLink entity.
+	// It exists in this package in order to avoid circular dependency with the "vaultsharelink" package.
+	VaultShareLinksInverseTable = "vault_share_links"
+	// VaultShareLinksColumn is the table column denoting the vault_share_links relation/edge.
+	VaultShareLinksColumn = "tenant_vault_share_links"
 	// JournalEntriesTable is the table that holds the journal_entries relation/edge.
 	JournalEntriesTable = "journal_entries"
 	// JournalEntriesInverseTable is the table name for the JournalEntry entity.
@@ -516,6 +563,139 @@ const (
 	GoalsInverseTable = "goals"
 	// GoalsColumn is the table column denoting the goals relation/edge.
 	GoalsColumn = "tenant_goals"
+	// SuppliersTable is the table that holds the suppliers relation/edge.
+	SuppliersTable = "suppliers"
+	// SuppliersInverseTable is the table name for the Supplier entity.
+	// It exists in this package in order to avoid circular dependency with the "supplier" package.
+	SuppliersInverseTable = "suppliers"
+	// SuppliersColumn is the table column denoting the suppliers relation/edge.
+	SuppliersColumn = "tenant_suppliers"
+	// CategoriesTable is the table that holds the categories relation/edge.
+	CategoriesTable = "categories"
+	// CategoriesInverseTable is the table name for the Category entity.
+	// It exists in this package in order to avoid circular dependency with the "category" package.
+	CategoriesInverseTable = "categories"
+	// CategoriesColumn is the table column denoting the categories relation/edge.
+	CategoriesColumn = "tenant_categories"
+	// WarehousesTable is the table that holds the warehouses relation/edge.
+	WarehousesTable = "warehouses"
+	// WarehousesInverseTable is the table name for the Warehouse entity.
+	// It exists in this package in order to avoid circular dependency with the "warehouse" package.
+	WarehousesInverseTable = "warehouses"
+	// WarehousesColumn is the table column denoting the warehouses relation/edge.
+	WarehousesColumn = "tenant_warehouses"
+	// AssetAssignmentsTable is the table that holds the asset_assignments relation/edge.
+	AssetAssignmentsTable = "asset_assignments"
+	// AssetAssignmentsInverseTable is the table name for the AssetAssignment entity.
+	// It exists in this package in order to avoid circular dependency with the "assetassignment" package.
+	AssetAssignmentsInverseTable = "asset_assignments"
+	// AssetAssignmentsColumn is the table column denoting the asset_assignments relation/edge.
+	AssetAssignmentsColumn = "tenant_asset_assignments"
+	// ContactsTable is the table that holds the contacts relation/edge.
+	ContactsTable = "contacts"
+	// ContactsInverseTable is the table name for the Contact entity.
+	// It exists in this package in order to avoid circular dependency with the "contact" package.
+	ContactsInverseTable = "contacts"
+	// ContactsColumn is the table column denoting the contacts relation/edge.
+	ContactsColumn = "tenant_contacts"
+	// LegalHoldsTable is the table that holds the legal_holds relation/edge.
+	LegalHoldsTable = "legal_holds"
+	// LegalHoldsInverseTable is the table name for the LegalHold entity.
+	// It exists in this package in order to avoid circular dependency with the "legalhold" package.
+	LegalHoldsInverseTable = "legal_holds"
+	// LegalHoldsColumn is the table column denoting the legal_holds relation/edge.
+	LegalHoldsColumn = "tenant_legal_holds"
+	// RetentionPoliciesTable is the table that holds the retention_policies relation/edge.
+	RetentionPoliciesTable = "retention_policies"
+	// RetentionPoliciesInverseTable is the table name for the RetentionPolicy entity.
+	// It exists in this package in order to avoid circular dependency with the "retentionpolicy" package.
+	RetentionPoliciesInverseTable = "retention_policies"
+	// RetentionPoliciesColumn is the table column denoting the retention_policies relation/edge.
+	RetentionPoliciesColumn = "tenant_retention_policies"
+	// VaultTemplatesTable is the table that holds the vault_templates relation/edge.
+	VaultTemplatesTable = "vault_templates"
+	// VaultTemplatesInverseTable is the table name for the VaultTemplate entity.
+	// It exists in this package in order to avoid circular dependency with the "vaulttemplate" package.
+	VaultTemplatesInverseTable = "vault_templates"
+	// VaultTemplatesColumn is the table column denoting the vault_templates relation/edge.
+	VaultTemplatesColumn = "tenant_vault_templates"
+	// StockAuditLogsTable is the table that holds the stock_audit_logs relation/edge.
+	StockAuditLogsTable = "stock_audit_logs"
+	// StockAuditLogsInverseTable is the table name for the StockAuditLog entity.
+	// It exists in this package in order to avoid circular dependency with the "stockauditlog" package.
+	StockAuditLogsInverseTable = "stock_audit_logs"
+	// StockAuditLogsColumn is the table column denoting the stock_audit_logs relation/edge.
+	StockAuditLogsColumn = "tenant_stock_audit_logs"
+	// MaintenanceSchedulesTable is the table that holds the maintenance_schedules relation/edge.
+	MaintenanceSchedulesTable = "maintenance_schedules"
+	// MaintenanceSchedulesInverseTable is the table name for the MaintenanceSchedule entity.
+	// It exists in this package in order to avoid circular dependency with the "maintenanceschedule" package.
+	MaintenanceSchedulesInverseTable = "maintenance_schedules"
+	// MaintenanceSchedulesColumn is the table column denoting the maintenance_schedules relation/edge.
+	MaintenanceSchedulesColumn = "tenant_maintenance_schedules"
+	// StockAlertsTable is the table that holds the stock_alerts relation/edge.
+	StockAlertsTable = "stock_alerts"
+	// StockAlertsInverseTable is the table name for the StockAlert entity.
+	// It exists in this package in order to avoid circular dependency with the "stockalert" package.
+	StockAlertsInverseTable = "stock_alerts"
+	// StockAlertsColumn is the table column denoting the stock_alerts relation/edge.
+	StockAlertsColumn = "tenant_stock_alerts"
+	// PurchaseOrdersTable is the table that holds the purchase_orders relation/edge.
+	PurchaseOrdersTable = "purchase_orders"
+	// PurchaseOrdersInverseTable is the table name for the PurchaseOrder entity.
+	// It exists in this package in order to avoid circular dependency with the "purchaseorder" package.
+	PurchaseOrdersInverseTable = "purchase_orders"
+	// PurchaseOrdersColumn is the table column denoting the purchase_orders relation/edge.
+	PurchaseOrdersColumn = "tenant_purchase_orders"
+	// InventoryCountsTable is the table that holds the inventory_counts relation/edge.
+	InventoryCountsTable = "inventory_counts"
+	// InventoryCountsInverseTable is the table name for the InventoryCount entity.
+	// It exists in this package in order to avoid circular dependency with the "inventorycount" package.
+	InventoryCountsInverseTable = "inventory_counts"
+	// InventoryCountsColumn is the table column denoting the inventory_counts relation/edge.
+	InventoryCountsColumn = "tenant_inventory_counts"
+	// JobPostingsTable is the table that holds the job_postings relation/edge.
+	JobPostingsTable = "job_postings"
+	// JobPostingsInverseTable is the table name for the JobPosting entity.
+	// It exists in this package in order to avoid circular dependency with the "jobposting" package.
+	JobPostingsInverseTable = "job_postings"
+	// JobPostingsColumn is the table column denoting the job_postings relation/edge.
+	JobPostingsColumn = "tenant_job_postings"
+	// CandidatesTable is the table that holds the candidates relation/edge.
+	CandidatesTable = "candidates"
+	// CandidatesInverseTable is the table name for the Candidate entity.
+	// It exists in this package in order to avoid circular dependency with the "candidate" package.
+	CandidatesInverseTable = "candidates"
+	// CandidatesColumn is the table column denoting the candidates relation/edge.
+	CandidatesColumn = "tenant_candidates"
+	// ApplicationsTable is the table that holds the applications relation/edge.
+	ApplicationsTable = "applications"
+	// ApplicationsInverseTable is the table name for the Application entity.
+	// It exists in this package in order to avoid circular dependency with the "application" package.
+	ApplicationsInverseTable = "applications"
+	// ApplicationsColumn is the table column denoting the applications relation/edge.
+	ApplicationsColumn = "tenant_applications"
+	// InterviewsTable is the table that holds the interviews relation/edge.
+	InterviewsTable = "interviews"
+	// InterviewsInverseTable is the table name for the Interview entity.
+	// It exists in this package in order to avoid circular dependency with the "interview" package.
+	InterviewsInverseTable = "interviews"
+	// InterviewsColumn is the table column denoting the interviews relation/edge.
+	InterviewsColumn = "tenant_interviews"
+	// BenefitPlansTable is the table that holds the benefit_plans relation/edge.
+	BenefitPlansTable = "benefit_plans"
+	// BenefitPlansInverseTable is the table name for the BenefitPlan entity.
+	// It exists in this package in order to avoid circular dependency with the "benefitplan" package.
+	BenefitPlansInverseTable = "benefit_plans"
+	// BenefitPlansColumn is the table column denoting the benefit_plans relation/edge.
+	BenefitPlansColumn = "tenant_benefit_plans"
+	// BenefitEnrollmentsTable is the table that holds the benefit_enrollments relation/edge.
+	BenefitEnrollmentsTable = "benefit_enrollments"
+	// BenefitEnrollmentsInverseTable is the table name for the BenefitEnrollment entity.
+	// It exists in this package in order to avoid circular dependency with the "benefitenrollment" package.
+	BenefitEnrollmentsInverseTable = "benefit_enrollments"
+	// BenefitEnrollmentsColumn is the table column denoting the benefit_enrollments relation/edge.
+	BenefitEnrollmentsColumn = "tenant_benefit_enrollments"
 )
 
 // Columns holds all SQL columns for tenant fields.
@@ -1033,6 +1213,20 @@ func ByVaultItems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByVaultShareLinksCount orders the results by vault_share_links count.
+func ByVaultShareLinksCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVaultShareLinksStep(), opts...)
+	}
+}
+
+// ByVaultShareLinks orders the results by vault_share_links terms.
+func ByVaultShareLinks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVaultShareLinksStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByJournalEntriesCount orders the results by journal_entries count.
 func ByJournalEntriesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -1347,6 +1541,272 @@ func ByGoals(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newGoalsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySuppliersCount orders the results by suppliers count.
+func BySuppliersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSuppliersStep(), opts...)
+	}
+}
+
+// BySuppliers orders the results by suppliers terms.
+func BySuppliers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSuppliersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCategoriesCount orders the results by categories count.
+func ByCategoriesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCategoriesStep(), opts...)
+	}
+}
+
+// ByCategories orders the results by categories terms.
+func ByCategories(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCategoriesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByWarehousesCount orders the results by warehouses count.
+func ByWarehousesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newWarehousesStep(), opts...)
+	}
+}
+
+// ByWarehouses orders the results by warehouses terms.
+func ByWarehouses(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWarehousesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByAssetAssignmentsCount orders the results by asset_assignments count.
+func ByAssetAssignmentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAssetAssignmentsStep(), opts...)
+	}
+}
+
+// ByAssetAssignments orders the results by asset_assignments terms.
+func ByAssetAssignments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAssetAssignmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByContactsCount orders the results by contacts count.
+func ByContactsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newContactsStep(), opts...)
+	}
+}
+
+// ByContacts orders the results by contacts terms.
+func ByContacts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newContactsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByLegalHoldsCount orders the results by legal_holds count.
+func ByLegalHoldsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLegalHoldsStep(), opts...)
+	}
+}
+
+// ByLegalHolds orders the results by legal_holds terms.
+func ByLegalHolds(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLegalHoldsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByRetentionPoliciesCount orders the results by retention_policies count.
+func ByRetentionPoliciesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRetentionPoliciesStep(), opts...)
+	}
+}
+
+// ByRetentionPolicies orders the results by retention_policies terms.
+func ByRetentionPolicies(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRetentionPoliciesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByVaultTemplatesCount orders the results by vault_templates count.
+func ByVaultTemplatesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVaultTemplatesStep(), opts...)
+	}
+}
+
+// ByVaultTemplates orders the results by vault_templates terms.
+func ByVaultTemplates(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVaultTemplatesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByStockAuditLogsCount orders the results by stock_audit_logs count.
+func ByStockAuditLogsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newStockAuditLogsStep(), opts...)
+	}
+}
+
+// ByStockAuditLogs orders the results by stock_audit_logs terms.
+func ByStockAuditLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStockAuditLogsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByMaintenanceSchedulesCount orders the results by maintenance_schedules count.
+func ByMaintenanceSchedulesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newMaintenanceSchedulesStep(), opts...)
+	}
+}
+
+// ByMaintenanceSchedules orders the results by maintenance_schedules terms.
+func ByMaintenanceSchedules(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newMaintenanceSchedulesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByStockAlertsCount orders the results by stock_alerts count.
+func ByStockAlertsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newStockAlertsStep(), opts...)
+	}
+}
+
+// ByStockAlerts orders the results by stock_alerts terms.
+func ByStockAlerts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStockAlertsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPurchaseOrdersCount orders the results by purchase_orders count.
+func ByPurchaseOrdersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPurchaseOrdersStep(), opts...)
+	}
+}
+
+// ByPurchaseOrders orders the results by purchase_orders terms.
+func ByPurchaseOrders(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPurchaseOrdersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByInventoryCountsCount orders the results by inventory_counts count.
+func ByInventoryCountsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newInventoryCountsStep(), opts...)
+	}
+}
+
+// ByInventoryCounts orders the results by inventory_counts terms.
+func ByInventoryCounts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newInventoryCountsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByJobPostingsCount orders the results by job_postings count.
+func ByJobPostingsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newJobPostingsStep(), opts...)
+	}
+}
+
+// ByJobPostings orders the results by job_postings terms.
+func ByJobPostings(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newJobPostingsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCandidatesCount orders the results by candidates count.
+func ByCandidatesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCandidatesStep(), opts...)
+	}
+}
+
+// ByCandidates orders the results by candidates terms.
+func ByCandidates(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCandidatesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByApplicationsCount orders the results by applications count.
+func ByApplicationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newApplicationsStep(), opts...)
+	}
+}
+
+// ByApplications orders the results by applications terms.
+func ByApplications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newApplicationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByInterviewsCount orders the results by interviews count.
+func ByInterviewsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newInterviewsStep(), opts...)
+	}
+}
+
+// ByInterviews orders the results by interviews terms.
+func ByInterviews(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newInterviewsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByBenefitPlansCount orders the results by benefit_plans count.
+func ByBenefitPlansCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newBenefitPlansStep(), opts...)
+	}
+}
+
+// ByBenefitPlans orders the results by benefit_plans terms.
+func ByBenefitPlans(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBenefitPlansStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByBenefitEnrollmentsCount orders the results by benefit_enrollments count.
+func ByBenefitEnrollmentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newBenefitEnrollmentsStep(), opts...)
+	}
+}
+
+// ByBenefitEnrollments orders the results by benefit_enrollments terms.
+func ByBenefitEnrollments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBenefitEnrollmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newParentStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -1571,6 +2031,13 @@ func newVaultItemsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, VaultItemsTable, VaultItemsColumn),
 	)
 }
+func newVaultShareLinksStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VaultShareLinksInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, VaultShareLinksTable, VaultShareLinksColumn),
+	)
+}
 func newJournalEntriesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -1730,5 +2197,138 @@ func newGoalsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(GoalsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, GoalsTable, GoalsColumn),
+	)
+}
+func newSuppliersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SuppliersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SuppliersTable, SuppliersColumn),
+	)
+}
+func newCategoriesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CategoriesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CategoriesTable, CategoriesColumn),
+	)
+}
+func newWarehousesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WarehousesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WarehousesTable, WarehousesColumn),
+	)
+}
+func newAssetAssignmentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AssetAssignmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AssetAssignmentsTable, AssetAssignmentsColumn),
+	)
+}
+func newContactsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ContactsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ContactsTable, ContactsColumn),
+	)
+}
+func newLegalHoldsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LegalHoldsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LegalHoldsTable, LegalHoldsColumn),
+	)
+}
+func newRetentionPoliciesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RetentionPoliciesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, RetentionPoliciesTable, RetentionPoliciesColumn),
+	)
+}
+func newVaultTemplatesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VaultTemplatesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, VaultTemplatesTable, VaultTemplatesColumn),
+	)
+}
+func newStockAuditLogsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StockAuditLogsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, StockAuditLogsTable, StockAuditLogsColumn),
+	)
+}
+func newMaintenanceSchedulesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(MaintenanceSchedulesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, MaintenanceSchedulesTable, MaintenanceSchedulesColumn),
+	)
+}
+func newStockAlertsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StockAlertsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, StockAlertsTable, StockAlertsColumn),
+	)
+}
+func newPurchaseOrdersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PurchaseOrdersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PurchaseOrdersTable, PurchaseOrdersColumn),
+	)
+}
+func newInventoryCountsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(InventoryCountsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, InventoryCountsTable, InventoryCountsColumn),
+	)
+}
+func newJobPostingsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(JobPostingsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, JobPostingsTable, JobPostingsColumn),
+	)
+}
+func newCandidatesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CandidatesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CandidatesTable, CandidatesColumn),
+	)
+}
+func newApplicationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ApplicationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ApplicationsTable, ApplicationsColumn),
+	)
+}
+func newInterviewsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(InterviewsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, InterviewsTable, InterviewsColumn),
+	)
+}
+func newBenefitPlansStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(BenefitPlansInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, BenefitPlansTable, BenefitPlansColumn),
+	)
+}
+func newBenefitEnrollmentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(BenefitEnrollmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, BenefitEnrollmentsTable, BenefitEnrollmentsColumn),
 	)
 }

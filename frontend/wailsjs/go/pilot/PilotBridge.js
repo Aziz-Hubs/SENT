@@ -10,6 +10,10 @@ export function AssignTicket(arg1, arg2) {
   return window['go']['pilot']['PilotBridge']['AssignTicket'](arg1, arg2);
 }
 
+export function ExecuteRemediation(arg1, arg2) {
+  return window['go']['pilot']['PilotBridge']['ExecuteRemediation'](arg1, arg2);
+}
+
 export function GetTickets() {
   return window['go']['pilot']['PilotBridge']['GetTickets']();
 }

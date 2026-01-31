@@ -100,6 +100,11 @@ func ClaimLeaseExpiresAt(v time.Time) predicate.Ticket {
 	return predicate.Ticket(sql.FieldEQ(FieldClaimLeaseExpiresAt, v))
 }
 
+// DeepLink applies equality check predicate on the "deep_link" field. It's identical to DeepLinkEQ.
+func DeepLink(v string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldEQ(FieldDeepLink, v))
+}
+
 // SubjectEQ applies the EQ predicate on the "subject" field.
 func SubjectEQ(v string) predicate.Ticket {
 	return predicate.Ticket(sql.FieldEQ(FieldSubject, v))
@@ -650,6 +655,91 @@ func ClaimLeaseExpiresAtNotNil() predicate.Ticket {
 	return predicate.Ticket(sql.FieldNotNull(FieldClaimLeaseExpiresAt))
 }
 
+// DeepLinkEQ applies the EQ predicate on the "deep_link" field.
+func DeepLinkEQ(v string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldEQ(FieldDeepLink, v))
+}
+
+// DeepLinkNEQ applies the NEQ predicate on the "deep_link" field.
+func DeepLinkNEQ(v string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldNEQ(FieldDeepLink, v))
+}
+
+// DeepLinkIn applies the In predicate on the "deep_link" field.
+func DeepLinkIn(vs ...string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldIn(FieldDeepLink, vs...))
+}
+
+// DeepLinkNotIn applies the NotIn predicate on the "deep_link" field.
+func DeepLinkNotIn(vs ...string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldNotIn(FieldDeepLink, vs...))
+}
+
+// DeepLinkGT applies the GT predicate on the "deep_link" field.
+func DeepLinkGT(v string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldGT(FieldDeepLink, v))
+}
+
+// DeepLinkGTE applies the GTE predicate on the "deep_link" field.
+func DeepLinkGTE(v string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldGTE(FieldDeepLink, v))
+}
+
+// DeepLinkLT applies the LT predicate on the "deep_link" field.
+func DeepLinkLT(v string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldLT(FieldDeepLink, v))
+}
+
+// DeepLinkLTE applies the LTE predicate on the "deep_link" field.
+func DeepLinkLTE(v string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldLTE(FieldDeepLink, v))
+}
+
+// DeepLinkContains applies the Contains predicate on the "deep_link" field.
+func DeepLinkContains(v string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldContains(FieldDeepLink, v))
+}
+
+// DeepLinkHasPrefix applies the HasPrefix predicate on the "deep_link" field.
+func DeepLinkHasPrefix(v string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldHasPrefix(FieldDeepLink, v))
+}
+
+// DeepLinkHasSuffix applies the HasSuffix predicate on the "deep_link" field.
+func DeepLinkHasSuffix(v string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldHasSuffix(FieldDeepLink, v))
+}
+
+// DeepLinkIsNil applies the IsNil predicate on the "deep_link" field.
+func DeepLinkIsNil() predicate.Ticket {
+	return predicate.Ticket(sql.FieldIsNull(FieldDeepLink))
+}
+
+// DeepLinkNotNil applies the NotNil predicate on the "deep_link" field.
+func DeepLinkNotNil() predicate.Ticket {
+	return predicate.Ticket(sql.FieldNotNull(FieldDeepLink))
+}
+
+// DeepLinkEqualFold applies the EqualFold predicate on the "deep_link" field.
+func DeepLinkEqualFold(v string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldEqualFold(FieldDeepLink, v))
+}
+
+// DeepLinkContainsFold applies the ContainsFold predicate on the "deep_link" field.
+func DeepLinkContainsFold(v string) predicate.Ticket {
+	return predicate.Ticket(sql.FieldContainsFold(FieldDeepLink, v))
+}
+
+// ExecutionPlanIsNil applies the IsNil predicate on the "execution_plan" field.
+func ExecutionPlanIsNil() predicate.Ticket {
+	return predicate.Ticket(sql.FieldIsNull(FieldExecutionPlan))
+}
+
+// ExecutionPlanNotNil applies the NotNil predicate on the "execution_plan" field.
+func ExecutionPlanNotNil() predicate.Ticket {
+	return predicate.Ticket(sql.FieldNotNull(FieldExecutionPlan))
+}
+
 // HasTenant applies the HasEdge predicate on the "tenant" edge.
 func HasTenant() predicate.Ticket {
 	return predicate.Ticket(func(s *sql.Selector) {
@@ -742,21 +832,21 @@ func HasAssetWith(preds ...predicate.Asset) predicate.Ticket {
 	})
 }
 
-// HasTimeEntries applies the HasEdge predicate on the "time_entries" edge.
-func HasTimeEntries() predicate.Ticket {
+// HasWorkLogs applies the HasEdge predicate on the "work_logs" edge.
+func HasWorkLogs() predicate.Ticket {
 	return predicate.Ticket(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TimeEntriesTable, TimeEntriesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, WorkLogsTable, WorkLogsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasTimeEntriesWith applies the HasEdge predicate on the "time_entries" edge with a given conditions (other predicates).
-func HasTimeEntriesWith(preds ...predicate.TimeEntry) predicate.Ticket {
+// HasWorkLogsWith applies the HasEdge predicate on the "work_logs" edge with a given conditions (other predicates).
+func HasWorkLogsWith(preds ...predicate.WorkLog) predicate.Ticket {
 	return predicate.Ticket(func(s *sql.Selector) {
-		step := newTimeEntriesStep()
+		step := newWorkLogsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

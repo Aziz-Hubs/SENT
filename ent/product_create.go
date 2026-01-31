@@ -7,10 +7,19 @@ import (
 	"errors"
 	"fmt"
 	"sent/ent/account"
+	"sent/ent/assetassignment"
+	"sent/ent/category"
+	"sent/ent/inventorycount"
 	"sent/ent/inventoryreservation"
+	"sent/ent/maintenanceschedule"
 	"sent/ent/product"
+	"sent/ent/productvariant"
+	"sent/ent/purchaseorderline"
+	"sent/ent/stockalert"
 	"sent/ent/stockmovement"
+	"sent/ent/supplier"
 	"sent/ent/tenant"
+	"sent/ent/warehouse"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -113,6 +122,188 @@ func (_c *ProductCreate) SetNillableUpdatedAt(v *time.Time) *ProductCreate {
 	return _c
 }
 
+// SetMinStockLevel sets the "min_stock_level" field.
+func (_c *ProductCreate) SetMinStockLevel(v int) *ProductCreate {
+	_c.mutation.SetMinStockLevel(v)
+	return _c
+}
+
+// SetNillableMinStockLevel sets the "min_stock_level" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableMinStockLevel(v *int) *ProductCreate {
+	if v != nil {
+		_c.SetMinStockLevel(*v)
+	}
+	return _c
+}
+
+// SetMaxStockLevel sets the "max_stock_level" field.
+func (_c *ProductCreate) SetMaxStockLevel(v int) *ProductCreate {
+	_c.mutation.SetMaxStockLevel(v)
+	return _c
+}
+
+// SetNillableMaxStockLevel sets the "max_stock_level" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableMaxStockLevel(v *int) *ProductCreate {
+	if v != nil {
+		_c.SetMaxStockLevel(*v)
+	}
+	return _c
+}
+
+// SetBarcode sets the "barcode" field.
+func (_c *ProductCreate) SetBarcode(v string) *ProductCreate {
+	_c.mutation.SetBarcode(v)
+	return _c
+}
+
+// SetNillableBarcode sets the "barcode" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableBarcode(v *string) *ProductCreate {
+	if v != nil {
+		_c.SetBarcode(*v)
+	}
+	return _c
+}
+
+// SetLocation sets the "location" field.
+func (_c *ProductCreate) SetLocation(v string) *ProductCreate {
+	_c.mutation.SetLocation(v)
+	return _c
+}
+
+// SetNillableLocation sets the "location" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableLocation(v *string) *ProductCreate {
+	if v != nil {
+		_c.SetLocation(*v)
+	}
+	return _c
+}
+
+// SetIsVariantParent sets the "is_variant_parent" field.
+func (_c *ProductCreate) SetIsVariantParent(v bool) *ProductCreate {
+	_c.mutation.SetIsVariantParent(v)
+	return _c
+}
+
+// SetNillableIsVariantParent sets the "is_variant_parent" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableIsVariantParent(v *bool) *ProductCreate {
+	if v != nil {
+		_c.SetIsVariantParent(*v)
+	}
+	return _c
+}
+
+// SetSerialNumber sets the "serial_number" field.
+func (_c *ProductCreate) SetSerialNumber(v string) *ProductCreate {
+	_c.mutation.SetSerialNumber(v)
+	return _c
+}
+
+// SetNillableSerialNumber sets the "serial_number" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableSerialNumber(v *string) *ProductCreate {
+	if v != nil {
+		_c.SetSerialNumber(*v)
+	}
+	return _c
+}
+
+// SetPurchaseDate sets the "purchase_date" field.
+func (_c *ProductCreate) SetPurchaseDate(v time.Time) *ProductCreate {
+	_c.mutation.SetPurchaseDate(v)
+	return _c
+}
+
+// SetNillablePurchaseDate sets the "purchase_date" field if the given value is not nil.
+func (_c *ProductCreate) SetNillablePurchaseDate(v *time.Time) *ProductCreate {
+	if v != nil {
+		_c.SetPurchaseDate(*v)
+	}
+	return _c
+}
+
+// SetPurchasePrice sets the "purchase_price" field.
+func (_c *ProductCreate) SetPurchasePrice(v decimal.Decimal) *ProductCreate {
+	_c.mutation.SetPurchasePrice(v)
+	return _c
+}
+
+// SetNillablePurchasePrice sets the "purchase_price" field if the given value is not nil.
+func (_c *ProductCreate) SetNillablePurchasePrice(v *decimal.Decimal) *ProductCreate {
+	if v != nil {
+		_c.SetPurchasePrice(*v)
+	}
+	return _c
+}
+
+// SetUsefulLifeMonths sets the "useful_life_months" field.
+func (_c *ProductCreate) SetUsefulLifeMonths(v int) *ProductCreate {
+	_c.mutation.SetUsefulLifeMonths(v)
+	return _c
+}
+
+// SetNillableUsefulLifeMonths sets the "useful_life_months" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableUsefulLifeMonths(v *int) *ProductCreate {
+	if v != nil {
+		_c.SetUsefulLifeMonths(*v)
+	}
+	return _c
+}
+
+// SetWarrantyExpiresAt sets the "warranty_expires_at" field.
+func (_c *ProductCreate) SetWarrantyExpiresAt(v time.Time) *ProductCreate {
+	_c.mutation.SetWarrantyExpiresAt(v)
+	return _c
+}
+
+// SetNillableWarrantyExpiresAt sets the "warranty_expires_at" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableWarrantyExpiresAt(v *time.Time) *ProductCreate {
+	if v != nil {
+		_c.SetWarrantyExpiresAt(*v)
+	}
+	return _c
+}
+
+// SetDisposalDate sets the "disposal_date" field.
+func (_c *ProductCreate) SetDisposalDate(v time.Time) *ProductCreate {
+	_c.mutation.SetDisposalDate(v)
+	return _c
+}
+
+// SetNillableDisposalDate sets the "disposal_date" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableDisposalDate(v *time.Time) *ProductCreate {
+	if v != nil {
+		_c.SetDisposalDate(*v)
+	}
+	return _c
+}
+
+// SetDisposalReason sets the "disposal_reason" field.
+func (_c *ProductCreate) SetDisposalReason(v string) *ProductCreate {
+	_c.mutation.SetDisposalReason(v)
+	return _c
+}
+
+// SetNillableDisposalReason sets the "disposal_reason" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableDisposalReason(v *string) *ProductCreate {
+	if v != nil {
+		_c.SetDisposalReason(*v)
+	}
+	return _c
+}
+
+// SetIsDisposed sets the "is_disposed" field.
+func (_c *ProductCreate) SetIsDisposed(v bool) *ProductCreate {
+	_c.mutation.SetIsDisposed(v)
+	return _c
+}
+
+// SetNillableIsDisposed sets the "is_disposed" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableIsDisposed(v *bool) *ProductCreate {
+	if v != nil {
+		_c.SetIsDisposed(*v)
+	}
+	return _c
+}
+
 // SetTenantID sets the "tenant" edge to the Tenant entity by ID.
 func (_c *ProductCreate) SetTenantID(id int) *ProductCreate {
 	_c.mutation.SetTenantID(id)
@@ -173,6 +364,153 @@ func (_c *ProductCreate) SetVendor(v *Account) *ProductCreate {
 	return _c.SetVendorID(v.ID)
 }
 
+// SetSupplierID sets the "supplier" edge to the Supplier entity by ID.
+func (_c *ProductCreate) SetSupplierID(id int) *ProductCreate {
+	_c.mutation.SetSupplierID(id)
+	return _c
+}
+
+// SetNillableSupplierID sets the "supplier" edge to the Supplier entity by ID if the given value is not nil.
+func (_c *ProductCreate) SetNillableSupplierID(id *int) *ProductCreate {
+	if id != nil {
+		_c = _c.SetSupplierID(*id)
+	}
+	return _c
+}
+
+// SetSupplier sets the "supplier" edge to the Supplier entity.
+func (_c *ProductCreate) SetSupplier(v *Supplier) *ProductCreate {
+	return _c.SetSupplierID(v.ID)
+}
+
+// SetCategoryID sets the "category" edge to the Category entity by ID.
+func (_c *ProductCreate) SetCategoryID(id int) *ProductCreate {
+	_c.mutation.SetCategoryID(id)
+	return _c
+}
+
+// SetNillableCategoryID sets the "category" edge to the Category entity by ID if the given value is not nil.
+func (_c *ProductCreate) SetNillableCategoryID(id *int) *ProductCreate {
+	if id != nil {
+		_c = _c.SetCategoryID(*id)
+	}
+	return _c
+}
+
+// SetCategory sets the "category" edge to the Category entity.
+func (_c *ProductCreate) SetCategory(v *Category) *ProductCreate {
+	return _c.SetCategoryID(v.ID)
+}
+
+// SetWarehouseID sets the "warehouse" edge to the Warehouse entity by ID.
+func (_c *ProductCreate) SetWarehouseID(id int) *ProductCreate {
+	_c.mutation.SetWarehouseID(id)
+	return _c
+}
+
+// SetNillableWarehouseID sets the "warehouse" edge to the Warehouse entity by ID if the given value is not nil.
+func (_c *ProductCreate) SetNillableWarehouseID(id *int) *ProductCreate {
+	if id != nil {
+		_c = _c.SetWarehouseID(*id)
+	}
+	return _c
+}
+
+// SetWarehouse sets the "warehouse" edge to the Warehouse entity.
+func (_c *ProductCreate) SetWarehouse(v *Warehouse) *ProductCreate {
+	return _c.SetWarehouseID(v.ID)
+}
+
+// AddAssignmentIDs adds the "assignments" edge to the AssetAssignment entity by IDs.
+func (_c *ProductCreate) AddAssignmentIDs(ids ...int) *ProductCreate {
+	_c.mutation.AddAssignmentIDs(ids...)
+	return _c
+}
+
+// AddAssignments adds the "assignments" edges to the AssetAssignment entity.
+func (_c *ProductCreate) AddAssignments(v ...*AssetAssignment) *ProductCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddAssignmentIDs(ids...)
+}
+
+// AddVariantIDs adds the "variants" edge to the ProductVariant entity by IDs.
+func (_c *ProductCreate) AddVariantIDs(ids ...int) *ProductCreate {
+	_c.mutation.AddVariantIDs(ids...)
+	return _c
+}
+
+// AddVariants adds the "variants" edges to the ProductVariant entity.
+func (_c *ProductCreate) AddVariants(v ...*ProductVariant) *ProductCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddVariantIDs(ids...)
+}
+
+// AddMaintenanceScheduleIDs adds the "maintenance_schedules" edge to the MaintenanceSchedule entity by IDs.
+func (_c *ProductCreate) AddMaintenanceScheduleIDs(ids ...int) *ProductCreate {
+	_c.mutation.AddMaintenanceScheduleIDs(ids...)
+	return _c
+}
+
+// AddMaintenanceSchedules adds the "maintenance_schedules" edges to the MaintenanceSchedule entity.
+func (_c *ProductCreate) AddMaintenanceSchedules(v ...*MaintenanceSchedule) *ProductCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddMaintenanceScheduleIDs(ids...)
+}
+
+// AddAlertIDs adds the "alerts" edge to the StockAlert entity by IDs.
+func (_c *ProductCreate) AddAlertIDs(ids ...int) *ProductCreate {
+	_c.mutation.AddAlertIDs(ids...)
+	return _c
+}
+
+// AddAlerts adds the "alerts" edges to the StockAlert entity.
+func (_c *ProductCreate) AddAlerts(v ...*StockAlert) *ProductCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddAlertIDs(ids...)
+}
+
+// AddPurchaseOrderLineIDs adds the "purchase_order_lines" edge to the PurchaseOrderLine entity by IDs.
+func (_c *ProductCreate) AddPurchaseOrderLineIDs(ids ...int) *ProductCreate {
+	_c.mutation.AddPurchaseOrderLineIDs(ids...)
+	return _c
+}
+
+// AddPurchaseOrderLines adds the "purchase_order_lines" edges to the PurchaseOrderLine entity.
+func (_c *ProductCreate) AddPurchaseOrderLines(v ...*PurchaseOrderLine) *ProductCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddPurchaseOrderLineIDs(ids...)
+}
+
+// AddInventoryCountIDs adds the "inventory_counts" edge to the InventoryCount entity by IDs.
+func (_c *ProductCreate) AddInventoryCountIDs(ids ...int) *ProductCreate {
+	_c.mutation.AddInventoryCountIDs(ids...)
+	return _c
+}
+
+// AddInventoryCounts adds the "inventory_counts" edges to the InventoryCount entity.
+func (_c *ProductCreate) AddInventoryCounts(v ...*InventoryCount) *ProductCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddInventoryCountIDs(ids...)
+}
+
 // Mutation returns the ProductMutation object of the builder.
 func (_c *ProductCreate) Mutation() *ProductMutation {
 	return _c.mutation
@@ -224,6 +562,22 @@ func (_c *ProductCreate) defaults() {
 		v := product.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.MinStockLevel(); !ok {
+		v := product.DefaultMinStockLevel
+		_c.mutation.SetMinStockLevel(v)
+	}
+	if _, ok := _c.mutation.MaxStockLevel(); !ok {
+		v := product.DefaultMaxStockLevel
+		_c.mutation.SetMaxStockLevel(v)
+	}
+	if _, ok := _c.mutation.IsVariantParent(); !ok {
+		v := product.DefaultIsVariantParent
+		_c.mutation.SetIsVariantParent(v)
+	}
+	if _, ok := _c.mutation.IsDisposed(); !ok {
+		v := product.DefaultIsDisposed
+		_c.mutation.SetIsDisposed(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -245,6 +599,18 @@ func (_c *ProductCreate) check() error {
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Product.updated_at"`)}
+	}
+	if _, ok := _c.mutation.MinStockLevel(); !ok {
+		return &ValidationError{Name: "min_stock_level", err: errors.New(`ent: missing required field "Product.min_stock_level"`)}
+	}
+	if _, ok := _c.mutation.MaxStockLevel(); !ok {
+		return &ValidationError{Name: "max_stock_level", err: errors.New(`ent: missing required field "Product.max_stock_level"`)}
+	}
+	if _, ok := _c.mutation.IsVariantParent(); !ok {
+		return &ValidationError{Name: "is_variant_parent", err: errors.New(`ent: missing required field "Product.is_variant_parent"`)}
+	}
+	if _, ok := _c.mutation.IsDisposed(); !ok {
+		return &ValidationError{Name: "is_disposed", err: errors.New(`ent: missing required field "Product.is_disposed"`)}
 	}
 	if len(_c.mutation.TenantIDs()) == 0 {
 		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "Product.tenant"`)}
@@ -306,6 +672,58 @@ func (_c *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(product.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.MinStockLevel(); ok {
+		_spec.SetField(product.FieldMinStockLevel, field.TypeInt, value)
+		_node.MinStockLevel = value
+	}
+	if value, ok := _c.mutation.MaxStockLevel(); ok {
+		_spec.SetField(product.FieldMaxStockLevel, field.TypeInt, value)
+		_node.MaxStockLevel = value
+	}
+	if value, ok := _c.mutation.Barcode(); ok {
+		_spec.SetField(product.FieldBarcode, field.TypeString, value)
+		_node.Barcode = value
+	}
+	if value, ok := _c.mutation.Location(); ok {
+		_spec.SetField(product.FieldLocation, field.TypeString, value)
+		_node.Location = value
+	}
+	if value, ok := _c.mutation.IsVariantParent(); ok {
+		_spec.SetField(product.FieldIsVariantParent, field.TypeBool, value)
+		_node.IsVariantParent = value
+	}
+	if value, ok := _c.mutation.SerialNumber(); ok {
+		_spec.SetField(product.FieldSerialNumber, field.TypeString, value)
+		_node.SerialNumber = value
+	}
+	if value, ok := _c.mutation.PurchaseDate(); ok {
+		_spec.SetField(product.FieldPurchaseDate, field.TypeTime, value)
+		_node.PurchaseDate = value
+	}
+	if value, ok := _c.mutation.PurchasePrice(); ok {
+		_spec.SetField(product.FieldPurchasePrice, field.TypeOther, value)
+		_node.PurchasePrice = value
+	}
+	if value, ok := _c.mutation.UsefulLifeMonths(); ok {
+		_spec.SetField(product.FieldUsefulLifeMonths, field.TypeInt, value)
+		_node.UsefulLifeMonths = value
+	}
+	if value, ok := _c.mutation.WarrantyExpiresAt(); ok {
+		_spec.SetField(product.FieldWarrantyExpiresAt, field.TypeTime, value)
+		_node.WarrantyExpiresAt = value
+	}
+	if value, ok := _c.mutation.DisposalDate(); ok {
+		_spec.SetField(product.FieldDisposalDate, field.TypeTime, value)
+		_node.DisposalDate = value
+	}
+	if value, ok := _c.mutation.DisposalReason(); ok {
+		_spec.SetField(product.FieldDisposalReason, field.TypeString, value)
+		_node.DisposalReason = value
+	}
+	if value, ok := _c.mutation.IsDisposed(); ok {
+		_spec.SetField(product.FieldIsDisposed, field.TypeBool, value)
+		_node.IsDisposed = value
 	}
 	if nodes := _c.mutation.TenantIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -371,6 +789,153 @@ func (_c *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.product_vendor = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SupplierIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   product.SupplierTable,
+			Columns: []string{product.SupplierColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(supplier.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.supplier_products = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CategoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   product.CategoryTable,
+			Columns: []string{product.CategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.category_products = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.WarehouseIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   product.WarehouseTable,
+			Columns: []string{product.WarehouseColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(warehouse.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.warehouse_products = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.AssignmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.AssignmentsTable,
+			Columns: []string{product.AssignmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(assetassignment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.VariantsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.VariantsTable,
+			Columns: []string{product.VariantsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(productvariant.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.MaintenanceSchedulesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.MaintenanceSchedulesTable,
+			Columns: []string{product.MaintenanceSchedulesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(maintenanceschedule.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.AlertsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.AlertsTable,
+			Columns: []string{product.AlertsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stockalert.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.PurchaseOrderLinesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.PurchaseOrderLinesTable,
+			Columns: []string{product.PurchaseOrderLinesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(purchaseorderline.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.InventoryCountsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.InventoryCountsTable,
+			Columns: []string{product.InventoryCountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(inventorycount.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

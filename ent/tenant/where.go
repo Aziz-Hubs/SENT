@@ -1037,6 +1037,29 @@ func HasVaultItemsWith(preds ...predicate.VaultItem) predicate.Tenant {
 	})
 }
 
+// HasVaultShareLinks applies the HasEdge predicate on the "vault_share_links" edge.
+func HasVaultShareLinks() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, VaultShareLinksTable, VaultShareLinksColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVaultShareLinksWith applies the HasEdge predicate on the "vault_share_links" edge with a given conditions (other predicates).
+func HasVaultShareLinksWith(preds ...predicate.VaultShareLink) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newVaultShareLinksStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasJournalEntries applies the HasEdge predicate on the "journal_entries" edge.
 func HasJournalEntries() predicate.Tenant {
 	return predicate.Tenant(func(s *sql.Selector) {
@@ -1558,6 +1581,443 @@ func HasGoals() predicate.Tenant {
 func HasGoalsWith(preds ...predicate.Goal) predicate.Tenant {
 	return predicate.Tenant(func(s *sql.Selector) {
 		step := newGoalsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSuppliers applies the HasEdge predicate on the "suppliers" edge.
+func HasSuppliers() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SuppliersTable, SuppliersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSuppliersWith applies the HasEdge predicate on the "suppliers" edge with a given conditions (other predicates).
+func HasSuppliersWith(preds ...predicate.Supplier) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newSuppliersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCategories applies the HasEdge predicate on the "categories" edge.
+func HasCategories() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CategoriesTable, CategoriesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCategoriesWith applies the HasEdge predicate on the "categories" edge with a given conditions (other predicates).
+func HasCategoriesWith(preds ...predicate.Category) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newCategoriesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasWarehouses applies the HasEdge predicate on the "warehouses" edge.
+func HasWarehouses() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WarehousesTable, WarehousesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasWarehousesWith applies the HasEdge predicate on the "warehouses" edge with a given conditions (other predicates).
+func HasWarehousesWith(preds ...predicate.Warehouse) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newWarehousesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasAssetAssignments applies the HasEdge predicate on the "asset_assignments" edge.
+func HasAssetAssignments() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AssetAssignmentsTable, AssetAssignmentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAssetAssignmentsWith applies the HasEdge predicate on the "asset_assignments" edge with a given conditions (other predicates).
+func HasAssetAssignmentsWith(preds ...predicate.AssetAssignment) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newAssetAssignmentsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasContacts applies the HasEdge predicate on the "contacts" edge.
+func HasContacts() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ContactsTable, ContactsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasContactsWith applies the HasEdge predicate on the "contacts" edge with a given conditions (other predicates).
+func HasContactsWith(preds ...predicate.Contact) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newContactsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLegalHolds applies the HasEdge predicate on the "legal_holds" edge.
+func HasLegalHolds() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LegalHoldsTable, LegalHoldsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLegalHoldsWith applies the HasEdge predicate on the "legal_holds" edge with a given conditions (other predicates).
+func HasLegalHoldsWith(preds ...predicate.LegalHold) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newLegalHoldsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasRetentionPolicies applies the HasEdge predicate on the "retention_policies" edge.
+func HasRetentionPolicies() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RetentionPoliciesTable, RetentionPoliciesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRetentionPoliciesWith applies the HasEdge predicate on the "retention_policies" edge with a given conditions (other predicates).
+func HasRetentionPoliciesWith(preds ...predicate.RetentionPolicy) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newRetentionPoliciesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasVaultTemplates applies the HasEdge predicate on the "vault_templates" edge.
+func HasVaultTemplates() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, VaultTemplatesTable, VaultTemplatesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVaultTemplatesWith applies the HasEdge predicate on the "vault_templates" edge with a given conditions (other predicates).
+func HasVaultTemplatesWith(preds ...predicate.VaultTemplate) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newVaultTemplatesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasStockAuditLogs applies the HasEdge predicate on the "stock_audit_logs" edge.
+func HasStockAuditLogs() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, StockAuditLogsTable, StockAuditLogsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStockAuditLogsWith applies the HasEdge predicate on the "stock_audit_logs" edge with a given conditions (other predicates).
+func HasStockAuditLogsWith(preds ...predicate.StockAuditLog) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newStockAuditLogsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasMaintenanceSchedules applies the HasEdge predicate on the "maintenance_schedules" edge.
+func HasMaintenanceSchedules() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, MaintenanceSchedulesTable, MaintenanceSchedulesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMaintenanceSchedulesWith applies the HasEdge predicate on the "maintenance_schedules" edge with a given conditions (other predicates).
+func HasMaintenanceSchedulesWith(preds ...predicate.MaintenanceSchedule) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newMaintenanceSchedulesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasStockAlerts applies the HasEdge predicate on the "stock_alerts" edge.
+func HasStockAlerts() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, StockAlertsTable, StockAlertsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStockAlertsWith applies the HasEdge predicate on the "stock_alerts" edge with a given conditions (other predicates).
+func HasStockAlertsWith(preds ...predicate.StockAlert) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newStockAlertsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPurchaseOrders applies the HasEdge predicate on the "purchase_orders" edge.
+func HasPurchaseOrders() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PurchaseOrdersTable, PurchaseOrdersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPurchaseOrdersWith applies the HasEdge predicate on the "purchase_orders" edge with a given conditions (other predicates).
+func HasPurchaseOrdersWith(preds ...predicate.PurchaseOrder) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newPurchaseOrdersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasInventoryCounts applies the HasEdge predicate on the "inventory_counts" edge.
+func HasInventoryCounts() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, InventoryCountsTable, InventoryCountsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasInventoryCountsWith applies the HasEdge predicate on the "inventory_counts" edge with a given conditions (other predicates).
+func HasInventoryCountsWith(preds ...predicate.InventoryCount) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newInventoryCountsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasJobPostings applies the HasEdge predicate on the "job_postings" edge.
+func HasJobPostings() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, JobPostingsTable, JobPostingsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasJobPostingsWith applies the HasEdge predicate on the "job_postings" edge with a given conditions (other predicates).
+func HasJobPostingsWith(preds ...predicate.JobPosting) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newJobPostingsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCandidates applies the HasEdge predicate on the "candidates" edge.
+func HasCandidates() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CandidatesTable, CandidatesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCandidatesWith applies the HasEdge predicate on the "candidates" edge with a given conditions (other predicates).
+func HasCandidatesWith(preds ...predicate.Candidate) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newCandidatesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasApplications applies the HasEdge predicate on the "applications" edge.
+func HasApplications() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ApplicationsTable, ApplicationsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasApplicationsWith applies the HasEdge predicate on the "applications" edge with a given conditions (other predicates).
+func HasApplicationsWith(preds ...predicate.Application) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newApplicationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasInterviews applies the HasEdge predicate on the "interviews" edge.
+func HasInterviews() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, InterviewsTable, InterviewsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasInterviewsWith applies the HasEdge predicate on the "interviews" edge with a given conditions (other predicates).
+func HasInterviewsWith(preds ...predicate.Interview) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newInterviewsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasBenefitPlans applies the HasEdge predicate on the "benefit_plans" edge.
+func HasBenefitPlans() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, BenefitPlansTable, BenefitPlansColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBenefitPlansWith applies the HasEdge predicate on the "benefit_plans" edge with a given conditions (other predicates).
+func HasBenefitPlansWith(preds ...predicate.BenefitPlan) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newBenefitPlansStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasBenefitEnrollments applies the HasEdge predicate on the "benefit_enrollments" edge.
+func HasBenefitEnrollments() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, BenefitEnrollmentsTable, BenefitEnrollmentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBenefitEnrollmentsWith applies the HasEdge predicate on the "benefit_enrollments" edge with a given conditions (other predicates).
+func HasBenefitEnrollmentsWith(preds ...predicate.BenefitEnrollment) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newBenefitEnrollmentsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

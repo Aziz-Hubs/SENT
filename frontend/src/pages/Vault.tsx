@@ -149,7 +149,7 @@ export function Vault() {
     setLoading(true);
     try {
       const res = await ListFiles(path);
-      setFiles(res || []);
+      setFiles((res || []) as any);
     } catch (err) {
       console.error(err);
       toast.error("Failed to list files");

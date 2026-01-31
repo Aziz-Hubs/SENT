@@ -87,6 +87,54 @@ var (
 			},
 		},
 	}
+	// ApplicationsColumns holds the columns for the "applications" table.
+	ApplicationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"NEW", "SCREENING", "INTERVIEWING", "OFFER", "HIRED", "REJECTED"}, Default: "NEW"},
+		{Name: "applied_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "candidate_applications", Type: field.TypeInt},
+		{Name: "job_posting_applications", Type: field.TypeInt},
+		{Name: "tenant_applications", Type: field.TypeInt},
+	}
+	// ApplicationsTable holds the schema information for the "applications" table.
+	ApplicationsTable = &schema.Table{
+		Name:       "applications",
+		Columns:    ApplicationsColumns,
+		PrimaryKey: []*schema.Column{ApplicationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "applications_candidates_applications",
+				Columns:    []*schema.Column{ApplicationsColumns[4]},
+				RefColumns: []*schema.Column{CandidatesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "applications_job_postings_applications",
+				Columns:    []*schema.Column{ApplicationsColumns[5]},
+				RefColumns: []*schema.Column{JobPostingsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "applications_tenants_applications",
+				Columns:    []*schema.Column{ApplicationsColumns[6]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "application_status",
+				Unique:  false,
+				Columns: []*schema.Column{ApplicationsColumns[1]},
+			},
+			{
+				Name:    "application_applied_at",
+				Unique:  false,
+				Columns: []*schema.Column{ApplicationsColumns[2]},
+			},
+		},
+	}
 	// AssetsColumns holds the columns for the "assets" table.
 	AssetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -143,6 +191,43 @@ var (
 				Columns:    []*schema.Column{AssetsColumns[17]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// AssetAssignmentsColumns holds the columns for the "asset_assignments" table.
+	AssetAssignmentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "assigned_at", Type: field.TypeTime},
+		{Name: "returned_at", Type: field.TypeTime, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "returned", "lost"}, Default: "active"},
+		{Name: "quantity", Type: field.TypeInt, Default: 1},
+		{Name: "employee_asset_assignments", Type: field.TypeInt},
+		{Name: "product_assignments", Type: field.TypeInt},
+		{Name: "tenant_asset_assignments", Type: field.TypeInt},
+	}
+	// AssetAssignmentsTable holds the schema information for the "asset_assignments" table.
+	AssetAssignmentsTable = &schema.Table{
+		Name:       "asset_assignments",
+		Columns:    AssetAssignmentsColumns,
+		PrimaryKey: []*schema.Column{AssetAssignmentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "asset_assignments_employees_asset_assignments",
+				Columns:    []*schema.Column{AssetAssignmentsColumns[5]},
+				RefColumns: []*schema.Column{EmployeesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "asset_assignments_products_assignments",
+				Columns:    []*schema.Column{AssetAssignmentsColumns[6]},
+				RefColumns: []*schema.Column{ProductsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "asset_assignments_tenants_asset_assignments",
+				Columns:    []*schema.Column{AssetAssignmentsColumns[7]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -218,6 +303,103 @@ var (
 				Name:    "auditlog_tenant_audit_logs",
 				Unique:  false,
 				Columns: []*schema.Column{AuditLogsColumns[7]},
+			},
+		},
+	}
+	// BenefitEnrollmentsColumns holds the columns for the "benefit_enrollments" table.
+	BenefitEnrollmentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "tier", Type: field.TypeEnum, Enums: []string{"INDIVIDUAL", "FAMILY", "COUPLE", "CHILDREN_ONLY"}, Default: "INDIVIDUAL"},
+		{Name: "employee_cost", Type: field.TypeFloat64},
+		{Name: "employer_cost", Type: field.TypeFloat64},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"ACTIVE", "PENDING", "TERMINATED"}, Default: "PENDING"},
+		{Name: "effective_from", Type: field.TypeTime},
+		{Name: "effective_to", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "benefit_plan_enrollments", Type: field.TypeInt},
+		{Name: "employee_benefit_enrollments", Type: field.TypeInt},
+		{Name: "tenant_benefit_enrollments", Type: field.TypeInt},
+	}
+	// BenefitEnrollmentsTable holds the schema information for the "benefit_enrollments" table.
+	BenefitEnrollmentsTable = &schema.Table{
+		Name:       "benefit_enrollments",
+		Columns:    BenefitEnrollmentsColumns,
+		PrimaryKey: []*schema.Column{BenefitEnrollmentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "benefit_enrollments_benefit_plans_enrollments",
+				Columns:    []*schema.Column{BenefitEnrollmentsColumns[9]},
+				RefColumns: []*schema.Column{BenefitPlansColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "benefit_enrollments_employees_benefit_enrollments",
+				Columns:    []*schema.Column{BenefitEnrollmentsColumns[10]},
+				RefColumns: []*schema.Column{EmployeesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "benefit_enrollments_tenants_benefit_enrollments",
+				Columns:    []*schema.Column{BenefitEnrollmentsColumns[11]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "benefitenrollment_status",
+				Unique:  false,
+				Columns: []*schema.Column{BenefitEnrollmentsColumns[4]},
+			},
+			{
+				Name:    "benefitenrollment_employee_benefit_enrollments_benefit_plan_enrollments",
+				Unique:  true,
+				Columns: []*schema.Column{BenefitEnrollmentsColumns[10], BenefitEnrollmentsColumns[9]},
+			},
+		},
+	}
+	// BenefitPlansColumns holds the columns for the "benefit_plans" table.
+	BenefitPlansColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"MEDICAL", "DENTAL", "VISION", "RETIREMENT", "OTHER"}, Default: "MEDICAL"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"ACTIVE", "INACTIVE", "DRAFT"}, Default: "DRAFT"},
+		{Name: "employer_contribution", Type: field.TypeFloat64},
+		{Name: "employee_deduction", Type: field.TypeFloat64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "tenant_benefit_plans", Type: field.TypeInt},
+	}
+	// BenefitPlansTable holds the schema information for the "benefit_plans" table.
+	BenefitPlansTable = &schema.Table{
+		Name:       "benefit_plans",
+		Columns:    BenefitPlansColumns,
+		PrimaryKey: []*schema.Column{BenefitPlansColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "benefit_plans_tenants_benefit_plans",
+				Columns:    []*schema.Column{BenefitPlansColumns[9]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "benefitplan_name_tenant_benefit_plans",
+				Unique:  true,
+				Columns: []*schema.Column{BenefitPlansColumns[1], BenefitPlansColumns[9]},
+			},
+			{
+				Name:    "benefitplan_type",
+				Unique:  false,
+				Columns: []*schema.Column{BenefitPlansColumns[3]},
+			},
+			{
+				Name:    "benefitplan_status",
+				Unique:  false,
+				Columns: []*schema.Column{BenefitPlansColumns[4]},
 			},
 		},
 	}
@@ -308,6 +490,67 @@ var (
 			},
 		},
 	}
+	// CandidatesColumns holds the columns for the "candidates" table.
+	CandidatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "first_name", Type: field.TypeString},
+		{Name: "last_name", Type: field.TypeString},
+		{Name: "email", Type: field.TypeString},
+		{Name: "phone", Type: field.TypeString, Nullable: true},
+		{Name: "resume_url", Type: field.TypeString, Nullable: true},
+		{Name: "linkedin_url", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "tenant_candidates", Type: field.TypeInt},
+	}
+	// CandidatesTable holds the schema information for the "candidates" table.
+	CandidatesTable = &schema.Table{
+		Name:       "candidates",
+		Columns:    CandidatesColumns,
+		PrimaryKey: []*schema.Column{CandidatesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "candidates_tenants_candidates",
+				Columns:    []*schema.Column{CandidatesColumns[9]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "candidate_email_tenant_candidates",
+				Unique:  true,
+				Columns: []*schema.Column{CandidatesColumns[3], CandidatesColumns[9]},
+			},
+			{
+				Name:    "candidate_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CandidatesColumns[7]},
+			},
+		},
+	}
+	// CategoriesColumns holds the columns for the "categories" table.
+	CategoriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"hardware", "license", "consumable", "accessory", "other"}, Default: "other"},
+		{Name: "tenant_categories", Type: field.TypeInt},
+	}
+	// CategoriesTable holds the schema information for the "categories" table.
+	CategoriesTable = &schema.Table{
+		Name:       "categories",
+		Columns:    CategoriesColumns,
+		PrimaryKey: []*schema.Column{CategoriesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "categories_tenants_categories",
+				Columns:    []*schema.Column{CategoriesColumns[4]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// CompensationAgreementsColumns holds the columns for the "compensation_agreements" table.
 	CompensationAgreementsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -336,6 +579,46 @@ var (
 				Columns:    []*schema.Column{CompensationAgreementsColumns[7]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// ContactsColumns holds the columns for the "contacts" table.
+	ContactsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "email", Type: field.TypeString, Nullable: true},
+		{Name: "phone", Type: field.TypeString, Nullable: true},
+		{Name: "address", Type: field.TypeString, Nullable: true},
+		{Name: "type", Type: field.TypeString, Default: "customer"},
+		{Name: "loyalty_points", Type: field.TypeInt, Default: 0},
+		{Name: "lifetime_value", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "tenant_contacts", Type: field.TypeInt},
+	}
+	// ContactsTable holds the schema information for the "contacts" table.
+	ContactsTable = &schema.Table{
+		Name:       "contacts",
+		Columns:    ContactsColumns,
+		PrimaryKey: []*schema.Column{ContactsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "contacts_tenants_contacts",
+				Columns:    []*schema.Column{ContactsColumns[10]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "contact_email_tenant_contacts",
+				Unique:  true,
+				Columns: []*schema.Column{ContactsColumns[2], ContactsColumns[10]},
+			},
+			{
+				Name:    "contact_phone_tenant_contacts",
+				Unique:  false,
+				Columns: []*schema.Column{ContactsColumns[3], ContactsColumns[10]},
 			},
 		},
 	}
@@ -687,6 +970,82 @@ var (
 			},
 		},
 	}
+	// InterviewsColumns holds the columns for the "interviews" table.
+	InterviewsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "scheduled_at", Type: field.TypeTime},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"PHONE", "VIDEO", "ONSITE"}, Default: "VIDEO"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"SCHEDULED", "COMPLETED", "CANCELLED"}, Default: "SCHEDULED"},
+		{Name: "feedback", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "application_interviews", Type: field.TypeInt},
+		{Name: "tenant_interviews", Type: field.TypeInt},
+	}
+	// InterviewsTable holds the schema information for the "interviews" table.
+	InterviewsTable = &schema.Table{
+		Name:       "interviews",
+		Columns:    InterviewsColumns,
+		PrimaryKey: []*schema.Column{InterviewsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "interviews_applications_interviews",
+				Columns:    []*schema.Column{InterviewsColumns[7]},
+				RefColumns: []*schema.Column{ApplicationsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "interviews_tenants_interviews",
+				Columns:    []*schema.Column{InterviewsColumns[8]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "interview_scheduled_at",
+				Unique:  false,
+				Columns: []*schema.Column{InterviewsColumns[1]},
+			},
+			{
+				Name:    "interview_status",
+				Unique:  false,
+				Columns: []*schema.Column{InterviewsColumns[3]},
+			},
+		},
+	}
+	// InventoryCountsColumns holds the columns for the "inventory_counts" table.
+	InventoryCountsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "counted_qty", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "system_qty", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "variance", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "counted_at", Type: field.TypeTime},
+		{Name: "counted_by", Type: field.TypeString, Nullable: true},
+		{Name: "notes", Type: field.TypeString, Nullable: true},
+		{Name: "product_inventory_counts", Type: field.TypeInt},
+		{Name: "tenant_inventory_counts", Type: field.TypeInt},
+	}
+	// InventoryCountsTable holds the schema information for the "inventory_counts" table.
+	InventoryCountsTable = &schema.Table{
+		Name:       "inventory_counts",
+		Columns:    InventoryCountsColumns,
+		PrimaryKey: []*schema.Column{InventoryCountsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "inventory_counts_products_inventory_counts",
+				Columns:    []*schema.Column{InventoryCountsColumns[7]},
+				RefColumns: []*schema.Column{ProductsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "inventory_counts_tenants_inventory_counts",
+				Columns:    []*schema.Column{InventoryCountsColumns[8]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// InventoryReservationsColumns holds the columns for the "inventory_reservations" table.
 	InventoryReservationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -778,6 +1137,45 @@ var (
 				Columns:    []*schema.Column{JobExecutionsColumns[7]},
 				RefColumns: []*schema.Column{JobsColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// JobPostingsColumns holds the columns for the "job_postings" table.
+	JobPostingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Size: 2147483647},
+		{Name: "requirements", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "location", Type: field.TypeString, Nullable: true},
+		{Name: "salary_range", Type: field.TypeString, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"DRAFT", "OPEN", "CLOSED", "FILLED"}, Default: "DRAFT"},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "tenant_job_postings", Type: field.TypeInt},
+	}
+	// JobPostingsTable holds the schema information for the "job_postings" table.
+	JobPostingsTable = &schema.Table{
+		Name:       "job_postings",
+		Columns:    JobPostingsColumns,
+		PrimaryKey: []*schema.Column{JobPostingsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "job_postings_tenants_job_postings",
+				Columns:    []*schema.Column{JobPostingsColumns[9]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "jobposting_status",
+				Unique:  false,
+				Columns: []*schema.Column{JobPostingsColumns[6]},
+			},
+			{
+				Name:    "jobposting_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{JobPostingsColumns[7]},
 			},
 		},
 	}
@@ -881,6 +1279,69 @@ var (
 				Name:    "ledgerentry_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{LedgerEntriesColumns[3]},
+			},
+		},
+	}
+	// LegalHoldsColumns holds the columns for the "legal_holds" table.
+	LegalHoldsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "start_date", Type: field.TypeTime},
+		{Name: "end_date", Type: field.TypeTime, Nullable: true},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "tenant_legal_holds", Type: field.TypeInt},
+		{Name: "user_created_legal_holds", Type: field.TypeInt, Nullable: true},
+	}
+	// LegalHoldsTable holds the schema information for the "legal_holds" table.
+	LegalHoldsTable = &schema.Table{
+		Name:       "legal_holds",
+		Columns:    LegalHoldsColumns,
+		PrimaryKey: []*schema.Column{LegalHoldsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "legal_holds_tenants_legal_holds",
+				Columns:    []*schema.Column{LegalHoldsColumns[7]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "legal_holds_users_created_legal_holds",
+				Columns:    []*schema.Column{LegalHoldsColumns[8]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// MaintenanceSchedulesColumns holds the columns for the "maintenance_schedules" table.
+	MaintenanceSchedulesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "scheduled_at", Type: field.TypeTime},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "notes", Type: field.TypeString, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "completed", "overdue"}, Default: "pending"},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "product_maintenance_schedules", Type: field.TypeInt},
+		{Name: "tenant_maintenance_schedules", Type: field.TypeInt},
+	}
+	// MaintenanceSchedulesTable holds the schema information for the "maintenance_schedules" table.
+	MaintenanceSchedulesTable = &schema.Table{
+		Name:       "maintenance_schedules",
+		Columns:    MaintenanceSchedulesColumns,
+		PrimaryKey: []*schema.Column{MaintenanceSchedulesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "maintenance_schedules_products_maintenance_schedules",
+				Columns:    []*schema.Column{MaintenanceSchedulesColumns[6]},
+				RefColumns: []*schema.Column{ProductsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "maintenance_schedules_tenants_maintenance_schedules",
+				Columns:    []*schema.Column{MaintenanceSchedulesColumns[7]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -1084,10 +1545,12 @@ var (
 	PerformanceReviewsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "overall_rating", Type: field.TypeEnum, Nullable: true, Enums: []string{"EXCEPTIONAL", "EXCEEDS", "MEETS", "DEVELOPING", "NEEDS_IMPROVEMENT"}},
+		{Name: "review_type", Type: field.TypeEnum, Enums: []string{"MANAGER", "SELF", "PEER", "DIRECT_REPORT"}, Default: "MANAGER"},
 		{Name: "strengths", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "areas_for_improvement", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "manager_comments", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "goals_assessment", Type: field.TypeJSON, Nullable: true},
+		{Name: "survey_responses", Type: field.TypeJSON, Nullable: true},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "IN_PROGRESS", "SUBMITTED", "ACKNOWLEDGED"}, Default: "PENDING"},
 		{Name: "submitted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "acknowledged_at", Type: field.TypeTime, Nullable: true},
@@ -1106,25 +1569,25 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "performance_reviews_employees_performance_reviews",
-				Columns:    []*schema.Column{PerformanceReviewsColumns[11]},
+				Columns:    []*schema.Column{PerformanceReviewsColumns[13]},
 				RefColumns: []*schema.Column{EmployeesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "performance_reviews_employees_conducted_reviews",
-				Columns:    []*schema.Column{PerformanceReviewsColumns[12]},
+				Columns:    []*schema.Column{PerformanceReviewsColumns[14]},
 				RefColumns: []*schema.Column{EmployeesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "performance_reviews_review_cycles_reviews",
-				Columns:    []*schema.Column{PerformanceReviewsColumns[13]},
+				Columns:    []*schema.Column{PerformanceReviewsColumns[15]},
 				RefColumns: []*schema.Column{ReviewCyclesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "performance_reviews_tenants_performance_reviews",
-				Columns:    []*schema.Column{PerformanceReviewsColumns[14]},
+				Columns:    []*schema.Column{PerformanceReviewsColumns[16]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1133,12 +1596,12 @@ var (
 			{
 				Name:    "performancereview_status",
 				Unique:  false,
-				Columns: []*schema.Column{PerformanceReviewsColumns[6]},
+				Columns: []*schema.Column{PerformanceReviewsColumns[8]},
 			},
 			{
 				Name:    "performancereview_employee_performance_reviews_review_cycle_reviews",
 				Unique:  true,
-				Columns: []*schema.Column{PerformanceReviewsColumns[11], PerformanceReviewsColumns[13]},
+				Columns: []*schema.Column{PerformanceReviewsColumns[13], PerformanceReviewsColumns[15]},
 			},
 		},
 	}
@@ -1186,8 +1649,24 @@ var (
 		{Name: "attributes", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "min_stock_level", Type: field.TypeInt, Default: 0},
+		{Name: "max_stock_level", Type: field.TypeInt, Default: 0},
+		{Name: "barcode", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "location", Type: field.TypeString, Nullable: true},
+		{Name: "is_variant_parent", Type: field.TypeBool, Default: false},
+		{Name: "serial_number", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "purchase_date", Type: field.TypeTime, Nullable: true},
+		{Name: "purchase_price", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "useful_life_months", Type: field.TypeInt, Nullable: true},
+		{Name: "warranty_expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "disposal_date", Type: field.TypeTime, Nullable: true},
+		{Name: "disposal_reason", Type: field.TypeString, Nullable: true},
+		{Name: "is_disposed", Type: field.TypeBool, Default: false},
+		{Name: "category_products", Type: field.TypeInt, Nullable: true},
 		{Name: "product_vendor", Type: field.TypeInt, Nullable: true},
+		{Name: "supplier_products", Type: field.TypeInt, Nullable: true},
 		{Name: "tenant_products", Type: field.TypeInt},
+		{Name: "warehouse_products", Type: field.TypeInt, Nullable: true},
 	}
 	// ProductsTable holds the schema information for the "products" table.
 	ProductsTable = &schema.Table{
@@ -1196,23 +1675,41 @@ var (
 		PrimaryKey: []*schema.Column{ProductsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
+				Symbol:     "products_categories_products",
+				Columns:    []*schema.Column{ProductsColumns[22]},
+				RefColumns: []*schema.Column{CategoriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
 				Symbol:     "products_accounts_vendor",
-				Columns:    []*schema.Column{ProductsColumns[9]},
+				Columns:    []*schema.Column{ProductsColumns[23]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
+				Symbol:     "products_suppliers_products",
+				Columns:    []*schema.Column{ProductsColumns[24]},
+				RefColumns: []*schema.Column{SuppliersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
 				Symbol:     "products_tenants_products",
-				Columns:    []*schema.Column{ProductsColumns[10]},
+				Columns:    []*schema.Column{ProductsColumns[25]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "products_warehouses_products",
+				Columns:    []*schema.Column{ProductsColumns[26]},
+				RefColumns: []*schema.Column{WarehousesColumns[0]},
+				OnDelete:   schema.SetNull,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "product_sku_tenant_products",
 				Unique:  true,
-				Columns: []*schema.Column{ProductsColumns[1], ProductsColumns[10]},
+				Columns: []*schema.Column{ProductsColumns[1], ProductsColumns[25]},
 			},
 			{
 				Name:    "product_name",
@@ -1226,6 +1723,92 @@ var (
 				Annotation: &entsql.IndexAnnotation{
 					Type: "GIN",
 				},
+			},
+		},
+	}
+	// ProductVariantsColumns holds the columns for the "product_variants" table.
+	ProductVariantsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "sku", Type: field.TypeString, Unique: true},
+		{Name: "price_adjustment", Type: field.TypeFloat64, Default: 0},
+		{Name: "stock", Type: field.TypeInt, Default: 0},
+		{Name: "product_variants", Type: field.TypeInt},
+	}
+	// ProductVariantsTable holds the schema information for the "product_variants" table.
+	ProductVariantsTable = &schema.Table{
+		Name:       "product_variants",
+		Columns:    ProductVariantsColumns,
+		PrimaryKey: []*schema.Column{ProductVariantsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "product_variants_products_variants",
+				Columns:    []*schema.Column{ProductVariantsColumns[5]},
+				RefColumns: []*schema.Column{ProductsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// PurchaseOrdersColumns holds the columns for the "purchase_orders" table.
+	PurchaseOrdersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "po_number", Type: field.TypeString, Unique: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"draft", "submitted", "received", "cancelled"}, Default: "draft"},
+		{Name: "order_date", Type: field.TypeTime},
+		{Name: "expected_date", Type: field.TypeTime, Nullable: true},
+		{Name: "total_amount", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "notes", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "supplier_purchase_orders", Type: field.TypeInt},
+		{Name: "tenant_purchase_orders", Type: field.TypeInt},
+	}
+	// PurchaseOrdersTable holds the schema information for the "purchase_orders" table.
+	PurchaseOrdersTable = &schema.Table{
+		Name:       "purchase_orders",
+		Columns:    PurchaseOrdersColumns,
+		PrimaryKey: []*schema.Column{PurchaseOrdersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "purchase_orders_suppliers_purchase_orders",
+				Columns:    []*schema.Column{PurchaseOrdersColumns[9]},
+				RefColumns: []*schema.Column{SuppliersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "purchase_orders_tenants_purchase_orders",
+				Columns:    []*schema.Column{PurchaseOrdersColumns[10]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// PurchaseOrderLinesColumns holds the columns for the "purchase_order_lines" table.
+	PurchaseOrderLinesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "quantity", Type: field.TypeInt},
+		{Name: "unit_cost", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "received_qty", Type: field.TypeInt, Default: 0},
+		{Name: "product_purchase_order_lines", Type: field.TypeInt},
+		{Name: "purchase_order_lines", Type: field.TypeInt},
+	}
+	// PurchaseOrderLinesTable holds the schema information for the "purchase_order_lines" table.
+	PurchaseOrderLinesTable = &schema.Table{
+		Name:       "purchase_order_lines",
+		Columns:    PurchaseOrderLinesColumns,
+		PrimaryKey: []*schema.Column{PurchaseOrderLinesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "purchase_order_lines_products_purchase_order_lines",
+				Columns:    []*schema.Column{PurchaseOrderLinesColumns[4]},
+				RefColumns: []*schema.Column{ProductsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "purchase_order_lines_purchase_orders_lines",
+				Columns:    []*schema.Column{PurchaseOrderLinesColumns[5]},
+				RefColumns: []*schema.Column{PurchaseOrdersColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -1302,6 +1885,8 @@ var (
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "running", "success", "failed"}, Default: "pending"},
 		{Name: "output", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "execution_context", Type: field.TypeJSON, Nullable: true},
+		{Name: "source_id", Type: field.TypeString, Nullable: true},
+		{Name: "source_app", Type: field.TypeString, Nullable: true},
 		{Name: "ticket_remediation_steps", Type: field.TypeInt},
 	}
 	// RemediationStepsTable holds the schema information for the "remediation_steps" table.
@@ -1312,8 +1897,34 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "remediation_steps_tickets_remediation_steps",
-				Columns:    []*schema.Column{RemediationStepsColumns[6]},
+				Columns:    []*schema.Column{RemediationStepsColumns[8]},
 				RefColumns: []*schema.Column{TicketsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// RetentionPoliciesColumns holds the columns for the "retention_policies" table.
+	RetentionPoliciesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "retention_days", Type: field.TypeInt},
+		{Name: "action", Type: field.TypeEnum, Enums: []string{"archive", "delete"}, Default: "archive"},
+		{Name: "file_type_filter", Type: field.TypeString, Nullable: true},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "tenant_retention_policies", Type: field.TypeInt},
+	}
+	// RetentionPoliciesTable holds the schema information for the "retention_policies" table.
+	RetentionPoliciesTable = &schema.Table{
+		Name:       "retention_policies",
+		Columns:    RetentionPoliciesColumns,
+		PrimaryKey: []*schema.Column{RetentionPoliciesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "retention_policies_tenants_retention_policies",
+				Columns:    []*schema.Column{RetentionPoliciesColumns[8]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -1594,6 +2205,62 @@ var (
 			},
 		},
 	}
+	// StockAlertsColumns holds the columns for the "stock_alerts" table.
+	StockAlertsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "alert_type", Type: field.TypeEnum, Enums: []string{"low_stock", "warranty_expiring", "maintenance_due"}},
+		{Name: "message", Type: field.TypeString},
+		{Name: "is_read", Type: field.TypeBool, Default: false},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "product_alerts", Type: field.TypeInt, Nullable: true},
+		{Name: "tenant_stock_alerts", Type: field.TypeInt},
+	}
+	// StockAlertsTable holds the schema information for the "stock_alerts" table.
+	StockAlertsTable = &schema.Table{
+		Name:       "stock_alerts",
+		Columns:    StockAlertsColumns,
+		PrimaryKey: []*schema.Column{StockAlertsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "stock_alerts_products_alerts",
+				Columns:    []*schema.Column{StockAlertsColumns[5]},
+				RefColumns: []*schema.Column{ProductsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "stock_alerts_tenants_stock_alerts",
+				Columns:    []*schema.Column{StockAlertsColumns[6]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// StockAuditLogsColumns holds the columns for the "stock_audit_logs" table.
+	StockAuditLogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "action", Type: field.TypeString},
+		{Name: "entity_type", Type: field.TypeString},
+		{Name: "entity_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt, Nullable: true},
+		{Name: "user_name", Type: field.TypeString, Nullable: true},
+		{Name: "details", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "tenant_stock_audit_logs", Type: field.TypeInt},
+	}
+	// StockAuditLogsTable holds the schema information for the "stock_audit_logs" table.
+	StockAuditLogsTable = &schema.Table{
+		Name:       "stock_audit_logs",
+		Columns:    StockAuditLogsColumns,
+		PrimaryKey: []*schema.Column{StockAuditLogsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "stock_audit_logs_tenants_stock_audit_logs",
+				Columns:    []*schema.Column{StockAuditLogsColumns[8]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// StockMovementsColumns holds the columns for the "stock_movements" table.
 	StockMovementsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -1714,6 +2381,31 @@ var (
 			},
 		},
 	}
+	// SuppliersColumns holds the columns for the "suppliers" table.
+	SuppliersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "contact_person", Type: field.TypeString, Nullable: true},
+		{Name: "email", Type: field.TypeString, Nullable: true},
+		{Name: "phone", Type: field.TypeString, Nullable: true},
+		{Name: "address", Type: field.TypeString, Nullable: true},
+		{Name: "website", Type: field.TypeString, Nullable: true},
+		{Name: "tenant_suppliers", Type: field.TypeInt},
+	}
+	// SuppliersTable holds the schema information for the "suppliers" table.
+	SuppliersTable = &schema.Table{
+		Name:       "suppliers",
+		Columns:    SuppliersColumns,
+		PrimaryKey: []*schema.Column{SuppliersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "suppliers_tenants_suppliers",
+				Columns:    []*schema.Column{SuppliersColumns[7]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// TenantsColumns holds the columns for the "tenants" table.
 	TenantsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -1759,6 +2451,8 @@ var (
 		{Name: "due_date", Type: field.TypeTime, Nullable: true},
 		{Name: "claim_lease_owner", Type: field.TypeString, Nullable: true},
 		{Name: "claim_lease_expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "deep_link", Type: field.TypeString, Nullable: true},
+		{Name: "execution_plan", Type: field.TypeJSON, Nullable: true},
 		{Name: "asset_tickets", Type: field.TypeInt, Nullable: true},
 		{Name: "tenant_tickets", Type: field.TypeInt},
 		{Name: "user_requested_tickets", Type: field.TypeInt},
@@ -1772,25 +2466,25 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "tickets_assets_tickets",
-				Columns:    []*schema.Column{TicketsColumns[12]},
+				Columns:    []*schema.Column{TicketsColumns[14]},
 				RefColumns: []*schema.Column{AssetsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "tickets_tenants_tickets",
-				Columns:    []*schema.Column{TicketsColumns[13]},
+				Columns:    []*schema.Column{TicketsColumns[15]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "tickets_users_requested_tickets",
-				Columns:    []*schema.Column{TicketsColumns[14]},
+				Columns:    []*schema.Column{TicketsColumns[16]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "tickets_users_assigned_tickets",
-				Columns:    []*schema.Column{TicketsColumns[15]},
+				Columns:    []*schema.Column{TicketsColumns[17]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -1799,15 +2493,16 @@ var (
 	// TimeEntriesColumns holds the columns for the "time_entries" table.
 	TimeEntriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "duration_hours", Type: field.TypeFloat64},
-		{Name: "note", Type: field.TypeString, Size: 2147483647},
-		{Name: "started_at", Type: field.TypeTime},
-		{Name: "is_billable", Type: field.TypeBool, Default: true},
+		{Name: "start_time", Type: field.TypeTime},
+		{Name: "end_time", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "technician_id", Type: field.TypeInt, Nullable: true},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "approved", "billed"}, Default: "pending"},
 		{Name: "work_type", Type: field.TypeString, Default: "general"},
+		{Name: "duration_hours", Type: field.TypeFloat64, Nullable: true},
 		{Name: "invoice_id", Type: field.TypeInt, Nullable: true},
-		{Name: "ticket_time_entries", Type: field.TypeInt},
-		{Name: "user_time_entries", Type: field.TypeInt},
+		{Name: "employee_time_entries", Type: field.TypeInt},
+		{Name: "ticket_id", Type: field.TypeInt, Nullable: true},
 	}
 	// TimeEntriesTable holds the schema information for the "time_entries" table.
 	TimeEntriesTable = &schema.Table{
@@ -1816,16 +2511,16 @@ var (
 		PrimaryKey: []*schema.Column{TimeEntriesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "time_entries_tickets_time_entries",
-				Columns:    []*schema.Column{TimeEntriesColumns[8]},
-				RefColumns: []*schema.Column{TicketsColumns[0]},
+				Symbol:     "time_entries_employees_time_entries",
+				Columns:    []*schema.Column{TimeEntriesColumns[9]},
+				RefColumns: []*schema.Column{EmployeesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "time_entries_users_time_entries",
-				Columns:    []*schema.Column{TimeEntriesColumns[9]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				Symbol:     "time_entries_tickets_ticket",
+				Columns:    []*schema.Column{TimeEntriesColumns[10]},
+				RefColumns: []*schema.Column{TicketsColumns[0]},
+				OnDelete:   schema.SetNull,
 			},
 		},
 	}
@@ -2101,6 +2796,72 @@ var (
 			},
 		},
 	}
+	// VaultCommentsColumns holds the columns for the "vault_comments" table.
+	VaultCommentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "content", Type: field.TypeString, Size: 2147483647},
+		{Name: "page", Type: field.TypeInt, Nullable: true},
+		{Name: "x", Type: field.TypeFloat64, Nullable: true},
+		{Name: "y", Type: field.TypeFloat64, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_vault_comments", Type: field.TypeInt},
+		{Name: "vault_item_comments", Type: field.TypeInt},
+	}
+	// VaultCommentsTable holds the schema information for the "vault_comments" table.
+	VaultCommentsTable = &schema.Table{
+		Name:       "vault_comments",
+		Columns:    VaultCommentsColumns,
+		PrimaryKey: []*schema.Column{VaultCommentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "vault_comments_users_vault_comments",
+				Columns:    []*schema.Column{VaultCommentsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "vault_comments_vault_items_comments",
+				Columns:    []*schema.Column{VaultCommentsColumns[8]},
+				RefColumns: []*schema.Column{VaultItemsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// VaultFavoritesColumns holds the columns for the "vault_favorites" table.
+	VaultFavoritesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_favorites", Type: field.TypeInt},
+		{Name: "vault_item_favorited_by", Type: field.TypeInt},
+	}
+	// VaultFavoritesTable holds the schema information for the "vault_favorites" table.
+	VaultFavoritesTable = &schema.Table{
+		Name:       "vault_favorites",
+		Columns:    VaultFavoritesColumns,
+		PrimaryKey: []*schema.Column{VaultFavoritesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "vault_favorites_users_favorites",
+				Columns:    []*schema.Column{VaultFavoritesColumns[2]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "vault_favorites_vault_items_favorited_by",
+				Columns:    []*schema.Column{VaultFavoritesColumns[3]},
+				RefColumns: []*schema.Column{VaultItemsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "vaultfavorite_user_favorites_vault_item_favorited_by",
+				Unique:  true,
+				Columns: []*schema.Column{VaultFavoritesColumns[2], VaultFavoritesColumns[3]},
+			},
+		},
+	}
 	// VaultItemsColumns holds the columns for the "vault_items" table.
 	VaultItemsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -2115,6 +2876,7 @@ var (
 		{Name: "is_dir", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "tenant_vault_items", Type: field.TypeInt},
 	}
 	// VaultItemsTable holds the schema information for the "vault_items" table.
@@ -2125,7 +2887,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "vault_items_tenants_vault_items",
-				Columns:    []*schema.Column{VaultItemsColumns[12]},
+				Columns:    []*schema.Column{VaultItemsColumns[13]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -2134,12 +2896,107 @@ var (
 			{
 				Name:    "vaultitem_path_tenant_vault_items",
 				Unique:  true,
-				Columns: []*schema.Column{VaultItemsColumns[1], VaultItemsColumns[12]},
+				Columns: []*schema.Column{VaultItemsColumns[1], VaultItemsColumns[13]},
 			},
 			{
 				Name:    "vaultitem_hash",
 				Unique:  false,
 				Columns: []*schema.Column{VaultItemsColumns[4]},
+			},
+		},
+	}
+	// VaultShareLinksColumns holds the columns for the "vault_share_links" table.
+	VaultShareLinksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "token", Type: field.TypeString, Unique: true},
+		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "password_hash", Type: field.TypeString, Nullable: true},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "max_views", Type: field.TypeInt, Default: 0},
+		{Name: "view_count", Type: field.TypeInt, Default: 0},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "tenant_vault_share_links", Type: field.TypeInt},
+		{Name: "vault_item_share_links", Type: field.TypeInt},
+	}
+	// VaultShareLinksTable holds the schema information for the "vault_share_links" table.
+	VaultShareLinksTable = &schema.Table{
+		Name:       "vault_share_links",
+		Columns:    VaultShareLinksColumns,
+		PrimaryKey: []*schema.Column{VaultShareLinksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "vault_share_links_tenants_vault_share_links",
+				Columns:    []*schema.Column{VaultShareLinksColumns[8]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "vault_share_links_vault_items_share_links",
+				Columns:    []*schema.Column{VaultShareLinksColumns[9]},
+				RefColumns: []*schema.Column{VaultItemsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// VaultTemplatesColumns holds the columns for the "vault_templates" table.
+	VaultTemplatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "content_hash", Type: field.TypeString},
+		{Name: "file_extension", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "tenant_vault_templates", Type: field.TypeInt},
+		{Name: "user_created_templates", Type: field.TypeInt, Nullable: true},
+	}
+	// VaultTemplatesTable holds the schema information for the "vault_templates" table.
+	VaultTemplatesTable = &schema.Table{
+		Name:       "vault_templates",
+		Columns:    VaultTemplatesColumns,
+		PrimaryKey: []*schema.Column{VaultTemplatesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "vault_templates_tenants_vault_templates",
+				Columns:    []*schema.Column{VaultTemplatesColumns[6]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "vault_templates_users_created_templates",
+				Columns:    []*schema.Column{VaultTemplatesColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// VaultVersionsColumns holds the columns for the "vault_versions" table.
+	VaultVersionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "version_number", Type: field.TypeInt},
+		{Name: "hash", Type: field.TypeString},
+		{Name: "size", Type: field.TypeInt64, Default: 0},
+		{Name: "comment", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_created_versions", Type: field.TypeInt, Nullable: true},
+		{Name: "vault_item_versions", Type: field.TypeInt},
+	}
+	// VaultVersionsTable holds the schema information for the "vault_versions" table.
+	VaultVersionsTable = &schema.Table{
+		Name:       "vault_versions",
+		Columns:    VaultVersionsColumns,
+		PrimaryKey: []*schema.Column{VaultVersionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "vault_versions_users_created_versions",
+				Columns:    []*schema.Column{VaultVersionsColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "vault_versions_vault_items_versions",
+				Columns:    []*schema.Column{VaultVersionsColumns[7]},
+				RefColumns: []*schema.Column{VaultItemsColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -2175,6 +3032,62 @@ var (
 			},
 		},
 	}
+	// WarehousesColumns holds the columns for the "warehouses" table.
+	WarehousesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "location_code", Type: field.TypeString, Unique: true},
+		{Name: "address", Type: field.TypeString, Nullable: true},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "tenant_warehouses", Type: field.TypeInt},
+	}
+	// WarehousesTable holds the schema information for the "warehouses" table.
+	WarehousesTable = &schema.Table{
+		Name:       "warehouses",
+		Columns:    WarehousesColumns,
+		PrimaryKey: []*schema.Column{WarehousesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "warehouses_tenants_warehouses",
+				Columns:    []*schema.Column{WarehousesColumns[5]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// WorkLogsColumns holds the columns for the "work_logs" table.
+	WorkLogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "duration_hours", Type: field.TypeFloat64},
+		{Name: "note", Type: field.TypeString, Size: 2147483647},
+		{Name: "started_at", Type: field.TypeTime},
+		{Name: "is_billable", Type: field.TypeBool, Default: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "approved", "billed"}, Default: "pending"},
+		{Name: "work_type", Type: field.TypeString, Default: "general"},
+		{Name: "invoice_id", Type: field.TypeInt, Nullable: true},
+		{Name: "ticket_work_logs", Type: field.TypeInt},
+		{Name: "user_work_logs", Type: field.TypeInt},
+	}
+	// WorkLogsTable holds the schema information for the "work_logs" table.
+	WorkLogsTable = &schema.Table{
+		Name:       "work_logs",
+		Columns:    WorkLogsColumns,
+		PrimaryKey: []*schema.Column{WorkLogsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "work_logs_tickets_work_logs",
+				Columns:    []*schema.Column{WorkLogsColumns[8]},
+				RefColumns: []*schema.Column{TicketsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "work_logs_users_work_logs",
+				Columns:    []*schema.Column{WorkLogsColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// AssetDependsOnColumns holds the columns for the "asset_depends_on" table.
 	AssetDependsOnColumns = []*schema.Column{
 		{Name: "asset_id", Type: field.TypeInt},
@@ -2196,6 +3109,56 @@ var (
 				Symbol:     "asset_depends_on_dependency_of_id",
 				Columns:    []*schema.Column{AssetDependsOnColumns[1]},
 				RefColumns: []*schema.Column{AssetsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// EmployeeConductedInterviewsColumns holds the columns for the "employee_conducted_interviews" table.
+	EmployeeConductedInterviewsColumns = []*schema.Column{
+		{Name: "employee_id", Type: field.TypeInt},
+		{Name: "interview_id", Type: field.TypeInt},
+	}
+	// EmployeeConductedInterviewsTable holds the schema information for the "employee_conducted_interviews" table.
+	EmployeeConductedInterviewsTable = &schema.Table{
+		Name:       "employee_conducted_interviews",
+		Columns:    EmployeeConductedInterviewsColumns,
+		PrimaryKey: []*schema.Column{EmployeeConductedInterviewsColumns[0], EmployeeConductedInterviewsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "employee_conducted_interviews_employee_id",
+				Columns:    []*schema.Column{EmployeeConductedInterviewsColumns[0]},
+				RefColumns: []*schema.Column{EmployeesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "employee_conducted_interviews_interview_id",
+				Columns:    []*schema.Column{EmployeeConductedInterviewsColumns[1]},
+				RefColumns: []*schema.Column{InterviewsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// LegalHoldItemsColumns holds the columns for the "legal_hold_items" table.
+	LegalHoldItemsColumns = []*schema.Column{
+		{Name: "legal_hold_id", Type: field.TypeInt},
+		{Name: "vault_item_id", Type: field.TypeInt},
+	}
+	// LegalHoldItemsTable holds the schema information for the "legal_hold_items" table.
+	LegalHoldItemsTable = &schema.Table{
+		Name:       "legal_hold_items",
+		Columns:    LegalHoldItemsColumns,
+		PrimaryKey: []*schema.Column{LegalHoldItemsColumns[0], LegalHoldItemsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "legal_hold_items_legal_hold_id",
+				Columns:    []*schema.Column{LegalHoldItemsColumns[0]},
+				RefColumns: []*schema.Column{LegalHoldsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "legal_hold_items_vault_item_id",
+				Columns:    []*schema.Column{LegalHoldItemsColumns[1]},
+				RefColumns: []*schema.Column{VaultItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -2229,13 +3192,20 @@ var (
 	Tables = []*schema.Table{
 		AccountsTable,
 		AgentsTable,
+		ApplicationsTable,
 		AssetsTable,
+		AssetAssignmentsTable,
 		AssetTypesTable,
 		AuditLogsTable,
+		BenefitEnrollmentsTable,
+		BenefitPlansTable,
 		BudgetForecastsTable,
 		CallLogsTable,
 		CamerasTable,
+		CandidatesTable,
+		CategoriesTable,
 		CompensationAgreementsTable,
+		ContactsTable,
 		ContractsTable,
 		CredentialsTable,
 		DepartmentsTable,
@@ -2245,11 +3215,16 @@ var (
 		GoalsTable,
 		HealthScoreSnapshotsTable,
 		IvrFlowsTable,
+		InterviewsTable,
+		InventoryCountsTable,
 		InventoryReservationsTable,
 		JobsTable,
 		JobExecutionsTable,
+		JobPostingsTable,
 		JournalEntriesTable,
 		LedgerEntriesTable,
+		LegalHoldsTable,
+		MaintenanceSchedulesTable,
 		NetworkBackupsTable,
 		NetworkDevicesTable,
 		NetworkLinksTable,
@@ -2259,9 +3234,13 @@ var (
 		PerformanceReviewsTable,
 		PermissionsTable,
 		ProductsTable,
+		ProductVariantsTable,
+		PurchaseOrdersTable,
+		PurchaseOrderLinesTable,
 		RecordingsTable,
 		RecurringInvoicesTable,
 		RemediationStepsTable,
+		RetentionPoliciesTable,
 		ReviewCyclesTable,
 		SoPsTable,
 		SaaSappsTable,
@@ -2270,9 +3249,12 @@ var (
 		SaaSusagesTable,
 		ScriptsTable,
 		ServiceRatesTable,
+		StockAlertsTable,
+		StockAuditLogsTable,
 		StockMovementsTable,
 		StrategicRoadmapsTable,
 		SuccessionMapsTable,
+		SuppliersTable,
 		TenantsTable,
 		TicketsTable,
 		TimeEntriesTable,
@@ -2281,9 +3263,18 @@ var (
 		TimeOffRequestsTable,
 		TransactionsTable,
 		UsersTable,
+		VaultCommentsTable,
+		VaultFavoritesTable,
 		VaultItemsTable,
+		VaultShareLinksTable,
+		VaultTemplatesTable,
+		VaultVersionsTable,
 		VoicemailsTable,
+		WarehousesTable,
+		WorkLogsTable,
 		AssetDependsOnTable,
+		EmployeeConductedInterviewsTable,
+		LegalHoldItemsTable,
 		UserPermissionsTable,
 	}
 )
@@ -2291,19 +3282,32 @@ var (
 func init() {
 	AccountsTable.ForeignKeys[0].RefTable = TenantsTable
 	AgentsTable.ForeignKeys[0].RefTable = TenantsTable
+	ApplicationsTable.ForeignKeys[0].RefTable = CandidatesTable
+	ApplicationsTable.ForeignKeys[1].RefTable = JobPostingsTable
+	ApplicationsTable.ForeignKeys[2].RefTable = TenantsTable
 	AssetsTable.ForeignKeys[0].RefTable = AssetsTable
 	AssetsTable.ForeignKeys[1].RefTable = ProductsTable
 	AssetsTable.ForeignKeys[2].RefTable = AssetTypesTable
 	AssetsTable.ForeignKeys[3].RefTable = TenantsTable
 	AssetsTable.ForeignKeys[4].RefTable = UsersTable
+	AssetAssignmentsTable.ForeignKeys[0].RefTable = EmployeesTable
+	AssetAssignmentsTable.ForeignKeys[1].RefTable = ProductsTable
+	AssetAssignmentsTable.ForeignKeys[2].RefTable = TenantsTable
 	AssetTypesTable.ForeignKeys[0].RefTable = TenantsTable
 	AuditLogsTable.ForeignKeys[0].RefTable = TenantsTable
+	BenefitEnrollmentsTable.ForeignKeys[0].RefTable = BenefitPlansTable
+	BenefitEnrollmentsTable.ForeignKeys[1].RefTable = EmployeesTable
+	BenefitEnrollmentsTable.ForeignKeys[2].RefTable = TenantsTable
+	BenefitPlansTable.ForeignKeys[0].RefTable = TenantsTable
 	BudgetForecastsTable.ForeignKeys[0].RefTable = TenantsTable
 	CallLogsTable.ForeignKeys[0].RefTable = TenantsTable
 	CallLogsTable.ForeignKeys[1].RefTable = UsersTable
 	CamerasTable.ForeignKeys[0].RefTable = TenantsTable
+	CandidatesTable.ForeignKeys[0].RefTable = TenantsTable
+	CategoriesTable.ForeignKeys[0].RefTable = TenantsTable
 	CompensationAgreementsTable.ForeignKeys[0].RefTable = EmployeesTable
 	CompensationAgreementsTable.ForeignKeys[1].RefTable = TenantsTable
+	ContactsTable.ForeignKeys[0].RefTable = TenantsTable
 	ContractsTable.ForeignKeys[0].RefTable = TenantsTable
 	CredentialsTable.ForeignKeys[0].RefTable = AssetsTable
 	CredentialsTable.ForeignKeys[1].RefTable = TenantsTable
@@ -2321,12 +3325,17 @@ func init() {
 	GoalsTable.ForeignKeys[1].RefTable = TenantsTable
 	HealthScoreSnapshotsTable.ForeignKeys[0].RefTable = TenantsTable
 	IvrFlowsTable.ForeignKeys[0].RefTable = TenantsTable
+	InterviewsTable.ForeignKeys[0].RefTable = ApplicationsTable
+	InterviewsTable.ForeignKeys[1].RefTable = TenantsTable
+	InventoryCountsTable.ForeignKeys[0].RefTable = ProductsTable
+	InventoryCountsTable.ForeignKeys[1].RefTable = TenantsTable
 	InventoryReservationsTable.ForeignKeys[0].RefTable = ProductsTable
 	InventoryReservationsTable.ForeignKeys[1].RefTable = TenantsTable
 	JobsTable.ForeignKeys[0].RefTable = ScriptsTable
 	JobsTable.ForeignKeys[1].RefTable = TenantsTable
 	JobExecutionsTable.ForeignKeys[0].RefTable = AgentsTable
 	JobExecutionsTable.ForeignKeys[1].RefTable = JobsTable
+	JobPostingsTable.ForeignKeys[0].RefTable = TenantsTable
 	JournalEntriesTable.ForeignKeys[0].RefTable = AccountsTable
 	JournalEntriesTable.ForeignKeys[1].RefTable = UsersTable
 	JournalEntriesTable.ForeignKeys[2].RefTable = TenantsTable
@@ -2334,6 +3343,10 @@ func init() {
 	LedgerEntriesTable.ForeignKeys[0].RefTable = AccountsTable
 	LedgerEntriesTable.ForeignKeys[1].RefTable = TenantsTable
 	LedgerEntriesTable.ForeignKeys[2].RefTable = TransactionsTable
+	LegalHoldsTable.ForeignKeys[0].RefTable = TenantsTable
+	LegalHoldsTable.ForeignKeys[1].RefTable = UsersTable
+	MaintenanceSchedulesTable.ForeignKeys[0].RefTable = ProductsTable
+	MaintenanceSchedulesTable.ForeignKeys[1].RefTable = TenantsTable
 	NetworkBackupsTable.ForeignKeys[0].RefTable = NetworkDevicesTable
 	NetworkBackupsTable.ForeignKeys[1].RefTable = TenantsTable
 	NetworkDevicesTable.ForeignKeys[0].RefTable = TenantsTable
@@ -2352,13 +3365,22 @@ func init() {
 	PerformanceReviewsTable.ForeignKeys[2].RefTable = ReviewCyclesTable
 	PerformanceReviewsTable.ForeignKeys[3].RefTable = TenantsTable
 	PermissionsTable.ForeignKeys[0].RefTable = TenantsTable
-	ProductsTable.ForeignKeys[0].RefTable = AccountsTable
-	ProductsTable.ForeignKeys[1].RefTable = TenantsTable
+	ProductsTable.ForeignKeys[0].RefTable = CategoriesTable
+	ProductsTable.ForeignKeys[1].RefTable = AccountsTable
+	ProductsTable.ForeignKeys[2].RefTable = SuppliersTable
+	ProductsTable.ForeignKeys[3].RefTable = TenantsTable
+	ProductsTable.ForeignKeys[4].RefTable = WarehousesTable
+	ProductVariantsTable.ForeignKeys[0].RefTable = ProductsTable
+	PurchaseOrdersTable.ForeignKeys[0].RefTable = SuppliersTable
+	PurchaseOrdersTable.ForeignKeys[1].RefTable = TenantsTable
+	PurchaseOrderLinesTable.ForeignKeys[0].RefTable = ProductsTable
+	PurchaseOrderLinesTable.ForeignKeys[1].RefTable = PurchaseOrdersTable
 	RecordingsTable.ForeignKeys[0].RefTable = CamerasTable
 	RecordingsTable.ForeignKeys[1].RefTable = TenantsTable
 	RecurringInvoicesTable.ForeignKeys[0].RefTable = AccountsTable
 	RecurringInvoicesTable.ForeignKeys[1].RefTable = TenantsTable
 	RemediationStepsTable.ForeignKeys[0].RefTable = TicketsTable
+	RetentionPoliciesTable.ForeignKeys[0].RefTable = TenantsTable
 	ReviewCyclesTable.ForeignKeys[0].RefTable = TenantsTable
 	SoPsTable.ForeignKeys[0].RefTable = AssetsTable
 	SoPsTable.ForeignKeys[1].RefTable = TenantsTable
@@ -2373,20 +3395,24 @@ func init() {
 	SaaSusagesTable.ForeignKeys[1].RefTable = TenantsTable
 	ScriptsTable.ForeignKeys[0].RefTable = TenantsTable
 	ServiceRatesTable.ForeignKeys[0].RefTable = TenantsTable
+	StockAlertsTable.ForeignKeys[0].RefTable = ProductsTable
+	StockAlertsTable.ForeignKeys[1].RefTable = TenantsTable
+	StockAuditLogsTable.ForeignKeys[0].RefTable = TenantsTable
 	StockMovementsTable.ForeignKeys[0].RefTable = ProductsTable
 	StockMovementsTable.ForeignKeys[1].RefTable = TenantsTable
 	StrategicRoadmapsTable.ForeignKeys[0].RefTable = TenantsTable
 	SuccessionMapsTable.ForeignKeys[0].RefTable = EmployeesTable
 	SuccessionMapsTable.ForeignKeys[1].RefTable = EmployeesTable
 	SuccessionMapsTable.ForeignKeys[2].RefTable = TenantsTable
+	SuppliersTable.ForeignKeys[0].RefTable = TenantsTable
 	TenantsTable.ForeignKeys[0].RefTable = TenantsTable
 	TenantsTable.ForeignKeys[1].RefTable = AccountsTable
 	TicketsTable.ForeignKeys[0].RefTable = AssetsTable
 	TicketsTable.ForeignKeys[1].RefTable = TenantsTable
 	TicketsTable.ForeignKeys[2].RefTable = UsersTable
 	TicketsTable.ForeignKeys[3].RefTable = UsersTable
-	TimeEntriesTable.ForeignKeys[0].RefTable = TicketsTable
-	TimeEntriesTable.ForeignKeys[1].RefTable = UsersTable
+	TimeEntriesTable.ForeignKeys[0].RefTable = EmployeesTable
+	TimeEntriesTable.ForeignKeys[1].RefTable = TicketsTable
 	TimeOffBalancesTable.ForeignKeys[0].RefTable = EmployeesTable
 	TimeOffBalancesTable.ForeignKeys[1].RefTable = TenantsTable
 	TimeOffBalancesTable.ForeignKeys[2].RefTable = TimeOffPoliciesTable
@@ -2398,11 +3424,28 @@ func init() {
 	TransactionsTable.ForeignKeys[1].RefTable = RecordingsTable
 	TransactionsTable.ForeignKeys[2].RefTable = UsersTable
 	UsersTable.ForeignKeys[0].RefTable = TenantsTable
+	VaultCommentsTable.ForeignKeys[0].RefTable = UsersTable
+	VaultCommentsTable.ForeignKeys[1].RefTable = VaultItemsTable
+	VaultFavoritesTable.ForeignKeys[0].RefTable = UsersTable
+	VaultFavoritesTable.ForeignKeys[1].RefTable = VaultItemsTable
 	VaultItemsTable.ForeignKeys[0].RefTable = TenantsTable
+	VaultShareLinksTable.ForeignKeys[0].RefTable = TenantsTable
+	VaultShareLinksTable.ForeignKeys[1].RefTable = VaultItemsTable
+	VaultTemplatesTable.ForeignKeys[0].RefTable = TenantsTable
+	VaultTemplatesTable.ForeignKeys[1].RefTable = UsersTable
+	VaultVersionsTable.ForeignKeys[0].RefTable = UsersTable
+	VaultVersionsTable.ForeignKeys[1].RefTable = VaultItemsTable
 	VoicemailsTable.ForeignKeys[0].RefTable = TenantsTable
 	VoicemailsTable.ForeignKeys[1].RefTable = UsersTable
+	WarehousesTable.ForeignKeys[0].RefTable = TenantsTable
+	WorkLogsTable.ForeignKeys[0].RefTable = TicketsTable
+	WorkLogsTable.ForeignKeys[1].RefTable = UsersTable
 	AssetDependsOnTable.ForeignKeys[0].RefTable = AssetsTable
 	AssetDependsOnTable.ForeignKeys[1].RefTable = AssetsTable
+	EmployeeConductedInterviewsTable.ForeignKeys[0].RefTable = EmployeesTable
+	EmployeeConductedInterviewsTable.ForeignKeys[1].RefTable = InterviewsTable
+	LegalHoldItemsTable.ForeignKeys[0].RefTable = LegalHoldsTable
+	LegalHoldItemsTable.ForeignKeys[1].RefTable = VaultItemsTable
 	UserPermissionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserPermissionsTable.ForeignKeys[1].RefTable = PermissionsTable
 }

@@ -797,21 +797,21 @@ func HasAssignedTicketsWith(preds ...predicate.Ticket) predicate.User {
 	})
 }
 
-// HasTimeEntries applies the HasEdge predicate on the "time_entries" edge.
-func HasTimeEntries() predicate.User {
+// HasWorkLogs applies the HasEdge predicate on the "work_logs" edge.
+func HasWorkLogs() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TimeEntriesTable, TimeEntriesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, WorkLogsTable, WorkLogsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasTimeEntriesWith applies the HasEdge predicate on the "time_entries" edge with a given conditions (other predicates).
-func HasTimeEntriesWith(preds ...predicate.TimeEntry) predicate.User {
+// HasWorkLogsWith applies the HasEdge predicate on the "work_logs" edge with a given conditions (other predicates).
+func HasWorkLogsWith(preds ...predicate.WorkLog) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newTimeEntriesStep()
+		step := newWorkLogsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -927,6 +927,121 @@ func HasSaasIdentities() predicate.User {
 func HasSaasIdentitiesWith(preds ...predicate.SaaSIdentity) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := newSaasIdentitiesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasFavorites applies the HasEdge predicate on the "favorites" edge.
+func HasFavorites() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FavoritesTable, FavoritesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFavoritesWith applies the HasEdge predicate on the "favorites" edge with a given conditions (other predicates).
+func HasFavoritesWith(preds ...predicate.VaultFavorite) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newFavoritesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasVaultComments applies the HasEdge predicate on the "vault_comments" edge.
+func HasVaultComments() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, VaultCommentsTable, VaultCommentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVaultCommentsWith applies the HasEdge predicate on the "vault_comments" edge with a given conditions (other predicates).
+func HasVaultCommentsWith(preds ...predicate.VaultComment) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newVaultCommentsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCreatedVersions applies the HasEdge predicate on the "created_versions" edge.
+func HasCreatedVersions() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CreatedVersionsTable, CreatedVersionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCreatedVersionsWith applies the HasEdge predicate on the "created_versions" edge with a given conditions (other predicates).
+func HasCreatedVersionsWith(preds ...predicate.VaultVersion) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newCreatedVersionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCreatedLegalHolds applies the HasEdge predicate on the "created_legal_holds" edge.
+func HasCreatedLegalHolds() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CreatedLegalHoldsTable, CreatedLegalHoldsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCreatedLegalHoldsWith applies the HasEdge predicate on the "created_legal_holds" edge with a given conditions (other predicates).
+func HasCreatedLegalHoldsWith(preds ...predicate.LegalHold) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newCreatedLegalHoldsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCreatedTemplates applies the HasEdge predicate on the "created_templates" edge.
+func HasCreatedTemplates() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CreatedTemplatesTable, CreatedTemplatesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCreatedTemplatesWith applies the HasEdge predicate on the "created_templates" edge with a given conditions (other predicates).
+func HasCreatedTemplatesWith(preds ...predicate.VaultTemplate) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newCreatedTemplatesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

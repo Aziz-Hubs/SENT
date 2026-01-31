@@ -28,6 +28,10 @@ type RemediationStep struct {
 	Output string `json:"output,omitempty"`
 	// ExecutionContext holds the value of the "execution_context" field.
 	ExecutionContext map[string]interface{} `json:"execution_context,omitempty"`
+	// SourceID holds the value of the "source_id" field.
+	SourceID string `json:"source_id,omitempty"`
+	// SourceApp holds the value of the "source_app" field.
+	SourceApp string `json:"source_app,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RemediationStepQuery when eager-loading is set.
 	Edges                    RemediationStepEdges `json:"edges"`
@@ -64,7 +68,7 @@ func (*RemediationStep) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case remediationstep.FieldID, remediationstep.FieldSequence:
 			values[i] = new(sql.NullInt64)
-		case remediationstep.FieldActionName, remediationstep.FieldStatus, remediationstep.FieldOutput:
+		case remediationstep.FieldActionName, remediationstep.FieldStatus, remediationstep.FieldOutput, remediationstep.FieldSourceID, remediationstep.FieldSourceApp:
 			values[i] = new(sql.NullString)
 		case remediationstep.ForeignKeys[0]: // ticket_remediation_steps
 			values[i] = new(sql.NullInt64)
@@ -120,6 +124,18 @@ func (_m *RemediationStep) assignValues(columns []string, values []any) error {
 				if err := json.Unmarshal(*value, &_m.ExecutionContext); err != nil {
 					return fmt.Errorf("unmarshal field execution_context: %w", err)
 				}
+			}
+		case remediationstep.FieldSourceID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field source_id", values[i])
+			} else if value.Valid {
+				_m.SourceID = value.String
+			}
+		case remediationstep.FieldSourceApp:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field source_app", values[i])
+			} else if value.Valid {
+				_m.SourceApp = value.String
 			}
 		case remediationstep.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -183,6 +199,12 @@ func (_m *RemediationStep) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("execution_context=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ExecutionContext))
+	builder.WriteString(", ")
+	builder.WriteString("source_id=")
+	builder.WriteString(_m.SourceID)
+	builder.WriteString(", ")
+	builder.WriteString("source_app=")
+	builder.WriteString(_m.SourceApp)
 	builder.WriteByte(')')
 	return builder.String()
 }

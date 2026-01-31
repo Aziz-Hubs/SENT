@@ -182,6 +182,8 @@ type ReviewDTO struct {
 	OverallRating string `json:"overall_rating"`
 	Status        string `json:"status"`
 	ReviewerName  string `json:"reviewer_name"`
+	SubjectName   string `json:"subject_name,omitempty"` // For peer reviews
+	Type          string `json:"type"`
 	SubmittedAt   string `json:"submitted_at"`
 }
 
@@ -251,6 +253,7 @@ func (b *PeopleBridge) GetMyReviews(employeeID int) ([]*ReviewDTO, error) {
 		dto := &ReviewDTO{
 			ID:     r.ID,
 			Status: string(r.Status),
+			Type:   string(r.ReviewType),
 		}
 		if r.OverallRating != "" {
 			dto.OverallRating = string(r.OverallRating)
@@ -261,6 +264,9 @@ func (b *PeopleBridge) GetMyReviews(employeeID int) ([]*ReviewDTO, error) {
 		if r.Edges.Reviewer != nil {
 			dto.ReviewerName = r.Edges.Reviewer.FirstName + " " + r.Edges.Reviewer.LastName
 		}
+		if r.Edges.Employee != nil {
+			dto.SubjectName = r.Edges.Employee.FirstName + " " + r.Edges.Employee.LastName
+		}
 		if !r.SubmittedAt.IsZero() {
 			dto.SubmittedAt = r.SubmittedAt.Format("2006-01-02")
 		}
@@ -269,3 +275,188 @@ func (b *PeopleBridge) GetMyReviews(employeeID int) ([]*ReviewDTO, error) {
 	return dtos, nil
 }
 
+// RequestPeerFeedback initiates a 360 review request
+func (b *PeopleBridge) RequestPeerFeedback(requesterID int, peerIDs []int) error {
+	pm := people.NewPerformanceManager(b.db)
+	_, err := pm.RequestFeedback(b.ctx, "Acuative Corporation", requesterID, peerIDs, nil)
+	return err
+}
+
+// GetFeedbackRequests returns reviews where the user is the reviewer (Peer Reviews)
+func (b *PeopleBridge) GetFeedbackRequests(reviewerID int) ([]*ReviewDTO, error) {
+	pm := people.NewPerformanceManager(b.db)
+	reqs, err := pm.GetIncomingFeedbackRequests(b.ctx, reviewerID)
+	if err != nil {
+		return nil, err
+	}
+
+	var dtos []*ReviewDTO
+	for _, r := range reqs {
+		dto := &ReviewDTO{
+			ID:     r.ID,
+			Status: string(r.Status),
+			Type:   string(r.ReviewType),
+		}
+		if r.Edges.Cycle != nil {
+			dto.CycleName = r.Edges.Cycle.Name
+		}
+		// In a feedback request, the "Subject" is the person we are reviewing (r.Edges.Employee)
+		if r.Edges.Employee != nil {
+			dto.SubjectName = r.Edges.Employee.FirstName + " " + r.Edges.Employee.LastName
+		}
+		dtos = append(dtos, dto)
+	}
+	return dtos, nil
+}
+
+// --- Benefits DTOs ---
+
+type BenefitPlanDTO struct {
+	ID           int     `json:"id"`
+	Name         string  `json:"name"`
+	Type         string  `json:"type"`
+	Description  string  `json:"description"`
+	EmpCost      float64 `json:"employee_cost"`
+	EmployerCost float64 `json:"employer_cost"`
+}
+
+type BenefitEnrollmentDTO struct {
+	ID        int     `json:"id"`
+	PlanName  string  `json:"plan_name"`
+	PlanType  string  `json:"plan_type"`
+	Tier      string  `json:"tier"`
+	MyCost    float64 `json:"my_cost"`
+	Status    string  `json:"status"`
+	Effective string  `json:"effective_date"`
+}
+
+// --- Recruiting & ATS DTOs ---
+
+type JobPostingDTO struct {
+	ID          int    `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Location    string `json:"location"`
+	Status      string `json:"status"`
+	CreatedAt   string `json:"created_at"`
+}
+
+type ApplicationDTO struct {
+	ID            int    `json:"id"`
+	CandidateName string `json:"candidate_name"`
+	CandidateEmail string `json:"candidate_email"`
+	Status        string `json:"status"`
+	AppliedAt     string `json:"applied_at"`
+}
+
+// --- Benefits Methods ---
+
+func (b *PeopleBridge) GetBenefitPlans() ([]*BenefitPlanDTO, error) {
+	bm := people.NewBenefitsManager(b.db)
+	// Hardcoded tenant ID 1 for now
+	plans, err := bm.GetPlans(b.ctx, 1)
+	if err != nil {
+		return nil, err
+	}
+
+	var dtos []*BenefitPlanDTO
+	for _, p := range plans {
+		dtos = append(dtos, &BenefitPlanDTO{
+			ID:           p.ID,
+			Name:         p.Name,
+			Type:         string(p.Type),
+			Description:  p.Description,
+			EmpCost:      p.EmployeeDeduction,
+			EmployerCost: p.EmployerContribution,
+		})
+	}
+	return dtos, nil
+}
+
+func (b *PeopleBridge) EnrollInBenefit(empID int, planID int, tier string) error {
+	bm := people.NewBenefitsManager(b.db)
+	_, err := bm.EnrollEmployee(b.ctx, empID, planID, tier)
+	return err
+}
+
+func (b *PeopleBridge) GetMyBenefits(empID int) ([]*BenefitEnrollmentDTO, error) {
+	bm := people.NewBenefitsManager(b.db)
+	enrollments, err := bm.GetEmployeeEnrollments(b.ctx, empID)
+	if err != nil {
+		return nil, err
+	}
+
+	var dtos []*BenefitEnrollmentDTO
+	for _, e := range enrollments {
+		dto := &BenefitEnrollmentDTO{
+			ID:        e.ID,
+			Tier:      string(e.Tier),
+			MyCost:    e.EmployeeCost,
+			Status:    string(e.Status),
+			Effective: e.EffectiveFrom.Format("2006-01-02"),
+		}
+		if e.Edges.Plan != nil {
+			dto.PlanName = e.Edges.Plan.Name
+			dto.PlanType = string(e.Edges.Plan.Type)
+		}
+		dtos = append(dtos, dto)
+	}
+	return dtos, nil
+}
+
+// CreateJobPosting creates a new job opening
+func (b *PeopleBridge) CreateJobPosting(tenantID int, title, description string) (*JobPostingDTO, error) {
+	rs := people.NewRecruitingService(b.db)
+	job, err := rs.CreateJobPosting(b.ctx, tenantID, title, description)
+	if err != nil {
+		return nil, err
+	}
+
+	return &JobPostingDTO{
+		ID:          job.ID,
+		Title:       job.Title,
+		Description: job.Description,
+		Status:      string(job.Status),
+		CreatedAt:   job.CreatedAt.Format(time.RFC3339),
+	}, nil
+}
+
+// SubmitApplication submits a new application
+func (b *PeopleBridge) SubmitApplication(tenantID, jobID int, firstName, lastName, email string) (*ApplicationDTO, error) {
+	rs := people.NewRecruitingService(b.db)
+	app, err := rs.SubmitApplication(b.ctx, tenantID, jobID, firstName, lastName, email)
+	if err != nil {
+		return nil, err
+	}
+
+	// Load candidate for DTO
+	cand, _ := app.QueryCandidate().Only(b.ctx)
+
+	return &ApplicationDTO{
+		ID:            app.ID,
+		CandidateName:  cand.FirstName + " " + cand.LastName,
+		CandidateEmail: cand.Email,
+		Status:        string(app.Status),
+		AppliedAt:     app.AppliedAt.Format(time.RFC3339),
+	}, nil
+}
+
+// GetJobPostings returns all job postings for a tenant
+func (b *PeopleBridge) GetJobPostings(tenantID int) ([]*JobPostingDTO, error) {
+	jobs, err := b.db.JobPosting.Query().All(b.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var dtos []*JobPostingDTO
+	for _, j := range jobs {
+		dtos = append(dtos, &JobPostingDTO{
+			ID:          j.ID,
+			Title:       j.Title,
+			Description: j.Description,
+			Status:      string(j.Status),
+			CreatedAt:   j.CreatedAt.Format(time.RFC3339),
+		})
+	}
+	return dtos, nil
+}

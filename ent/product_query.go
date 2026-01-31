@@ -8,11 +8,20 @@ import (
 	"fmt"
 	"math"
 	"sent/ent/account"
+	"sent/ent/assetassignment"
+	"sent/ent/category"
+	"sent/ent/inventorycount"
 	"sent/ent/inventoryreservation"
+	"sent/ent/maintenanceschedule"
 	"sent/ent/predicate"
 	"sent/ent/product"
+	"sent/ent/productvariant"
+	"sent/ent/purchaseorderline"
+	"sent/ent/stockalert"
 	"sent/ent/stockmovement"
+	"sent/ent/supplier"
 	"sent/ent/tenant"
+	"sent/ent/warehouse"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -23,16 +32,25 @@ import (
 // ProductQuery is the builder for querying Product entities.
 type ProductQuery struct {
 	config
-	ctx              *QueryContext
-	order            []product.OrderOption
-	inters           []Interceptor
-	predicates       []predicate.Product
-	withTenant       *TenantQuery
-	withMovements    *StockMovementQuery
-	withReservations *InventoryReservationQuery
-	withVendor       *AccountQuery
-	withFKs          bool
-	modifiers        []func(*sql.Selector)
+	ctx                      *QueryContext
+	order                    []product.OrderOption
+	inters                   []Interceptor
+	predicates               []predicate.Product
+	withTenant               *TenantQuery
+	withMovements            *StockMovementQuery
+	withReservations         *InventoryReservationQuery
+	withVendor               *AccountQuery
+	withSupplier             *SupplierQuery
+	withCategory             *CategoryQuery
+	withWarehouse            *WarehouseQuery
+	withAssignments          *AssetAssignmentQuery
+	withVariants             *ProductVariantQuery
+	withMaintenanceSchedules *MaintenanceScheduleQuery
+	withAlerts               *StockAlertQuery
+	withPurchaseOrderLines   *PurchaseOrderLineQuery
+	withInventoryCounts      *InventoryCountQuery
+	withFKs                  bool
+	modifiers                []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -150,6 +168,204 @@ func (_q *ProductQuery) QueryVendor() *AccountQuery {
 			sqlgraph.From(product.Table, product.FieldID, selector),
 			sqlgraph.To(account.Table, account.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, product.VendorTable, product.VendorColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySupplier chains the current query on the "supplier" edge.
+func (_q *ProductQuery) QuerySupplier() *SupplierQuery {
+	query := (&SupplierClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, selector),
+			sqlgraph.To(supplier.Table, supplier.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, product.SupplierTable, product.SupplierColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCategory chains the current query on the "category" edge.
+func (_q *ProductQuery) QueryCategory() *CategoryQuery {
+	query := (&CategoryClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, selector),
+			sqlgraph.To(category.Table, category.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, product.CategoryTable, product.CategoryColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryWarehouse chains the current query on the "warehouse" edge.
+func (_q *ProductQuery) QueryWarehouse() *WarehouseQuery {
+	query := (&WarehouseClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, selector),
+			sqlgraph.To(warehouse.Table, warehouse.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, product.WarehouseTable, product.WarehouseColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAssignments chains the current query on the "assignments" edge.
+func (_q *ProductQuery) QueryAssignments() *AssetAssignmentQuery {
+	query := (&AssetAssignmentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, selector),
+			sqlgraph.To(assetassignment.Table, assetassignment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.AssignmentsTable, product.AssignmentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryVariants chains the current query on the "variants" edge.
+func (_q *ProductQuery) QueryVariants() *ProductVariantQuery {
+	query := (&ProductVariantClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, selector),
+			sqlgraph.To(productvariant.Table, productvariant.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.VariantsTable, product.VariantsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMaintenanceSchedules chains the current query on the "maintenance_schedules" edge.
+func (_q *ProductQuery) QueryMaintenanceSchedules() *MaintenanceScheduleQuery {
+	query := (&MaintenanceScheduleClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, selector),
+			sqlgraph.To(maintenanceschedule.Table, maintenanceschedule.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.MaintenanceSchedulesTable, product.MaintenanceSchedulesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAlerts chains the current query on the "alerts" edge.
+func (_q *ProductQuery) QueryAlerts() *StockAlertQuery {
+	query := (&StockAlertClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, selector),
+			sqlgraph.To(stockalert.Table, stockalert.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.AlertsTable, product.AlertsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPurchaseOrderLines chains the current query on the "purchase_order_lines" edge.
+func (_q *ProductQuery) QueryPurchaseOrderLines() *PurchaseOrderLineQuery {
+	query := (&PurchaseOrderLineClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, selector),
+			sqlgraph.To(purchaseorderline.Table, purchaseorderline.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.PurchaseOrderLinesTable, product.PurchaseOrderLinesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryInventoryCounts chains the current query on the "inventory_counts" edge.
+func (_q *ProductQuery) QueryInventoryCounts() *InventoryCountQuery {
+	query := (&InventoryCountClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, selector),
+			sqlgraph.To(inventorycount.Table, inventorycount.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.InventoryCountsTable, product.InventoryCountsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -344,15 +560,24 @@ func (_q *ProductQuery) Clone() *ProductQuery {
 		return nil
 	}
 	return &ProductQuery{
-		config:           _q.config,
-		ctx:              _q.ctx.Clone(),
-		order:            append([]product.OrderOption{}, _q.order...),
-		inters:           append([]Interceptor{}, _q.inters...),
-		predicates:       append([]predicate.Product{}, _q.predicates...),
-		withTenant:       _q.withTenant.Clone(),
-		withMovements:    _q.withMovements.Clone(),
-		withReservations: _q.withReservations.Clone(),
-		withVendor:       _q.withVendor.Clone(),
+		config:                   _q.config,
+		ctx:                      _q.ctx.Clone(),
+		order:                    append([]product.OrderOption{}, _q.order...),
+		inters:                   append([]Interceptor{}, _q.inters...),
+		predicates:               append([]predicate.Product{}, _q.predicates...),
+		withTenant:               _q.withTenant.Clone(),
+		withMovements:            _q.withMovements.Clone(),
+		withReservations:         _q.withReservations.Clone(),
+		withVendor:               _q.withVendor.Clone(),
+		withSupplier:             _q.withSupplier.Clone(),
+		withCategory:             _q.withCategory.Clone(),
+		withWarehouse:            _q.withWarehouse.Clone(),
+		withAssignments:          _q.withAssignments.Clone(),
+		withVariants:             _q.withVariants.Clone(),
+		withMaintenanceSchedules: _q.withMaintenanceSchedules.Clone(),
+		withAlerts:               _q.withAlerts.Clone(),
+		withPurchaseOrderLines:   _q.withPurchaseOrderLines.Clone(),
+		withInventoryCounts:      _q.withInventoryCounts.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -401,6 +626,105 @@ func (_q *ProductQuery) WithVendor(opts ...func(*AccountQuery)) *ProductQuery {
 		opt(query)
 	}
 	_q.withVendor = query
+	return _q
+}
+
+// WithSupplier tells the query-builder to eager-load the nodes that are connected to
+// the "supplier" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ProductQuery) WithSupplier(opts ...func(*SupplierQuery)) *ProductQuery {
+	query := (&SupplierClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSupplier = query
+	return _q
+}
+
+// WithCategory tells the query-builder to eager-load the nodes that are connected to
+// the "category" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ProductQuery) WithCategory(opts ...func(*CategoryQuery)) *ProductQuery {
+	query := (&CategoryClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCategory = query
+	return _q
+}
+
+// WithWarehouse tells the query-builder to eager-load the nodes that are connected to
+// the "warehouse" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ProductQuery) WithWarehouse(opts ...func(*WarehouseQuery)) *ProductQuery {
+	query := (&WarehouseClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withWarehouse = query
+	return _q
+}
+
+// WithAssignments tells the query-builder to eager-load the nodes that are connected to
+// the "assignments" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ProductQuery) WithAssignments(opts ...func(*AssetAssignmentQuery)) *ProductQuery {
+	query := (&AssetAssignmentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withAssignments = query
+	return _q
+}
+
+// WithVariants tells the query-builder to eager-load the nodes that are connected to
+// the "variants" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ProductQuery) WithVariants(opts ...func(*ProductVariantQuery)) *ProductQuery {
+	query := (&ProductVariantClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withVariants = query
+	return _q
+}
+
+// WithMaintenanceSchedules tells the query-builder to eager-load the nodes that are connected to
+// the "maintenance_schedules" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ProductQuery) WithMaintenanceSchedules(opts ...func(*MaintenanceScheduleQuery)) *ProductQuery {
+	query := (&MaintenanceScheduleClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withMaintenanceSchedules = query
+	return _q
+}
+
+// WithAlerts tells the query-builder to eager-load the nodes that are connected to
+// the "alerts" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ProductQuery) WithAlerts(opts ...func(*StockAlertQuery)) *ProductQuery {
+	query := (&StockAlertClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withAlerts = query
+	return _q
+}
+
+// WithPurchaseOrderLines tells the query-builder to eager-load the nodes that are connected to
+// the "purchase_order_lines" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ProductQuery) WithPurchaseOrderLines(opts ...func(*PurchaseOrderLineQuery)) *ProductQuery {
+	query := (&PurchaseOrderLineClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPurchaseOrderLines = query
+	return _q
+}
+
+// WithInventoryCounts tells the query-builder to eager-load the nodes that are connected to
+// the "inventory_counts" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ProductQuery) WithInventoryCounts(opts ...func(*InventoryCountQuery)) *ProductQuery {
+	query := (&InventoryCountClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withInventoryCounts = query
 	return _q
 }
 
@@ -483,14 +807,23 @@ func (_q *ProductQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prod
 		nodes       = []*Product{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [13]bool{
 			_q.withTenant != nil,
 			_q.withMovements != nil,
 			_q.withReservations != nil,
 			_q.withVendor != nil,
+			_q.withSupplier != nil,
+			_q.withCategory != nil,
+			_q.withWarehouse != nil,
+			_q.withAssignments != nil,
+			_q.withVariants != nil,
+			_q.withMaintenanceSchedules != nil,
+			_q.withAlerts != nil,
+			_q.withPurchaseOrderLines != nil,
+			_q.withInventoryCounts != nil,
 		}
 	)
-	if _q.withTenant != nil || _q.withVendor != nil {
+	if _q.withTenant != nil || _q.withVendor != nil || _q.withSupplier != nil || _q.withCategory != nil || _q.withWarehouse != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -540,6 +873,70 @@ func (_q *ProductQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prod
 	if query := _q.withVendor; query != nil {
 		if err := _q.loadVendor(ctx, query, nodes, nil,
 			func(n *Product, e *Account) { n.Edges.Vendor = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSupplier; query != nil {
+		if err := _q.loadSupplier(ctx, query, nodes, nil,
+			func(n *Product, e *Supplier) { n.Edges.Supplier = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCategory; query != nil {
+		if err := _q.loadCategory(ctx, query, nodes, nil,
+			func(n *Product, e *Category) { n.Edges.Category = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withWarehouse; query != nil {
+		if err := _q.loadWarehouse(ctx, query, nodes, nil,
+			func(n *Product, e *Warehouse) { n.Edges.Warehouse = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withAssignments; query != nil {
+		if err := _q.loadAssignments(ctx, query, nodes,
+			func(n *Product) { n.Edges.Assignments = []*AssetAssignment{} },
+			func(n *Product, e *AssetAssignment) { n.Edges.Assignments = append(n.Edges.Assignments, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withVariants; query != nil {
+		if err := _q.loadVariants(ctx, query, nodes,
+			func(n *Product) { n.Edges.Variants = []*ProductVariant{} },
+			func(n *Product, e *ProductVariant) { n.Edges.Variants = append(n.Edges.Variants, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withMaintenanceSchedules; query != nil {
+		if err := _q.loadMaintenanceSchedules(ctx, query, nodes,
+			func(n *Product) { n.Edges.MaintenanceSchedules = []*MaintenanceSchedule{} },
+			func(n *Product, e *MaintenanceSchedule) {
+				n.Edges.MaintenanceSchedules = append(n.Edges.MaintenanceSchedules, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withAlerts; query != nil {
+		if err := _q.loadAlerts(ctx, query, nodes,
+			func(n *Product) { n.Edges.Alerts = []*StockAlert{} },
+			func(n *Product, e *StockAlert) { n.Edges.Alerts = append(n.Edges.Alerts, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withPurchaseOrderLines; query != nil {
+		if err := _q.loadPurchaseOrderLines(ctx, query, nodes,
+			func(n *Product) { n.Edges.PurchaseOrderLines = []*PurchaseOrderLine{} },
+			func(n *Product, e *PurchaseOrderLine) {
+				n.Edges.PurchaseOrderLines = append(n.Edges.PurchaseOrderLines, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withInventoryCounts; query != nil {
+		if err := _q.loadInventoryCounts(ctx, query, nodes,
+			func(n *Product) { n.Edges.InventoryCounts = []*InventoryCount{} },
+			func(n *Product, e *InventoryCount) { n.Edges.InventoryCounts = append(n.Edges.InventoryCounts, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -669,6 +1066,288 @@ func (_q *ProductQuery) loadVendor(ctx context.Context, query *AccountQuery, nod
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
+	}
+	return nil
+}
+func (_q *ProductQuery) loadSupplier(ctx context.Context, query *SupplierQuery, nodes []*Product, init func(*Product), assign func(*Product, *Supplier)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Product)
+	for i := range nodes {
+		if nodes[i].supplier_products == nil {
+			continue
+		}
+		fk := *nodes[i].supplier_products
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(supplier.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "supplier_products" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *ProductQuery) loadCategory(ctx context.Context, query *CategoryQuery, nodes []*Product, init func(*Product), assign func(*Product, *Category)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Product)
+	for i := range nodes {
+		if nodes[i].category_products == nil {
+			continue
+		}
+		fk := *nodes[i].category_products
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(category.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "category_products" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *ProductQuery) loadWarehouse(ctx context.Context, query *WarehouseQuery, nodes []*Product, init func(*Product), assign func(*Product, *Warehouse)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Product)
+	for i := range nodes {
+		if nodes[i].warehouse_products == nil {
+			continue
+		}
+		fk := *nodes[i].warehouse_products
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(warehouse.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "warehouse_products" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *ProductQuery) loadAssignments(ctx context.Context, query *AssetAssignmentQuery, nodes []*Product, init func(*Product), assign func(*Product, *AssetAssignment)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Product)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.AssetAssignment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(product.AssignmentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.product_assignments
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "product_assignments" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "product_assignments" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ProductQuery) loadVariants(ctx context.Context, query *ProductVariantQuery, nodes []*Product, init func(*Product), assign func(*Product, *ProductVariant)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Product)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.ProductVariant(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(product.VariantsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.product_variants
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "product_variants" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "product_variants" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ProductQuery) loadMaintenanceSchedules(ctx context.Context, query *MaintenanceScheduleQuery, nodes []*Product, init func(*Product), assign func(*Product, *MaintenanceSchedule)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Product)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.MaintenanceSchedule(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(product.MaintenanceSchedulesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.product_maintenance_schedules
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "product_maintenance_schedules" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "product_maintenance_schedules" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ProductQuery) loadAlerts(ctx context.Context, query *StockAlertQuery, nodes []*Product, init func(*Product), assign func(*Product, *StockAlert)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Product)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.StockAlert(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(product.AlertsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.product_alerts
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "product_alerts" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "product_alerts" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ProductQuery) loadPurchaseOrderLines(ctx context.Context, query *PurchaseOrderLineQuery, nodes []*Product, init func(*Product), assign func(*Product, *PurchaseOrderLine)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Product)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.PurchaseOrderLine(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(product.PurchaseOrderLinesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.product_purchase_order_lines
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "product_purchase_order_lines" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "product_purchase_order_lines" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ProductQuery) loadInventoryCounts(ctx context.Context, query *InventoryCountQuery, nodes []*Product, init func(*Product), assign func(*Product, *InventoryCount)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Product)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.InventoryCount(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(product.InventoryCountsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.product_inventory_counts
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "product_inventory_counts" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "product_inventory_counts" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

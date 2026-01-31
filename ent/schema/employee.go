@@ -70,5 +70,9 @@ func (Employee) Edges() []ent.Edge {
 		edge.To("performance_reviews", PerformanceReview.Type),
 		edge.To("conducted_reviews", PerformanceReview.Type),
 		edge.To("goals", Goal.Type),
+		edge.To("asset_assignments", AssetAssignment.Type),
+		edge.To("time_entries", TimeEntry.Type),
+		edge.To("conducted_interviews", Interview.Type),
+		edge.To("benefit_enrollments", BenefitEnrollment.Type),
 	}
 }

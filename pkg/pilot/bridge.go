@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"sent/ent"
+	"sent/ent/remediationstep"
 	"sent/ent/tenant"
 	"sent/ent/ticket"
 	"sent/ent/timeentry"
@@ -167,6 +168,52 @@ func (b *PilotBridge) SanitizeLog(input string) string {
 	return output
 }
 
+// ExecuteRemediation triggers a planned fix from the execution plan.
+func (b *PilotBridge) ExecuteRemediation(ticketID int, actionIndex int) error {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return err
+	}
+
+	// 1. Get ticket to find the plan
+	t, err := b.db.Ticket.Get(b.ctx, ticketID)
+	if err != nil {
+		return err
+	}
+
+	plan, ok := t.ExecutionPlan["suggested_actions"].([]interface{})
+	if !ok || actionIndex >= len(plan) {
+		return fmt.Errorf("invalid remediation action index")
+	}
+
+	action := plan[actionIndex].(map[string]interface{})
+	actionName := action["name"].(string)
+
+	// 2. Create Remediation Step
+	step, err := b.db.RemediationStep.Create().
+		SetTicketID(ticketID).
+		SetActionName(actionName).
+		SetSourceApp("pulse").
+		SetStatus(remediationstep.StatusPending).
+		Save(b.ctx)
+	if err != nil {
+		return err
+	}
+
+	// 3. Enqueue Job
+	if b.river != nil {
+		_, err = b.river.Insert(b.ctx, orchestrator.RemediationArgs{
+			TenantID:   profile.TenantID,
+			TicketID:   ticketID,
+			StepID:     step.ID,
+			ActionName: actionName,
+			Params:     action,
+		}, nil)
+	}
+
+	return err
+}
+
 type TicketDTO struct {
 	ID          int       `json:"id"`
 	Subject     string    `json:"subject"`
@@ -175,8 +222,10 @@ type TicketDTO struct {
 	Priority    string    `json:"priority"`
 	Requester   string    `json:"requester"`
 	Assignee    string    `json:"assignee"`
-	Asset       string    `json:"asset"`
-	CreatedAt   time.Time `json:"createdAt"`
+	Asset         string                 `json:"asset"`
+	CreatedAt     time.Time              `json:"createdAt"`
+	DeepLink      string                 `json:"deepLink"`
+	ExecutionPlan map[string]interface{} `json:"executionPlan"`
 }
 
 func mapTicketToDTO(t *ent.Ticket) TicketDTO {
@@ -184,9 +233,11 @@ func mapTicketToDTO(t *ent.Ticket) TicketDTO {
 		ID:          t.ID,
 		Subject:     t.Subject,
 		Description: t.Description,
-		Status:      string(t.Status),
-		Priority:    string(t.Priority),
-		CreatedAt:   t.CreatedAt,
+		Status:        string(t.Status),
+		Priority:      string(t.Priority),
+		CreatedAt:     t.CreatedAt,
+		DeepLink:      t.DeepLink,
+		ExecutionPlan: t.ExecutionPlan,
 	}
 	if t.Edges.Requester != nil {
 		dto.Requester = t.Edges.Requester.Email

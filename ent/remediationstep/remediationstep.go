@@ -24,6 +24,10 @@ const (
 	FieldOutput = "output"
 	// FieldExecutionContext holds the string denoting the execution_context field in the database.
 	FieldExecutionContext = "execution_context"
+	// FieldSourceID holds the string denoting the source_id field in the database.
+	FieldSourceID = "source_id"
+	// FieldSourceApp holds the string denoting the source_app field in the database.
+	FieldSourceApp = "source_app"
 	// EdgeTicket holds the string denoting the ticket edge name in mutations.
 	EdgeTicket = "ticket"
 	// Table holds the table name of the remediationstep in the database.
@@ -45,6 +49,8 @@ var Columns = []string{
 	FieldStatus,
 	FieldOutput,
 	FieldExecutionContext,
+	FieldSourceID,
+	FieldSourceApp,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "remediation_steps"
@@ -122,6 +128,16 @@ func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByOutput orders the results by the output field.
 func ByOutput(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOutput, opts...).ToFunc()
+}
+
+// BySourceID orders the results by the source_id field.
+func BySourceID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSourceID, opts...).ToFunc()
+}
+
+// BySourceApp orders the results by the source_app field.
+func BySourceApp(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSourceApp, opts...).ToFunc()
 }
 
 // ByTicketField orders the results by ticket field.

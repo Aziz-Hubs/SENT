@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Table,
   TableBody,
   TableCell,
@@ -24,12 +17,8 @@ import {
   Power,
   Terminal,
   MoreHorizontal,
-  FileCode,
-  Calendar,
   Server,
-  Activity, // Added Import
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -42,8 +31,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import DeviceDetails from "./pulse/DeviceDetails";
 import ScriptRepository from "./pulse/ScriptRepository";
-import JobScheduler from "./pulse/JobScheduler"; // Import JobScheduler
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import JobScheduler from "./pulse/JobScheduler";
+import { useAppStore } from "@/store/useAppStore";
 
 interface Agent {
   id: number;
@@ -63,6 +52,7 @@ const PulsePage = () => {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDevice, setSelectedDevice] = useState<Agent | null>(null);
+  const { activeTab } = useAppStore();
 
   const fetchAgents = async () => {
     setLoading(true);
@@ -140,7 +130,7 @@ const PulsePage = () => {
         <DeviceDetails
           device={{
             ...selectedDevice,
-            id: selectedDevice.id.toString(), // Convert ID to string
+            id: selectedDevice.id.toString(),
             disk: selectedDevice.disk || 0,
             uptime: selectedDevice.uptime || "Unknown",
             cpu: selectedDevice.cpu || 0,
@@ -156,6 +146,107 @@ const PulsePage = () => {
     return status === "online"
       ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
       : "bg-slate-500/10 text-slate-500 border-slate-500/20";
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "devices":
+      case "overview":
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search devices by hostname or IP..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="max-w-sm"
+              />
+            </div>
+
+            <div className="border rounded-md">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Hostname</TableHead>
+                    <TableHead>OS</TableHead>
+                    <TableHead>IP Address</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Last Seen</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAgents.map((agent) => (
+                    <TableRow
+                      key={agent.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => setSelectedDevice(agent)}
+                    >
+                      <TableCell className="font-medium flex items-center gap-2">
+                        <Laptop className="h-4 w-4 text-slate-500" />
+                        {agent.hostname}
+                      </TableCell>
+                      <TableCell className="uppercase text-xs font-bold text-muted-foreground">
+                        {agent.os}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {agent.ip}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={getStatusColor(agent.status)}
+                        >
+                          {agent.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-xs">
+                        {formatDistanceToNow(new Date(agent.last_seen), {
+                          addSuffix: true,
+                        })}
+                      </TableCell>
+                      <TableCell
+                        className="text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>
+                              Remote Actions
+                            </DropdownMenuLabel>
+                            <DropdownMenuItem
+                              onClick={() => setSelectedDevice(agent)}
+                            >
+                              <Terminal className="mr-2 h-4 w-4" /> Connect
+                              Terminal
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-red-600">
+                              <Power className="mr-2 h-4 w-4" /> Reboot Device
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        );
+      case "scripts":
+        return <ScriptRepository />;
+      case "jobs":
+        return <JobScheduler />;
+      default:
+        return <div>Invalid Tab</div>;
+    }
   };
 
   return (
@@ -177,115 +268,7 @@ const PulsePage = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="devices" className="flex-1 flex flex-col">
-        <TabsList>
-          <TabsTrigger value="devices">
-            <Server className="mr-2 h-4 w-4" />
-            Devices
-          </TabsTrigger>
-          <TabsTrigger value="scripts">
-            <FileCode className="mr-2 h-4 w-4" />
-            Scripts
-          </TabsTrigger>
-          <TabsTrigger value="jobs">
-            <Calendar className="mr-2 h-4 w-4" />
-            Jobs
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="devices" className="flex-1 flex flex-col space-y-4">
-          <div className="flex items-center space-x-2 mt-4">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search devices by hostname or IP..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-sm"
-            />
-          </div>
-
-          <div className="border rounded-md flex-1 overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Hostname</TableHead>
-                  <TableHead>OS</TableHead>
-                  <TableHead>IP Address</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last Seen</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAgents.map((agent) => (
-                  <TableRow
-                    key={agent.id}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => setSelectedDevice(agent)}
-                  >
-                    <TableCell className="font-medium flex items-center gap-2">
-                      <Laptop className="h-4 w-4 text-slate-500" />
-                      {agent.hostname}
-                    </TableCell>
-                    <TableCell className="uppercase text-xs font-bold text-muted-foreground">
-                      {agent.os}
-                    </TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {agent.ip}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={getStatusColor(agent.status)}
-                      >
-                        {agent.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-xs">
-                      {formatDistanceToNow(new Date(agent.last_seen), {
-                        addSuffix: true,
-                      })}
-                    </TableCell>
-                    <TableCell
-                      className="text-right"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Remote Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() => setSelectedDevice(agent)}
-                          >
-                            <Terminal className="mr-2 h-4 w-4" /> Connect
-                            Terminal
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
-                            <Power className="mr-2 h-4 w-4" /> Reboot Device
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="scripts" className="flex-1 mt-4">
-          <ScriptRepository />
-        </TabsContent>
-
-        <TabsContent value="jobs" className="flex-1 mt-4">
-          <JobScheduler />
-        </TabsContent>
-      </Tabs>
+      <div className="flex-1 overflow-auto">{renderContent()}</div>
     </div>
   );
 };

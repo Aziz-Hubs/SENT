@@ -57,3 +57,13 @@ func ReadFile(path string) ([]byte, error) {
     }
     return ioutil.ReadFile(path)
 }
+
+// WriteFile writes content to a file
+func WriteFile(path string, data []byte) error {
+    return ioutil.WriteFile(path, data, 0644)
+}
+
+// DeleteFile removes a file
+func DeleteFile(path string) error {
+    return os.Remove(path)
+}

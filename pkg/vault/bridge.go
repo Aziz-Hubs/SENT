@@ -13,7 +13,10 @@ import (
 	"time"
 
 	"sent/ent"
+	"sent/ent/auditlog"
 	"sent/ent/tenant"
+	"sent/ent/user"
+	"sent/ent/vaultfavorite"
 	"sent/ent/vaultitem"
 	"sent/pkg/auth"
 	"sent/pkg/orchestrator"
@@ -73,6 +76,15 @@ func (b *VaultBridge) SetRiverClient(r *river.Client[pgx.Tx]) {
 // Startup initializes the bridge context.
 func (b *VaultBridge) Startup(ctx context.Context) {
 	b.ctx = ctx
+}
+
+// getUserID retrieves the database user ID from the profile's Zitadel Subject.
+func (b *VaultBridge) getUserID(profile *auth.UserProfile) (int, error) {
+	u, err := b.db.User.Query().Where(user.ZitadelID(profile.Subject)).Only(b.ctx)
+	if err != nil {
+		return 0, fmt.Errorf("user not found: %w", err)
+	}
+	return u.ID, nil
 }
 
 // getTenantFS returns a base-path filesystem isolated to the specific tenant.
@@ -197,17 +209,20 @@ func (b *VaultBridge) ListFiles(dir string) ([]FileDTO, error) {
 }
 
 // SaveFile writes a file to storage using CAS.
-// SaveFile writes a file to storage using CAS.
 func (b *VaultBridge) SaveFile(path string, base64Content string) error {
 	profile, err := b.auth.GetUserProfile()
 	if err != nil {
 		return err
 	}
-	return b.SaveFileAsTenant(path, base64Content, profile.TenantID)
+	return b.saveFileInternal(path, base64Content, profile.TenantID, profile)
 }
 
 // SaveFileAsTenant writes a file to storage for a specific tenant using CAS.
 func (b *VaultBridge) SaveFileAsTenant(path string, base64Content string, tenantID int) error {
+	return b.saveFileInternal(path, base64Content, tenantID, nil)
+}
+
+func (b *VaultBridge) saveFileInternal(path string, base64Content string, tenantID int, profile *auth.UserProfile) error {
 	path, err := b.sanitizePath(path)
 	if err != nil {
 		return fmt.Errorf("invalid path: %w", err)
@@ -252,6 +267,25 @@ func (b *VaultBridge) SaveFileAsTenant(path string, base64Content string, tenant
 
 	var item *ent.VaultItem
 	if existing != nil {
+		// Version Control: Create a version before updating
+		versionCount, _ := existing.QueryVersions().Count(b.ctx)
+		vBuilder := b.db.VaultVersion.Create().
+			SetItem(existing).
+			SetHash(existing.Hash).
+			SetSize(existing.Size).
+			SetVersionNumber(versionCount + 1)
+		
+		if profile != nil {
+			if uid, err := b.getUserID(profile); err == nil {
+				vBuilder.SetCreatedByID(uid)
+			}
+		}
+		
+		_, err = vBuilder.Save(b.ctx)
+		if err != nil {
+			fmt.Printf("[SENTvault] Warning: Failed to create version: %v\n", err)
+		}
+
 		item, err = b.db.VaultItem.UpdateOne(existing).
 			SetHash(fileHash).
 			SetName(fileName).
@@ -274,6 +308,13 @@ func (b *VaultBridge) SaveFileAsTenant(path string, base64Content string, tenant
 		return fmt.Errorf("failed to save vault item metadata: %w", err)
 	}
 
+	// Activity Logging
+	actor := "system"
+	if profile != nil {
+		actor = profile.Subject
+	}
+	b.logActivity(tenantID, actor, "upload", path)
+
 	// 4. Trigger Asynchronous OCR Job
 	if b.river != nil {
 		ext := strings.ToLower(filepath.Ext(fileName))
@@ -287,7 +328,6 @@ func (b *VaultBridge) SaveFileAsTenant(path string, base64Content string, tenant
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -389,7 +429,7 @@ func (b *VaultBridge) CreateFolder(path string) error {
 	return fs.MkdirAll(path, 0755)
 }
 
-// DeleteFile permanently deletes a file or directory.
+// DeleteFile soft-deletes a file (moves to trash).
 func (b *VaultBridge) DeleteFile(path string) error {
 	profile, err := b.auth.GetUserProfile()
 	if err != nil {
@@ -404,14 +444,358 @@ func (b *VaultBridge) DeleteFile(path string) error {
 	if err != nil {
 		return fmt.Errorf("invalid path: %w", err)
 	}
-	fs := b.getTenantFS(tenantID)
-	
-	// Also delete metadata from DB
-	_, _ = b.db.VaultItem.Delete().
+
+	// Get the item
+	item, err := b.db.VaultItem.Query().
 		Where(vaultitem.Path(path), vaultitem.HasTenantWith(tenant.ID(tenantID))).
+		Only(b.ctx)
+	if err != nil {
+		return fmt.Errorf("file not found: %w", err)
+	}
+
+	// Check for legal hold
+	hasHold, err := item.QueryLegalHolds().Where(/* legalhold.Active(true) */).Exist(b.ctx)
+	if err != nil {
+		return fmt.Errorf("failed to check legal hold: %w", err)
+	}
+	if hasHold {
+		return fmt.Errorf("cannot delete: file is under legal hold")
+	}
+
+	// Soft delete
+	now := time.Now()
+	_, err = b.db.VaultItem.UpdateOne(item).SetDeletedAt(now).Save(b.ctx)
+	if err != nil {
+		return fmt.Errorf("failed to soft delete: %w", err)
+	}
+
+	b.logActivity(tenantID, profile.Subject, "delete", path)
+	return nil
+}
+
+// ListTrash returns all soft-deleted files for the current tenant.
+func (b *VaultBridge) ListTrash() ([]FileDTO, error) {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return nil, err
+	}
+	tenantID := profile.TenantID
+
+	items, err := b.db.VaultItem.Query().
+		Where(
+			vaultitem.HasTenantWith(tenant.ID(tenantID)),
+			vaultitem.DeletedAtNotNil(),
+		).
+		All(b.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []FileDTO
+	for _, item := range items {
+		results = append(results, FileDTO{
+			Name:    item.Name,
+			Path:    item.Path,
+			Size:    item.Size,
+			ModTime: item.UpdatedAt,
+			IsDir:   item.IsDir,
+		})
+	}
+	return results, nil
+}
+
+// RestoreFromTrash restores a soft-deleted file.
+func (b *VaultBridge) RestoreFromTrash(path string) error {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return err
+	}
+	tenantID := profile.TenantID
+
+	path, err = b.sanitizePath(path)
+	if err != nil {
+		return err
+	}
+
+	_, err = b.db.VaultItem.Update().
+		Where(vaultitem.Path(path), vaultitem.HasTenantWith(tenant.ID(tenantID))).
+		ClearDeletedAt().
+		Save(b.ctx)
+	if err != nil {
+		return fmt.Errorf("failed to restore: %w", err)
+	}
+
+	b.logActivity(tenantID, profile.Subject, "restore", path)
+	return nil
+}
+
+// EmptyTrash permanently deletes all items in trash.
+func (b *VaultBridge) EmptyTrash() error {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return err
+	}
+	tenantID := profile.TenantID
+
+	if !b.auth.HasRole("admin") {
+		return fmt.Errorf("permission denied: only admins can empty trash")
+	}
+
+	_, err = b.db.VaultItem.Delete().
+		Where(
+			vaultitem.HasTenantWith(tenant.ID(tenantID)),
+			vaultitem.DeletedAtNotNil(),
+		).
 		Exec(b.ctx)
-		
-	return fs.RemoveAll(path)
+	return err
+}
+
+// StarFile adds a file to user's favorites.
+func (b *VaultBridge) StarFile(path string) error {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return err
+	}
+	tenantID := profile.TenantID
+
+	path, err = b.sanitizePath(path)
+	if err != nil {
+		return err
+	}
+
+	item, err := b.db.VaultItem.Query().
+		Where(vaultitem.Path(path), vaultitem.HasTenantWith(tenant.ID(tenantID))).
+		Only(b.ctx)
+	if err != nil {
+		return err
+	}
+
+	uid, err := b.getUserID(profile)
+	if err != nil {
+		return err
+	}
+
+	_, err = b.db.VaultFavorite.Create().
+		SetUserID(uid).
+		SetItemID(item.ID).
+		Save(b.ctx)
+	return err
+}
+
+// UnstarFile removes a file from user's favorites.
+func (b *VaultBridge) UnstarFile(path string) error {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return err
+	}
+	tenantID := profile.TenantID
+
+	path, err = b.sanitizePath(path)
+	if err != nil {
+		return err
+	}
+
+	item, err := b.db.VaultItem.Query().
+		Where(vaultitem.Path(path), vaultitem.HasTenantWith(tenant.ID(tenantID))).
+		Only(b.ctx)
+	if err != nil {
+		return err
+	}
+
+	uid, err := b.getUserID(profile)
+	if err != nil {
+		return err
+	}
+
+	_, err = b.db.VaultFavorite.Delete().
+		Where(
+			vaultfavorite.HasUserWith(user.ID(uid)),
+			vaultfavorite.HasItemWith(vaultitem.ID(item.ID)),
+		).
+		Exec(b.ctx)
+	return err
+}
+
+// ListStarred returns all starred files for the current user.
+func (b *VaultBridge) ListStarred() ([]FileDTO, error) {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return nil, err
+	}
+
+	uid, err := b.getUserID(profile)
+	if err != nil {
+		return nil, err
+	}
+
+	favorites, err := b.db.VaultFavorite.Query().
+		Where(vaultfavorite.HasUserWith(user.ID(uid))).
+		WithItem().
+		All(b.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []FileDTO
+	for _, fav := range favorites {
+		if fav.Edges.Item != nil {
+			item := fav.Edges.Item
+			results = append(results, FileDTO{
+				Name:    item.Name,
+				Path:    item.Path,
+				Size:    item.Size,
+				ModTime: item.UpdatedAt,
+				IsDir:   item.IsDir,
+			})
+		}
+	}
+	return results, nil
+}
+
+// AddComment adds a comment to a file.
+func (b *VaultBridge) AddComment(path string, content string, page int, x, y float64) error {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return err
+	}
+	tenantID := profile.TenantID
+
+	path, err = b.sanitizePath(path)
+	if err != nil {
+		return err
+	}
+
+	item, err := b.db.VaultItem.Query().
+		Where(vaultitem.Path(path), vaultitem.HasTenantWith(tenant.ID(tenantID))).
+		Only(b.ctx)
+	if err != nil {
+		return err
+	}
+
+	uid, err := b.getUserID(profile)
+	if err != nil {
+		return err
+	}
+
+	_, err = b.db.VaultComment.Create().
+		SetItemID(item.ID).
+		SetAuthorID(uid).
+		SetContent(content).
+		SetPage(page).
+		SetX(x).
+		SetY(y).
+		Save(b.ctx)
+	return err
+}
+
+// ListComments returns all comments for a file.
+func (b *VaultBridge) ListComments(path string) ([]*ent.VaultComment, error) {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return nil, err
+	}
+	tenantID := profile.TenantID
+
+	path, err = b.sanitizePath(path)
+	if err != nil {
+		return nil, err
+	}
+
+	item, err := b.db.VaultItem.Query().
+		Where(vaultitem.Path(path), vaultitem.HasTenantWith(tenant.ID(tenantID))).
+		Only(b.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return item.QueryComments().WithAuthor().All(b.ctx)
+}
+
+// GetVersionHistory returns all versions of a file.
+func (b *VaultBridge) GetVersionHistory(path string) ([]*ent.VaultVersion, error) {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return nil, err
+	}
+	tenantID := profile.TenantID
+
+	path, err = b.sanitizePath(path)
+	if err != nil {
+		return nil, err
+	}
+
+	item, err := b.db.VaultItem.Query().
+		Where(vaultitem.Path(path), vaultitem.HasTenantWith(tenant.ID(tenantID))).
+		Only(b.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return item.QueryVersions().Order(ent.Desc("version_number")).All(b.ctx)
+}
+
+// RestoreVersion restores a file to a previous version.
+func (b *VaultBridge) RestoreVersion(path string, versionID int) error {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return err
+	}
+	tenantID := profile.TenantID
+
+	path, err = b.sanitizePath(path)
+	if err != nil {
+		return err
+	}
+
+	item, err := b.db.VaultItem.Query().
+		Where(vaultitem.Path(path), vaultitem.HasTenantWith(tenant.ID(tenantID))).
+		Only(b.ctx)
+	if err != nil {
+		return err
+	}
+
+	version, err := b.db.VaultVersion.Get(b.ctx, versionID)
+	if err != nil {
+		return err
+	}
+
+	// Update item to point to the old hash
+	_, err = b.db.VaultItem.UpdateOne(item).
+		SetHash(version.Hash).
+		SetSize(version.Size).
+		SetUpdatedAt(time.Now()).
+		Save(b.ctx)
+	if err != nil {
+		return err
+	}
+
+	b.logActivity(tenantID, profile.Subject, "restore_version", path)
+	return nil
+}
+
+// GetActivityFeed returns recent actions for the tenant.
+func (b *VaultBridge) GetActivityFeed(limit int) ([]*ent.AuditLog, error) {
+	profile, err := b.auth.GetUserProfile()
+	if err != nil {
+		return nil, err
+	}
+	tenantID := profile.TenantID
+
+	return b.db.AuditLog.Query().
+		Where(auditlog.HasTenantWith(tenant.ID(tenantID))).
+		Order(ent.Desc("timestamp")).
+		Limit(limit).
+		All(b.ctx)
+}
+
+// logActivity records an action to the audit log.
+func (b *VaultBridge) logActivity(tenantID int, actorID string, action, path string) {
+	_, _ = b.db.AuditLog.Create().
+		SetTenantID(tenantID).
+		SetAppName("vault").
+		SetActorID(actorID).
+		SetAction(action + ": " + path).
+		Save(b.ctx)
 }
 
 // archiveFile moves the current file at path to the .history directory.
@@ -425,3 +809,4 @@ func (b *VaultBridge) archiveFile(path string) error {
 func (b *VaultBridge) GetFileHistory(path string) ([]string, error) {
 	return []string{}, nil
 }
+

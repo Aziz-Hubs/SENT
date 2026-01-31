@@ -41,6 +41,8 @@ type VaultItem struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the VaultItemQuery when eager-loading is set.
 	Edges              VaultItemEdges `json:"edges"`
@@ -52,9 +54,19 @@ type VaultItem struct {
 type VaultItemEdges struct {
 	// Tenant holds the value of the tenant edge.
 	Tenant *Tenant `json:"tenant,omitempty"`
+	// ShareLinks holds the value of the share_links edge.
+	ShareLinks []*VaultShareLink `json:"share_links,omitempty"`
+	// Versions holds the value of the versions edge.
+	Versions []*VaultVersion `json:"versions,omitempty"`
+	// Comments holds the value of the comments edge.
+	Comments []*VaultComment `json:"comments,omitempty"`
+	// FavoritedBy holds the value of the favorited_by edge.
+	FavoritedBy []*VaultFavorite `json:"favorited_by,omitempty"`
+	// LegalHolds holds the value of the legal_holds edge.
+	LegalHolds []*LegalHold `json:"legal_holds,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [6]bool
 }
 
 // TenantOrErr returns the Tenant value or an error if the edge
@@ -66,6 +78,51 @@ func (e VaultItemEdges) TenantOrErr() (*Tenant, error) {
 		return nil, &NotFoundError{label: tenant.Label}
 	}
 	return nil, &NotLoadedError{edge: "tenant"}
+}
+
+// ShareLinksOrErr returns the ShareLinks value or an error if the edge
+// was not loaded in eager-loading.
+func (e VaultItemEdges) ShareLinksOrErr() ([]*VaultShareLink, error) {
+	if e.loadedTypes[1] {
+		return e.ShareLinks, nil
+	}
+	return nil, &NotLoadedError{edge: "share_links"}
+}
+
+// VersionsOrErr returns the Versions value or an error if the edge
+// was not loaded in eager-loading.
+func (e VaultItemEdges) VersionsOrErr() ([]*VaultVersion, error) {
+	if e.loadedTypes[2] {
+		return e.Versions, nil
+	}
+	return nil, &NotLoadedError{edge: "versions"}
+}
+
+// CommentsOrErr returns the Comments value or an error if the edge
+// was not loaded in eager-loading.
+func (e VaultItemEdges) CommentsOrErr() ([]*VaultComment, error) {
+	if e.loadedTypes[3] {
+		return e.Comments, nil
+	}
+	return nil, &NotLoadedError{edge: "comments"}
+}
+
+// FavoritedByOrErr returns the FavoritedBy value or an error if the edge
+// was not loaded in eager-loading.
+func (e VaultItemEdges) FavoritedByOrErr() ([]*VaultFavorite, error) {
+	if e.loadedTypes[4] {
+		return e.FavoritedBy, nil
+	}
+	return nil, &NotLoadedError{edge: "favorited_by"}
+}
+
+// LegalHoldsOrErr returns the LegalHolds value or an error if the edge
+// was not loaded in eager-loading.
+func (e VaultItemEdges) LegalHoldsOrErr() ([]*LegalHold, error) {
+	if e.loadedTypes[5] {
+		return e.LegalHolds, nil
+	}
+	return nil, &NotLoadedError{edge: "legal_holds"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -81,7 +138,7 @@ func (*VaultItem) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case vaultitem.FieldPath, vaultitem.FieldName, vaultitem.FieldHash, vaultitem.FieldFileType, vaultitem.FieldContent:
 			values[i] = new(sql.NullString)
-		case vaultitem.FieldCreatedAt, vaultitem.FieldUpdatedAt:
+		case vaultitem.FieldCreatedAt, vaultitem.FieldUpdatedAt, vaultitem.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		case vaultitem.ForeignKeys[0]: // tenant_vault_items
 			values[i] = new(sql.NullInt64)
@@ -174,6 +231,13 @@ func (_m *VaultItem) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
+		case vaultitem.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
+			}
 		case vaultitem.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field tenant_vault_items", value)
@@ -197,6 +261,31 @@ func (_m *VaultItem) Value(name string) (ent.Value, error) {
 // QueryTenant queries the "tenant" edge of the VaultItem entity.
 func (_m *VaultItem) QueryTenant() *TenantQuery {
 	return NewVaultItemClient(_m.config).QueryTenant(_m)
+}
+
+// QueryShareLinks queries the "share_links" edge of the VaultItem entity.
+func (_m *VaultItem) QueryShareLinks() *VaultShareLinkQuery {
+	return NewVaultItemClient(_m.config).QueryShareLinks(_m)
+}
+
+// QueryVersions queries the "versions" edge of the VaultItem entity.
+func (_m *VaultItem) QueryVersions() *VaultVersionQuery {
+	return NewVaultItemClient(_m.config).QueryVersions(_m)
+}
+
+// QueryComments queries the "comments" edge of the VaultItem entity.
+func (_m *VaultItem) QueryComments() *VaultCommentQuery {
+	return NewVaultItemClient(_m.config).QueryComments(_m)
+}
+
+// QueryFavoritedBy queries the "favorited_by" edge of the VaultItem entity.
+func (_m *VaultItem) QueryFavoritedBy() *VaultFavoriteQuery {
+	return NewVaultItemClient(_m.config).QueryFavoritedBy(_m)
+}
+
+// QueryLegalHolds queries the "legal_holds" edge of the VaultItem entity.
+func (_m *VaultItem) QueryLegalHolds() *LegalHoldQuery {
+	return NewVaultItemClient(_m.config).QueryLegalHolds(_m)
 }
 
 // Update returns a builder for updating this VaultItem.
@@ -254,6 +343,11 @@ func (_m *VaultItem) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -6,26 +6,114 @@ export function AdjustStock(arg1) {
   return window['go']['stock']['StockBridge']['AdjustStock'](arg1);
 }
 
+export function AssignAsset(arg1, arg2, arg3) {
+  return window['go']['stock']['StockBridge']['AssignAsset'](arg1, arg2, arg3);
+}
+
 export function CalculateCOGS(arg1, arg2) {
   return window['go']['stock']['StockBridge']['CalculateCOGS'](arg1, arg2);
+}
+
+export function CompleteMaintenance(arg1) {
+  return window['go']['stock']['StockBridge']['CompleteMaintenance'](arg1);
+}
+
+export function CreateCategory(arg1, arg2) {
+  return window['go']['stock']['StockBridge']['CreateCategory'](arg1, arg2);
 }
 
 export function CreateProduct(arg1) {
   return window['go']['stock']['StockBridge']['CreateProduct'](arg1);
 }
 
+export function CreatePurchaseOrder(arg1, arg2) {
+  return window['go']['stock']['StockBridge']['CreatePurchaseOrder'](arg1, arg2);
+}
+
+export function CreateSupplier(arg1) {
+  return window['go']['stock']['StockBridge']['CreateSupplier'](arg1);
+}
+
+export function DisposeAsset(arg1, arg2) {
+  return window['go']['stock']['StockBridge']['DisposeAsset'](arg1, arg2);
+}
+
 export function GenerateBarcode(arg1) {
   return window['go']['stock']['StockBridge']['GenerateBarcode'](arg1);
+}
+
+export function GetAlerts() {
+  return window['go']['stock']['StockBridge']['GetAlerts']();
+}
+
+export function GetAuditLogs(arg1, arg2) {
+  return window['go']['stock']['StockBridge']['GetAuditLogs'](arg1, arg2);
+}
+
+export function GetCategories() {
+  return window['go']['stock']['StockBridge']['GetCategories']();
+}
+
+export function GetEmployees() {
+  return window['go']['stock']['StockBridge']['GetEmployees']();
+}
+
+export function GetExpiringWarranties(arg1) {
+  return window['go']['stock']['StockBridge']['GetExpiringWarranties'](arg1);
 }
 
 export function GetHistory() {
   return window['go']['stock']['StockBridge']['GetHistory']();
 }
 
+export function GetPendingMaintenance() {
+  return window['go']['stock']['StockBridge']['GetPendingMaintenance']();
+}
+
+export function GetProductAssignments(arg1) {
+  return window['go']['stock']['StockBridge']['GetProductAssignments'](arg1);
+}
+
 export function GetProducts() {
   return window['go']['stock']['StockBridge']['GetProducts']();
 }
 
+export function GetPurchaseOrders() {
+  return window['go']['stock']['StockBridge']['GetPurchaseOrders']();
+}
+
+export function GetSuppliers() {
+  return window['go']['stock']['StockBridge']['GetSuppliers']();
+}
+
+export function ImportProducts(arg1) {
+  return window['go']['stock']['StockBridge']['ImportProducts'](arg1);
+}
+
+export function MarkAlertRead(arg1) {
+  return window['go']['stock']['StockBridge']['MarkAlertRead'](arg1);
+}
+
+export function ReceivePurchaseOrder(arg1) {
+  return window['go']['stock']['StockBridge']['ReceivePurchaseOrder'](arg1);
+}
+
+export function RecordCount(arg1, arg2) {
+  return window['go']['stock']['StockBridge']['RecordCount'](arg1, arg2);
+}
+
+export function ReturnAsset(arg1, arg2) {
+  return window['go']['stock']['StockBridge']['ReturnAsset'](arg1, arg2);
+}
+
+export function ScheduleMaintenance(arg1, arg2, arg3) {
+  return window['go']['stock']['StockBridge']['ScheduleMaintenance'](arg1, arg2, arg3);
+}
+
 export function Startup(arg1) {
   return window['go']['stock']['StockBridge']['Startup'](arg1);
+}
+
+export function UpdateLocation(arg1, arg2) {
+  return window['go']['stock']['StockBridge']['UpdateLocation'](arg1, arg2);
 }

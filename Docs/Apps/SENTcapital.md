@@ -34,6 +34,7 @@ SENTcapital is the financial nerve center of the SENT ecosystem. It unifies Doub
 
 - **SENTpeople:** Payroll runs automatically create Expense (Debit) and Cash (Credit) entries in the ledger.
 - **SENTpilot:** Billable hours from PSA tickets are converted into Invoices in SENTcapital.
+- **SENTstock:** Real-time inventory asset valuation and automated straight-line depreciation postings.
 - **SENTgov:** All transactions are tagged with tax codes for automated compliance reporting.
 
 ## **4. Workflow**

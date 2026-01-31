@@ -105,6 +105,11 @@ func UpdatedAt(v time.Time) predicate.VaultItem {
 	return predicate.VaultItem(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
+// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
+func DeletedAt(v time.Time) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldEQ(FieldDeletedAt, v))
+}
+
 // PathEQ applies the EQ predicate on the "path" field.
 func PathEQ(v string) predicate.VaultItem {
 	return predicate.VaultItem(sql.FieldEQ(FieldPath, v))
@@ -600,6 +605,56 @@ func UpdatedAtLTE(v time.Time) predicate.VaultItem {
 	return predicate.VaultItem(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
+// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
+func DeletedAtEQ(v time.Time) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
+func DeletedAtNEQ(v time.Time) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldNEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtIn applies the In predicate on the "deleted_at" field.
+func DeletedAtIn(vs ...time.Time) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
+func DeletedAtNotIn(vs ...time.Time) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldNotIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtGT applies the GT predicate on the "deleted_at" field.
+func DeletedAtGT(v time.Time) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldGT(FieldDeletedAt, v))
+}
+
+// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
+func DeletedAtGTE(v time.Time) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldGTE(FieldDeletedAt, v))
+}
+
+// DeletedAtLT applies the LT predicate on the "deleted_at" field.
+func DeletedAtLT(v time.Time) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldLT(FieldDeletedAt, v))
+}
+
+// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
+func DeletedAtLTE(v time.Time) predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldLTE(FieldDeletedAt, v))
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.VaultItem {
+	return predicate.VaultItem(sql.FieldNotNull(FieldDeletedAt))
+}
+
 // HasTenant applies the HasEdge predicate on the "tenant" edge.
 func HasTenant() predicate.VaultItem {
 	return predicate.VaultItem(func(s *sql.Selector) {
@@ -615,6 +670,121 @@ func HasTenant() predicate.VaultItem {
 func HasTenantWith(preds ...predicate.Tenant) predicate.VaultItem {
 	return predicate.VaultItem(func(s *sql.Selector) {
 		step := newTenantStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasShareLinks applies the HasEdge predicate on the "share_links" edge.
+func HasShareLinks() predicate.VaultItem {
+	return predicate.VaultItem(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ShareLinksTable, ShareLinksColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasShareLinksWith applies the HasEdge predicate on the "share_links" edge with a given conditions (other predicates).
+func HasShareLinksWith(preds ...predicate.VaultShareLink) predicate.VaultItem {
+	return predicate.VaultItem(func(s *sql.Selector) {
+		step := newShareLinksStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasVersions applies the HasEdge predicate on the "versions" edge.
+func HasVersions() predicate.VaultItem {
+	return predicate.VaultItem(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, VersionsTable, VersionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVersionsWith applies the HasEdge predicate on the "versions" edge with a given conditions (other predicates).
+func HasVersionsWith(preds ...predicate.VaultVersion) predicate.VaultItem {
+	return predicate.VaultItem(func(s *sql.Selector) {
+		step := newVersionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasComments applies the HasEdge predicate on the "comments" edge.
+func HasComments() predicate.VaultItem {
+	return predicate.VaultItem(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CommentsTable, CommentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCommentsWith applies the HasEdge predicate on the "comments" edge with a given conditions (other predicates).
+func HasCommentsWith(preds ...predicate.VaultComment) predicate.VaultItem {
+	return predicate.VaultItem(func(s *sql.Selector) {
+		step := newCommentsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasFavoritedBy applies the HasEdge predicate on the "favorited_by" edge.
+func HasFavoritedBy() predicate.VaultItem {
+	return predicate.VaultItem(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FavoritedByTable, FavoritedByColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFavoritedByWith applies the HasEdge predicate on the "favorited_by" edge with a given conditions (other predicates).
+func HasFavoritedByWith(preds ...predicate.VaultFavorite) predicate.VaultItem {
+	return predicate.VaultItem(func(s *sql.Selector) {
+		step := newFavoritedByStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLegalHolds applies the HasEdge predicate on the "legal_holds" edge.
+func HasLegalHolds() predicate.VaultItem {
+	return predicate.VaultItem(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, LegalHoldsTable, LegalHoldsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLegalHoldsWith applies the HasEdge predicate on the "legal_holds" edge with a given conditions (other predicates).
+func HasLegalHoldsWith(preds ...predicate.LegalHold) predicate.VaultItem {
+	return predicate.VaultItem(func(s *sql.Selector) {
+		step := newLegalHoldsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

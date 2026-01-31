@@ -7,6 +7,8 @@ interface AppState {
   isAuthenticated: boolean
   user: UserProfile | null
   activeDivision: string
+  activeTab: string
+  activeCategory: 'core' | 'infrastructure' | 'business'
   contextContent: React.ReactNode | null
   isContextOpen: boolean
   privacyMode: boolean
@@ -15,6 +17,8 @@ interface AppState {
   setAuth: (status: boolean) => void
   setUser: (user: UserProfile) => void
   setDivision: (division: string) => void
+  setTab: (tab: string) => void
+  setCategory: (category: 'core' | 'infrastructure' | 'business') => void
   setContextSidebar: (content: React.ReactNode | null) => void
   toggleContext: (open?: boolean) => void
   togglePrivacy: (enabled?: boolean) => void
@@ -27,6 +31,8 @@ export const useAppStore = create<AppState>()(
     isAuthenticated: false,
     user: null,
     activeDivision: 'dashboard',
+    activeTab: 'overview',
+    activeCategory: 'core',
     contextContent: null,
     isContextOpen: false,
     privacyMode: false,
@@ -44,8 +50,19 @@ export const useAppStore = create<AppState>()(
     setDivision: (division) =>
       set((state) => {
         state.activeDivision = division
+        state.activeTab = 'overview' // Reset tab on division change
         state.isContextOpen = false
         state.contextContent = null
+      }),
+
+    setTab: (tab) =>
+      set((state) => {
+        state.activeTab = tab
+      }),
+
+    setCategory: (category) =>
+      set((state) => {
+        state.activeCategory = category
       }),
 
     setContextSidebar: (content) =>
@@ -68,6 +85,7 @@ export const useAppStore = create<AppState>()(
         state.isAuthenticated = false
         state.user = null
         state.activeDivision = 'dashboard'
+        state.activeCategory = 'core'
         state.isContextOpen = false
         state.contextContent = null
         state.privacyMode = false

@@ -6,6 +6,10 @@ import (
 	"sent/ent"
 	"sent/pkg/pulse"
 	"sent/pkg/pulse/agent"
+    "sent/pkg/pulse/common"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/riverqueue/river"
 )
 
 type PulseBridge struct {
@@ -35,6 +39,13 @@ func NewPulseBridge(db *ent.Client) *PulseBridge {
 	}
 }
 
+func (b *PulseBridge) SetRiverClient(r *river.Client[pgx.Tx]) {
+	if b.manager != nil {
+		b.manager.SetRiverClient(r)
+	}
+}
+
+
 func (b *PulseBridge) Startup(ctx context.Context) {
 	b.ctx = ctx
 	// Start the ingestion worker in the background
@@ -44,6 +55,8 @@ func (b *PulseBridge) Startup(ctx context.Context) {
     go func() {
         mux := http.NewServeMux()
         mux.HandleFunc("/api/pulse/terminal/", b.HandleTerminalConnect)
+        mux.HandleFunc("/rdp/stream", b.HandleRDPStream)
+        mux.HandleFunc("/rdp/view", b.HandleRDPView)
         if err := http.ListenAndServe(":8000", mux); err != nil {
             // Log but don't crash main app
            // fmt.Printf("[BRIDGE] WS Server failed: %v\n", err)
@@ -203,4 +216,53 @@ func (b *PulseBridge) ScanPatches(agentID string) ([]agent.PatchInfo, error) {
 // InstallPatches triggers patch installation on the agent
 func (b *PulseBridge) InstallPatches(agentID string, patchIDs []string) error {
     return agent.InstallPatches(patchIDs)
+}
+
+// --- New Core Features ---
+
+// RebootDevice restarts the agent machine
+func (b *PulseBridge) RebootDevice(agentID string) error {
+    // In a real distributed system, we would publish a "reboot" command via Redis/Centrifugo.
+    // For local dev/MVP where Bridge runs alongside Agent logic (monolith simulation):
+    return agent.RebootSystem()
+}
+
+// ShutdownDevice shuts down the agent machine
+func (b *PulseBridge) ShutdownDevice(agentID string) error {
+    return agent.ShutdownSystem()
+}
+
+// GetEventLogs fetches system logs
+func (b *PulseBridge) GetEventLogs(agentID string) ([]agent.LogEntry, error) {
+    return agent.GetSystemLogs()
+}
+
+// GetEnvVars fetches environment variables
+func (b *PulseBridge) GetEnvVars(agentID string) ([]agent.EnvVar, error) {
+    return agent.GetEnvironmentVariables(), nil
+}
+
+// GetProcesses fetches running processes
+func (b *PulseBridge) GetProcesses(agentID string) ([]agent.ProcessInfo, error) {
+    return agent.GetProcesses()
+}
+
+// KillProcess terminates a process
+func (b *PulseBridge) KillProcess(agentID string, pid int32) error {
+    return agent.KillProcess(pid)
+}
+
+// DownloadFile reads a file from the agent
+func (b *PulseBridge) DownloadFile(agentID string, path string) ([]byte, error) {
+    return agent.ReadFile(path)
+}
+
+// DeleteFile deletes a file from the agent
+func (b *PulseBridge) DeleteFile(agentID string, path string) error {
+    return agent.DeleteFile(path)
+}
+
+// GetSoftwareInventory fetches installed software
+func (b *PulseBridge) GetSoftwareInventory(agentID string) ([]common.SoftwareInfo, error) {
+    return agent.GetInstalledSoftware(), nil
 }

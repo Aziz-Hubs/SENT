@@ -50,11 +50,16 @@ func (User) Edges() []ent.Edge {
 		edge.To("permissions", Permission.Type),
 		edge.To("requested_tickets", Ticket.Type),
 		edge.To("assigned_tickets", Ticket.Type),
-		edge.To("time_entries", TimeEntry.Type),
+		edge.To("work_logs", WorkLog.Type),
 		edge.To("owned_assets", Asset.Type),
 		edge.To("authored_sops", SOP.Type),
 		edge.To("call_logs", CallLog.Type),
 		edge.To("voicemails", Voicemail.Type),
 		edge.To("saas_identities", SaaSIdentity.Type),
+		edge.To("favorites", VaultFavorite.Type),
+		edge.To("vault_comments", VaultComment.Type),
+		edge.To("created_versions", VaultVersion.Type),
+		edge.To("created_legal_holds", LegalHold.Type),
+		edge.To("created_templates", VaultTemplate.Type),
 	}
 }

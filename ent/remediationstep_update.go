@@ -110,6 +110,46 @@ func (_u *RemediationStepUpdate) ClearExecutionContext() *RemediationStepUpdate 
 	return _u
 }
 
+// SetSourceID sets the "source_id" field.
+func (_u *RemediationStepUpdate) SetSourceID(v string) *RemediationStepUpdate {
+	_u.mutation.SetSourceID(v)
+	return _u
+}
+
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (_u *RemediationStepUpdate) SetNillableSourceID(v *string) *RemediationStepUpdate {
+	if v != nil {
+		_u.SetSourceID(*v)
+	}
+	return _u
+}
+
+// ClearSourceID clears the value of the "source_id" field.
+func (_u *RemediationStepUpdate) ClearSourceID() *RemediationStepUpdate {
+	_u.mutation.ClearSourceID()
+	return _u
+}
+
+// SetSourceApp sets the "source_app" field.
+func (_u *RemediationStepUpdate) SetSourceApp(v string) *RemediationStepUpdate {
+	_u.mutation.SetSourceApp(v)
+	return _u
+}
+
+// SetNillableSourceApp sets the "source_app" field if the given value is not nil.
+func (_u *RemediationStepUpdate) SetNillableSourceApp(v *string) *RemediationStepUpdate {
+	if v != nil {
+		_u.SetSourceApp(*v)
+	}
+	return _u
+}
+
+// ClearSourceApp clears the value of the "source_app" field.
+func (_u *RemediationStepUpdate) ClearSourceApp() *RemediationStepUpdate {
+	_u.mutation.ClearSourceApp()
+	return _u
+}
+
 // SetTicketID sets the "ticket" edge to the Ticket entity by ID.
 func (_u *RemediationStepUpdate) SetTicketID(id int) *RemediationStepUpdate {
 	_u.mutation.SetTicketID(id)
@@ -213,6 +253,18 @@ func (_u *RemediationStepUpdate) sqlSave(ctx context.Context) (_node int, err er
 	}
 	if _u.mutation.ExecutionContextCleared() {
 		_spec.ClearField(remediationstep.FieldExecutionContext, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SourceID(); ok {
+		_spec.SetField(remediationstep.FieldSourceID, field.TypeString, value)
+	}
+	if _u.mutation.SourceIDCleared() {
+		_spec.ClearField(remediationstep.FieldSourceID, field.TypeString)
+	}
+	if value, ok := _u.mutation.SourceApp(); ok {
+		_spec.SetField(remediationstep.FieldSourceApp, field.TypeString, value)
+	}
+	if _u.mutation.SourceAppCleared() {
+		_spec.ClearField(remediationstep.FieldSourceApp, field.TypeString)
 	}
 	if _u.mutation.TicketCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -343,6 +395,46 @@ func (_u *RemediationStepUpdateOne) SetExecutionContext(v map[string]interface{}
 // ClearExecutionContext clears the value of the "execution_context" field.
 func (_u *RemediationStepUpdateOne) ClearExecutionContext() *RemediationStepUpdateOne {
 	_u.mutation.ClearExecutionContext()
+	return _u
+}
+
+// SetSourceID sets the "source_id" field.
+func (_u *RemediationStepUpdateOne) SetSourceID(v string) *RemediationStepUpdateOne {
+	_u.mutation.SetSourceID(v)
+	return _u
+}
+
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (_u *RemediationStepUpdateOne) SetNillableSourceID(v *string) *RemediationStepUpdateOne {
+	if v != nil {
+		_u.SetSourceID(*v)
+	}
+	return _u
+}
+
+// ClearSourceID clears the value of the "source_id" field.
+func (_u *RemediationStepUpdateOne) ClearSourceID() *RemediationStepUpdateOne {
+	_u.mutation.ClearSourceID()
+	return _u
+}
+
+// SetSourceApp sets the "source_app" field.
+func (_u *RemediationStepUpdateOne) SetSourceApp(v string) *RemediationStepUpdateOne {
+	_u.mutation.SetSourceApp(v)
+	return _u
+}
+
+// SetNillableSourceApp sets the "source_app" field if the given value is not nil.
+func (_u *RemediationStepUpdateOne) SetNillableSourceApp(v *string) *RemediationStepUpdateOne {
+	if v != nil {
+		_u.SetSourceApp(*v)
+	}
+	return _u
+}
+
+// ClearSourceApp clears the value of the "source_app" field.
+func (_u *RemediationStepUpdateOne) ClearSourceApp() *RemediationStepUpdateOne {
+	_u.mutation.ClearSourceApp()
 	return _u
 }
 
@@ -479,6 +571,18 @@ func (_u *RemediationStepUpdateOne) sqlSave(ctx context.Context) (_node *Remedia
 	}
 	if _u.mutation.ExecutionContextCleared() {
 		_spec.ClearField(remediationstep.FieldExecutionContext, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SourceID(); ok {
+		_spec.SetField(remediationstep.FieldSourceID, field.TypeString, value)
+	}
+	if _u.mutation.SourceIDCleared() {
+		_spec.ClearField(remediationstep.FieldSourceID, field.TypeString)
+	}
+	if value, ok := _u.mutation.SourceApp(); ok {
+		_spec.SetField(remediationstep.FieldSourceApp, field.TypeString, value)
+	}
+	if _u.mutation.SourceAppCleared() {
+		_spec.ClearField(remediationstep.FieldSourceApp, field.TypeString)
 	}
 	if _u.mutation.TicketCleared() {
 		edge := &sqlgraph.EdgeSpec{

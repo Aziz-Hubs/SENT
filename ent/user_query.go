@@ -9,15 +9,20 @@ import (
 	"math"
 	"sent/ent/asset"
 	"sent/ent/calllog"
+	"sent/ent/legalhold"
 	"sent/ent/permission"
 	"sent/ent/predicate"
 	"sent/ent/saasidentity"
 	"sent/ent/sop"
 	"sent/ent/tenant"
 	"sent/ent/ticket"
-	"sent/ent/timeentry"
 	"sent/ent/user"
+	"sent/ent/vaultcomment"
+	"sent/ent/vaultfavorite"
+	"sent/ent/vaulttemplate"
+	"sent/ent/vaultversion"
 	"sent/ent/voicemail"
+	"sent/ent/worklog"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -28,22 +33,27 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx                  *QueryContext
-	order                []user.OrderOption
-	inters               []Interceptor
-	predicates           []predicate.User
-	withTenant           *TenantQuery
-	withPermissions      *PermissionQuery
-	withRequestedTickets *TicketQuery
-	withAssignedTickets  *TicketQuery
-	withTimeEntries      *TimeEntryQuery
-	withOwnedAssets      *AssetQuery
-	withAuthoredSops     *SOPQuery
-	withCallLogs         *CallLogQuery
-	withVoicemails       *VoicemailQuery
-	withSaasIdentities   *SaaSIdentityQuery
-	withFKs              bool
-	modifiers            []func(*sql.Selector)
+	ctx                   *QueryContext
+	order                 []user.OrderOption
+	inters                []Interceptor
+	predicates            []predicate.User
+	withTenant            *TenantQuery
+	withPermissions       *PermissionQuery
+	withRequestedTickets  *TicketQuery
+	withAssignedTickets   *TicketQuery
+	withWorkLogs          *WorkLogQuery
+	withOwnedAssets       *AssetQuery
+	withAuthoredSops      *SOPQuery
+	withCallLogs          *CallLogQuery
+	withVoicemails        *VoicemailQuery
+	withSaasIdentities    *SaaSIdentityQuery
+	withFavorites         *VaultFavoriteQuery
+	withVaultComments     *VaultCommentQuery
+	withCreatedVersions   *VaultVersionQuery
+	withCreatedLegalHolds *LegalHoldQuery
+	withCreatedTemplates  *VaultTemplateQuery
+	withFKs               bool
+	modifiers             []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -168,9 +178,9 @@ func (_q *UserQuery) QueryAssignedTickets() *TicketQuery {
 	return query
 }
 
-// QueryTimeEntries chains the current query on the "time_entries" edge.
-func (_q *UserQuery) QueryTimeEntries() *TimeEntryQuery {
-	query := (&TimeEntryClient{config: _q.config}).Query()
+// QueryWorkLogs chains the current query on the "work_logs" edge.
+func (_q *UserQuery) QueryWorkLogs() *WorkLogQuery {
+	query := (&WorkLogClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -181,8 +191,8 @@ func (_q *UserQuery) QueryTimeEntries() *TimeEntryQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(timeentry.Table, timeentry.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.TimeEntriesTable, user.TimeEntriesColumn),
+			sqlgraph.To(worklog.Table, worklog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.WorkLogsTable, user.WorkLogsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -293,6 +303,116 @@ func (_q *UserQuery) QuerySaasIdentities() *SaaSIdentityQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(saasidentity.Table, saasidentity.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.SaasIdentitiesTable, user.SaasIdentitiesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFavorites chains the current query on the "favorites" edge.
+func (_q *UserQuery) QueryFavorites() *VaultFavoriteQuery {
+	query := (&VaultFavoriteClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(vaultfavorite.Table, vaultfavorite.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.FavoritesTable, user.FavoritesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryVaultComments chains the current query on the "vault_comments" edge.
+func (_q *UserQuery) QueryVaultComments() *VaultCommentQuery {
+	query := (&VaultCommentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(vaultcomment.Table, vaultcomment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.VaultCommentsTable, user.VaultCommentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCreatedVersions chains the current query on the "created_versions" edge.
+func (_q *UserQuery) QueryCreatedVersions() *VaultVersionQuery {
+	query := (&VaultVersionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(vaultversion.Table, vaultversion.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CreatedVersionsTable, user.CreatedVersionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCreatedLegalHolds chains the current query on the "created_legal_holds" edge.
+func (_q *UserQuery) QueryCreatedLegalHolds() *LegalHoldQuery {
+	query := (&LegalHoldClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(legalhold.Table, legalhold.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CreatedLegalHoldsTable, user.CreatedLegalHoldsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCreatedTemplates chains the current query on the "created_templates" edge.
+func (_q *UserQuery) QueryCreatedTemplates() *VaultTemplateQuery {
+	query := (&VaultTemplateClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(vaulttemplate.Table, vaulttemplate.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CreatedTemplatesTable, user.CreatedTemplatesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -487,21 +607,26 @@ func (_q *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:               _q.config,
-		ctx:                  _q.ctx.Clone(),
-		order:                append([]user.OrderOption{}, _q.order...),
-		inters:               append([]Interceptor{}, _q.inters...),
-		predicates:           append([]predicate.User{}, _q.predicates...),
-		withTenant:           _q.withTenant.Clone(),
-		withPermissions:      _q.withPermissions.Clone(),
-		withRequestedTickets: _q.withRequestedTickets.Clone(),
-		withAssignedTickets:  _q.withAssignedTickets.Clone(),
-		withTimeEntries:      _q.withTimeEntries.Clone(),
-		withOwnedAssets:      _q.withOwnedAssets.Clone(),
-		withAuthoredSops:     _q.withAuthoredSops.Clone(),
-		withCallLogs:         _q.withCallLogs.Clone(),
-		withVoicemails:       _q.withVoicemails.Clone(),
-		withSaasIdentities:   _q.withSaasIdentities.Clone(),
+		config:                _q.config,
+		ctx:                   _q.ctx.Clone(),
+		order:                 append([]user.OrderOption{}, _q.order...),
+		inters:                append([]Interceptor{}, _q.inters...),
+		predicates:            append([]predicate.User{}, _q.predicates...),
+		withTenant:            _q.withTenant.Clone(),
+		withPermissions:       _q.withPermissions.Clone(),
+		withRequestedTickets:  _q.withRequestedTickets.Clone(),
+		withAssignedTickets:   _q.withAssignedTickets.Clone(),
+		withWorkLogs:          _q.withWorkLogs.Clone(),
+		withOwnedAssets:       _q.withOwnedAssets.Clone(),
+		withAuthoredSops:      _q.withAuthoredSops.Clone(),
+		withCallLogs:          _q.withCallLogs.Clone(),
+		withVoicemails:        _q.withVoicemails.Clone(),
+		withSaasIdentities:    _q.withSaasIdentities.Clone(),
+		withFavorites:         _q.withFavorites.Clone(),
+		withVaultComments:     _q.withVaultComments.Clone(),
+		withCreatedVersions:   _q.withCreatedVersions.Clone(),
+		withCreatedLegalHolds: _q.withCreatedLegalHolds.Clone(),
+		withCreatedTemplates:  _q.withCreatedTemplates.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -553,14 +678,14 @@ func (_q *UserQuery) WithAssignedTickets(opts ...func(*TicketQuery)) *UserQuery 
 	return _q
 }
 
-// WithTimeEntries tells the query-builder to eager-load the nodes that are connected to
-// the "time_entries" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UserQuery) WithTimeEntries(opts ...func(*TimeEntryQuery)) *UserQuery {
-	query := (&TimeEntryClient{config: _q.config}).Query()
+// WithWorkLogs tells the query-builder to eager-load the nodes that are connected to
+// the "work_logs" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithWorkLogs(opts ...func(*WorkLogQuery)) *UserQuery {
+	query := (&WorkLogClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withTimeEntries = query
+	_q.withWorkLogs = query
 	return _q
 }
 
@@ -616,6 +741,61 @@ func (_q *UserQuery) WithSaasIdentities(opts ...func(*SaaSIdentityQuery)) *UserQ
 		opt(query)
 	}
 	_q.withSaasIdentities = query
+	return _q
+}
+
+// WithFavorites tells the query-builder to eager-load the nodes that are connected to
+// the "favorites" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithFavorites(opts ...func(*VaultFavoriteQuery)) *UserQuery {
+	query := (&VaultFavoriteClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withFavorites = query
+	return _q
+}
+
+// WithVaultComments tells the query-builder to eager-load the nodes that are connected to
+// the "vault_comments" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithVaultComments(opts ...func(*VaultCommentQuery)) *UserQuery {
+	query := (&VaultCommentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withVaultComments = query
+	return _q
+}
+
+// WithCreatedVersions tells the query-builder to eager-load the nodes that are connected to
+// the "created_versions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithCreatedVersions(opts ...func(*VaultVersionQuery)) *UserQuery {
+	query := (&VaultVersionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCreatedVersions = query
+	return _q
+}
+
+// WithCreatedLegalHolds tells the query-builder to eager-load the nodes that are connected to
+// the "created_legal_holds" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithCreatedLegalHolds(opts ...func(*LegalHoldQuery)) *UserQuery {
+	query := (&LegalHoldClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCreatedLegalHolds = query
+	return _q
+}
+
+// WithCreatedTemplates tells the query-builder to eager-load the nodes that are connected to
+// the "created_templates" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithCreatedTemplates(opts ...func(*VaultTemplateQuery)) *UserQuery {
+	query := (&VaultTemplateClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCreatedTemplates = query
 	return _q
 }
 
@@ -698,17 +878,22 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		nodes       = []*User{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [10]bool{
+		loadedTypes = [15]bool{
 			_q.withTenant != nil,
 			_q.withPermissions != nil,
 			_q.withRequestedTickets != nil,
 			_q.withAssignedTickets != nil,
-			_q.withTimeEntries != nil,
+			_q.withWorkLogs != nil,
 			_q.withOwnedAssets != nil,
 			_q.withAuthoredSops != nil,
 			_q.withCallLogs != nil,
 			_q.withVoicemails != nil,
 			_q.withSaasIdentities != nil,
+			_q.withFavorites != nil,
+			_q.withVaultComments != nil,
+			_q.withCreatedVersions != nil,
+			_q.withCreatedLegalHolds != nil,
+			_q.withCreatedTemplates != nil,
 		}
 	)
 	if _q.withTenant != nil {
@@ -765,10 +950,10 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	if query := _q.withTimeEntries; query != nil {
-		if err := _q.loadTimeEntries(ctx, query, nodes,
-			func(n *User) { n.Edges.TimeEntries = []*TimeEntry{} },
-			func(n *User, e *TimeEntry) { n.Edges.TimeEntries = append(n.Edges.TimeEntries, e) }); err != nil {
+	if query := _q.withWorkLogs; query != nil {
+		if err := _q.loadWorkLogs(ctx, query, nodes,
+			func(n *User) { n.Edges.WorkLogs = []*WorkLog{} },
+			func(n *User, e *WorkLog) { n.Edges.WorkLogs = append(n.Edges.WorkLogs, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -804,6 +989,41 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadSaasIdentities(ctx, query, nodes,
 			func(n *User) { n.Edges.SaasIdentities = []*SaaSIdentity{} },
 			func(n *User, e *SaaSIdentity) { n.Edges.SaasIdentities = append(n.Edges.SaasIdentities, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withFavorites; query != nil {
+		if err := _q.loadFavorites(ctx, query, nodes,
+			func(n *User) { n.Edges.Favorites = []*VaultFavorite{} },
+			func(n *User, e *VaultFavorite) { n.Edges.Favorites = append(n.Edges.Favorites, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withVaultComments; query != nil {
+		if err := _q.loadVaultComments(ctx, query, nodes,
+			func(n *User) { n.Edges.VaultComments = []*VaultComment{} },
+			func(n *User, e *VaultComment) { n.Edges.VaultComments = append(n.Edges.VaultComments, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCreatedVersions; query != nil {
+		if err := _q.loadCreatedVersions(ctx, query, nodes,
+			func(n *User) { n.Edges.CreatedVersions = []*VaultVersion{} },
+			func(n *User, e *VaultVersion) { n.Edges.CreatedVersions = append(n.Edges.CreatedVersions, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCreatedLegalHolds; query != nil {
+		if err := _q.loadCreatedLegalHolds(ctx, query, nodes,
+			func(n *User) { n.Edges.CreatedLegalHolds = []*LegalHold{} },
+			func(n *User, e *LegalHold) { n.Edges.CreatedLegalHolds = append(n.Edges.CreatedLegalHolds, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCreatedTemplates; query != nil {
+		if err := _q.loadCreatedTemplates(ctx, query, nodes,
+			func(n *User) { n.Edges.CreatedTemplates = []*VaultTemplate{} },
+			func(n *User, e *VaultTemplate) { n.Edges.CreatedTemplates = append(n.Edges.CreatedTemplates, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -965,7 +1185,7 @@ func (_q *UserQuery) loadAssignedTickets(ctx context.Context, query *TicketQuery
 	}
 	return nil
 }
-func (_q *UserQuery) loadTimeEntries(ctx context.Context, query *TimeEntryQuery, nodes []*User, init func(*User), assign func(*User, *TimeEntry)) error {
+func (_q *UserQuery) loadWorkLogs(ctx context.Context, query *WorkLogQuery, nodes []*User, init func(*User), assign func(*User, *WorkLog)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*User)
 	for i := range nodes {
@@ -976,21 +1196,21 @@ func (_q *UserQuery) loadTimeEntries(ctx context.Context, query *TimeEntryQuery,
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.TimeEntry(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.TimeEntriesColumn), fks...))
+	query.Where(predicate.WorkLog(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.WorkLogsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_time_entries
+		fk := n.user_work_logs
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_time_entries" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "user_work_logs" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_time_entries" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_work_logs" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1146,6 +1366,161 @@ func (_q *UserQuery) loadSaasIdentities(ctx context.Context, query *SaaSIdentity
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_saas_identities" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadFavorites(ctx context.Context, query *VaultFavoriteQuery, nodes []*User, init func(*User), assign func(*User, *VaultFavorite)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.VaultFavorite(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.FavoritesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_favorites
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_favorites" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_favorites" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadVaultComments(ctx context.Context, query *VaultCommentQuery, nodes []*User, init func(*User), assign func(*User, *VaultComment)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.VaultComment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.VaultCommentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_vault_comments
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_vault_comments" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_vault_comments" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadCreatedVersions(ctx context.Context, query *VaultVersionQuery, nodes []*User, init func(*User), assign func(*User, *VaultVersion)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.VaultVersion(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.CreatedVersionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_created_versions
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_created_versions" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_created_versions" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadCreatedLegalHolds(ctx context.Context, query *LegalHoldQuery, nodes []*User, init func(*User), assign func(*User, *LegalHold)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.LegalHold(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.CreatedLegalHoldsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_created_legal_holds
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_created_legal_holds" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_created_legal_holds" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadCreatedTemplates(ctx context.Context, query *VaultTemplateQuery, nodes []*User, init func(*User), assign func(*User, *VaultTemplate)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.VaultTemplate(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.CreatedTemplatesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_created_templates
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_created_templates" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_created_templates" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

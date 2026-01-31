@@ -31,7 +31,19 @@ SENTemployee is the dedicated self-service portal for all staff members. It sepa
 
 - **My Goals:** Employee-driven goal setting (OKRs). Users can create goals, update progress (0-100%), and mark them as complete.
 - **Reviews:** Access to past performance reviews and active self-evaluations.
+- **Peer Feedback:** Invite colleagues for 360-degree feedback and track pending invitations.
 - **Development:** Track personal development plans and training progress.
+
+### **3.4 Benefits & Pay**
+
+- **Open Enrollment:** Select and compare health, dental, and retirement plans during active election windows.
+- **Payslip Archive:** View and download historical PDF pay stubs processed by the SENTpeople engine.
+- **Expense Submission:** Upload receipts and submit reimbursement requests directly from mobile or desktop.
+
+### **3.5 Learning & Growth (LMS)**
+
+- **Course Dashboard:** Access mandatory training (security, compliance) and elective professional development.
+- **Progress Tracking:** Real-time completion status and certificate downloads for finished modules.
 
 ## **4. Integration with SENT Ecosystem**
 
@@ -41,7 +53,6 @@ SENTemployee is the dedicated self-service portal for all staff members. It sepa
 
 ## **5. Future Roadmap**
 
-- **Benefits Enrollment:** Select health/dental plans during open enrollment.
-- **Pay Stubs:** View and download PDF payslips (via SENTpeople payroll engine).
-- **Expense Reporting:** Submit expense reports directly from the portal (integrating with SENTcapital).
-- **Team View:** Managers can see a simplified view of their direct reports' availability.
+- **AI Career Copilot:** Suggested training and internal job openings based on skills and performance data.
+- **Team Management:** Simplified view for managers to handle direct report approvals and availability heatmaps.
+- **Interactive Payslips:** Breakdown of tax deductions and benefit contributions with "what-if" modeling.

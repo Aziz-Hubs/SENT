@@ -147,7 +147,7 @@ export function Capital() {
   const fetchTransactions = async () => {
     try {
       const res = await GetTransactions();
-      setTransactions(res || []);
+      setTransactions((res || []) as any);
     } catch (err) {
       toast.error("Failed to load transactions");
     }

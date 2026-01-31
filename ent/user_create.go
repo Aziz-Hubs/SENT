@@ -8,14 +8,19 @@ import (
 	"fmt"
 	"sent/ent/asset"
 	"sent/ent/calllog"
+	"sent/ent/legalhold"
 	"sent/ent/permission"
 	"sent/ent/saasidentity"
 	"sent/ent/sop"
 	"sent/ent/tenant"
 	"sent/ent/ticket"
-	"sent/ent/timeentry"
 	"sent/ent/user"
+	"sent/ent/vaultcomment"
+	"sent/ent/vaultfavorite"
+	"sent/ent/vaulttemplate"
+	"sent/ent/vaultversion"
 	"sent/ent/voicemail"
+	"sent/ent/worklog"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -215,19 +220,19 @@ func (_c *UserCreate) AddAssignedTickets(v ...*Ticket) *UserCreate {
 	return _c.AddAssignedTicketIDs(ids...)
 }
 
-// AddTimeEntryIDs adds the "time_entries" edge to the TimeEntry entity by IDs.
-func (_c *UserCreate) AddTimeEntryIDs(ids ...int) *UserCreate {
-	_c.mutation.AddTimeEntryIDs(ids...)
+// AddWorkLogIDs adds the "work_logs" edge to the WorkLog entity by IDs.
+func (_c *UserCreate) AddWorkLogIDs(ids ...int) *UserCreate {
+	_c.mutation.AddWorkLogIDs(ids...)
 	return _c
 }
 
-// AddTimeEntries adds the "time_entries" edges to the TimeEntry entity.
-func (_c *UserCreate) AddTimeEntries(v ...*TimeEntry) *UserCreate {
+// AddWorkLogs adds the "work_logs" edges to the WorkLog entity.
+func (_c *UserCreate) AddWorkLogs(v ...*WorkLog) *UserCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddTimeEntryIDs(ids...)
+	return _c.AddWorkLogIDs(ids...)
 }
 
 // AddOwnedAssetIDs adds the "owned_assets" edge to the Asset entity by IDs.
@@ -303,6 +308,81 @@ func (_c *UserCreate) AddSaasIdentities(v ...*SaaSIdentity) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddSaasIdentityIDs(ids...)
+}
+
+// AddFavoriteIDs adds the "favorites" edge to the VaultFavorite entity by IDs.
+func (_c *UserCreate) AddFavoriteIDs(ids ...int) *UserCreate {
+	_c.mutation.AddFavoriteIDs(ids...)
+	return _c
+}
+
+// AddFavorites adds the "favorites" edges to the VaultFavorite entity.
+func (_c *UserCreate) AddFavorites(v ...*VaultFavorite) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddFavoriteIDs(ids...)
+}
+
+// AddVaultCommentIDs adds the "vault_comments" edge to the VaultComment entity by IDs.
+func (_c *UserCreate) AddVaultCommentIDs(ids ...int) *UserCreate {
+	_c.mutation.AddVaultCommentIDs(ids...)
+	return _c
+}
+
+// AddVaultComments adds the "vault_comments" edges to the VaultComment entity.
+func (_c *UserCreate) AddVaultComments(v ...*VaultComment) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddVaultCommentIDs(ids...)
+}
+
+// AddCreatedVersionIDs adds the "created_versions" edge to the VaultVersion entity by IDs.
+func (_c *UserCreate) AddCreatedVersionIDs(ids ...int) *UserCreate {
+	_c.mutation.AddCreatedVersionIDs(ids...)
+	return _c
+}
+
+// AddCreatedVersions adds the "created_versions" edges to the VaultVersion entity.
+func (_c *UserCreate) AddCreatedVersions(v ...*VaultVersion) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCreatedVersionIDs(ids...)
+}
+
+// AddCreatedLegalHoldIDs adds the "created_legal_holds" edge to the LegalHold entity by IDs.
+func (_c *UserCreate) AddCreatedLegalHoldIDs(ids ...int) *UserCreate {
+	_c.mutation.AddCreatedLegalHoldIDs(ids...)
+	return _c
+}
+
+// AddCreatedLegalHolds adds the "created_legal_holds" edges to the LegalHold entity.
+func (_c *UserCreate) AddCreatedLegalHolds(v ...*LegalHold) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCreatedLegalHoldIDs(ids...)
+}
+
+// AddCreatedTemplateIDs adds the "created_templates" edge to the VaultTemplate entity by IDs.
+func (_c *UserCreate) AddCreatedTemplateIDs(ids ...int) *UserCreate {
+	_c.mutation.AddCreatedTemplateIDs(ids...)
+	return _c
+}
+
+// AddCreatedTemplates adds the "created_templates" edges to the VaultTemplate entity.
+func (_c *UserCreate) AddCreatedTemplates(v ...*VaultTemplate) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCreatedTemplateIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -521,15 +601,15 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.TimeEntriesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.WorkLogsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.TimeEntriesTable,
-			Columns: []string{user.TimeEntriesColumn},
+			Table:   user.WorkLogsTable,
+			Columns: []string{user.WorkLogsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(worklog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -610,6 +690,86 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(saasidentity.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.FavoritesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FavoritesTable,
+			Columns: []string{user.FavoritesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vaultfavorite.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.VaultCommentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.VaultCommentsTable,
+			Columns: []string{user.VaultCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vaultcomment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CreatedVersionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CreatedVersionsTable,
+			Columns: []string{user.CreatedVersionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vaultversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CreatedLegalHoldsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CreatedLegalHoldsTable,
+			Columns: []string{user.CreatedLegalHoldsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(legalhold.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CreatedTemplatesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CreatedTemplatesTable,
+			Columns: []string{user.CreatedTemplatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vaulttemplate.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

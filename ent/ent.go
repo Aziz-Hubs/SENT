@@ -9,13 +9,20 @@ import (
 	"reflect"
 	"sent/ent/account"
 	"sent/ent/agent"
+	"sent/ent/application"
 	"sent/ent/asset"
+	"sent/ent/assetassignment"
 	"sent/ent/assettype"
 	"sent/ent/auditlog"
+	"sent/ent/benefitenrollment"
+	"sent/ent/benefitplan"
 	"sent/ent/budgetforecast"
 	"sent/ent/calllog"
 	"sent/ent/camera"
+	"sent/ent/candidate"
+	"sent/ent/category"
 	"sent/ent/compensationagreement"
+	"sent/ent/contact"
 	"sent/ent/contract"
 	"sent/ent/credential"
 	"sent/ent/department"
@@ -24,12 +31,17 @@ import (
 	"sent/ent/employee"
 	"sent/ent/goal"
 	"sent/ent/healthscoresnapshot"
+	"sent/ent/interview"
+	"sent/ent/inventorycount"
 	"sent/ent/inventoryreservation"
 	"sent/ent/ivrflow"
 	"sent/ent/job"
 	"sent/ent/jobexecution"
+	"sent/ent/jobposting"
 	"sent/ent/journalentry"
 	"sent/ent/ledgerentry"
+	"sent/ent/legalhold"
+	"sent/ent/maintenanceschedule"
 	"sent/ent/networkbackup"
 	"sent/ent/networkdevice"
 	"sent/ent/networklink"
@@ -39,9 +51,13 @@ import (
 	"sent/ent/performancereview"
 	"sent/ent/permission"
 	"sent/ent/product"
+	"sent/ent/productvariant"
+	"sent/ent/purchaseorder"
+	"sent/ent/purchaseorderline"
 	"sent/ent/recording"
 	"sent/ent/recurringinvoice"
 	"sent/ent/remediationstep"
+	"sent/ent/retentionpolicy"
 	"sent/ent/reviewcycle"
 	"sent/ent/saasapp"
 	"sent/ent/saasfilter"
@@ -50,9 +66,12 @@ import (
 	"sent/ent/script"
 	"sent/ent/servicerate"
 	"sent/ent/sop"
+	"sent/ent/stockalert"
+	"sent/ent/stockauditlog"
 	"sent/ent/stockmovement"
 	"sent/ent/strategicroadmap"
 	"sent/ent/successionmap"
+	"sent/ent/supplier"
 	"sent/ent/tenant"
 	"sent/ent/ticket"
 	"sent/ent/timeentry"
@@ -61,8 +80,15 @@ import (
 	"sent/ent/timeoffrequest"
 	"sent/ent/transaction"
 	"sent/ent/user"
+	"sent/ent/vaultcomment"
+	"sent/ent/vaultfavorite"
 	"sent/ent/vaultitem"
+	"sent/ent/vaultsharelink"
+	"sent/ent/vaulttemplate"
+	"sent/ent/vaultversion"
 	"sent/ent/voicemail"
+	"sent/ent/warehouse"
+	"sent/ent/worklog"
 	"sync"
 
 	"entgo.io/ent"
@@ -130,13 +156,20 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			account.Table:               account.ValidColumn,
 			agent.Table:                 agent.ValidColumn,
+			application.Table:           application.ValidColumn,
 			asset.Table:                 asset.ValidColumn,
+			assetassignment.Table:       assetassignment.ValidColumn,
 			assettype.Table:             assettype.ValidColumn,
 			auditlog.Table:              auditlog.ValidColumn,
+			benefitenrollment.Table:     benefitenrollment.ValidColumn,
+			benefitplan.Table:           benefitplan.ValidColumn,
 			budgetforecast.Table:        budgetforecast.ValidColumn,
 			calllog.Table:               calllog.ValidColumn,
 			camera.Table:                camera.ValidColumn,
+			candidate.Table:             candidate.ValidColumn,
+			category.Table:              category.ValidColumn,
 			compensationagreement.Table: compensationagreement.ValidColumn,
+			contact.Table:               contact.ValidColumn,
 			contract.Table:              contract.ValidColumn,
 			credential.Table:            credential.ValidColumn,
 			department.Table:            department.ValidColumn,
@@ -146,11 +179,16 @@ func checkColumn(t, c string) error {
 			goal.Table:                  goal.ValidColumn,
 			healthscoresnapshot.Table:   healthscoresnapshot.ValidColumn,
 			ivrflow.Table:               ivrflow.ValidColumn,
+			interview.Table:             interview.ValidColumn,
+			inventorycount.Table:        inventorycount.ValidColumn,
 			inventoryreservation.Table:  inventoryreservation.ValidColumn,
 			job.Table:                   job.ValidColumn,
 			jobexecution.Table:          jobexecution.ValidColumn,
+			jobposting.Table:            jobposting.ValidColumn,
 			journalentry.Table:          journalentry.ValidColumn,
 			ledgerentry.Table:           ledgerentry.ValidColumn,
+			legalhold.Table:             legalhold.ValidColumn,
+			maintenanceschedule.Table:   maintenanceschedule.ValidColumn,
 			networkbackup.Table:         networkbackup.ValidColumn,
 			networkdevice.Table:         networkdevice.ValidColumn,
 			networklink.Table:           networklink.ValidColumn,
@@ -160,9 +198,13 @@ func checkColumn(t, c string) error {
 			performancereview.Table:     performancereview.ValidColumn,
 			permission.Table:            permission.ValidColumn,
 			product.Table:               product.ValidColumn,
+			productvariant.Table:        productvariant.ValidColumn,
+			purchaseorder.Table:         purchaseorder.ValidColumn,
+			purchaseorderline.Table:     purchaseorderline.ValidColumn,
 			recording.Table:             recording.ValidColumn,
 			recurringinvoice.Table:      recurringinvoice.ValidColumn,
 			remediationstep.Table:       remediationstep.ValidColumn,
+			retentionpolicy.Table:       retentionpolicy.ValidColumn,
 			reviewcycle.Table:           reviewcycle.ValidColumn,
 			sop.Table:                   sop.ValidColumn,
 			saasapp.Table:               saasapp.ValidColumn,
@@ -171,9 +213,12 @@ func checkColumn(t, c string) error {
 			saasusage.Table:             saasusage.ValidColumn,
 			script.Table:                script.ValidColumn,
 			servicerate.Table:           servicerate.ValidColumn,
+			stockalert.Table:            stockalert.ValidColumn,
+			stockauditlog.Table:         stockauditlog.ValidColumn,
 			stockmovement.Table:         stockmovement.ValidColumn,
 			strategicroadmap.Table:      strategicroadmap.ValidColumn,
 			successionmap.Table:         successionmap.ValidColumn,
+			supplier.Table:              supplier.ValidColumn,
 			tenant.Table:                tenant.ValidColumn,
 			ticket.Table:                ticket.ValidColumn,
 			timeentry.Table:             timeentry.ValidColumn,
@@ -182,8 +227,15 @@ func checkColumn(t, c string) error {
 			timeoffrequest.Table:        timeoffrequest.ValidColumn,
 			transaction.Table:           transaction.ValidColumn,
 			user.Table:                  user.ValidColumn,
+			vaultcomment.Table:          vaultcomment.ValidColumn,
+			vaultfavorite.Table:         vaultfavorite.ValidColumn,
 			vaultitem.Table:             vaultitem.ValidColumn,
+			vaultsharelink.Table:        vaultsharelink.ValidColumn,
+			vaulttemplate.Table:         vaulttemplate.ValidColumn,
+			vaultversion.Table:          vaultversion.ValidColumn,
 			voicemail.Table:             voicemail.ValidColumn,
+			warehouse.Table:             warehouse.ValidColumn,
+			worklog.Table:               worklog.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

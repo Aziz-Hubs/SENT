@@ -66,6 +66,34 @@ func (_c *RemediationStepCreate) SetExecutionContext(v map[string]interface{}) *
 	return _c
 }
 
+// SetSourceID sets the "source_id" field.
+func (_c *RemediationStepCreate) SetSourceID(v string) *RemediationStepCreate {
+	_c.mutation.SetSourceID(v)
+	return _c
+}
+
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (_c *RemediationStepCreate) SetNillableSourceID(v *string) *RemediationStepCreate {
+	if v != nil {
+		_c.SetSourceID(*v)
+	}
+	return _c
+}
+
+// SetSourceApp sets the "source_app" field.
+func (_c *RemediationStepCreate) SetSourceApp(v string) *RemediationStepCreate {
+	_c.mutation.SetSourceApp(v)
+	return _c
+}
+
+// SetNillableSourceApp sets the "source_app" field if the given value is not nil.
+func (_c *RemediationStepCreate) SetNillableSourceApp(v *string) *RemediationStepCreate {
+	if v != nil {
+		_c.SetSourceApp(*v)
+	}
+	return _c
+}
+
 // SetTicketID sets the "ticket" edge to the Ticket entity by ID.
 func (_c *RemediationStepCreate) SetTicketID(id int) *RemediationStepCreate {
 	_c.mutation.SetTicketID(id)
@@ -182,6 +210,14 @@ func (_c *RemediationStepCreate) createSpec() (*RemediationStep, *sqlgraph.Creat
 	if value, ok := _c.mutation.ExecutionContext(); ok {
 		_spec.SetField(remediationstep.FieldExecutionContext, field.TypeJSON, value)
 		_node.ExecutionContext = value
+	}
+	if value, ok := _c.mutation.SourceID(); ok {
+		_spec.SetField(remediationstep.FieldSourceID, field.TypeString, value)
+		_node.SourceID = value
+	}
+	if value, ok := _c.mutation.SourceApp(); ok {
+		_spec.SetField(remediationstep.FieldSourceApp, field.TypeString, value)
+		_node.SourceApp = value
 	}
 	if nodes := _c.mutation.TicketIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

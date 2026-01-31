@@ -19,10 +19,14 @@ func (PerformanceReview) Fields() []ent.Field {
 		field.Enum("overall_rating").
 			Values("EXCEPTIONAL", "EXCEEDS", "MEETS", "DEVELOPING", "NEEDS_IMPROVEMENT").
 			Optional(),
+		field.Enum("review_type").
+			Values("MANAGER", "SELF", "PEER", "DIRECT_REPORT").
+			Default("MANAGER"),
 		field.Text("strengths").Optional(),
 		field.Text("areas_for_improvement").Optional(),
 		field.Text("manager_comments").Optional(),
 		field.JSON("goals_assessment", map[string]interface{}{}).Optional(),
+		field.JSON("survey_responses", map[string]interface{}{}).Optional(),
 		field.Enum("status").
 			Values("PENDING", "IN_PROGRESS", "SUBMITTED", "ACKNOWLEDGED").
 			Default("PENDING"),

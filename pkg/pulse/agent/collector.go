@@ -2,6 +2,7 @@ package agent
 
 import (
 	"log"
+	"os/user"
 	"time"
 
 	"sent/pkg/pulse/common"
@@ -38,8 +39,23 @@ func (c *Collector) GetHostInfo() (*common.HostInfo, error) {
 		Arch:            info.Architecture,
 		AgentVersion:    "0.0.1", // TODO: Get from build info
 		MAC:             info.MACs,
-		IP:              info.IPs,
-	}, nil
+        IP:              info.IPs,
+        AvName:          detectAntivirusName(),
+        AvStatus:        detectAntivirusStatus(),
+        Software:        GetInstalledSoftware(),
+    }, nil
+}
+
+func detectAntivirusName() string {
+    // Phase 3: Mock Implementation
+    // In production, use "github.com/yusufpapurcu/wmi" on Windows to query Query "SELECT * FROM AntivirusProduct" in "ROOT\SecurityCenter2"
+    // On Linux, check processes or dpkg.
+    return "Windows Defender" // Default assumption/Placeholder
+}
+
+func detectAntivirusStatus() string {
+    // In production, verify if service is running and defs are up to date
+    return "Active"
 }
 
 func (c *Collector) GetMetrics() (*common.SystemMetrics, error) {
@@ -73,6 +89,13 @@ func (c *Collector) GetMetrics() (*common.SystemMetrics, error) {
 		metrics.MemoryUsed = mem.Used
 		metrics.MemoryFree = mem.Free
 	}
+    
+    // Get active user
+    if u, err := user.Current(); err == nil {
+        metrics.ActiveUser = u.Username
+    } else {
+        metrics.ActiveUser = "unknown"
+    }
 
 	return metrics, nil
 }

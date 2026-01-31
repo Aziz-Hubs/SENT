@@ -36,8 +36,20 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// EdgeTenant holds the string denoting the tenant edge name in mutations.
 	EdgeTenant = "tenant"
+	// EdgeShareLinks holds the string denoting the share_links edge name in mutations.
+	EdgeShareLinks = "share_links"
+	// EdgeVersions holds the string denoting the versions edge name in mutations.
+	EdgeVersions = "versions"
+	// EdgeComments holds the string denoting the comments edge name in mutations.
+	EdgeComments = "comments"
+	// EdgeFavoritedBy holds the string denoting the favorited_by edge name in mutations.
+	EdgeFavoritedBy = "favorited_by"
+	// EdgeLegalHolds holds the string denoting the legal_holds edge name in mutations.
+	EdgeLegalHolds = "legal_holds"
 	// Table holds the table name of the vaultitem in the database.
 	Table = "vault_items"
 	// TenantTable is the table that holds the tenant relation/edge.
@@ -47,6 +59,39 @@ const (
 	TenantInverseTable = "tenants"
 	// TenantColumn is the table column denoting the tenant relation/edge.
 	TenantColumn = "tenant_vault_items"
+	// ShareLinksTable is the table that holds the share_links relation/edge.
+	ShareLinksTable = "vault_share_links"
+	// ShareLinksInverseTable is the table name for the VaultShareLink entity.
+	// It exists in this package in order to avoid circular dependency with the "vaultsharelink" package.
+	ShareLinksInverseTable = "vault_share_links"
+	// ShareLinksColumn is the table column denoting the share_links relation/edge.
+	ShareLinksColumn = "vault_item_share_links"
+	// VersionsTable is the table that holds the versions relation/edge.
+	VersionsTable = "vault_versions"
+	// VersionsInverseTable is the table name for the VaultVersion entity.
+	// It exists in this package in order to avoid circular dependency with the "vaultversion" package.
+	VersionsInverseTable = "vault_versions"
+	// VersionsColumn is the table column denoting the versions relation/edge.
+	VersionsColumn = "vault_item_versions"
+	// CommentsTable is the table that holds the comments relation/edge.
+	CommentsTable = "vault_comments"
+	// CommentsInverseTable is the table name for the VaultComment entity.
+	// It exists in this package in order to avoid circular dependency with the "vaultcomment" package.
+	CommentsInverseTable = "vault_comments"
+	// CommentsColumn is the table column denoting the comments relation/edge.
+	CommentsColumn = "vault_item_comments"
+	// FavoritedByTable is the table that holds the favorited_by relation/edge.
+	FavoritedByTable = "vault_favorites"
+	// FavoritedByInverseTable is the table name for the VaultFavorite entity.
+	// It exists in this package in order to avoid circular dependency with the "vaultfavorite" package.
+	FavoritedByInverseTable = "vault_favorites"
+	// FavoritedByColumn is the table column denoting the favorited_by relation/edge.
+	FavoritedByColumn = "vault_item_favorited_by"
+	// LegalHoldsTable is the table that holds the legal_holds relation/edge. The primary key declared below.
+	LegalHoldsTable = "legal_hold_items"
+	// LegalHoldsInverseTable is the table name for the LegalHold entity.
+	// It exists in this package in order to avoid circular dependency with the "legalhold" package.
+	LegalHoldsInverseTable = "legal_holds"
 )
 
 // Columns holds all SQL columns for vaultitem fields.
@@ -63,6 +108,7 @@ var Columns = []string{
 	FieldIsDir,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldDeletedAt,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "vault_items"
@@ -70,6 +116,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"tenant_vault_items",
 }
+
+var (
+	// LegalHoldsPrimaryKey and LegalHoldsColumn2 are the table columns denoting the
+	// primary key for the legal_holds relation (M2M).
+	LegalHoldsPrimaryKey = []string{"legal_hold_id", "vault_item_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -165,10 +217,85 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
 // ByTenantField orders the results by tenant field.
 func ByTenantField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newTenantStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByShareLinksCount orders the results by share_links count.
+func ByShareLinksCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newShareLinksStep(), opts...)
+	}
+}
+
+// ByShareLinks orders the results by share_links terms.
+func ByShareLinks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newShareLinksStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByVersionsCount orders the results by versions count.
+func ByVersionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVersionsStep(), opts...)
+	}
+}
+
+// ByVersions orders the results by versions terms.
+func ByVersions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVersionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCommentsCount orders the results by comments count.
+func ByCommentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCommentsStep(), opts...)
+	}
+}
+
+// ByComments orders the results by comments terms.
+func ByComments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCommentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByFavoritedByCount orders the results by favorited_by count.
+func ByFavoritedByCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFavoritedByStep(), opts...)
+	}
+}
+
+// ByFavoritedBy orders the results by favorited_by terms.
+func ByFavoritedBy(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFavoritedByStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByLegalHoldsCount orders the results by legal_holds count.
+func ByLegalHoldsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLegalHoldsStep(), opts...)
+	}
+}
+
+// ByLegalHolds orders the results by legal_holds terms.
+func ByLegalHolds(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLegalHoldsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newTenantStep() *sqlgraph.Step {
@@ -176,5 +303,40 @@ func newTenantStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TenantInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, TenantTable, TenantColumn),
+	)
+}
+func newShareLinksStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ShareLinksInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ShareLinksTable, ShareLinksColumn),
+	)
+}
+func newVersionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VersionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, VersionsTable, VersionsColumn),
+	)
+}
+func newCommentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CommentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CommentsTable, CommentsColumn),
+	)
+}
+func newFavoritedByStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FavoritedByInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FavoritedByTable, FavoritedByColumn),
+	)
+}
+func newLegalHoldsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LegalHoldsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, LegalHoldsTable, LegalHoldsPrimaryKey...),
 	)
 }

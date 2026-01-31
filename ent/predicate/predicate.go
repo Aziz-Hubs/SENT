@@ -12,14 +12,26 @@ type Account func(*sql.Selector)
 // Agent is the predicate function for agent builders.
 type Agent func(*sql.Selector)
 
+// Application is the predicate function for application builders.
+type Application func(*sql.Selector)
+
 // Asset is the predicate function for asset builders.
 type Asset func(*sql.Selector)
+
+// AssetAssignment is the predicate function for assetassignment builders.
+type AssetAssignment func(*sql.Selector)
 
 // AssetType is the predicate function for assettype builders.
 type AssetType func(*sql.Selector)
 
 // AuditLog is the predicate function for auditlog builders.
 type AuditLog func(*sql.Selector)
+
+// BenefitEnrollment is the predicate function for benefitenrollment builders.
+type BenefitEnrollment func(*sql.Selector)
+
+// BenefitPlan is the predicate function for benefitplan builders.
+type BenefitPlan func(*sql.Selector)
 
 // BudgetForecast is the predicate function for budgetforecast builders.
 type BudgetForecast func(*sql.Selector)
@@ -30,8 +42,17 @@ type CallLog func(*sql.Selector)
 // Camera is the predicate function for camera builders.
 type Camera func(*sql.Selector)
 
+// Candidate is the predicate function for candidate builders.
+type Candidate func(*sql.Selector)
+
+// Category is the predicate function for category builders.
+type Category func(*sql.Selector)
+
 // CompensationAgreement is the predicate function for compensationagreement builders.
 type CompensationAgreement func(*sql.Selector)
+
+// Contact is the predicate function for contact builders.
+type Contact func(*sql.Selector)
 
 // Contract is the predicate function for contract builders.
 type Contract func(*sql.Selector)
@@ -60,6 +81,12 @@ type HealthScoreSnapshot func(*sql.Selector)
 // IVRFlow is the predicate function for ivrflow builders.
 type IVRFlow func(*sql.Selector)
 
+// Interview is the predicate function for interview builders.
+type Interview func(*sql.Selector)
+
+// InventoryCount is the predicate function for inventorycount builders.
+type InventoryCount func(*sql.Selector)
+
 // InventoryReservation is the predicate function for inventoryreservation builders.
 type InventoryReservation func(*sql.Selector)
 
@@ -69,11 +96,20 @@ type Job func(*sql.Selector)
 // JobExecution is the predicate function for jobexecution builders.
 type JobExecution func(*sql.Selector)
 
+// JobPosting is the predicate function for jobposting builders.
+type JobPosting func(*sql.Selector)
+
 // JournalEntry is the predicate function for journalentry builders.
 type JournalEntry func(*sql.Selector)
 
 // LedgerEntry is the predicate function for ledgerentry builders.
 type LedgerEntry func(*sql.Selector)
+
+// LegalHold is the predicate function for legalhold builders.
+type LegalHold func(*sql.Selector)
+
+// MaintenanceSchedule is the predicate function for maintenanceschedule builders.
+type MaintenanceSchedule func(*sql.Selector)
 
 // NetworkBackup is the predicate function for networkbackup builders.
 type NetworkBackup func(*sql.Selector)
@@ -102,6 +138,15 @@ type Permission func(*sql.Selector)
 // Product is the predicate function for product builders.
 type Product func(*sql.Selector)
 
+// ProductVariant is the predicate function for productvariant builders.
+type ProductVariant func(*sql.Selector)
+
+// PurchaseOrder is the predicate function for purchaseorder builders.
+type PurchaseOrder func(*sql.Selector)
+
+// PurchaseOrderLine is the predicate function for purchaseorderline builders.
+type PurchaseOrderLine func(*sql.Selector)
+
 // Recording is the predicate function for recording builders.
 type Recording func(*sql.Selector)
 
@@ -110,6 +155,9 @@ type RecurringInvoice func(*sql.Selector)
 
 // RemediationStep is the predicate function for remediationstep builders.
 type RemediationStep func(*sql.Selector)
+
+// RetentionPolicy is the predicate function for retentionpolicy builders.
+type RetentionPolicy func(*sql.Selector)
 
 // ReviewCycle is the predicate function for reviewcycle builders.
 type ReviewCycle func(*sql.Selector)
@@ -135,6 +183,12 @@ type Script func(*sql.Selector)
 // ServiceRate is the predicate function for servicerate builders.
 type ServiceRate func(*sql.Selector)
 
+// StockAlert is the predicate function for stockalert builders.
+type StockAlert func(*sql.Selector)
+
+// StockAuditLog is the predicate function for stockauditlog builders.
+type StockAuditLog func(*sql.Selector)
+
 // StockMovement is the predicate function for stockmovement builders.
 type StockMovement func(*sql.Selector)
 
@@ -143,6 +197,9 @@ type StrategicRoadmap func(*sql.Selector)
 
 // SuccessionMap is the predicate function for successionmap builders.
 type SuccessionMap func(*sql.Selector)
+
+// Supplier is the predicate function for supplier builders.
+type Supplier func(*sql.Selector)
 
 // Tenant is the predicate function for tenant builders.
 type Tenant func(*sql.Selector)
@@ -168,8 +225,29 @@ type Transaction func(*sql.Selector)
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
 
+// VaultComment is the predicate function for vaultcomment builders.
+type VaultComment func(*sql.Selector)
+
+// VaultFavorite is the predicate function for vaultfavorite builders.
+type VaultFavorite func(*sql.Selector)
+
 // VaultItem is the predicate function for vaultitem builders.
 type VaultItem func(*sql.Selector)
 
+// VaultShareLink is the predicate function for vaultsharelink builders.
+type VaultShareLink func(*sql.Selector)
+
+// VaultTemplate is the predicate function for vaulttemplate builders.
+type VaultTemplate func(*sql.Selector)
+
+// VaultVersion is the predicate function for vaultversion builders.
+type VaultVersion func(*sql.Selector)
+
 // Voicemail is the predicate function for voicemail builders.
 type Voicemail func(*sql.Selector)
+
+// Warehouse is the predicate function for warehouse builders.
+type Warehouse func(*sql.Selector)
+
+// WorkLog is the predicate function for worklog builders.
+type WorkLog func(*sql.Selector)

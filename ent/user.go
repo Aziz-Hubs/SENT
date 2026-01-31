@@ -58,8 +58,8 @@ type UserEdges struct {
 	RequestedTickets []*Ticket `json:"requested_tickets,omitempty"`
 	// AssignedTickets holds the value of the assigned_tickets edge.
 	AssignedTickets []*Ticket `json:"assigned_tickets,omitempty"`
-	// TimeEntries holds the value of the time_entries edge.
-	TimeEntries []*TimeEntry `json:"time_entries,omitempty"`
+	// WorkLogs holds the value of the work_logs edge.
+	WorkLogs []*WorkLog `json:"work_logs,omitempty"`
 	// OwnedAssets holds the value of the owned_assets edge.
 	OwnedAssets []*Asset `json:"owned_assets,omitempty"`
 	// AuthoredSops holds the value of the authored_sops edge.
@@ -70,9 +70,19 @@ type UserEdges struct {
 	Voicemails []*Voicemail `json:"voicemails,omitempty"`
 	// SaasIdentities holds the value of the saas_identities edge.
 	SaasIdentities []*SaaSIdentity `json:"saas_identities,omitempty"`
+	// Favorites holds the value of the favorites edge.
+	Favorites []*VaultFavorite `json:"favorites,omitempty"`
+	// VaultComments holds the value of the vault_comments edge.
+	VaultComments []*VaultComment `json:"vault_comments,omitempty"`
+	// CreatedVersions holds the value of the created_versions edge.
+	CreatedVersions []*VaultVersion `json:"created_versions,omitempty"`
+	// CreatedLegalHolds holds the value of the created_legal_holds edge.
+	CreatedLegalHolds []*LegalHold `json:"created_legal_holds,omitempty"`
+	// CreatedTemplates holds the value of the created_templates edge.
+	CreatedTemplates []*VaultTemplate `json:"created_templates,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [10]bool
+	loadedTypes [15]bool
 }
 
 // TenantOrErr returns the Tenant value or an error if the edge
@@ -113,13 +123,13 @@ func (e UserEdges) AssignedTicketsOrErr() ([]*Ticket, error) {
 	return nil, &NotLoadedError{edge: "assigned_tickets"}
 }
 
-// TimeEntriesOrErr returns the TimeEntries value or an error if the edge
+// WorkLogsOrErr returns the WorkLogs value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) TimeEntriesOrErr() ([]*TimeEntry, error) {
+func (e UserEdges) WorkLogsOrErr() ([]*WorkLog, error) {
 	if e.loadedTypes[4] {
-		return e.TimeEntries, nil
+		return e.WorkLogs, nil
 	}
-	return nil, &NotLoadedError{edge: "time_entries"}
+	return nil, &NotLoadedError{edge: "work_logs"}
 }
 
 // OwnedAssetsOrErr returns the OwnedAssets value or an error if the edge
@@ -165,6 +175,51 @@ func (e UserEdges) SaasIdentitiesOrErr() ([]*SaaSIdentity, error) {
 		return e.SaasIdentities, nil
 	}
 	return nil, &NotLoadedError{edge: "saas_identities"}
+}
+
+// FavoritesOrErr returns the Favorites value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FavoritesOrErr() ([]*VaultFavorite, error) {
+	if e.loadedTypes[10] {
+		return e.Favorites, nil
+	}
+	return nil, &NotLoadedError{edge: "favorites"}
+}
+
+// VaultCommentsOrErr returns the VaultComments value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) VaultCommentsOrErr() ([]*VaultComment, error) {
+	if e.loadedTypes[11] {
+		return e.VaultComments, nil
+	}
+	return nil, &NotLoadedError{edge: "vault_comments"}
+}
+
+// CreatedVersionsOrErr returns the CreatedVersions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CreatedVersionsOrErr() ([]*VaultVersion, error) {
+	if e.loadedTypes[12] {
+		return e.CreatedVersions, nil
+	}
+	return nil, &NotLoadedError{edge: "created_versions"}
+}
+
+// CreatedLegalHoldsOrErr returns the CreatedLegalHolds value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CreatedLegalHoldsOrErr() ([]*LegalHold, error) {
+	if e.loadedTypes[13] {
+		return e.CreatedLegalHolds, nil
+	}
+	return nil, &NotLoadedError{edge: "created_legal_holds"}
+}
+
+// CreatedTemplatesOrErr returns the CreatedTemplates value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CreatedTemplatesOrErr() ([]*VaultTemplate, error) {
+	if e.loadedTypes[14] {
+		return e.CreatedTemplates, nil
+	}
+	return nil, &NotLoadedError{edge: "created_templates"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -311,9 +366,9 @@ func (_m *User) QueryAssignedTickets() *TicketQuery {
 	return NewUserClient(_m.config).QueryAssignedTickets(_m)
 }
 
-// QueryTimeEntries queries the "time_entries" edge of the User entity.
-func (_m *User) QueryTimeEntries() *TimeEntryQuery {
-	return NewUserClient(_m.config).QueryTimeEntries(_m)
+// QueryWorkLogs queries the "work_logs" edge of the User entity.
+func (_m *User) QueryWorkLogs() *WorkLogQuery {
+	return NewUserClient(_m.config).QueryWorkLogs(_m)
 }
 
 // QueryOwnedAssets queries the "owned_assets" edge of the User entity.
@@ -339,6 +394,31 @@ func (_m *User) QueryVoicemails() *VoicemailQuery {
 // QuerySaasIdentities queries the "saas_identities" edge of the User entity.
 func (_m *User) QuerySaasIdentities() *SaaSIdentityQuery {
 	return NewUserClient(_m.config).QuerySaasIdentities(_m)
+}
+
+// QueryFavorites queries the "favorites" edge of the User entity.
+func (_m *User) QueryFavorites() *VaultFavoriteQuery {
+	return NewUserClient(_m.config).QueryFavorites(_m)
+}
+
+// QueryVaultComments queries the "vault_comments" edge of the User entity.
+func (_m *User) QueryVaultComments() *VaultCommentQuery {
+	return NewUserClient(_m.config).QueryVaultComments(_m)
+}
+
+// QueryCreatedVersions queries the "created_versions" edge of the User entity.
+func (_m *User) QueryCreatedVersions() *VaultVersionQuery {
+	return NewUserClient(_m.config).QueryCreatedVersions(_m)
+}
+
+// QueryCreatedLegalHolds queries the "created_legal_holds" edge of the User entity.
+func (_m *User) QueryCreatedLegalHolds() *LegalHoldQuery {
+	return NewUserClient(_m.config).QueryCreatedLegalHolds(_m)
+}
+
+// QueryCreatedTemplates queries the "created_templates" edge of the User entity.
+func (_m *User) QueryCreatedTemplates() *VaultTemplateQuery {
+	return NewUserClient(_m.config).QueryCreatedTemplates(_m)
 }
 
 // Update returns a builder for updating this User.

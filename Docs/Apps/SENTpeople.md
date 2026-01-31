@@ -58,12 +58,34 @@ SENTpeople is the Human Resources Information System (HRIS). It manages the empl
 ### **3.6 Contract Pipeline**
 
 - **PDF Generation:** Automated employment contract generation using **Maroto v2**, merging captured signatures and cryptographic verification hashes.
-- **Vault Integration:** Signed contracts are automatically versioned and stored in **SENTvault**.
+- **Vault Integration:** Signed contracts are automatically versioned and stored in **SENTvault** under **Legal Hold** if necessary during offboarding disputes.
 
 ### **3.7 Payroll**
 
 - **Processing:** Calculation of Gross-to-Net pay, tax deductions, and benefits.
 - **Payslips:** PDF payslip generation and email delivery.
+
+### **3.8 Applicant Tracking System (ATS)**
+
+- **Pipeline Management:** Visual Kanban pipeline for tracking candidates from application to hire.
+- **Interview Scheduling:** Integrated calendar booking with SENTcal and automated candidate communications.
+- **Resume Processing:** Uploaded CVs are processed via **SENTvault OCR** and automatically tagged using **AI Document Classification**.
+- **Job Postings:** Headless CMS integration with SENTcanvas to broadcast open roles to public websites.
+
+### **3.9 Benefits Administration**
+
+- **Plan Management:** Support for Health, Dental, Vision, and Retirement plans with employer/employee cost splitting.
+- **Open Enrollment:** Automated enrollment periods with digital plan comparison and election logic.
+
+### **3.10 Learning Management System (LMS)**
+
+- **Course Catalog:** Internal and external course hosting with progress tracking and mandatory compliance assignments.
+- **Skill Mapping:** Auto-matching courses to employee skill gaps identified in performance reviews.
+
+### **3.11 Workforce Analytics**
+
+- **KPI Dashboard:** Real-time visibility into Headcount, Turnover, Attrition Risk (AI-powered), and Time-to-Hire.
+- **Pay Equity:** Automated analysis of compensation distribution across departments and demographics.
 
 ## **4. Integration with SENT Ecosystem**
 
@@ -78,8 +100,7 @@ SENTpeople is the Human Resources Information System (HRIS). It manages the empl
 - **SENTpilot:** "Ticket Routing". Tickets from the CEO are flagged as VIP because of their role in the Org Chart.
 - **SENTwave:** "Emergency Blast". Uses employee cell phone numbers to send SMS alerts during a crisis.
 
-## **7. Future Feature Roadmap**
-
-- **360 Reviews:** Peer-to-peer performance feedback collection.
-- **Benefits Administration:** Portal for employees to choose health insurance plans.
-- **Applicant Tracking System (ATS):** Manage job postings and resumes before they become employees.
+- **360 Reviews:** Peer-to-peer performance feedback collection (Now in Implementation).
+- **Expense Reporting:** Automated reimbursement workflows linked to SENTcapital.
+- **AI Career Pathing:** Predictive modeling to suggest internal promotion paths based on skills and performance.
+- **Global Compliance Engine:** Dynamic tax and labor law updates for 50+ jurisdictions.

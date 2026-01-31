@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
+	"sent/ent/employee"
 	"sent/ent/ticket"
 	"sent/ent/timeentry"
-	"sent/ent/user"
 	"strings"
 	"time"
 
@@ -19,37 +19,51 @@ type TimeEntry struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// DurationHours holds the value of the "duration_hours" field.
-	DurationHours float64 `json:"duration_hours,omitempty"`
-	// Note holds the value of the "note" field.
-	Note string `json:"note,omitempty"`
-	// StartedAt holds the value of the "started_at" field.
-	StartedAt time.Time `json:"started_at,omitempty"`
-	// IsBillable holds the value of the "is_billable" field.
-	IsBillable bool `json:"is_billable,omitempty"`
-	// Status holds the value of the "status" field.
+	// When the shift started
+	StartTime time.Time `json:"start_time,omitempty"`
+	// When the shift ended
+	EndTime time.Time `json:"end_time,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// Associated ticket for billing
+	TicketID int `json:"ticket_id,omitempty"`
+	// Assigned technician user ID
+	TechnicianID int `json:"technician_id,omitempty"`
+	// Billing workflow status
 	Status timeentry.Status `json:"status,omitempty"`
-	// WorkType holds the value of the "work_type" field.
+	// Type of work performed
 	WorkType string `json:"work_type,omitempty"`
-	// InvoiceID holds the value of the "invoice_id" field.
+	// Duration in hours
+	DurationHours float64 `json:"duration_hours,omitempty"`
+	// Associated invoice ID when billed
 	InvoiceID int `json:"invoice_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TimeEntryQuery when eager-loading is set.
-	Edges               TimeEntryEdges `json:"edges"`
-	ticket_time_entries *int
-	user_time_entries   *int
-	selectValues        sql.SelectValues
+	Edges                 TimeEntryEdges `json:"edges"`
+	employee_time_entries *int
+	selectValues          sql.SelectValues
 }
 
 // TimeEntryEdges holds the relations/edges for other nodes in the graph.
 type TimeEntryEdges struct {
+	// Employee holds the value of the employee edge.
+	Employee *Employee `json:"employee,omitempty"`
 	// Ticket holds the value of the ticket edge.
 	Ticket *Ticket `json:"ticket,omitempty"`
-	// Technician holds the value of the technician edge.
-	Technician *User `json:"technician,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
+}
+
+// EmployeeOrErr returns the Employee value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TimeEntryEdges) EmployeeOrErr() (*Employee, error) {
+	if e.Employee != nil {
+		return e.Employee, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: employee.Label}
+	}
+	return nil, &NotLoadedError{edge: "employee"}
 }
 
 // TicketOrErr returns the Ticket value or an error if the edge
@@ -57,21 +71,10 @@ type TimeEntryEdges struct {
 func (e TimeEntryEdges) TicketOrErr() (*Ticket, error) {
 	if e.Ticket != nil {
 		return e.Ticket, nil
-	} else if e.loadedTypes[0] {
+	} else if e.loadedTypes[1] {
 		return nil, &NotFoundError{label: ticket.Label}
 	}
 	return nil, &NotLoadedError{edge: "ticket"}
-}
-
-// TechnicianOrErr returns the Technician value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TimeEntryEdges) TechnicianOrErr() (*User, error) {
-	if e.Technician != nil {
-		return e.Technician, nil
-	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: user.Label}
-	}
-	return nil, &NotLoadedError{edge: "technician"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -79,19 +82,15 @@ func (*TimeEntry) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case timeentry.FieldIsBillable:
-			values[i] = new(sql.NullBool)
 		case timeentry.FieldDurationHours:
 			values[i] = new(sql.NullFloat64)
-		case timeentry.FieldID, timeentry.FieldInvoiceID:
+		case timeentry.FieldID, timeentry.FieldTicketID, timeentry.FieldTechnicianID, timeentry.FieldInvoiceID:
 			values[i] = new(sql.NullInt64)
-		case timeentry.FieldNote, timeentry.FieldStatus, timeentry.FieldWorkType:
+		case timeentry.FieldStatus, timeentry.FieldWorkType:
 			values[i] = new(sql.NullString)
-		case timeentry.FieldStartedAt:
+		case timeentry.FieldStartTime, timeentry.FieldEndTime, timeentry.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case timeentry.ForeignKeys[0]: // ticket_time_entries
-			values[i] = new(sql.NullInt64)
-		case timeentry.ForeignKeys[1]: // user_time_entries
+		case timeentry.ForeignKeys[0]: // employee_time_entries
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -114,29 +113,35 @@ func (_m *TimeEntry) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case timeentry.FieldDurationHours:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field duration_hours", values[i])
-			} else if value.Valid {
-				_m.DurationHours = value.Float64
-			}
-		case timeentry.FieldNote:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field note", values[i])
-			} else if value.Valid {
-				_m.Note = value.String
-			}
-		case timeentry.FieldStartedAt:
+		case timeentry.FieldStartTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field started_at", values[i])
+				return fmt.Errorf("unexpected type %T for field start_time", values[i])
 			} else if value.Valid {
-				_m.StartedAt = value.Time
+				_m.StartTime = value.Time
 			}
-		case timeentry.FieldIsBillable:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_billable", values[i])
+		case timeentry.FieldEndTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field end_time", values[i])
 			} else if value.Valid {
-				_m.IsBillable = value.Bool
+				_m.EndTime = value.Time
+			}
+		case timeentry.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				_m.CreatedAt = value.Time
+			}
+		case timeentry.FieldTicketID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field ticket_id", values[i])
+			} else if value.Valid {
+				_m.TicketID = int(value.Int64)
+			}
+		case timeentry.FieldTechnicianID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field technician_id", values[i])
+			} else if value.Valid {
+				_m.TechnicianID = int(value.Int64)
 			}
 		case timeentry.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -150,6 +155,12 @@ func (_m *TimeEntry) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.WorkType = value.String
 			}
+		case timeentry.FieldDurationHours:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field duration_hours", values[i])
+			} else if value.Valid {
+				_m.DurationHours = value.Float64
+			}
 		case timeentry.FieldInvoiceID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field invoice_id", values[i])
@@ -158,17 +169,10 @@ func (_m *TimeEntry) assignValues(columns []string, values []any) error {
 			}
 		case timeentry.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field ticket_time_entries", value)
+				return fmt.Errorf("unexpected type %T for edge-field employee_time_entries", value)
 			} else if value.Valid {
-				_m.ticket_time_entries = new(int)
-				*_m.ticket_time_entries = int(value.Int64)
-			}
-		case timeentry.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_time_entries", value)
-			} else if value.Valid {
-				_m.user_time_entries = new(int)
-				*_m.user_time_entries = int(value.Int64)
+				_m.employee_time_entries = new(int)
+				*_m.employee_time_entries = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -183,14 +187,14 @@ func (_m *TimeEntry) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
+// QueryEmployee queries the "employee" edge of the TimeEntry entity.
+func (_m *TimeEntry) QueryEmployee() *EmployeeQuery {
+	return NewTimeEntryClient(_m.config).QueryEmployee(_m)
+}
+
 // QueryTicket queries the "ticket" edge of the TimeEntry entity.
 func (_m *TimeEntry) QueryTicket() *TicketQuery {
 	return NewTimeEntryClient(_m.config).QueryTicket(_m)
-}
-
-// QueryTechnician queries the "technician" edge of the TimeEntry entity.
-func (_m *TimeEntry) QueryTechnician() *UserQuery {
-	return NewTimeEntryClient(_m.config).QueryTechnician(_m)
 }
 
 // Update returns a builder for updating this TimeEntry.
@@ -216,23 +220,29 @@ func (_m *TimeEntry) String() string {
 	var builder strings.Builder
 	builder.WriteString("TimeEntry(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("duration_hours=")
-	builder.WriteString(fmt.Sprintf("%v", _m.DurationHours))
+	builder.WriteString("start_time=")
+	builder.WriteString(_m.StartTime.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("note=")
-	builder.WriteString(_m.Note)
+	builder.WriteString("end_time=")
+	builder.WriteString(_m.EndTime.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("started_at=")
-	builder.WriteString(_m.StartedAt.Format(time.ANSIC))
+	builder.WriteString("created_at=")
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("is_billable=")
-	builder.WriteString(fmt.Sprintf("%v", _m.IsBillable))
+	builder.WriteString("ticket_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TicketID))
+	builder.WriteString(", ")
+	builder.WriteString("technician_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TechnicianID))
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteString(", ")
 	builder.WriteString("work_type=")
 	builder.WriteString(_m.WorkType)
+	builder.WriteString(", ")
+	builder.WriteString("duration_hours=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DurationHours))
 	builder.WriteString(", ")
 	builder.WriteString("invoice_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.InvoiceID))

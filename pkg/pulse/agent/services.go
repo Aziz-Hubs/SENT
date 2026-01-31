@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"encoding/json"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -19,14 +20,49 @@ func GetServices() ([]ServiceInfo, error) {
 	var services []ServiceInfo
 
 	if runtime.GOOS == "windows" {
-		// Use PowerShell to get services (slower but easier for MVP)
-		_ = exec.Command("powershell", "-Command", "Get-Service | Select-Object Name,DisplayName,Status | ConvertTo-Json")
-		// Parsing JSON output from PS in Go would be robust, but for minimal dependency MVP
-		// we might just return a mock or basic list.
-        // Let's implement a Stub for now to avoid complex parsing logic in this sprint
-        services = append(services, ServiceInfo{Name: "wuauserv", DisplayName: "Windows Update", Status: "running"})
-        services = append(services, ServiceInfo{Name: "Spooler", DisplayName: "Print Spooler", Status: "running"})
-        services = append(services, ServiceInfo{Name: "SentinelAgent", DisplayName: "SentinelOne Agent", Status: "running"})
+		// Use PowerShell to get services as JSON
+        // Get-Service | Select-Object Name,DisplayName,Status | ConvertTo-Json -Compress
+		cmd := exec.Command("powershell", "-NoProfile", "-Command", "Get-Service | Select-Object Name,DisplayName,Status | ConvertTo-Json -Compress")
+		output, err := cmd.Output()
+        if err != nil {
+            // Fallback or error
+            return nil, err
+        }
+
+        // Parse JSON output
+        // PowerShell ConvertTo-Json can return a single object or an array.
+        // We need to handle both cases or ensure array.
+        // Wrapping in @() in PS usually ensures array but let's try generic unmarshal.
+        
+        var rawServices []map[string]interface{}
+        // Try unmarshal as array
+        if err := json.Unmarshal(output, &rawServices); err != nil {
+             // Try unmarshal as single object
+             var singleService map[string]interface{}
+             if err2 := json.Unmarshal(output, &singleService); err2 == nil {
+                 rawServices = append(rawServices, singleService)
+             }
+        }
+
+        for _, s := range rawServices {
+            name, _ := s["Name"].(string)
+            displayName, _ := s["DisplayName"].(string)
+            statusVal, _ := s["Status"].(float64) // PS JSON often returns integer for enum
+            statusStr := "unknown"
+            
+            // Status 4=Running, 1=Stopped (Microsoft.PowerShell.Commands.ServiceControllerStatus)
+            if statusVal == 4 {
+                statusStr = "running"
+            } else if statusVal == 1 {
+                statusStr = "stopped"
+            }
+
+            services = append(services, ServiceInfo{
+                Name:        name,
+                DisplayName: displayName,
+                Status:      statusStr,
+            })
+        }
 	} else {
 		// Linux Systemd
 		cmd := exec.Command("systemctl", "list-units", "--type=service", "--all", "--no-pager", "--plain")

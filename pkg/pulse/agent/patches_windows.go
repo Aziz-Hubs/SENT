@@ -77,9 +77,12 @@ if ($UpdatesToInstall.Count -gt 0) {
 	return cmd.Run()
 }
 
-func getString(m map[string]interface{}, key string) string {
-	if v, ok := m[key].(string); ok {
-		return v
-	}
-	return ""
+// GetPendingPatches returns available updates for the system (Windows)
+func GetPendingPatches() ([]PatchInfo, error) {
+	return getWindowsUpdates()
+}
+
+// InstallPatches installs specified patches (Windows)
+func InstallPatches(patchIDs []string) error {
+	return installWindowsPatches(patchIDs)
 }

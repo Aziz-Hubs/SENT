@@ -120,6 +120,26 @@ func OverallRatingNotNil() predicate.PerformanceReview {
 	return predicate.PerformanceReview(sql.FieldNotNull(FieldOverallRating))
 }
 
+// ReviewTypeEQ applies the EQ predicate on the "review_type" field.
+func ReviewTypeEQ(v ReviewType) predicate.PerformanceReview {
+	return predicate.PerformanceReview(sql.FieldEQ(FieldReviewType, v))
+}
+
+// ReviewTypeNEQ applies the NEQ predicate on the "review_type" field.
+func ReviewTypeNEQ(v ReviewType) predicate.PerformanceReview {
+	return predicate.PerformanceReview(sql.FieldNEQ(FieldReviewType, v))
+}
+
+// ReviewTypeIn applies the In predicate on the "review_type" field.
+func ReviewTypeIn(vs ...ReviewType) predicate.PerformanceReview {
+	return predicate.PerformanceReview(sql.FieldIn(FieldReviewType, vs...))
+}
+
+// ReviewTypeNotIn applies the NotIn predicate on the "review_type" field.
+func ReviewTypeNotIn(vs ...ReviewType) predicate.PerformanceReview {
+	return predicate.PerformanceReview(sql.FieldNotIn(FieldReviewType, vs...))
+}
+
 // StrengthsEQ applies the EQ predicate on the "strengths" field.
 func StrengthsEQ(v string) predicate.PerformanceReview {
 	return predicate.PerformanceReview(sql.FieldEQ(FieldStrengths, v))
@@ -353,6 +373,16 @@ func GoalsAssessmentIsNil() predicate.PerformanceReview {
 // GoalsAssessmentNotNil applies the NotNil predicate on the "goals_assessment" field.
 func GoalsAssessmentNotNil() predicate.PerformanceReview {
 	return predicate.PerformanceReview(sql.FieldNotNull(FieldGoalsAssessment))
+}
+
+// SurveyResponsesIsNil applies the IsNil predicate on the "survey_responses" field.
+func SurveyResponsesIsNil() predicate.PerformanceReview {
+	return predicate.PerformanceReview(sql.FieldIsNull(FieldSurveyResponses))
+}
+
+// SurveyResponsesNotNil applies the NotNil predicate on the "survey_responses" field.
+func SurveyResponsesNotNil() predicate.PerformanceReview {
+	return predicate.PerformanceReview(sql.FieldNotNull(FieldSurveyResponses))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

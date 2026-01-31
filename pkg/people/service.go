@@ -16,18 +16,22 @@ import (
 // PeopleService is the main HCM engine.
 type PeopleService struct {
 	db       *ent.Client
-	payroll  *PayrollEngine
-	contract *ContractService
-	river    *river.Client[*ent.Tx]
+	payroll    *PayrollEngine
+	contract   *ContractService
+	recruiting *RecruitingService
+	benefits   *BenefitsManager
+	river      *river.Client[*ent.Tx]
 }
 
 // NewPeopleService initializes the PeopleService.
-func NewPeopleService(db *ent.Client, payroll *PayrollEngine, contract *ContractService, river *river.Client[*ent.Tx]) *PeopleService {
+func NewPeopleService(db *ent.Client, payroll *PayrollEngine, contract *ContractService, recruiting *RecruitingService, river *river.Client[*ent.Tx]) *PeopleService {
 	return &PeopleService{
-		db:       db,
-		payroll:  payroll,
-		contract: contract,
-		river:    river,
+		db:         db,
+		payroll:    payroll,
+		contract:   contract,
+		recruiting: recruiting,
+		benefits:   NewBenefitsManager(db),
+		river:      river,
 	}
 }
 

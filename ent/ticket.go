@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"sent/ent/asset"
 	"sent/ent/tenant"
@@ -42,6 +43,10 @@ type Ticket struct {
 	ClaimLeaseOwner string `json:"claim_lease_owner,omitempty"`
 	// ClaimLeaseExpiresAt holds the value of the "claim_lease_expires_at" field.
 	ClaimLeaseExpiresAt *time.Time `json:"claim_lease_expires_at,omitempty"`
+	// DeepLink holds the value of the "deep_link" field.
+	DeepLink string `json:"deep_link,omitempty"`
+	// ExecutionPlan holds the value of the "execution_plan" field.
+	ExecutionPlan map[string]interface{} `json:"execution_plan,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TicketQuery when eager-loading is set.
 	Edges                  TicketEdges `json:"edges"`
@@ -62,8 +67,8 @@ type TicketEdges struct {
 	Assignee *User `json:"assignee,omitempty"`
 	// Asset holds the value of the asset edge.
 	Asset *Asset `json:"asset,omitempty"`
-	// TimeEntries holds the value of the time_entries edge.
-	TimeEntries []*TimeEntry `json:"time_entries,omitempty"`
+	// WorkLogs holds the value of the work_logs edge.
+	WorkLogs []*WorkLog `json:"work_logs,omitempty"`
 	// RemediationSteps holds the value of the remediation_steps edge.
 	RemediationSteps []*RemediationStep `json:"remediation_steps,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -115,13 +120,13 @@ func (e TicketEdges) AssetOrErr() (*Asset, error) {
 	return nil, &NotLoadedError{edge: "asset"}
 }
 
-// TimeEntriesOrErr returns the TimeEntries value or an error if the edge
+// WorkLogsOrErr returns the WorkLogs value or an error if the edge
 // was not loaded in eager-loading.
-func (e TicketEdges) TimeEntriesOrErr() ([]*TimeEntry, error) {
+func (e TicketEdges) WorkLogsOrErr() ([]*WorkLog, error) {
 	if e.loadedTypes[4] {
-		return e.TimeEntries, nil
+		return e.WorkLogs, nil
 	}
-	return nil, &NotLoadedError{edge: "time_entries"}
+	return nil, &NotLoadedError{edge: "work_logs"}
 }
 
 // RemediationStepsOrErr returns the RemediationSteps value or an error if the edge
@@ -138,9 +143,11 @@ func (*Ticket) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case ticket.FieldExecutionPlan:
+			values[i] = new([]byte)
 		case ticket.FieldID:
 			values[i] = new(sql.NullInt64)
-		case ticket.FieldSubject, ticket.FieldDescription, ticket.FieldStatus, ticket.FieldPriority, ticket.FieldMetadata, ticket.FieldClaimLeaseOwner:
+		case ticket.FieldSubject, ticket.FieldDescription, ticket.FieldStatus, ticket.FieldPriority, ticket.FieldMetadata, ticket.FieldClaimLeaseOwner, ticket.FieldDeepLink:
 			values[i] = new(sql.NullString)
 		case ticket.FieldCreatedAt, ticket.FieldUpdatedAt, ticket.FieldResolvedAt, ticket.FieldDueDate, ticket.FieldClaimLeaseExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -242,6 +249,20 @@ func (_m *Ticket) assignValues(columns []string, values []any) error {
 				_m.ClaimLeaseExpiresAt = new(time.Time)
 				*_m.ClaimLeaseExpiresAt = value.Time
 			}
+		case ticket.FieldDeepLink:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field deep_link", values[i])
+			} else if value.Valid {
+				_m.DeepLink = value.String
+			}
+		case ticket.FieldExecutionPlan:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field execution_plan", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.ExecutionPlan); err != nil {
+					return fmt.Errorf("unmarshal field execution_plan: %w", err)
+				}
+			}
 		case ticket.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field asset_tickets", value)
@@ -303,9 +324,9 @@ func (_m *Ticket) QueryAsset() *AssetQuery {
 	return NewTicketClient(_m.config).QueryAsset(_m)
 }
 
-// QueryTimeEntries queries the "time_entries" edge of the Ticket entity.
-func (_m *Ticket) QueryTimeEntries() *TimeEntryQuery {
-	return NewTicketClient(_m.config).QueryTimeEntries(_m)
+// QueryWorkLogs queries the "work_logs" edge of the Ticket entity.
+func (_m *Ticket) QueryWorkLogs() *WorkLogQuery {
+	return NewTicketClient(_m.config).QueryWorkLogs(_m)
 }
 
 // QueryRemediationSteps queries the "remediation_steps" edge of the Ticket entity.
@@ -374,6 +395,12 @@ func (_m *Ticket) String() string {
 		builder.WriteString("claim_lease_expires_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("deep_link=")
+	builder.WriteString(_m.DeepLink)
+	builder.WriteString(", ")
+	builder.WriteString("execution_plan=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ExecutionPlan))
 	builder.WriteByte(')')
 	return builder.String()
 }

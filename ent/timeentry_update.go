@@ -6,10 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sent/ent/employee"
 	"sent/ent/predicate"
 	"sent/ent/ticket"
 	"sent/ent/timeentry"
-	"sent/ent/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -31,66 +31,84 @@ func (_u *TimeEntryUpdate) Where(ps ...predicate.TimeEntry) *TimeEntryUpdate {
 	return _u
 }
 
-// SetDurationHours sets the "duration_hours" field.
-func (_u *TimeEntryUpdate) SetDurationHours(v float64) *TimeEntryUpdate {
-	_u.mutation.ResetDurationHours()
-	_u.mutation.SetDurationHours(v)
+// SetStartTime sets the "start_time" field.
+func (_u *TimeEntryUpdate) SetStartTime(v time.Time) *TimeEntryUpdate {
+	_u.mutation.SetStartTime(v)
 	return _u
 }
 
-// SetNillableDurationHours sets the "duration_hours" field if the given value is not nil.
-func (_u *TimeEntryUpdate) SetNillableDurationHours(v *float64) *TimeEntryUpdate {
+// SetNillableStartTime sets the "start_time" field if the given value is not nil.
+func (_u *TimeEntryUpdate) SetNillableStartTime(v *time.Time) *TimeEntryUpdate {
 	if v != nil {
-		_u.SetDurationHours(*v)
+		_u.SetStartTime(*v)
 	}
 	return _u
 }
 
-// AddDurationHours adds value to the "duration_hours" field.
-func (_u *TimeEntryUpdate) AddDurationHours(v float64) *TimeEntryUpdate {
-	_u.mutation.AddDurationHours(v)
+// SetEndTime sets the "end_time" field.
+func (_u *TimeEntryUpdate) SetEndTime(v time.Time) *TimeEntryUpdate {
+	_u.mutation.SetEndTime(v)
 	return _u
 }
 
-// SetNote sets the "note" field.
-func (_u *TimeEntryUpdate) SetNote(v string) *TimeEntryUpdate {
-	_u.mutation.SetNote(v)
-	return _u
-}
-
-// SetNillableNote sets the "note" field if the given value is not nil.
-func (_u *TimeEntryUpdate) SetNillableNote(v *string) *TimeEntryUpdate {
+// SetNillableEndTime sets the "end_time" field if the given value is not nil.
+func (_u *TimeEntryUpdate) SetNillableEndTime(v *time.Time) *TimeEntryUpdate {
 	if v != nil {
-		_u.SetNote(*v)
+		_u.SetEndTime(*v)
 	}
 	return _u
 }
 
-// SetStartedAt sets the "started_at" field.
-func (_u *TimeEntryUpdate) SetStartedAt(v time.Time) *TimeEntryUpdate {
-	_u.mutation.SetStartedAt(v)
+// ClearEndTime clears the value of the "end_time" field.
+func (_u *TimeEntryUpdate) ClearEndTime() *TimeEntryUpdate {
+	_u.mutation.ClearEndTime()
 	return _u
 }
 
-// SetNillableStartedAt sets the "started_at" field if the given value is not nil.
-func (_u *TimeEntryUpdate) SetNillableStartedAt(v *time.Time) *TimeEntryUpdate {
+// SetTicketID sets the "ticket_id" field.
+func (_u *TimeEntryUpdate) SetTicketID(v int) *TimeEntryUpdate {
+	_u.mutation.SetTicketID(v)
+	return _u
+}
+
+// SetNillableTicketID sets the "ticket_id" field if the given value is not nil.
+func (_u *TimeEntryUpdate) SetNillableTicketID(v *int) *TimeEntryUpdate {
 	if v != nil {
-		_u.SetStartedAt(*v)
+		_u.SetTicketID(*v)
 	}
 	return _u
 }
 
-// SetIsBillable sets the "is_billable" field.
-func (_u *TimeEntryUpdate) SetIsBillable(v bool) *TimeEntryUpdate {
-	_u.mutation.SetIsBillable(v)
+// ClearTicketID clears the value of the "ticket_id" field.
+func (_u *TimeEntryUpdate) ClearTicketID() *TimeEntryUpdate {
+	_u.mutation.ClearTicketID()
 	return _u
 }
 
-// SetNillableIsBillable sets the "is_billable" field if the given value is not nil.
-func (_u *TimeEntryUpdate) SetNillableIsBillable(v *bool) *TimeEntryUpdate {
+// SetTechnicianID sets the "technician_id" field.
+func (_u *TimeEntryUpdate) SetTechnicianID(v int) *TimeEntryUpdate {
+	_u.mutation.ResetTechnicianID()
+	_u.mutation.SetTechnicianID(v)
+	return _u
+}
+
+// SetNillableTechnicianID sets the "technician_id" field if the given value is not nil.
+func (_u *TimeEntryUpdate) SetNillableTechnicianID(v *int) *TimeEntryUpdate {
 	if v != nil {
-		_u.SetIsBillable(*v)
+		_u.SetTechnicianID(*v)
 	}
+	return _u
+}
+
+// AddTechnicianID adds value to the "technician_id" field.
+func (_u *TimeEntryUpdate) AddTechnicianID(v int) *TimeEntryUpdate {
+	_u.mutation.AddTechnicianID(v)
+	return _u
+}
+
+// ClearTechnicianID clears the value of the "technician_id" field.
+func (_u *TimeEntryUpdate) ClearTechnicianID() *TimeEntryUpdate {
+	_u.mutation.ClearTechnicianID()
 	return _u
 }
 
@@ -122,6 +140,33 @@ func (_u *TimeEntryUpdate) SetNillableWorkType(v *string) *TimeEntryUpdate {
 	return _u
 }
 
+// SetDurationHours sets the "duration_hours" field.
+func (_u *TimeEntryUpdate) SetDurationHours(v float64) *TimeEntryUpdate {
+	_u.mutation.ResetDurationHours()
+	_u.mutation.SetDurationHours(v)
+	return _u
+}
+
+// SetNillableDurationHours sets the "duration_hours" field if the given value is not nil.
+func (_u *TimeEntryUpdate) SetNillableDurationHours(v *float64) *TimeEntryUpdate {
+	if v != nil {
+		_u.SetDurationHours(*v)
+	}
+	return _u
+}
+
+// AddDurationHours adds value to the "duration_hours" field.
+func (_u *TimeEntryUpdate) AddDurationHours(v float64) *TimeEntryUpdate {
+	_u.mutation.AddDurationHours(v)
+	return _u
+}
+
+// ClearDurationHours clears the value of the "duration_hours" field.
+func (_u *TimeEntryUpdate) ClearDurationHours() *TimeEntryUpdate {
+	_u.mutation.ClearDurationHours()
+	return _u
+}
+
 // SetInvoiceID sets the "invoice_id" field.
 func (_u *TimeEntryUpdate) SetInvoiceID(v int) *TimeEntryUpdate {
 	_u.mutation.ResetInvoiceID()
@@ -149,10 +194,15 @@ func (_u *TimeEntryUpdate) ClearInvoiceID() *TimeEntryUpdate {
 	return _u
 }
 
-// SetTicketID sets the "ticket" edge to the Ticket entity by ID.
-func (_u *TimeEntryUpdate) SetTicketID(id int) *TimeEntryUpdate {
-	_u.mutation.SetTicketID(id)
+// SetEmployeeID sets the "employee" edge to the Employee entity by ID.
+func (_u *TimeEntryUpdate) SetEmployeeID(id int) *TimeEntryUpdate {
+	_u.mutation.SetEmployeeID(id)
 	return _u
+}
+
+// SetEmployee sets the "employee" edge to the Employee entity.
+func (_u *TimeEntryUpdate) SetEmployee(v *Employee) *TimeEntryUpdate {
+	return _u.SetEmployeeID(v.ID)
 }
 
 // SetTicket sets the "ticket" edge to the Ticket entity.
@@ -160,31 +210,20 @@ func (_u *TimeEntryUpdate) SetTicket(v *Ticket) *TimeEntryUpdate {
 	return _u.SetTicketID(v.ID)
 }
 
-// SetTechnicianID sets the "technician" edge to the User entity by ID.
-func (_u *TimeEntryUpdate) SetTechnicianID(id int) *TimeEntryUpdate {
-	_u.mutation.SetTechnicianID(id)
-	return _u
-}
-
-// SetTechnician sets the "technician" edge to the User entity.
-func (_u *TimeEntryUpdate) SetTechnician(v *User) *TimeEntryUpdate {
-	return _u.SetTechnicianID(v.ID)
-}
-
 // Mutation returns the TimeEntryMutation object of the builder.
 func (_u *TimeEntryUpdate) Mutation() *TimeEntryMutation {
 	return _u.mutation
 }
 
-// ClearTicket clears the "ticket" edge to the Ticket entity.
-func (_u *TimeEntryUpdate) ClearTicket() *TimeEntryUpdate {
-	_u.mutation.ClearTicket()
+// ClearEmployee clears the "employee" edge to the Employee entity.
+func (_u *TimeEntryUpdate) ClearEmployee() *TimeEntryUpdate {
+	_u.mutation.ClearEmployee()
 	return _u
 }
 
-// ClearTechnician clears the "technician" edge to the User entity.
-func (_u *TimeEntryUpdate) ClearTechnician() *TimeEntryUpdate {
-	_u.mutation.ClearTechnician()
+// ClearTicket clears the "ticket" edge to the Ticket entity.
+func (_u *TimeEntryUpdate) ClearTicket() *TimeEntryUpdate {
+	_u.mutation.ClearTicket()
 	return _u
 }
 
@@ -222,11 +261,8 @@ func (_u *TimeEntryUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "TimeEntry.status": %w`, err)}
 		}
 	}
-	if _u.mutation.TicketCleared() && len(_u.mutation.TicketIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "TimeEntry.ticket"`)
-	}
-	if _u.mutation.TechnicianCleared() && len(_u.mutation.TechnicianIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "TimeEntry.technician"`)
+	if _u.mutation.EmployeeCleared() && len(_u.mutation.EmployeeIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "TimeEntry.employee"`)
 	}
 	return nil
 }
@@ -249,26 +285,38 @@ func (_u *TimeEntryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.DurationHours(); ok {
-		_spec.SetField(timeentry.FieldDurationHours, field.TypeFloat64, value)
+	if value, ok := _u.mutation.StartTime(); ok {
+		_spec.SetField(timeentry.FieldStartTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.AddedDurationHours(); ok {
-		_spec.AddField(timeentry.FieldDurationHours, field.TypeFloat64, value)
+	if value, ok := _u.mutation.EndTime(); ok {
+		_spec.SetField(timeentry.FieldEndTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.Note(); ok {
-		_spec.SetField(timeentry.FieldNote, field.TypeString, value)
+	if _u.mutation.EndTimeCleared() {
+		_spec.ClearField(timeentry.FieldEndTime, field.TypeTime)
 	}
-	if value, ok := _u.mutation.StartedAt(); ok {
-		_spec.SetField(timeentry.FieldStartedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.TechnicianID(); ok {
+		_spec.SetField(timeentry.FieldTechnicianID, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.IsBillable(); ok {
-		_spec.SetField(timeentry.FieldIsBillable, field.TypeBool, value)
+	if value, ok := _u.mutation.AddedTechnicianID(); ok {
+		_spec.AddField(timeentry.FieldTechnicianID, field.TypeInt, value)
+	}
+	if _u.mutation.TechnicianIDCleared() {
+		_spec.ClearField(timeentry.FieldTechnicianID, field.TypeInt)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(timeentry.FieldStatus, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.WorkType(); ok {
 		_spec.SetField(timeentry.FieldWorkType, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DurationHours(); ok {
+		_spec.SetField(timeentry.FieldDurationHours, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedDurationHours(); ok {
+		_spec.AddField(timeentry.FieldDurationHours, field.TypeFloat64, value)
+	}
+	if _u.mutation.DurationHoursCleared() {
+		_spec.ClearField(timeentry.FieldDurationHours, field.TypeFloat64)
 	}
 	if value, ok := _u.mutation.InvoiceID(); ok {
 		_spec.SetField(timeentry.FieldInvoiceID, field.TypeInt, value)
@@ -279,10 +327,39 @@ func (_u *TimeEntryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.InvoiceIDCleared() {
 		_spec.ClearField(timeentry.FieldInvoiceID, field.TypeInt)
 	}
-	if _u.mutation.TicketCleared() {
+	if _u.mutation.EmployeeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
+			Table:   timeentry.EmployeeTable,
+			Columns: []string{timeentry.EmployeeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(employee.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EmployeeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   timeentry.EmployeeTable,
+			Columns: []string{timeentry.EmployeeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(employee.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TicketCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
 			Table:   timeentry.TicketTable,
 			Columns: []string{timeentry.TicketColumn},
 			Bidi:    false,
@@ -295,41 +372,12 @@ func (_u *TimeEntryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if nodes := _u.mutation.TicketIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   timeentry.TicketTable,
 			Columns: []string{timeentry.TicketColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ticket.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.TechnicianCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   timeentry.TechnicianTable,
-			Columns: []string{timeentry.TechnicianColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TechnicianIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   timeentry.TechnicianTable,
-			Columns: []string{timeentry.TechnicianColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -359,66 +407,84 @@ type TimeEntryUpdateOne struct {
 	modifiers []func(*sql.UpdateBuilder)
 }
 
-// SetDurationHours sets the "duration_hours" field.
-func (_u *TimeEntryUpdateOne) SetDurationHours(v float64) *TimeEntryUpdateOne {
-	_u.mutation.ResetDurationHours()
-	_u.mutation.SetDurationHours(v)
+// SetStartTime sets the "start_time" field.
+func (_u *TimeEntryUpdateOne) SetStartTime(v time.Time) *TimeEntryUpdateOne {
+	_u.mutation.SetStartTime(v)
 	return _u
 }
 
-// SetNillableDurationHours sets the "duration_hours" field if the given value is not nil.
-func (_u *TimeEntryUpdateOne) SetNillableDurationHours(v *float64) *TimeEntryUpdateOne {
+// SetNillableStartTime sets the "start_time" field if the given value is not nil.
+func (_u *TimeEntryUpdateOne) SetNillableStartTime(v *time.Time) *TimeEntryUpdateOne {
 	if v != nil {
-		_u.SetDurationHours(*v)
+		_u.SetStartTime(*v)
 	}
 	return _u
 }
 
-// AddDurationHours adds value to the "duration_hours" field.
-func (_u *TimeEntryUpdateOne) AddDurationHours(v float64) *TimeEntryUpdateOne {
-	_u.mutation.AddDurationHours(v)
+// SetEndTime sets the "end_time" field.
+func (_u *TimeEntryUpdateOne) SetEndTime(v time.Time) *TimeEntryUpdateOne {
+	_u.mutation.SetEndTime(v)
 	return _u
 }
 
-// SetNote sets the "note" field.
-func (_u *TimeEntryUpdateOne) SetNote(v string) *TimeEntryUpdateOne {
-	_u.mutation.SetNote(v)
-	return _u
-}
-
-// SetNillableNote sets the "note" field if the given value is not nil.
-func (_u *TimeEntryUpdateOne) SetNillableNote(v *string) *TimeEntryUpdateOne {
+// SetNillableEndTime sets the "end_time" field if the given value is not nil.
+func (_u *TimeEntryUpdateOne) SetNillableEndTime(v *time.Time) *TimeEntryUpdateOne {
 	if v != nil {
-		_u.SetNote(*v)
+		_u.SetEndTime(*v)
 	}
 	return _u
 }
 
-// SetStartedAt sets the "started_at" field.
-func (_u *TimeEntryUpdateOne) SetStartedAt(v time.Time) *TimeEntryUpdateOne {
-	_u.mutation.SetStartedAt(v)
+// ClearEndTime clears the value of the "end_time" field.
+func (_u *TimeEntryUpdateOne) ClearEndTime() *TimeEntryUpdateOne {
+	_u.mutation.ClearEndTime()
 	return _u
 }
 
-// SetNillableStartedAt sets the "started_at" field if the given value is not nil.
-func (_u *TimeEntryUpdateOne) SetNillableStartedAt(v *time.Time) *TimeEntryUpdateOne {
+// SetTicketID sets the "ticket_id" field.
+func (_u *TimeEntryUpdateOne) SetTicketID(v int) *TimeEntryUpdateOne {
+	_u.mutation.SetTicketID(v)
+	return _u
+}
+
+// SetNillableTicketID sets the "ticket_id" field if the given value is not nil.
+func (_u *TimeEntryUpdateOne) SetNillableTicketID(v *int) *TimeEntryUpdateOne {
 	if v != nil {
-		_u.SetStartedAt(*v)
+		_u.SetTicketID(*v)
 	}
 	return _u
 }
 
-// SetIsBillable sets the "is_billable" field.
-func (_u *TimeEntryUpdateOne) SetIsBillable(v bool) *TimeEntryUpdateOne {
-	_u.mutation.SetIsBillable(v)
+// ClearTicketID clears the value of the "ticket_id" field.
+func (_u *TimeEntryUpdateOne) ClearTicketID() *TimeEntryUpdateOne {
+	_u.mutation.ClearTicketID()
 	return _u
 }
 
-// SetNillableIsBillable sets the "is_billable" field if the given value is not nil.
-func (_u *TimeEntryUpdateOne) SetNillableIsBillable(v *bool) *TimeEntryUpdateOne {
+// SetTechnicianID sets the "technician_id" field.
+func (_u *TimeEntryUpdateOne) SetTechnicianID(v int) *TimeEntryUpdateOne {
+	_u.mutation.ResetTechnicianID()
+	_u.mutation.SetTechnicianID(v)
+	return _u
+}
+
+// SetNillableTechnicianID sets the "technician_id" field if the given value is not nil.
+func (_u *TimeEntryUpdateOne) SetNillableTechnicianID(v *int) *TimeEntryUpdateOne {
 	if v != nil {
-		_u.SetIsBillable(*v)
+		_u.SetTechnicianID(*v)
 	}
+	return _u
+}
+
+// AddTechnicianID adds value to the "technician_id" field.
+func (_u *TimeEntryUpdateOne) AddTechnicianID(v int) *TimeEntryUpdateOne {
+	_u.mutation.AddTechnicianID(v)
+	return _u
+}
+
+// ClearTechnicianID clears the value of the "technician_id" field.
+func (_u *TimeEntryUpdateOne) ClearTechnicianID() *TimeEntryUpdateOne {
+	_u.mutation.ClearTechnicianID()
 	return _u
 }
 
@@ -450,6 +516,33 @@ func (_u *TimeEntryUpdateOne) SetNillableWorkType(v *string) *TimeEntryUpdateOne
 	return _u
 }
 
+// SetDurationHours sets the "duration_hours" field.
+func (_u *TimeEntryUpdateOne) SetDurationHours(v float64) *TimeEntryUpdateOne {
+	_u.mutation.ResetDurationHours()
+	_u.mutation.SetDurationHours(v)
+	return _u
+}
+
+// SetNillableDurationHours sets the "duration_hours" field if the given value is not nil.
+func (_u *TimeEntryUpdateOne) SetNillableDurationHours(v *float64) *TimeEntryUpdateOne {
+	if v != nil {
+		_u.SetDurationHours(*v)
+	}
+	return _u
+}
+
+// AddDurationHours adds value to the "duration_hours" field.
+func (_u *TimeEntryUpdateOne) AddDurationHours(v float64) *TimeEntryUpdateOne {
+	_u.mutation.AddDurationHours(v)
+	return _u
+}
+
+// ClearDurationHours clears the value of the "duration_hours" field.
+func (_u *TimeEntryUpdateOne) ClearDurationHours() *TimeEntryUpdateOne {
+	_u.mutation.ClearDurationHours()
+	return _u
+}
+
 // SetInvoiceID sets the "invoice_id" field.
 func (_u *TimeEntryUpdateOne) SetInvoiceID(v int) *TimeEntryUpdateOne {
 	_u.mutation.ResetInvoiceID()
@@ -477,10 +570,15 @@ func (_u *TimeEntryUpdateOne) ClearInvoiceID() *TimeEntryUpdateOne {
 	return _u
 }
 
-// SetTicketID sets the "ticket" edge to the Ticket entity by ID.
-func (_u *TimeEntryUpdateOne) SetTicketID(id int) *TimeEntryUpdateOne {
-	_u.mutation.SetTicketID(id)
+// SetEmployeeID sets the "employee" edge to the Employee entity by ID.
+func (_u *TimeEntryUpdateOne) SetEmployeeID(id int) *TimeEntryUpdateOne {
+	_u.mutation.SetEmployeeID(id)
 	return _u
+}
+
+// SetEmployee sets the "employee" edge to the Employee entity.
+func (_u *TimeEntryUpdateOne) SetEmployee(v *Employee) *TimeEntryUpdateOne {
+	return _u.SetEmployeeID(v.ID)
 }
 
 // SetTicket sets the "ticket" edge to the Ticket entity.
@@ -488,31 +586,20 @@ func (_u *TimeEntryUpdateOne) SetTicket(v *Ticket) *TimeEntryUpdateOne {
 	return _u.SetTicketID(v.ID)
 }
 
-// SetTechnicianID sets the "technician" edge to the User entity by ID.
-func (_u *TimeEntryUpdateOne) SetTechnicianID(id int) *TimeEntryUpdateOne {
-	_u.mutation.SetTechnicianID(id)
-	return _u
-}
-
-// SetTechnician sets the "technician" edge to the User entity.
-func (_u *TimeEntryUpdateOne) SetTechnician(v *User) *TimeEntryUpdateOne {
-	return _u.SetTechnicianID(v.ID)
-}
-
 // Mutation returns the TimeEntryMutation object of the builder.
 func (_u *TimeEntryUpdateOne) Mutation() *TimeEntryMutation {
 	return _u.mutation
 }
 
-// ClearTicket clears the "ticket" edge to the Ticket entity.
-func (_u *TimeEntryUpdateOne) ClearTicket() *TimeEntryUpdateOne {
-	_u.mutation.ClearTicket()
+// ClearEmployee clears the "employee" edge to the Employee entity.
+func (_u *TimeEntryUpdateOne) ClearEmployee() *TimeEntryUpdateOne {
+	_u.mutation.ClearEmployee()
 	return _u
 }
 
-// ClearTechnician clears the "technician" edge to the User entity.
-func (_u *TimeEntryUpdateOne) ClearTechnician() *TimeEntryUpdateOne {
-	_u.mutation.ClearTechnician()
+// ClearTicket clears the "ticket" edge to the Ticket entity.
+func (_u *TimeEntryUpdateOne) ClearTicket() *TimeEntryUpdateOne {
+	_u.mutation.ClearTicket()
 	return _u
 }
 
@@ -563,11 +650,8 @@ func (_u *TimeEntryUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "TimeEntry.status": %w`, err)}
 		}
 	}
-	if _u.mutation.TicketCleared() && len(_u.mutation.TicketIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "TimeEntry.ticket"`)
-	}
-	if _u.mutation.TechnicianCleared() && len(_u.mutation.TechnicianIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "TimeEntry.technician"`)
+	if _u.mutation.EmployeeCleared() && len(_u.mutation.EmployeeIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "TimeEntry.employee"`)
 	}
 	return nil
 }
@@ -607,26 +691,38 @@ func (_u *TimeEntryUpdateOne) sqlSave(ctx context.Context) (_node *TimeEntry, er
 			}
 		}
 	}
-	if value, ok := _u.mutation.DurationHours(); ok {
-		_spec.SetField(timeentry.FieldDurationHours, field.TypeFloat64, value)
+	if value, ok := _u.mutation.StartTime(); ok {
+		_spec.SetField(timeentry.FieldStartTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.AddedDurationHours(); ok {
-		_spec.AddField(timeentry.FieldDurationHours, field.TypeFloat64, value)
+	if value, ok := _u.mutation.EndTime(); ok {
+		_spec.SetField(timeentry.FieldEndTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.Note(); ok {
-		_spec.SetField(timeentry.FieldNote, field.TypeString, value)
+	if _u.mutation.EndTimeCleared() {
+		_spec.ClearField(timeentry.FieldEndTime, field.TypeTime)
 	}
-	if value, ok := _u.mutation.StartedAt(); ok {
-		_spec.SetField(timeentry.FieldStartedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.TechnicianID(); ok {
+		_spec.SetField(timeentry.FieldTechnicianID, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.IsBillable(); ok {
-		_spec.SetField(timeentry.FieldIsBillable, field.TypeBool, value)
+	if value, ok := _u.mutation.AddedTechnicianID(); ok {
+		_spec.AddField(timeentry.FieldTechnicianID, field.TypeInt, value)
+	}
+	if _u.mutation.TechnicianIDCleared() {
+		_spec.ClearField(timeentry.FieldTechnicianID, field.TypeInt)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(timeentry.FieldStatus, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.WorkType(); ok {
 		_spec.SetField(timeentry.FieldWorkType, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DurationHours(); ok {
+		_spec.SetField(timeentry.FieldDurationHours, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedDurationHours(); ok {
+		_spec.AddField(timeentry.FieldDurationHours, field.TypeFloat64, value)
+	}
+	if _u.mutation.DurationHoursCleared() {
+		_spec.ClearField(timeentry.FieldDurationHours, field.TypeFloat64)
 	}
 	if value, ok := _u.mutation.InvoiceID(); ok {
 		_spec.SetField(timeentry.FieldInvoiceID, field.TypeInt, value)
@@ -637,10 +733,39 @@ func (_u *TimeEntryUpdateOne) sqlSave(ctx context.Context) (_node *TimeEntry, er
 	if _u.mutation.InvoiceIDCleared() {
 		_spec.ClearField(timeentry.FieldInvoiceID, field.TypeInt)
 	}
-	if _u.mutation.TicketCleared() {
+	if _u.mutation.EmployeeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
+			Table:   timeentry.EmployeeTable,
+			Columns: []string{timeentry.EmployeeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(employee.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EmployeeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   timeentry.EmployeeTable,
+			Columns: []string{timeentry.EmployeeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(employee.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TicketCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
 			Table:   timeentry.TicketTable,
 			Columns: []string{timeentry.TicketColumn},
 			Bidi:    false,
@@ -653,41 +778,12 @@ func (_u *TimeEntryUpdateOne) sqlSave(ctx context.Context) (_node *TimeEntry, er
 	if nodes := _u.mutation.TicketIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   timeentry.TicketTable,
 			Columns: []string{timeentry.TicketColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ticket.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.TechnicianCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   timeentry.TechnicianTable,
-			Columns: []string{timeentry.TechnicianColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TechnicianIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   timeentry.TechnicianTable,
-			Columns: []string{timeentry.TechnicianColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -4,11 +4,17 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
+	"sent/ent/legalhold"
 	"sent/ent/predicate"
 	"sent/ent/tenant"
+	"sent/ent/vaultcomment"
+	"sent/ent/vaultfavorite"
 	"sent/ent/vaultitem"
+	"sent/ent/vaultsharelink"
+	"sent/ent/vaultversion"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -19,13 +25,18 @@ import (
 // VaultItemQuery is the builder for querying VaultItem entities.
 type VaultItemQuery struct {
 	config
-	ctx        *QueryContext
-	order      []vaultitem.OrderOption
-	inters     []Interceptor
-	predicates []predicate.VaultItem
-	withTenant *TenantQuery
-	withFKs    bool
-	modifiers  []func(*sql.Selector)
+	ctx             *QueryContext
+	order           []vaultitem.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.VaultItem
+	withTenant      *TenantQuery
+	withShareLinks  *VaultShareLinkQuery
+	withVersions    *VaultVersionQuery
+	withComments    *VaultCommentQuery
+	withFavoritedBy *VaultFavoriteQuery
+	withLegalHolds  *LegalHoldQuery
+	withFKs         bool
+	modifiers       []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -77,6 +88,116 @@ func (_q *VaultItemQuery) QueryTenant() *TenantQuery {
 			sqlgraph.From(vaultitem.Table, vaultitem.FieldID, selector),
 			sqlgraph.To(tenant.Table, tenant.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, vaultitem.TenantTable, vaultitem.TenantColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryShareLinks chains the current query on the "share_links" edge.
+func (_q *VaultItemQuery) QueryShareLinks() *VaultShareLinkQuery {
+	query := (&VaultShareLinkClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vaultitem.Table, vaultitem.FieldID, selector),
+			sqlgraph.To(vaultsharelink.Table, vaultsharelink.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, vaultitem.ShareLinksTable, vaultitem.ShareLinksColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryVersions chains the current query on the "versions" edge.
+func (_q *VaultItemQuery) QueryVersions() *VaultVersionQuery {
+	query := (&VaultVersionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vaultitem.Table, vaultitem.FieldID, selector),
+			sqlgraph.To(vaultversion.Table, vaultversion.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, vaultitem.VersionsTable, vaultitem.VersionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryComments chains the current query on the "comments" edge.
+func (_q *VaultItemQuery) QueryComments() *VaultCommentQuery {
+	query := (&VaultCommentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vaultitem.Table, vaultitem.FieldID, selector),
+			sqlgraph.To(vaultcomment.Table, vaultcomment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, vaultitem.CommentsTable, vaultitem.CommentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFavoritedBy chains the current query on the "favorited_by" edge.
+func (_q *VaultItemQuery) QueryFavoritedBy() *VaultFavoriteQuery {
+	query := (&VaultFavoriteClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vaultitem.Table, vaultitem.FieldID, selector),
+			sqlgraph.To(vaultfavorite.Table, vaultfavorite.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, vaultitem.FavoritedByTable, vaultitem.FavoritedByColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLegalHolds chains the current query on the "legal_holds" edge.
+func (_q *VaultItemQuery) QueryLegalHolds() *LegalHoldQuery {
+	query := (&LegalHoldClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vaultitem.Table, vaultitem.FieldID, selector),
+			sqlgraph.To(legalhold.Table, legalhold.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, vaultitem.LegalHoldsTable, vaultitem.LegalHoldsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -271,12 +392,17 @@ func (_q *VaultItemQuery) Clone() *VaultItemQuery {
 		return nil
 	}
 	return &VaultItemQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]vaultitem.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.VaultItem{}, _q.predicates...),
-		withTenant: _q.withTenant.Clone(),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]vaultitem.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.VaultItem{}, _q.predicates...),
+		withTenant:      _q.withTenant.Clone(),
+		withShareLinks:  _q.withShareLinks.Clone(),
+		withVersions:    _q.withVersions.Clone(),
+		withComments:    _q.withComments.Clone(),
+		withFavoritedBy: _q.withFavoritedBy.Clone(),
+		withLegalHolds:  _q.withLegalHolds.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -292,6 +418,61 @@ func (_q *VaultItemQuery) WithTenant(opts ...func(*TenantQuery)) *VaultItemQuery
 		opt(query)
 	}
 	_q.withTenant = query
+	return _q
+}
+
+// WithShareLinks tells the query-builder to eager-load the nodes that are connected to
+// the "share_links" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *VaultItemQuery) WithShareLinks(opts ...func(*VaultShareLinkQuery)) *VaultItemQuery {
+	query := (&VaultShareLinkClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withShareLinks = query
+	return _q
+}
+
+// WithVersions tells the query-builder to eager-load the nodes that are connected to
+// the "versions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *VaultItemQuery) WithVersions(opts ...func(*VaultVersionQuery)) *VaultItemQuery {
+	query := (&VaultVersionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withVersions = query
+	return _q
+}
+
+// WithComments tells the query-builder to eager-load the nodes that are connected to
+// the "comments" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *VaultItemQuery) WithComments(opts ...func(*VaultCommentQuery)) *VaultItemQuery {
+	query := (&VaultCommentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withComments = query
+	return _q
+}
+
+// WithFavoritedBy tells the query-builder to eager-load the nodes that are connected to
+// the "favorited_by" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *VaultItemQuery) WithFavoritedBy(opts ...func(*VaultFavoriteQuery)) *VaultItemQuery {
+	query := (&VaultFavoriteClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withFavoritedBy = query
+	return _q
+}
+
+// WithLegalHolds tells the query-builder to eager-load the nodes that are connected to
+// the "legal_holds" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *VaultItemQuery) WithLegalHolds(opts ...func(*LegalHoldQuery)) *VaultItemQuery {
+	query := (&LegalHoldClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLegalHolds = query
 	return _q
 }
 
@@ -374,8 +555,13 @@ func (_q *VaultItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Va
 		nodes       = []*VaultItem{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [6]bool{
 			_q.withTenant != nil,
+			_q.withShareLinks != nil,
+			_q.withVersions != nil,
+			_q.withComments != nil,
+			_q.withFavoritedBy != nil,
+			_q.withLegalHolds != nil,
 		}
 	)
 	if _q.withTenant != nil {
@@ -411,6 +597,41 @@ func (_q *VaultItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Va
 			return nil, err
 		}
 	}
+	if query := _q.withShareLinks; query != nil {
+		if err := _q.loadShareLinks(ctx, query, nodes,
+			func(n *VaultItem) { n.Edges.ShareLinks = []*VaultShareLink{} },
+			func(n *VaultItem, e *VaultShareLink) { n.Edges.ShareLinks = append(n.Edges.ShareLinks, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withVersions; query != nil {
+		if err := _q.loadVersions(ctx, query, nodes,
+			func(n *VaultItem) { n.Edges.Versions = []*VaultVersion{} },
+			func(n *VaultItem, e *VaultVersion) { n.Edges.Versions = append(n.Edges.Versions, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withComments; query != nil {
+		if err := _q.loadComments(ctx, query, nodes,
+			func(n *VaultItem) { n.Edges.Comments = []*VaultComment{} },
+			func(n *VaultItem, e *VaultComment) { n.Edges.Comments = append(n.Edges.Comments, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withFavoritedBy; query != nil {
+		if err := _q.loadFavoritedBy(ctx, query, nodes,
+			func(n *VaultItem) { n.Edges.FavoritedBy = []*VaultFavorite{} },
+			func(n *VaultItem, e *VaultFavorite) { n.Edges.FavoritedBy = append(n.Edges.FavoritedBy, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLegalHolds; query != nil {
+		if err := _q.loadLegalHolds(ctx, query, nodes,
+			func(n *VaultItem) { n.Edges.LegalHolds = []*LegalHold{} },
+			func(n *VaultItem, e *LegalHold) { n.Edges.LegalHolds = append(n.Edges.LegalHolds, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -442,6 +663,191 @@ func (_q *VaultItemQuery) loadTenant(ctx context.Context, query *TenantQuery, no
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *VaultItemQuery) loadShareLinks(ctx context.Context, query *VaultShareLinkQuery, nodes []*VaultItem, init func(*VaultItem), assign func(*VaultItem, *VaultShareLink)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*VaultItem)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.VaultShareLink(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(vaultitem.ShareLinksColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.vault_item_share_links
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "vault_item_share_links" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "vault_item_share_links" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *VaultItemQuery) loadVersions(ctx context.Context, query *VaultVersionQuery, nodes []*VaultItem, init func(*VaultItem), assign func(*VaultItem, *VaultVersion)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*VaultItem)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.VaultVersion(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(vaultitem.VersionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.vault_item_versions
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "vault_item_versions" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "vault_item_versions" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *VaultItemQuery) loadComments(ctx context.Context, query *VaultCommentQuery, nodes []*VaultItem, init func(*VaultItem), assign func(*VaultItem, *VaultComment)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*VaultItem)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.VaultComment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(vaultitem.CommentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.vault_item_comments
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "vault_item_comments" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "vault_item_comments" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *VaultItemQuery) loadFavoritedBy(ctx context.Context, query *VaultFavoriteQuery, nodes []*VaultItem, init func(*VaultItem), assign func(*VaultItem, *VaultFavorite)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*VaultItem)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.VaultFavorite(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(vaultitem.FavoritedByColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.vault_item_favorited_by
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "vault_item_favorited_by" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "vault_item_favorited_by" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *VaultItemQuery) loadLegalHolds(ctx context.Context, query *LegalHoldQuery, nodes []*VaultItem, init func(*VaultItem), assign func(*VaultItem, *LegalHold)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*VaultItem)
+	nids := make(map[int]map[*VaultItem]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(vaultitem.LegalHoldsTable)
+		s.Join(joinT).On(s.C(legalhold.FieldID), joinT.C(vaultitem.LegalHoldsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(vaultitem.LegalHoldsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(vaultitem.LegalHoldsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*VaultItem]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*LegalHold](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "legal_holds" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
 		}
 	}
 	return nil

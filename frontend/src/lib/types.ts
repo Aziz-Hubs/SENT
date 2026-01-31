@@ -37,6 +37,43 @@ export interface Product {
     quantity: number;
     reserved: number;
     incoming: number;
+    hasVariants?: boolean;
+    variants?: ProductVariant[];
+    barcode?: string;
+    supplierName?: string;
+    categoryName?: string;
+    minStock?: number;
+    serialNumber?: string;
+    purchaseDate?: string;
+    purchasePrice?: number;
+    usefulLifeMonths?: number;
+    warrantyExpiresAt?: string;
+    isDisposed?: boolean;
+    currentValue?: number;
+    location?: string;
+}
+
+export interface ProductVariant {
+    id: number;
+    name: string;
+    sku: string;
+    priceAdjustment: number;
+    stock: number;
+}
+
+export interface Contact {
+    id: number;
+    name: string;
+    email: string;
+    phone: string;
+    type: string;
+    loyaltyPoints: number;
+    lifetimeValue: number;
+}
+
+export interface Payment {
+    method: "cash" | "card" | "other";
+    amount: number;
 }
 
 export interface StockMovement {
@@ -67,4 +104,65 @@ export interface TransactionDTO {
     total_amount: number;
     approval_status: string;
     reference: string;
+}
+
+export interface AuditLog {
+    id: number;
+    action: string;
+    entityType: string;
+    entityId: number;
+    userName: string;
+    details: string;
+    createdAt: string;
+}
+
+export interface MaintenanceSchedule {
+    id: number;
+    productId: number;
+    productName: string;
+    scheduledAt: string;
+    completedAt?: string;
+    status: "pending" | "completed" | "overdue";
+    notes: string;
+}
+
+export interface StockAlert {
+    id: number;
+    type: string;
+    message: string;
+    isRead: boolean;
+    createdAt: string;
+    productId?: number;
+}
+
+export interface PurchaseOrder {
+    id: number;
+    poNumber: string;
+    supplierId: number;
+    supplierName: string;
+    status: string;
+    orderDate: string;
+    expectedDate?: string;
+    totalAmount: number;
+    lines: PurchaseOrderLine[];
+}
+
+export interface PurchaseOrderLine {
+    id: number;
+    productId: number;
+    productName: string;
+    quantity: number;
+    unitCost: number;
+    receivedQty: number;
+}
+
+export interface InventoryCount {
+    id: number;
+    productId: number;
+    productName: string;
+    countedQty: number;
+    systemQty: number;
+    variance: number;
+    countedAt: string;
+    countedBy: string;
 }

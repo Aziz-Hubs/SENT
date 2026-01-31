@@ -11,8 +11,8 @@ import (
 	"sent/ent/remediationstep"
 	"sent/ent/tenant"
 	"sent/ent/ticket"
-	"sent/ent/timeentry"
 	"sent/ent/user"
+	"sent/ent/worklog"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -210,6 +210,38 @@ func (_u *TicketUpdate) ClearClaimLeaseExpiresAt() *TicketUpdate {
 	return _u
 }
 
+// SetDeepLink sets the "deep_link" field.
+func (_u *TicketUpdate) SetDeepLink(v string) *TicketUpdate {
+	_u.mutation.SetDeepLink(v)
+	return _u
+}
+
+// SetNillableDeepLink sets the "deep_link" field if the given value is not nil.
+func (_u *TicketUpdate) SetNillableDeepLink(v *string) *TicketUpdate {
+	if v != nil {
+		_u.SetDeepLink(*v)
+	}
+	return _u
+}
+
+// ClearDeepLink clears the value of the "deep_link" field.
+func (_u *TicketUpdate) ClearDeepLink() *TicketUpdate {
+	_u.mutation.ClearDeepLink()
+	return _u
+}
+
+// SetExecutionPlan sets the "execution_plan" field.
+func (_u *TicketUpdate) SetExecutionPlan(v map[string]interface{}) *TicketUpdate {
+	_u.mutation.SetExecutionPlan(v)
+	return _u
+}
+
+// ClearExecutionPlan clears the value of the "execution_plan" field.
+func (_u *TicketUpdate) ClearExecutionPlan() *TicketUpdate {
+	_u.mutation.ClearExecutionPlan()
+	return _u
+}
+
 // SetTenantID sets the "tenant" edge to the Tenant entity by ID.
 func (_u *TicketUpdate) SetTenantID(id int) *TicketUpdate {
 	_u.mutation.SetTenantID(id)
@@ -270,19 +302,19 @@ func (_u *TicketUpdate) SetAsset(v *Asset) *TicketUpdate {
 	return _u.SetAssetID(v.ID)
 }
 
-// AddTimeEntryIDs adds the "time_entries" edge to the TimeEntry entity by IDs.
-func (_u *TicketUpdate) AddTimeEntryIDs(ids ...int) *TicketUpdate {
-	_u.mutation.AddTimeEntryIDs(ids...)
+// AddWorkLogIDs adds the "work_logs" edge to the WorkLog entity by IDs.
+func (_u *TicketUpdate) AddWorkLogIDs(ids ...int) *TicketUpdate {
+	_u.mutation.AddWorkLogIDs(ids...)
 	return _u
 }
 
-// AddTimeEntries adds the "time_entries" edges to the TimeEntry entity.
-func (_u *TicketUpdate) AddTimeEntries(v ...*TimeEntry) *TicketUpdate {
+// AddWorkLogs adds the "work_logs" edges to the WorkLog entity.
+func (_u *TicketUpdate) AddWorkLogs(v ...*WorkLog) *TicketUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddTimeEntryIDs(ids...)
+	return _u.AddWorkLogIDs(ids...)
 }
 
 // AddRemediationStepIDs adds the "remediation_steps" edge to the RemediationStep entity by IDs.
@@ -329,25 +361,25 @@ func (_u *TicketUpdate) ClearAsset() *TicketUpdate {
 	return _u
 }
 
-// ClearTimeEntries clears all "time_entries" edges to the TimeEntry entity.
-func (_u *TicketUpdate) ClearTimeEntries() *TicketUpdate {
-	_u.mutation.ClearTimeEntries()
+// ClearWorkLogs clears all "work_logs" edges to the WorkLog entity.
+func (_u *TicketUpdate) ClearWorkLogs() *TicketUpdate {
+	_u.mutation.ClearWorkLogs()
 	return _u
 }
 
-// RemoveTimeEntryIDs removes the "time_entries" edge to TimeEntry entities by IDs.
-func (_u *TicketUpdate) RemoveTimeEntryIDs(ids ...int) *TicketUpdate {
-	_u.mutation.RemoveTimeEntryIDs(ids...)
+// RemoveWorkLogIDs removes the "work_logs" edge to WorkLog entities by IDs.
+func (_u *TicketUpdate) RemoveWorkLogIDs(ids ...int) *TicketUpdate {
+	_u.mutation.RemoveWorkLogIDs(ids...)
 	return _u
 }
 
-// RemoveTimeEntries removes "time_entries" edges to TimeEntry entities.
-func (_u *TicketUpdate) RemoveTimeEntries(v ...*TimeEntry) *TicketUpdate {
+// RemoveWorkLogs removes "work_logs" edges to WorkLog entities.
+func (_u *TicketUpdate) RemoveWorkLogs(v ...*WorkLog) *TicketUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveTimeEntryIDs(ids...)
+	return _u.RemoveWorkLogIDs(ids...)
 }
 
 // ClearRemediationSteps clears all "remediation_steps" edges to the RemediationStep entity.
@@ -494,6 +526,18 @@ func (_u *TicketUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.ClaimLeaseExpiresAtCleared() {
 		_spec.ClearField(ticket.FieldClaimLeaseExpiresAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.DeepLink(); ok {
+		_spec.SetField(ticket.FieldDeepLink, field.TypeString, value)
+	}
+	if _u.mutation.DeepLinkCleared() {
+		_spec.ClearField(ticket.FieldDeepLink, field.TypeString)
+	}
+	if value, ok := _u.mutation.ExecutionPlan(); ok {
+		_spec.SetField(ticket.FieldExecutionPlan, field.TypeJSON, value)
+	}
+	if _u.mutation.ExecutionPlanCleared() {
+		_spec.ClearField(ticket.FieldExecutionPlan, field.TypeJSON)
+	}
 	if _u.mutation.TenantCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -610,28 +654,28 @@ func (_u *TicketUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TimeEntriesCleared() {
+	if _u.mutation.WorkLogsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   ticket.TimeEntriesTable,
-			Columns: []string{ticket.TimeEntriesColumn},
+			Table:   ticket.WorkLogsTable,
+			Columns: []string{ticket.WorkLogsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(worklog.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTimeEntriesIDs(); len(nodes) > 0 && !_u.mutation.TimeEntriesCleared() {
+	if nodes := _u.mutation.RemovedWorkLogsIDs(); len(nodes) > 0 && !_u.mutation.WorkLogsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   ticket.TimeEntriesTable,
-			Columns: []string{ticket.TimeEntriesColumn},
+			Table:   ticket.WorkLogsTable,
+			Columns: []string{ticket.WorkLogsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(worklog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -639,15 +683,15 @@ func (_u *TicketUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TimeEntriesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.WorkLogsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   ticket.TimeEntriesTable,
-			Columns: []string{ticket.TimeEntriesColumn},
+			Table:   ticket.WorkLogsTable,
+			Columns: []string{ticket.WorkLogsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(worklog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -898,6 +942,38 @@ func (_u *TicketUpdateOne) ClearClaimLeaseExpiresAt() *TicketUpdateOne {
 	return _u
 }
 
+// SetDeepLink sets the "deep_link" field.
+func (_u *TicketUpdateOne) SetDeepLink(v string) *TicketUpdateOne {
+	_u.mutation.SetDeepLink(v)
+	return _u
+}
+
+// SetNillableDeepLink sets the "deep_link" field if the given value is not nil.
+func (_u *TicketUpdateOne) SetNillableDeepLink(v *string) *TicketUpdateOne {
+	if v != nil {
+		_u.SetDeepLink(*v)
+	}
+	return _u
+}
+
+// ClearDeepLink clears the value of the "deep_link" field.
+func (_u *TicketUpdateOne) ClearDeepLink() *TicketUpdateOne {
+	_u.mutation.ClearDeepLink()
+	return _u
+}
+
+// SetExecutionPlan sets the "execution_plan" field.
+func (_u *TicketUpdateOne) SetExecutionPlan(v map[string]interface{}) *TicketUpdateOne {
+	_u.mutation.SetExecutionPlan(v)
+	return _u
+}
+
+// ClearExecutionPlan clears the value of the "execution_plan" field.
+func (_u *TicketUpdateOne) ClearExecutionPlan() *TicketUpdateOne {
+	_u.mutation.ClearExecutionPlan()
+	return _u
+}
+
 // SetTenantID sets the "tenant" edge to the Tenant entity by ID.
 func (_u *TicketUpdateOne) SetTenantID(id int) *TicketUpdateOne {
 	_u.mutation.SetTenantID(id)
@@ -958,19 +1034,19 @@ func (_u *TicketUpdateOne) SetAsset(v *Asset) *TicketUpdateOne {
 	return _u.SetAssetID(v.ID)
 }
 
-// AddTimeEntryIDs adds the "time_entries" edge to the TimeEntry entity by IDs.
-func (_u *TicketUpdateOne) AddTimeEntryIDs(ids ...int) *TicketUpdateOne {
-	_u.mutation.AddTimeEntryIDs(ids...)
+// AddWorkLogIDs adds the "work_logs" edge to the WorkLog entity by IDs.
+func (_u *TicketUpdateOne) AddWorkLogIDs(ids ...int) *TicketUpdateOne {
+	_u.mutation.AddWorkLogIDs(ids...)
 	return _u
 }
 
-// AddTimeEntries adds the "time_entries" edges to the TimeEntry entity.
-func (_u *TicketUpdateOne) AddTimeEntries(v ...*TimeEntry) *TicketUpdateOne {
+// AddWorkLogs adds the "work_logs" edges to the WorkLog entity.
+func (_u *TicketUpdateOne) AddWorkLogs(v ...*WorkLog) *TicketUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddTimeEntryIDs(ids...)
+	return _u.AddWorkLogIDs(ids...)
 }
 
 // AddRemediationStepIDs adds the "remediation_steps" edge to the RemediationStep entity by IDs.
@@ -1017,25 +1093,25 @@ func (_u *TicketUpdateOne) ClearAsset() *TicketUpdateOne {
 	return _u
 }
 
-// ClearTimeEntries clears all "time_entries" edges to the TimeEntry entity.
-func (_u *TicketUpdateOne) ClearTimeEntries() *TicketUpdateOne {
-	_u.mutation.ClearTimeEntries()
+// ClearWorkLogs clears all "work_logs" edges to the WorkLog entity.
+func (_u *TicketUpdateOne) ClearWorkLogs() *TicketUpdateOne {
+	_u.mutation.ClearWorkLogs()
 	return _u
 }
 
-// RemoveTimeEntryIDs removes the "time_entries" edge to TimeEntry entities by IDs.
-func (_u *TicketUpdateOne) RemoveTimeEntryIDs(ids ...int) *TicketUpdateOne {
-	_u.mutation.RemoveTimeEntryIDs(ids...)
+// RemoveWorkLogIDs removes the "work_logs" edge to WorkLog entities by IDs.
+func (_u *TicketUpdateOne) RemoveWorkLogIDs(ids ...int) *TicketUpdateOne {
+	_u.mutation.RemoveWorkLogIDs(ids...)
 	return _u
 }
 
-// RemoveTimeEntries removes "time_entries" edges to TimeEntry entities.
-func (_u *TicketUpdateOne) RemoveTimeEntries(v ...*TimeEntry) *TicketUpdateOne {
+// RemoveWorkLogs removes "work_logs" edges to WorkLog entities.
+func (_u *TicketUpdateOne) RemoveWorkLogs(v ...*WorkLog) *TicketUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveTimeEntryIDs(ids...)
+	return _u.RemoveWorkLogIDs(ids...)
 }
 
 // ClearRemediationSteps clears all "remediation_steps" edges to the RemediationStep entity.
@@ -1212,6 +1288,18 @@ func (_u *TicketUpdateOne) sqlSave(ctx context.Context) (_node *Ticket, err erro
 	if _u.mutation.ClaimLeaseExpiresAtCleared() {
 		_spec.ClearField(ticket.FieldClaimLeaseExpiresAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.DeepLink(); ok {
+		_spec.SetField(ticket.FieldDeepLink, field.TypeString, value)
+	}
+	if _u.mutation.DeepLinkCleared() {
+		_spec.ClearField(ticket.FieldDeepLink, field.TypeString)
+	}
+	if value, ok := _u.mutation.ExecutionPlan(); ok {
+		_spec.SetField(ticket.FieldExecutionPlan, field.TypeJSON, value)
+	}
+	if _u.mutation.ExecutionPlanCleared() {
+		_spec.ClearField(ticket.FieldExecutionPlan, field.TypeJSON)
+	}
 	if _u.mutation.TenantCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -1328,28 +1416,28 @@ func (_u *TicketUpdateOne) sqlSave(ctx context.Context) (_node *Ticket, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TimeEntriesCleared() {
+	if _u.mutation.WorkLogsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   ticket.TimeEntriesTable,
-			Columns: []string{ticket.TimeEntriesColumn},
+			Table:   ticket.WorkLogsTable,
+			Columns: []string{ticket.WorkLogsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(worklog.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTimeEntriesIDs(); len(nodes) > 0 && !_u.mutation.TimeEntriesCleared() {
+	if nodes := _u.mutation.RemovedWorkLogsIDs(); len(nodes) > 0 && !_u.mutation.WorkLogsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   ticket.TimeEntriesTable,
-			Columns: []string{ticket.TimeEntriesColumn},
+			Table:   ticket.WorkLogsTable,
+			Columns: []string{ticket.WorkLogsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(worklog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1357,15 +1445,15 @@ func (_u *TicketUpdateOne) sqlSave(ctx context.Context) (_node *Ticket, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TimeEntriesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.WorkLogsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   ticket.TimeEntriesTable,
-			Columns: []string{ticket.TimeEntriesColumn},
+			Table:   ticket.WorkLogsTable,
+			Columns: []string{ticket.WorkLogsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(worklog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

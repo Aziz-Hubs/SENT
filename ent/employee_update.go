@@ -7,14 +7,18 @@ import (
 	"errors"
 	"fmt"
 	"sent/ent/account"
+	"sent/ent/assetassignment"
+	"sent/ent/benefitenrollment"
 	"sent/ent/compensationagreement"
 	"sent/ent/department"
 	"sent/ent/employee"
 	"sent/ent/goal"
+	"sent/ent/interview"
 	"sent/ent/performancereview"
 	"sent/ent/predicate"
 	"sent/ent/successionmap"
 	"sent/ent/tenant"
+	"sent/ent/timeentry"
 	"sent/ent/timeoffbalance"
 	"sent/ent/timeoffrequest"
 	"time"
@@ -454,6 +458,66 @@ func (_u *EmployeeUpdate) AddGoals(v ...*Goal) *EmployeeUpdate {
 	return _u.AddGoalIDs(ids...)
 }
 
+// AddAssetAssignmentIDs adds the "asset_assignments" edge to the AssetAssignment entity by IDs.
+func (_u *EmployeeUpdate) AddAssetAssignmentIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.AddAssetAssignmentIDs(ids...)
+	return _u
+}
+
+// AddAssetAssignments adds the "asset_assignments" edges to the AssetAssignment entity.
+func (_u *EmployeeUpdate) AddAssetAssignments(v ...*AssetAssignment) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddAssetAssignmentIDs(ids...)
+}
+
+// AddTimeEntryIDs adds the "time_entries" edge to the TimeEntry entity by IDs.
+func (_u *EmployeeUpdate) AddTimeEntryIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.AddTimeEntryIDs(ids...)
+	return _u
+}
+
+// AddTimeEntries adds the "time_entries" edges to the TimeEntry entity.
+func (_u *EmployeeUpdate) AddTimeEntries(v ...*TimeEntry) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTimeEntryIDs(ids...)
+}
+
+// AddConductedInterviewIDs adds the "conducted_interviews" edge to the Interview entity by IDs.
+func (_u *EmployeeUpdate) AddConductedInterviewIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.AddConductedInterviewIDs(ids...)
+	return _u
+}
+
+// AddConductedInterviews adds the "conducted_interviews" edges to the Interview entity.
+func (_u *EmployeeUpdate) AddConductedInterviews(v ...*Interview) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddConductedInterviewIDs(ids...)
+}
+
+// AddBenefitEnrollmentIDs adds the "benefit_enrollments" edge to the BenefitEnrollment entity by IDs.
+func (_u *EmployeeUpdate) AddBenefitEnrollmentIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.AddBenefitEnrollmentIDs(ids...)
+	return _u
+}
+
+// AddBenefitEnrollments adds the "benefit_enrollments" edges to the BenefitEnrollment entity.
+func (_u *EmployeeUpdate) AddBenefitEnrollments(v ...*BenefitEnrollment) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddBenefitEnrollmentIDs(ids...)
+}
+
 // Mutation returns the EmployeeMutation object of the builder.
 func (_u *EmployeeUpdate) Mutation() *EmployeeMutation {
 	return _u.mutation
@@ -691,6 +755,90 @@ func (_u *EmployeeUpdate) RemoveGoals(v ...*Goal) *EmployeeUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveGoalIDs(ids...)
+}
+
+// ClearAssetAssignments clears all "asset_assignments" edges to the AssetAssignment entity.
+func (_u *EmployeeUpdate) ClearAssetAssignments() *EmployeeUpdate {
+	_u.mutation.ClearAssetAssignments()
+	return _u
+}
+
+// RemoveAssetAssignmentIDs removes the "asset_assignments" edge to AssetAssignment entities by IDs.
+func (_u *EmployeeUpdate) RemoveAssetAssignmentIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.RemoveAssetAssignmentIDs(ids...)
+	return _u
+}
+
+// RemoveAssetAssignments removes "asset_assignments" edges to AssetAssignment entities.
+func (_u *EmployeeUpdate) RemoveAssetAssignments(v ...*AssetAssignment) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveAssetAssignmentIDs(ids...)
+}
+
+// ClearTimeEntries clears all "time_entries" edges to the TimeEntry entity.
+func (_u *EmployeeUpdate) ClearTimeEntries() *EmployeeUpdate {
+	_u.mutation.ClearTimeEntries()
+	return _u
+}
+
+// RemoveTimeEntryIDs removes the "time_entries" edge to TimeEntry entities by IDs.
+func (_u *EmployeeUpdate) RemoveTimeEntryIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.RemoveTimeEntryIDs(ids...)
+	return _u
+}
+
+// RemoveTimeEntries removes "time_entries" edges to TimeEntry entities.
+func (_u *EmployeeUpdate) RemoveTimeEntries(v ...*TimeEntry) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTimeEntryIDs(ids...)
+}
+
+// ClearConductedInterviews clears all "conducted_interviews" edges to the Interview entity.
+func (_u *EmployeeUpdate) ClearConductedInterviews() *EmployeeUpdate {
+	_u.mutation.ClearConductedInterviews()
+	return _u
+}
+
+// RemoveConductedInterviewIDs removes the "conducted_interviews" edge to Interview entities by IDs.
+func (_u *EmployeeUpdate) RemoveConductedInterviewIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.RemoveConductedInterviewIDs(ids...)
+	return _u
+}
+
+// RemoveConductedInterviews removes "conducted_interviews" edges to Interview entities.
+func (_u *EmployeeUpdate) RemoveConductedInterviews(v ...*Interview) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveConductedInterviewIDs(ids...)
+}
+
+// ClearBenefitEnrollments clears all "benefit_enrollments" edges to the BenefitEnrollment entity.
+func (_u *EmployeeUpdate) ClearBenefitEnrollments() *EmployeeUpdate {
+	_u.mutation.ClearBenefitEnrollments()
+	return _u
+}
+
+// RemoveBenefitEnrollmentIDs removes the "benefit_enrollments" edge to BenefitEnrollment entities by IDs.
+func (_u *EmployeeUpdate) RemoveBenefitEnrollmentIDs(ids ...int) *EmployeeUpdate {
+	_u.mutation.RemoveBenefitEnrollmentIDs(ids...)
+	return _u
+}
+
+// RemoveBenefitEnrollments removes "benefit_enrollments" edges to BenefitEnrollment entities.
+func (_u *EmployeeUpdate) RemoveBenefitEnrollments(v ...*BenefitEnrollment) *EmployeeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveBenefitEnrollmentIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1377,6 +1525,186 @@ func (_u *EmployeeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.AssetAssignmentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.AssetAssignmentsTable,
+			Columns: []string{employee.AssetAssignmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(assetassignment.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedAssetAssignmentsIDs(); len(nodes) > 0 && !_u.mutation.AssetAssignmentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.AssetAssignmentsTable,
+			Columns: []string{employee.AssetAssignmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(assetassignment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.AssetAssignmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.AssetAssignmentsTable,
+			Columns: []string{employee.AssetAssignmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(assetassignment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TimeEntriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeEntriesTable,
+			Columns: []string{employee.TimeEntriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTimeEntriesIDs(); len(nodes) > 0 && !_u.mutation.TimeEntriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeEntriesTable,
+			Columns: []string{employee.TimeEntriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TimeEntriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeEntriesTable,
+			Columns: []string{employee.TimeEntriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ConductedInterviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   employee.ConductedInterviewsTable,
+			Columns: employee.ConductedInterviewsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(interview.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedConductedInterviewsIDs(); len(nodes) > 0 && !_u.mutation.ConductedInterviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   employee.ConductedInterviewsTable,
+			Columns: employee.ConductedInterviewsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(interview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ConductedInterviewsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   employee.ConductedInterviewsTable,
+			Columns: employee.ConductedInterviewsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(interview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.BenefitEnrollmentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.BenefitEnrollmentsTable,
+			Columns: []string{employee.BenefitEnrollmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(benefitenrollment.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedBenefitEnrollmentsIDs(); len(nodes) > 0 && !_u.mutation.BenefitEnrollmentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.BenefitEnrollmentsTable,
+			Columns: []string{employee.BenefitEnrollmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(benefitenrollment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.BenefitEnrollmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.BenefitEnrollmentsTable,
+			Columns: []string{employee.BenefitEnrollmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(benefitenrollment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -1815,6 +2143,66 @@ func (_u *EmployeeUpdateOne) AddGoals(v ...*Goal) *EmployeeUpdateOne {
 	return _u.AddGoalIDs(ids...)
 }
 
+// AddAssetAssignmentIDs adds the "asset_assignments" edge to the AssetAssignment entity by IDs.
+func (_u *EmployeeUpdateOne) AddAssetAssignmentIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.AddAssetAssignmentIDs(ids...)
+	return _u
+}
+
+// AddAssetAssignments adds the "asset_assignments" edges to the AssetAssignment entity.
+func (_u *EmployeeUpdateOne) AddAssetAssignments(v ...*AssetAssignment) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddAssetAssignmentIDs(ids...)
+}
+
+// AddTimeEntryIDs adds the "time_entries" edge to the TimeEntry entity by IDs.
+func (_u *EmployeeUpdateOne) AddTimeEntryIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.AddTimeEntryIDs(ids...)
+	return _u
+}
+
+// AddTimeEntries adds the "time_entries" edges to the TimeEntry entity.
+func (_u *EmployeeUpdateOne) AddTimeEntries(v ...*TimeEntry) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTimeEntryIDs(ids...)
+}
+
+// AddConductedInterviewIDs adds the "conducted_interviews" edge to the Interview entity by IDs.
+func (_u *EmployeeUpdateOne) AddConductedInterviewIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.AddConductedInterviewIDs(ids...)
+	return _u
+}
+
+// AddConductedInterviews adds the "conducted_interviews" edges to the Interview entity.
+func (_u *EmployeeUpdateOne) AddConductedInterviews(v ...*Interview) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddConductedInterviewIDs(ids...)
+}
+
+// AddBenefitEnrollmentIDs adds the "benefit_enrollments" edge to the BenefitEnrollment entity by IDs.
+func (_u *EmployeeUpdateOne) AddBenefitEnrollmentIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.AddBenefitEnrollmentIDs(ids...)
+	return _u
+}
+
+// AddBenefitEnrollments adds the "benefit_enrollments" edges to the BenefitEnrollment entity.
+func (_u *EmployeeUpdateOne) AddBenefitEnrollments(v ...*BenefitEnrollment) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddBenefitEnrollmentIDs(ids...)
+}
+
 // Mutation returns the EmployeeMutation object of the builder.
 func (_u *EmployeeUpdateOne) Mutation() *EmployeeMutation {
 	return _u.mutation
@@ -2052,6 +2440,90 @@ func (_u *EmployeeUpdateOne) RemoveGoals(v ...*Goal) *EmployeeUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveGoalIDs(ids...)
+}
+
+// ClearAssetAssignments clears all "asset_assignments" edges to the AssetAssignment entity.
+func (_u *EmployeeUpdateOne) ClearAssetAssignments() *EmployeeUpdateOne {
+	_u.mutation.ClearAssetAssignments()
+	return _u
+}
+
+// RemoveAssetAssignmentIDs removes the "asset_assignments" edge to AssetAssignment entities by IDs.
+func (_u *EmployeeUpdateOne) RemoveAssetAssignmentIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.RemoveAssetAssignmentIDs(ids...)
+	return _u
+}
+
+// RemoveAssetAssignments removes "asset_assignments" edges to AssetAssignment entities.
+func (_u *EmployeeUpdateOne) RemoveAssetAssignments(v ...*AssetAssignment) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveAssetAssignmentIDs(ids...)
+}
+
+// ClearTimeEntries clears all "time_entries" edges to the TimeEntry entity.
+func (_u *EmployeeUpdateOne) ClearTimeEntries() *EmployeeUpdateOne {
+	_u.mutation.ClearTimeEntries()
+	return _u
+}
+
+// RemoveTimeEntryIDs removes the "time_entries" edge to TimeEntry entities by IDs.
+func (_u *EmployeeUpdateOne) RemoveTimeEntryIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.RemoveTimeEntryIDs(ids...)
+	return _u
+}
+
+// RemoveTimeEntries removes "time_entries" edges to TimeEntry entities.
+func (_u *EmployeeUpdateOne) RemoveTimeEntries(v ...*TimeEntry) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTimeEntryIDs(ids...)
+}
+
+// ClearConductedInterviews clears all "conducted_interviews" edges to the Interview entity.
+func (_u *EmployeeUpdateOne) ClearConductedInterviews() *EmployeeUpdateOne {
+	_u.mutation.ClearConductedInterviews()
+	return _u
+}
+
+// RemoveConductedInterviewIDs removes the "conducted_interviews" edge to Interview entities by IDs.
+func (_u *EmployeeUpdateOne) RemoveConductedInterviewIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.RemoveConductedInterviewIDs(ids...)
+	return _u
+}
+
+// RemoveConductedInterviews removes "conducted_interviews" edges to Interview entities.
+func (_u *EmployeeUpdateOne) RemoveConductedInterviews(v ...*Interview) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveConductedInterviewIDs(ids...)
+}
+
+// ClearBenefitEnrollments clears all "benefit_enrollments" edges to the BenefitEnrollment entity.
+func (_u *EmployeeUpdateOne) ClearBenefitEnrollments() *EmployeeUpdateOne {
+	_u.mutation.ClearBenefitEnrollments()
+	return _u
+}
+
+// RemoveBenefitEnrollmentIDs removes the "benefit_enrollments" edge to BenefitEnrollment entities by IDs.
+func (_u *EmployeeUpdateOne) RemoveBenefitEnrollmentIDs(ids ...int) *EmployeeUpdateOne {
+	_u.mutation.RemoveBenefitEnrollmentIDs(ids...)
+	return _u
+}
+
+// RemoveBenefitEnrollments removes "benefit_enrollments" edges to BenefitEnrollment entities.
+func (_u *EmployeeUpdateOne) RemoveBenefitEnrollments(v ...*BenefitEnrollment) *EmployeeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveBenefitEnrollmentIDs(ids...)
 }
 
 // Where appends a list predicates to the EmployeeUpdate builder.
@@ -2761,6 +3233,186 @@ func (_u *EmployeeUpdateOne) sqlSave(ctx context.Context) (_node *Employee, err 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(goal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.AssetAssignmentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.AssetAssignmentsTable,
+			Columns: []string{employee.AssetAssignmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(assetassignment.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedAssetAssignmentsIDs(); len(nodes) > 0 && !_u.mutation.AssetAssignmentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.AssetAssignmentsTable,
+			Columns: []string{employee.AssetAssignmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(assetassignment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.AssetAssignmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.AssetAssignmentsTable,
+			Columns: []string{employee.AssetAssignmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(assetassignment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TimeEntriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeEntriesTable,
+			Columns: []string{employee.TimeEntriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTimeEntriesIDs(); len(nodes) > 0 && !_u.mutation.TimeEntriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeEntriesTable,
+			Columns: []string{employee.TimeEntriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TimeEntriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.TimeEntriesTable,
+			Columns: []string{employee.TimeEntriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ConductedInterviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   employee.ConductedInterviewsTable,
+			Columns: employee.ConductedInterviewsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(interview.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedConductedInterviewsIDs(); len(nodes) > 0 && !_u.mutation.ConductedInterviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   employee.ConductedInterviewsTable,
+			Columns: employee.ConductedInterviewsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(interview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ConductedInterviewsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   employee.ConductedInterviewsTable,
+			Columns: employee.ConductedInterviewsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(interview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.BenefitEnrollmentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.BenefitEnrollmentsTable,
+			Columns: []string{employee.BenefitEnrollmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(benefitenrollment.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedBenefitEnrollmentsIDs(); len(nodes) > 0 && !_u.mutation.BenefitEnrollmentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.BenefitEnrollmentsTable,
+			Columns: []string{employee.BenefitEnrollmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(benefitenrollment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.BenefitEnrollmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   employee.BenefitEnrollmentsTable,
+			Columns: []string{employee.BenefitEnrollmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(benefitenrollment.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

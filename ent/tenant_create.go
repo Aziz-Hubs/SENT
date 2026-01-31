@@ -8,13 +8,20 @@ import (
 	"fmt"
 	"sent/ent/account"
 	"sent/ent/agent"
+	"sent/ent/application"
 	"sent/ent/asset"
+	"sent/ent/assetassignment"
 	"sent/ent/assettype"
 	"sent/ent/auditlog"
+	"sent/ent/benefitenrollment"
+	"sent/ent/benefitplan"
 	"sent/ent/budgetforecast"
 	"sent/ent/calllog"
 	"sent/ent/camera"
+	"sent/ent/candidate"
+	"sent/ent/category"
 	"sent/ent/compensationagreement"
+	"sent/ent/contact"
 	"sent/ent/contract"
 	"sent/ent/credential"
 	"sent/ent/department"
@@ -23,11 +30,16 @@ import (
 	"sent/ent/employee"
 	"sent/ent/goal"
 	"sent/ent/healthscoresnapshot"
+	"sent/ent/interview"
+	"sent/ent/inventorycount"
 	"sent/ent/inventoryreservation"
 	"sent/ent/ivrflow"
 	"sent/ent/job"
+	"sent/ent/jobposting"
 	"sent/ent/journalentry"
 	"sent/ent/ledgerentry"
+	"sent/ent/legalhold"
+	"sent/ent/maintenanceschedule"
 	"sent/ent/networkbackup"
 	"sent/ent/networkdevice"
 	"sent/ent/networklink"
@@ -37,8 +49,10 @@ import (
 	"sent/ent/performancereview"
 	"sent/ent/permission"
 	"sent/ent/product"
+	"sent/ent/purchaseorder"
 	"sent/ent/recording"
 	"sent/ent/recurringinvoice"
+	"sent/ent/retentionpolicy"
 	"sent/ent/reviewcycle"
 	"sent/ent/saasapp"
 	"sent/ent/saasfilter"
@@ -47,9 +61,12 @@ import (
 	"sent/ent/script"
 	"sent/ent/servicerate"
 	"sent/ent/sop"
+	"sent/ent/stockalert"
+	"sent/ent/stockauditlog"
 	"sent/ent/stockmovement"
 	"sent/ent/strategicroadmap"
 	"sent/ent/successionmap"
+	"sent/ent/supplier"
 	"sent/ent/tenant"
 	"sent/ent/ticket"
 	"sent/ent/timeoffbalance"
@@ -58,7 +75,10 @@ import (
 	"sent/ent/transaction"
 	"sent/ent/user"
 	"sent/ent/vaultitem"
+	"sent/ent/vaultsharelink"
+	"sent/ent/vaulttemplate"
 	"sent/ent/voicemail"
+	"sent/ent/warehouse"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -611,6 +631,21 @@ func (_c *TenantCreate) AddVaultItems(v ...*VaultItem) *TenantCreate {
 	return _c.AddVaultItemIDs(ids...)
 }
 
+// AddVaultShareLinkIDs adds the "vault_share_links" edge to the VaultShareLink entity by IDs.
+func (_c *TenantCreate) AddVaultShareLinkIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddVaultShareLinkIDs(ids...)
+	return _c
+}
+
+// AddVaultShareLinks adds the "vault_share_links" edges to the VaultShareLink entity.
+func (_c *TenantCreate) AddVaultShareLinks(v ...*VaultShareLink) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddVaultShareLinkIDs(ids...)
+}
+
 // AddJournalEntryIDs adds the "journal_entries" edge to the JournalEntry entity by IDs.
 func (_c *TenantCreate) AddJournalEntryIDs(ids ...int) *TenantCreate {
 	_c.mutation.AddJournalEntryIDs(ids...)
@@ -958,6 +993,291 @@ func (_c *TenantCreate) AddGoals(v ...*Goal) *TenantCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddGoalIDs(ids...)
+}
+
+// AddSupplierIDs adds the "suppliers" edge to the Supplier entity by IDs.
+func (_c *TenantCreate) AddSupplierIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddSupplierIDs(ids...)
+	return _c
+}
+
+// AddSuppliers adds the "suppliers" edges to the Supplier entity.
+func (_c *TenantCreate) AddSuppliers(v ...*Supplier) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSupplierIDs(ids...)
+}
+
+// AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
+func (_c *TenantCreate) AddCategoryIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddCategoryIDs(ids...)
+	return _c
+}
+
+// AddCategories adds the "categories" edges to the Category entity.
+func (_c *TenantCreate) AddCategories(v ...*Category) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCategoryIDs(ids...)
+}
+
+// AddWarehouseIDs adds the "warehouses" edge to the Warehouse entity by IDs.
+func (_c *TenantCreate) AddWarehouseIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddWarehouseIDs(ids...)
+	return _c
+}
+
+// AddWarehouses adds the "warehouses" edges to the Warehouse entity.
+func (_c *TenantCreate) AddWarehouses(v ...*Warehouse) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddWarehouseIDs(ids...)
+}
+
+// AddAssetAssignmentIDs adds the "asset_assignments" edge to the AssetAssignment entity by IDs.
+func (_c *TenantCreate) AddAssetAssignmentIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddAssetAssignmentIDs(ids...)
+	return _c
+}
+
+// AddAssetAssignments adds the "asset_assignments" edges to the AssetAssignment entity.
+func (_c *TenantCreate) AddAssetAssignments(v ...*AssetAssignment) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddAssetAssignmentIDs(ids...)
+}
+
+// AddContactIDs adds the "contacts" edge to the Contact entity by IDs.
+func (_c *TenantCreate) AddContactIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddContactIDs(ids...)
+	return _c
+}
+
+// AddContacts adds the "contacts" edges to the Contact entity.
+func (_c *TenantCreate) AddContacts(v ...*Contact) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddContactIDs(ids...)
+}
+
+// AddLegalHoldIDs adds the "legal_holds" edge to the LegalHold entity by IDs.
+func (_c *TenantCreate) AddLegalHoldIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddLegalHoldIDs(ids...)
+	return _c
+}
+
+// AddLegalHolds adds the "legal_holds" edges to the LegalHold entity.
+func (_c *TenantCreate) AddLegalHolds(v ...*LegalHold) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLegalHoldIDs(ids...)
+}
+
+// AddRetentionPolicyIDs adds the "retention_policies" edge to the RetentionPolicy entity by IDs.
+func (_c *TenantCreate) AddRetentionPolicyIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddRetentionPolicyIDs(ids...)
+	return _c
+}
+
+// AddRetentionPolicies adds the "retention_policies" edges to the RetentionPolicy entity.
+func (_c *TenantCreate) AddRetentionPolicies(v ...*RetentionPolicy) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddRetentionPolicyIDs(ids...)
+}
+
+// AddVaultTemplateIDs adds the "vault_templates" edge to the VaultTemplate entity by IDs.
+func (_c *TenantCreate) AddVaultTemplateIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddVaultTemplateIDs(ids...)
+	return _c
+}
+
+// AddVaultTemplates adds the "vault_templates" edges to the VaultTemplate entity.
+func (_c *TenantCreate) AddVaultTemplates(v ...*VaultTemplate) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddVaultTemplateIDs(ids...)
+}
+
+// AddStockAuditLogIDs adds the "stock_audit_logs" edge to the StockAuditLog entity by IDs.
+func (_c *TenantCreate) AddStockAuditLogIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddStockAuditLogIDs(ids...)
+	return _c
+}
+
+// AddStockAuditLogs adds the "stock_audit_logs" edges to the StockAuditLog entity.
+func (_c *TenantCreate) AddStockAuditLogs(v ...*StockAuditLog) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddStockAuditLogIDs(ids...)
+}
+
+// AddMaintenanceScheduleIDs adds the "maintenance_schedules" edge to the MaintenanceSchedule entity by IDs.
+func (_c *TenantCreate) AddMaintenanceScheduleIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddMaintenanceScheduleIDs(ids...)
+	return _c
+}
+
+// AddMaintenanceSchedules adds the "maintenance_schedules" edges to the MaintenanceSchedule entity.
+func (_c *TenantCreate) AddMaintenanceSchedules(v ...*MaintenanceSchedule) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddMaintenanceScheduleIDs(ids...)
+}
+
+// AddStockAlertIDs adds the "stock_alerts" edge to the StockAlert entity by IDs.
+func (_c *TenantCreate) AddStockAlertIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddStockAlertIDs(ids...)
+	return _c
+}
+
+// AddStockAlerts adds the "stock_alerts" edges to the StockAlert entity.
+func (_c *TenantCreate) AddStockAlerts(v ...*StockAlert) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddStockAlertIDs(ids...)
+}
+
+// AddPurchaseOrderIDs adds the "purchase_orders" edge to the PurchaseOrder entity by IDs.
+func (_c *TenantCreate) AddPurchaseOrderIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddPurchaseOrderIDs(ids...)
+	return _c
+}
+
+// AddPurchaseOrders adds the "purchase_orders" edges to the PurchaseOrder entity.
+func (_c *TenantCreate) AddPurchaseOrders(v ...*PurchaseOrder) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddPurchaseOrderIDs(ids...)
+}
+
+// AddInventoryCountIDs adds the "inventory_counts" edge to the InventoryCount entity by IDs.
+func (_c *TenantCreate) AddInventoryCountIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddInventoryCountIDs(ids...)
+	return _c
+}
+
+// AddInventoryCounts adds the "inventory_counts" edges to the InventoryCount entity.
+func (_c *TenantCreate) AddInventoryCounts(v ...*InventoryCount) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddInventoryCountIDs(ids...)
+}
+
+// AddJobPostingIDs adds the "job_postings" edge to the JobPosting entity by IDs.
+func (_c *TenantCreate) AddJobPostingIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddJobPostingIDs(ids...)
+	return _c
+}
+
+// AddJobPostings adds the "job_postings" edges to the JobPosting entity.
+func (_c *TenantCreate) AddJobPostings(v ...*JobPosting) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddJobPostingIDs(ids...)
+}
+
+// AddCandidateIDs adds the "candidates" edge to the Candidate entity by IDs.
+func (_c *TenantCreate) AddCandidateIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddCandidateIDs(ids...)
+	return _c
+}
+
+// AddCandidates adds the "candidates" edges to the Candidate entity.
+func (_c *TenantCreate) AddCandidates(v ...*Candidate) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCandidateIDs(ids...)
+}
+
+// AddApplicationIDs adds the "applications" edge to the Application entity by IDs.
+func (_c *TenantCreate) AddApplicationIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddApplicationIDs(ids...)
+	return _c
+}
+
+// AddApplications adds the "applications" edges to the Application entity.
+func (_c *TenantCreate) AddApplications(v ...*Application) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddApplicationIDs(ids...)
+}
+
+// AddInterviewIDs adds the "interviews" edge to the Interview entity by IDs.
+func (_c *TenantCreate) AddInterviewIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddInterviewIDs(ids...)
+	return _c
+}
+
+// AddInterviews adds the "interviews" edges to the Interview entity.
+func (_c *TenantCreate) AddInterviews(v ...*Interview) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddInterviewIDs(ids...)
+}
+
+// AddBenefitPlanIDs adds the "benefit_plans" edge to the BenefitPlan entity by IDs.
+func (_c *TenantCreate) AddBenefitPlanIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddBenefitPlanIDs(ids...)
+	return _c
+}
+
+// AddBenefitPlans adds the "benefit_plans" edges to the BenefitPlan entity.
+func (_c *TenantCreate) AddBenefitPlans(v ...*BenefitPlan) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddBenefitPlanIDs(ids...)
+}
+
+// AddBenefitEnrollmentIDs adds the "benefit_enrollments" edge to the BenefitEnrollment entity by IDs.
+func (_c *TenantCreate) AddBenefitEnrollmentIDs(ids ...int) *TenantCreate {
+	_c.mutation.AddBenefitEnrollmentIDs(ids...)
+	return _c
+}
+
+// AddBenefitEnrollments adds the "benefit_enrollments" edges to the BenefitEnrollment entity.
+func (_c *TenantCreate) AddBenefitEnrollments(v ...*BenefitEnrollment) *TenantCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddBenefitEnrollmentIDs(ids...)
 }
 
 // Mutation returns the TenantMutation object of the builder.
@@ -1585,6 +1905,22 @@ func (_c *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := _c.mutation.VaultShareLinksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.VaultShareLinksTable,
+			Columns: []string{tenant.VaultShareLinksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vaultsharelink.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := _c.mutation.JournalEntriesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -1947,6 +2283,310 @@ func (_c *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(goal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SuppliersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.SuppliersTable,
+			Columns: []string{tenant.SuppliersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(supplier.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CategoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.CategoriesTable,
+			Columns: []string{tenant.CategoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.WarehousesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.WarehousesTable,
+			Columns: []string{tenant.WarehousesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(warehouse.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.AssetAssignmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.AssetAssignmentsTable,
+			Columns: []string{tenant.AssetAssignmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(assetassignment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ContactsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.ContactsTable,
+			Columns: []string{tenant.ContactsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(contact.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LegalHoldsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.LegalHoldsTable,
+			Columns: []string{tenant.LegalHoldsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(legalhold.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.RetentionPoliciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.RetentionPoliciesTable,
+			Columns: []string{tenant.RetentionPoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(retentionpolicy.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.VaultTemplatesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.VaultTemplatesTable,
+			Columns: []string{tenant.VaultTemplatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vaulttemplate.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.StockAuditLogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.StockAuditLogsTable,
+			Columns: []string{tenant.StockAuditLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stockauditlog.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.MaintenanceSchedulesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.MaintenanceSchedulesTable,
+			Columns: []string{tenant.MaintenanceSchedulesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(maintenanceschedule.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.StockAlertsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.StockAlertsTable,
+			Columns: []string{tenant.StockAlertsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stockalert.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.PurchaseOrdersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.PurchaseOrdersTable,
+			Columns: []string{tenant.PurchaseOrdersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(purchaseorder.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.InventoryCountsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.InventoryCountsTable,
+			Columns: []string{tenant.InventoryCountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(inventorycount.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.JobPostingsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.JobPostingsTable,
+			Columns: []string{tenant.JobPostingsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(jobposting.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CandidatesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.CandidatesTable,
+			Columns: []string{tenant.CandidatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(candidate.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ApplicationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.ApplicationsTable,
+			Columns: []string{tenant.ApplicationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.InterviewsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.InterviewsTable,
+			Columns: []string{tenant.InterviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(interview.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.BenefitPlansIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.BenefitPlansTable,
+			Columns: []string{tenant.BenefitPlansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(benefitplan.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.BenefitEnrollmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.BenefitEnrollmentsTable,
+			Columns: []string{tenant.BenefitEnrollmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(benefitenrollment.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

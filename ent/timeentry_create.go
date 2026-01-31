@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sent/ent/employee"
 	"sent/ent/ticket"
 	"sent/ent/timeentry"
-	"sent/ent/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -22,42 +22,72 @@ type TimeEntryCreate struct {
 	hooks    []Hook
 }
 
-// SetDurationHours sets the "duration_hours" field.
-func (_c *TimeEntryCreate) SetDurationHours(v float64) *TimeEntryCreate {
-	_c.mutation.SetDurationHours(v)
+// SetStartTime sets the "start_time" field.
+func (_c *TimeEntryCreate) SetStartTime(v time.Time) *TimeEntryCreate {
+	_c.mutation.SetStartTime(v)
 	return _c
 }
 
-// SetNote sets the "note" field.
-func (_c *TimeEntryCreate) SetNote(v string) *TimeEntryCreate {
-	_c.mutation.SetNote(v)
-	return _c
-}
-
-// SetStartedAt sets the "started_at" field.
-func (_c *TimeEntryCreate) SetStartedAt(v time.Time) *TimeEntryCreate {
-	_c.mutation.SetStartedAt(v)
-	return _c
-}
-
-// SetNillableStartedAt sets the "started_at" field if the given value is not nil.
-func (_c *TimeEntryCreate) SetNillableStartedAt(v *time.Time) *TimeEntryCreate {
+// SetNillableStartTime sets the "start_time" field if the given value is not nil.
+func (_c *TimeEntryCreate) SetNillableStartTime(v *time.Time) *TimeEntryCreate {
 	if v != nil {
-		_c.SetStartedAt(*v)
+		_c.SetStartTime(*v)
 	}
 	return _c
 }
 
-// SetIsBillable sets the "is_billable" field.
-func (_c *TimeEntryCreate) SetIsBillable(v bool) *TimeEntryCreate {
-	_c.mutation.SetIsBillable(v)
+// SetEndTime sets the "end_time" field.
+func (_c *TimeEntryCreate) SetEndTime(v time.Time) *TimeEntryCreate {
+	_c.mutation.SetEndTime(v)
 	return _c
 }
 
-// SetNillableIsBillable sets the "is_billable" field if the given value is not nil.
-func (_c *TimeEntryCreate) SetNillableIsBillable(v *bool) *TimeEntryCreate {
+// SetNillableEndTime sets the "end_time" field if the given value is not nil.
+func (_c *TimeEntryCreate) SetNillableEndTime(v *time.Time) *TimeEntryCreate {
 	if v != nil {
-		_c.SetIsBillable(*v)
+		_c.SetEndTime(*v)
+	}
+	return _c
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (_c *TimeEntryCreate) SetCreatedAt(v time.Time) *TimeEntryCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (_c *TimeEntryCreate) SetNillableCreatedAt(v *time.Time) *TimeEntryCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
+	}
+	return _c
+}
+
+// SetTicketID sets the "ticket_id" field.
+func (_c *TimeEntryCreate) SetTicketID(v int) *TimeEntryCreate {
+	_c.mutation.SetTicketID(v)
+	return _c
+}
+
+// SetNillableTicketID sets the "ticket_id" field if the given value is not nil.
+func (_c *TimeEntryCreate) SetNillableTicketID(v *int) *TimeEntryCreate {
+	if v != nil {
+		_c.SetTicketID(*v)
+	}
+	return _c
+}
+
+// SetTechnicianID sets the "technician_id" field.
+func (_c *TimeEntryCreate) SetTechnicianID(v int) *TimeEntryCreate {
+	_c.mutation.SetTechnicianID(v)
+	return _c
+}
+
+// SetNillableTechnicianID sets the "technician_id" field if the given value is not nil.
+func (_c *TimeEntryCreate) SetNillableTechnicianID(v *int) *TimeEntryCreate {
+	if v != nil {
+		_c.SetTechnicianID(*v)
 	}
 	return _c
 }
@@ -90,6 +120,20 @@ func (_c *TimeEntryCreate) SetNillableWorkType(v *string) *TimeEntryCreate {
 	return _c
 }
 
+// SetDurationHours sets the "duration_hours" field.
+func (_c *TimeEntryCreate) SetDurationHours(v float64) *TimeEntryCreate {
+	_c.mutation.SetDurationHours(v)
+	return _c
+}
+
+// SetNillableDurationHours sets the "duration_hours" field if the given value is not nil.
+func (_c *TimeEntryCreate) SetNillableDurationHours(v *float64) *TimeEntryCreate {
+	if v != nil {
+		_c.SetDurationHours(*v)
+	}
+	return _c
+}
+
 // SetInvoiceID sets the "invoice_id" field.
 func (_c *TimeEntryCreate) SetInvoiceID(v int) *TimeEntryCreate {
 	_c.mutation.SetInvoiceID(v)
@@ -104,26 +148,20 @@ func (_c *TimeEntryCreate) SetNillableInvoiceID(v *int) *TimeEntryCreate {
 	return _c
 }
 
-// SetTicketID sets the "ticket" edge to the Ticket entity by ID.
-func (_c *TimeEntryCreate) SetTicketID(id int) *TimeEntryCreate {
-	_c.mutation.SetTicketID(id)
+// SetEmployeeID sets the "employee" edge to the Employee entity by ID.
+func (_c *TimeEntryCreate) SetEmployeeID(id int) *TimeEntryCreate {
+	_c.mutation.SetEmployeeID(id)
 	return _c
+}
+
+// SetEmployee sets the "employee" edge to the Employee entity.
+func (_c *TimeEntryCreate) SetEmployee(v *Employee) *TimeEntryCreate {
+	return _c.SetEmployeeID(v.ID)
 }
 
 // SetTicket sets the "ticket" edge to the Ticket entity.
 func (_c *TimeEntryCreate) SetTicket(v *Ticket) *TimeEntryCreate {
 	return _c.SetTicketID(v.ID)
-}
-
-// SetTechnicianID sets the "technician" edge to the User entity by ID.
-func (_c *TimeEntryCreate) SetTechnicianID(id int) *TimeEntryCreate {
-	_c.mutation.SetTechnicianID(id)
-	return _c
-}
-
-// SetTechnician sets the "technician" edge to the User entity.
-func (_c *TimeEntryCreate) SetTechnician(v *User) *TimeEntryCreate {
-	return _c.SetTechnicianID(v.ID)
 }
 
 // Mutation returns the TimeEntryMutation object of the builder.
@@ -161,13 +199,13 @@ func (_c *TimeEntryCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *TimeEntryCreate) defaults() {
-	if _, ok := _c.mutation.StartedAt(); !ok {
-		v := timeentry.DefaultStartedAt()
-		_c.mutation.SetStartedAt(v)
+	if _, ok := _c.mutation.StartTime(); !ok {
+		v := timeentry.DefaultStartTime()
+		_c.mutation.SetStartTime(v)
 	}
-	if _, ok := _c.mutation.IsBillable(); !ok {
-		v := timeentry.DefaultIsBillable
-		_c.mutation.SetIsBillable(v)
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		v := timeentry.DefaultCreatedAt()
+		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := timeentry.DefaultStatus
@@ -181,17 +219,11 @@ func (_c *TimeEntryCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *TimeEntryCreate) check() error {
-	if _, ok := _c.mutation.DurationHours(); !ok {
-		return &ValidationError{Name: "duration_hours", err: errors.New(`ent: missing required field "TimeEntry.duration_hours"`)}
+	if _, ok := _c.mutation.StartTime(); !ok {
+		return &ValidationError{Name: "start_time", err: errors.New(`ent: missing required field "TimeEntry.start_time"`)}
 	}
-	if _, ok := _c.mutation.Note(); !ok {
-		return &ValidationError{Name: "note", err: errors.New(`ent: missing required field "TimeEntry.note"`)}
-	}
-	if _, ok := _c.mutation.StartedAt(); !ok {
-		return &ValidationError{Name: "started_at", err: errors.New(`ent: missing required field "TimeEntry.started_at"`)}
-	}
-	if _, ok := _c.mutation.IsBillable(); !ok {
-		return &ValidationError{Name: "is_billable", err: errors.New(`ent: missing required field "TimeEntry.is_billable"`)}
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "TimeEntry.created_at"`)}
 	}
 	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "TimeEntry.status"`)}
@@ -204,11 +236,8 @@ func (_c *TimeEntryCreate) check() error {
 	if _, ok := _c.mutation.WorkType(); !ok {
 		return &ValidationError{Name: "work_type", err: errors.New(`ent: missing required field "TimeEntry.work_type"`)}
 	}
-	if len(_c.mutation.TicketIDs()) == 0 {
-		return &ValidationError{Name: "ticket", err: errors.New(`ent: missing required edge "TimeEntry.ticket"`)}
-	}
-	if len(_c.mutation.TechnicianIDs()) == 0 {
-		return &ValidationError{Name: "technician", err: errors.New(`ent: missing required edge "TimeEntry.technician"`)}
+	if len(_c.mutation.EmployeeIDs()) == 0 {
+		return &ValidationError{Name: "employee", err: errors.New(`ent: missing required edge "TimeEntry.employee"`)}
 	}
 	return nil
 }
@@ -236,21 +265,21 @@ func (_c *TimeEntryCreate) createSpec() (*TimeEntry, *sqlgraph.CreateSpec) {
 		_node = &TimeEntry{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(timeentry.Table, sqlgraph.NewFieldSpec(timeentry.FieldID, field.TypeInt))
 	)
-	if value, ok := _c.mutation.DurationHours(); ok {
-		_spec.SetField(timeentry.FieldDurationHours, field.TypeFloat64, value)
-		_node.DurationHours = value
+	if value, ok := _c.mutation.StartTime(); ok {
+		_spec.SetField(timeentry.FieldStartTime, field.TypeTime, value)
+		_node.StartTime = value
 	}
-	if value, ok := _c.mutation.Note(); ok {
-		_spec.SetField(timeentry.FieldNote, field.TypeString, value)
-		_node.Note = value
+	if value, ok := _c.mutation.EndTime(); ok {
+		_spec.SetField(timeentry.FieldEndTime, field.TypeTime, value)
+		_node.EndTime = value
 	}
-	if value, ok := _c.mutation.StartedAt(); ok {
-		_spec.SetField(timeentry.FieldStartedAt, field.TypeTime, value)
-		_node.StartedAt = value
+	if value, ok := _c.mutation.CreatedAt(); ok {
+		_spec.SetField(timeentry.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
 	}
-	if value, ok := _c.mutation.IsBillable(); ok {
-		_spec.SetField(timeentry.FieldIsBillable, field.TypeBool, value)
-		_node.IsBillable = value
+	if value, ok := _c.mutation.TechnicianID(); ok {
+		_spec.SetField(timeentry.FieldTechnicianID, field.TypeInt, value)
+		_node.TechnicianID = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(timeentry.FieldStatus, field.TypeEnum, value)
@@ -260,14 +289,35 @@ func (_c *TimeEntryCreate) createSpec() (*TimeEntry, *sqlgraph.CreateSpec) {
 		_spec.SetField(timeentry.FieldWorkType, field.TypeString, value)
 		_node.WorkType = value
 	}
+	if value, ok := _c.mutation.DurationHours(); ok {
+		_spec.SetField(timeentry.FieldDurationHours, field.TypeFloat64, value)
+		_node.DurationHours = value
+	}
 	if value, ok := _c.mutation.InvoiceID(); ok {
 		_spec.SetField(timeentry.FieldInvoiceID, field.TypeInt, value)
 		_node.InvoiceID = value
 	}
-	if nodes := _c.mutation.TicketIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.EmployeeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
+			Table:   timeentry.EmployeeTable,
+			Columns: []string{timeentry.EmployeeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(employee.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.employee_time_entries = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TicketIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
 			Table:   timeentry.TicketTable,
 			Columns: []string{timeentry.TicketColumn},
 			Bidi:    false,
@@ -278,24 +328,7 @@ func (_c *TimeEntryCreate) createSpec() (*TimeEntry, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.ticket_time_entries = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.TechnicianIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   timeentry.TechnicianTable,
-			Columns: []string{timeentry.TechnicianColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.user_time_entries = &nodes[0]
+		_node.TicketID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
