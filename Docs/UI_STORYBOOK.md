@@ -7,13 +7,15 @@ This document tracks the standardization of UI components across the 9 Phase 3 a
 |:---|:---:|:---:|:---:|:---|
 | SENTpeople | ✅ | ✅ | ✅ | Synced |
 | SENTpulse | ✅ | ✅ | ✅ | Synced |
-| SENTnexus | ✅ | ✅ | ✅ | Synced |
-| SENToptic | ✅ | ✅ | ✅ | Synced |
-| SENTcontrol | ✅ | ✅ | ✅ | Synced |
-| SENTgrid | ✅ | ✅ | ✅ | Synced |
 | SENTpilot | ✅ | ✅ | ✅ | Synced |
-| SENThorizon | ✅ | ✅ | ✅ | Synced |
-| SENTwave | ✅ | ✅ | ✅ | Synced |
+| SENTstock | ✅ | ✅ | ✅ | Synced |
+| SENTcapital | ✅ | ✅ | ✅ | Synced |
+| SENTnexus | - | - | - | Planned |
+| SENToptic | - | - | - | Planned |
+| SENTcontrol | - | - | - | Planned |
+| SENTgrid | - | - | - | Planned |
+| SENThorizon | - | - | - | Planned |
+| SENTwave | - | - | - | Planned |
 
 ## 2. Empty States & Skeletons
 Standardized `EmptyState.tsx` and `skeleton.tsx` are now integrated into every module's data fetching lifecycle.

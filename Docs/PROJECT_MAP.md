@@ -2,15 +2,14 @@
 
 ```mermaid
 graph TD
-    Root[SENT Project Root] --> Cmd[cmd]
-    Root --> Internal[internal]
-    Root --> Web[web]
+    Root[SENT Project Root] --> Backend[backend]
+    Root --> Frontend[frontend]
+    Root --> Docs[Docs]
 
-    Root --> Scripts[scripts]
-    Root --> Configs[configs]
-
-    Cmd --> CmdSent[sent]
-    CmdSent --> Main[main.go]
+    Backend --> Main[main.go]
+    Backend --> Internal[internal]
+    Backend --> WailsConfig[wails.json]
+    Backend --> BackendBuild[build]
 
     Internal --> App[app]
     Internal --> Platform[platform]
@@ -26,25 +25,28 @@ graph TD
     MSP --> Pulse[pulse]
     MSP --> Pilot[pilot]
 
-    Web --> Frontend[frontend]
-    Web --> Assets[assets.go]
     Frontend --> Src[src]
     Frontend --> Dist[dist]
-
-
-
-    Scripts --> Maint[Maintenance Scripts]
+    Frontend --> Components[components]
+    
+    Src --> Pages[pages]
+    Src --> Lib[lib]
 ```
 
 ## Directory Description
 
-- **cmd/sent**: Entry point for the application. Contains `main.go`.
-- **internal**: Private application code.
-    - **app**: Application-specific logic (e.g., Wails bridge).
-    - **platform**: Shared infrastructure (Auth, Database, Orchestrator).
-    - **divisions**: Domain logic split into ERP and MSP.
-- **web**: Web assets and embedding logic.
-    - **frontend**: The Vite/React frontend application.
-    - **assets.go**: Go file embedding the `dist` folder.
+- **backend/**: The Go application code (Wails).
+    - **main.go**: Entry point for the application.
+    - **internal/**: Private application code.
+        - **app/**: Application-specific logic (e.g., Wails bridge).
+        - **platform/**: Shared infrastructure (Auth, Database, Orchestrator).
+        - **divisions/**: Domain logic split into ERP and MSP.
+    - **wails.json**: Wails project configuration.
 
-- **scripts**: Utility and maintenance scripts (`*.ps1`, `*.go`).
+- **frontend/**: The Vite/React frontend application.
+    - **src/**: Source code.
+        - **pages/**: Route components.
+        - **lib/**: Shared utilities.
+    - **wailsjs/**: Generated Go bindings for TypeScript.
+
+- **Docs/**: Project documentation.

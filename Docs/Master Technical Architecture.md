@@ -4,7 +4,7 @@
 
 **Architecture Style:** Unified Modular Monolith (Native Desktop & Hybrid Cloud)
 
-**Repository Strategy:** Monorepo (Go Workspaces \+ Turborepo)
+**Repository Strategy:** Monorepo (Frontend/Backend Split)
 
 **Target Launch:** Q3 2026
 
@@ -29,8 +29,8 @@ Standard web apps run logic in the browser and fetch data via HTTP (JSON over RE
 | Layer               | Technology            | Implementation Detail                                                                              |
 | :------------------ | :-------------------- | :------------------------------------------------------------------------------------------------- |
 | **Desktop Runtime** | **Wails v2**          | Handles window management, native menus, and the JS-to-Go binding. Generates .exe, .app, and .deb. |
-| **Core Backend**    | **Go (Golang) 1.24+** | Handles business logic, database connections, and background routines.                             |
-| **Frontend UI**     | **React 19 \+ Vite**  | Compiled into static assets and embedded directly into the Go binary.                              |
+| **Core Backend**    | **Go (Golang) 1.24+** | Handles business logic, database connections, and background routines. Located in `backend/`.      |
+| **Frontend UI**     | **React 19 \+ Vite**  | Compiled into static assets and embedded directly into the Go binary. Located in `frontend/`.      |
 | **Components**      | **ShadCN/UI**         | Re-usable component system based on Radix UI and Tailwind. Code is copied, not imported.           |
 | **Styling**         | **TailwindCSS**       | Utility-first styling for rapid UI development.                                                    |
 | **Database**        | **PostgreSQL 16**     | Primary relational store. Hosted externally (Cloud/On-Prem) or locally via Docker.                 |

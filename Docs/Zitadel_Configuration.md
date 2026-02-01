@@ -18,7 +18,7 @@ The SENT desktop application (`pkg/auth/authenticator.go`) is configured to use 
 ### Implementation Markers:
 *   **Application Type:** **Native** (Public Client).
 *   **Auth Method:** **PKCE** (None - Secret not required for Native).
-*   **Client ID:** `357622351384346627` (Current Active ID).
+*   **Client ID:** `357700606812553219` (Current Active ID).
 *   **Issuer:** `http://localhost:8080` (Default; can be overridden via `ZITADEL_ISSUER`).
 
 ### Step-by-Step Configuration:
@@ -36,10 +36,10 @@ The SENT desktop application (`pkg/auth/authenticator.go`) is configured to use 
     *   **Post Logout URIs:** `http://localhost:4242/auth/logout`
 5.  **Review & Create:**
     *   Click **Create**.
-    *   **IMPORTANT:** Ensure the generated Client ID matches `357622351384346627`. If Zitadel generates a different ID, you MUST export it as an environment variable:
+    *   **IMPORTANT:** Ensure the generated Client ID matches `357700606812553219`. If Zitadel generates a different ID, you MUST export it as an environment variable:
 
 ```bash
-export ZITADEL_CLIENT_ID="357622351384346627"
+export ZITADEL_CLIENT_ID="357700606812553219"
 ```
 
 ## 4. Keyring Integration
