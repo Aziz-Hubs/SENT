@@ -1,99 +1,145 @@
 @import "tailwindcss";
 
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
 @theme {
+  --font-sans: "Inter", "Geist", sans-serif;
+  
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
+
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
+
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
+
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
+
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
+
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
+
   --color-popover: hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
+
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
 
-  /* Division Colors */
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  /* Division Colors (Preserved) */
   --color-erp: hsl(var(--erp));
   --color-msp: hsl(var(--msp));
   --color-sec: hsl(var(--sec));
-
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
 }
 
+/*
+  The default theme uses the "zinc" palette.
+*/
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
     --radius: 0.5rem;
 
-    /* Division Bases */
+    /* Division Bases (Preserved) */
     --erp: 142.1 70.6% 45.3%;
     --msp: 221.2 83.2% 53.3%;
     --sec: 24.6 95% 53.1%;
+    
+    /* Sidebar Variables (Zinc Light) */
+    --sidebar: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    /* === NEON OBSIDIAN PALETTE === */
-    --background: 0 0% 0.8%; /* #020202 - Pitch Black Obsidian */
-    --foreground: 210 40% 98%;
-    --card: 0 0% 3%; /* Slightly elevated glass base */
-    --card-foreground: 210 40% 98%;
-    --popover: 0 0% 4%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 0 0% 8%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 0 0% 12%;
-    --muted-foreground: 215 20.2% 65%;
-    --accent: 0 0% 10%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 40%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 0 0% 15%;
-    --input: 0 0% 10%;
-    --ring: 224.3 76.3% 48%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
 
-    /* === CHROMATIC ARCHITECTURE === */
-    /* Emerald Neon: Capital, ERP, Financial */
-    --neon-emerald: 142 70% 50%;
+    /* Division Bases (Preserved) */
     --erp: 142 70% 50%;
-    /* Cyan Neon: Pulse, Engagement, People */
-    --neon-cyan: 185 100% 50%;
     --msp: 185 100% 50%;
-    /* Amber Neon: Tax, Control, Compliance */
-    --neon-amber: 38 100% 50%;
     --sec: 38 100% 50%;
-    /* Violet Neon: Admin, Settings, System */
-    --neon-violet: 270 100% 65%;
+    
+    /* Sidebar Variables (Zinc Dark) */
+    --sidebar: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -103,47 +149,30 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: "Inter", "Geist", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* === GLOBAL SCROLLBAR === */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
   }
 
-  button {
-    cursor: pointer;
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full transition-colors;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/40;
   }
 }
 
 @layer utilities {
   .fade-in {
     animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-transparent;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40 transition-colors;
-  }
-
-  .paper-form {
-    @apply bg-[#fdfdfd] dark:bg-[#1a1c1e] border-[#333] dark:border-[#555] border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)];
-    background-image: radial-gradient(#e5e5e5 0.5px, transparent 0.5px);
-    background-size: 10px 10px;
-  }
-
-  .mono-audit {
-    font-family: "JetBrains Mono", "Courier New", monospace;
-    letter-spacing: -0.02em;
-  }
-
-  .audit-cell {
-    @apply border-b border-r border-black/10 dark:border-white/10 p-2;
   }
 
   .glass-sidebar {
@@ -154,108 +183,14 @@
   .glass-card {
     @apply bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] shadow-2xl;
   }
-
-  /* === NEON TEXT UTILITIES === */
-  .text-neon-emerald {
-    color: hsl(142 70% 50%);
-    text-shadow: 0 0 8px hsl(142 70% 50% / 0.5);
-  }
-  .text-neon-cyan {
-    color: hsl(185 100% 50%);
-    text-shadow: 0 0 8px hsl(185 100% 50% / 0.5);
-  }
-  .text-neon-amber {
-    color: hsl(38 100% 50%);
-    text-shadow: 0 0 8px hsl(38 100% 50% / 0.5);
-  }
-  .text-neon-violet {
-    color: hsl(270 100% 65%);
-    text-shadow: 0 0 8px hsl(270 100% 65% / 0.5);
-  }
-
-  /* === NEON BORDER UTILITIES === */
-  .border-neon-emerald {
-    border-color: hsl(142 70% 50% / 0.3);
-    box-shadow: 0 0 10px hsl(142 70% 50% / 0.15), inset 0 0 6px hsl(142 70% 50% / 0.05);
-  }
-  .border-neon-cyan {
-    border-color: hsl(185 100% 50% / 0.3);
-    box-shadow: 0 0 10px hsl(185 100% 50% / 0.15), inset 0 0 6px hsl(185 100% 50% / 0.05);
-  }
-  .border-neon-amber {
-    border-color: hsl(38 100% 50% / 0.3);
-    box-shadow: 0 0 10px hsl(38 100% 50% / 0.15), inset 0 0 6px hsl(38 100% 50% / 0.05);
-  }
-  .border-neon-violet {
-    border-color: hsl(270 100% 65% / 0.3);
-    box-shadow: 0 0 10px hsl(270 100% 65% / 0.15), inset 0 0 6px hsl(270 100% 65% / 0.05);
-  }
-
-  /* === GLASS PANEL WITH NEON RIM === */
-  .glass-panel-neon {
-    @apply bg-black/30 backdrop-blur-xl border rounded-lg;
-    border-width: 0.5px;
-  }
-
-  /* === NEON PULSE GLOW (Branding) === */
-  .neon-pulse-glow {
-    animation: neonPulse 2s ease-in-out infinite alternate;
-  }
-
-  /* === OBSIDIAN SCROLLBAR === */
-  .obsidian-scrollbar::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-  .obsidian-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .obsidian-scrollbar::-webkit-scrollbar-thumb {
-    background: hsl(0 0% 25%);
-    border-radius: 2px;
-  }
-  .obsidian-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: hsl(0 0% 35%);
-  }
+  
+  /* Preserving neon helpers for compatibility, mapped to standard colors or kept as is if not interfering */
+  .text-neon-emerald { color: hsl(var(--erp)); }
+  .text-neon-cyan { color: hsl(var(--msp)); }
+  .text-neon-amber { color: hsl(var(--sec)); }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes neonPulse {
-  from {
-    text-shadow: 0 0 4px hsl(185 100% 50% / 0.4), 0 0 10px hsl(185 100% 50% / 0.2);
-  }
-  to {
-    text-shadow: 0 0 8px hsl(185 100% 50% / 0.6), 0 0 20px hsl(185 100% 50% / 0.3), 0 0 30px hsl(185 100% 50% / 0.1);
-  }
-}
-
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  .printable-area,
-  .printable-area * {
-    visibility: visible;
-  }
-  .printable-area {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: white;
-    color: black;
-    z-index: 9999;
-    padding: 20px;
-  }
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }

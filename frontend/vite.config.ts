@@ -8,6 +8,11 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@wailsjs": path.resolve(__dirname, "./wailsjs"),
     },
+  },
+  build: {
+    outDir: '../backend/web/dist',
+    emptyOutDir: true,
   },
 })

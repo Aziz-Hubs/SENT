@@ -26,18 +26,18 @@ Standard web apps run logic in the browser and fetch data via HTTP (JSON over RE
 
 ## **2\. Core Technology Stack (Universal Layers)**
 
-| Layer | Technology | Implementation Detail |
-| :---- | :---- | :---- |
-| **Desktop Runtime** | **Wails v2** | Handles window management, native menus, and the JS-to-Go binding. Generates .exe, .app, and .deb. |
-| **Core Backend** | **Go (Golang) 1.24+** | Handles business logic, database connections, and background routines. |
-| **Frontend UI** | **React 19 \+ Vite** | Compiled into static assets and embedded directly into the Go binary. |
-| **Components** | **ShadCN/UI** | Re-usable component system based on Radix UI and Tailwind. Code is copied, not imported. |
-| **Styling** | **TailwindCSS** | Utility-first styling for rapid UI development. |
-| **Database** | **PostgreSQL 16** | Primary relational store. Hosted externally (Cloud/On-Prem) or locally via Docker. |
-| **Time-Series** | **TimescaleDB** | Extension enabled on Postgres for high-ingest telemetry (logs, metrics). |
-| **ORM** | **Ent** | Graph-based ORM. Generates type-safe Go code for complex entity relationships. |
-| **Migrations** | **Atlas** | Declarative schema migration management for Postgres. |
-| **Auth** | **Zitadel** | OIDC Provider. Handles SSO, MFA, and Audit Trails. |
+| Layer               | Technology            | Implementation Detail                                                                              |
+| :------------------ | :-------------------- | :------------------------------------------------------------------------------------------------- |
+| **Desktop Runtime** | **Wails v2**          | Handles window management, native menus, and the JS-to-Go binding. Generates .exe, .app, and .deb. |
+| **Core Backend**    | **Go (Golang) 1.24+** | Handles business logic, database connections, and background routines.                             |
+| **Frontend UI**     | **React 19 \+ Vite**  | Compiled into static assets and embedded directly into the Go binary.                              |
+| **Components**      | **ShadCN/UI**         | Re-usable component system based on Radix UI and Tailwind. Code is copied, not imported.           |
+| **Styling**         | **TailwindCSS**       | Utility-first styling for rapid UI development.                                                    |
+| **Database**        | **PostgreSQL 16**     | Primary relational store. Hosted externally (Cloud/On-Prem) or locally via Docker.                 |
+| **Time-Series**     | **TimescaleDB**       | Extension enabled on Postgres for high-ingest telemetry (logs, metrics).                           |
+| **Data Access**     | **PGX & SQLc**        | Fast, type-safe SQL code generation defined by standard SQL queries.                               |
+| **Migrations**      | **Atlas**             | Declarative schema migration management for Postgres.                                              |
+| **Auth**            | **Zitadel**           | OIDC Provider. Handles SSO, MFA, and Audit Trails.                                                 |
 
 ## **3\. Workload Isolation Strategy (The "Noisy Neighbor" Fix)**
 
@@ -103,7 +103,7 @@ We wrap specialized open-source engines into our Go monolithic structure to prov
   * *Implementation:* Uses libpcap bindings to capture traffic on the network interface for analysis.
 * **SENTcontrol (Engine: MS Graph + SNI):**
   * *Implementation:* Native Cloud SDKs for identity sync; BPF-backed SNI filtering for SaaS egress control.
-* **SENTnexus (Engine: Ent Graph + AES-GCM):**
+* **SENTnexus (Engine: SQLc + AES-GCM):**
   * *Implementation:* Recursive graph traversal engine for blast radius analysis; hardware-accelerated vault.
 * **SENToptic (Engine: MediaMTX \+ TFLite):**
   * *Implementation:* MediaMTX for stream ingestion; TFLite for local INT8 object detection on keyframes.
@@ -112,14 +112,14 @@ We wrap specialized open-source engines into our Go monolithic structure to prov
 * **SENTpulse (Engine: TimescaleDB):**
   * *Implementation:* Utilizes Postgres Hypertables and Continuous Aggregates for high-speed telemetry querying.
 
-## **5\. Data Architecture (PostgreSQL \+ Ent)**
+## **5\. Data Architecture (PostgreSQL \+ SQLc)**
 
 ### **5.1 The Unified Schema**
 
-All applications share a single database schema managed by Ent.
+All applications share a single database schema managed by raw SQL migrations.
 
-* **Tenancy:** Every table includes organization\_id for strict isolation, enforced at the Ent query-filter level.
-* **Global Interceptor:** A centralized **Ent Mutator Hook** (`pkg/database/postgres.go`) intercepts all mutations across all nine apps to generate immutable entries in the `AuditLog` hypertable automatically.
+* **Tenancy:** Every table includes organization_id for strict isolation, enforced reliably at the query level.
+* **Global Interceptor:** A centralized **MW Wrapper** (`pkg/database/postgres.go`) intercepts all mutations across all nine apps to generate immutable entries in the `AuditLog` hypertable automatically.
 * **Hypertables:** Tables for device\_metrics and security\_logs are converted to TimescaleDB hypertables for automatic partitioning.
 * **Encryption:** Sensitive fields (Passwords, PII, Payroll) utilize **AES-256-GCM** authenticated encryption with hardware-accelerated CPU instructions.
 
