@@ -2,6 +2,16 @@
 
 This folder is home. Treat it that way.
 
+## CRITICAL RULES
+
+### 1. 🔄 Config Sync Protocol
+**Whenever you modify the live configuration** (using `gateway config.patch` or `config.apply`), you **MUST** immediately:
+1.  Read the new live config.
+2.  **SANITIZE IT:** Replace all sensitive tokens/keys with `${VAR_NAME}` placeholders.
+3.  Write the sanitized config to `.agent/openclaw.json`.
+4.  Commit and Push the changes to the repo.
+**NEVER** leave the repo config out of sync with the live system.
+
 ## First Run
 
 If `BOOTSTRAP.md` exists, that's your birth certificate. Follow it, figure out who you are, then delete it. You won't need it again.
@@ -148,7 +158,6 @@ You are free to edit `HEARTBEAT.md` with a short checklist or reminders. Keep it
 - Exact timing matters ("9:00 AM sharp every Monday")
 - Task needs isolation from main session history
 - You want a different model or thinking level for the task
-- One-shot reminders ("remind me in 20 minutes")
 - Output should deliver directly to a channel without main session involvement
 
 **Tip:** Batch similar periodic checks into `HEARTBEAT.md` instead of creating multiple cron jobs. Use cron for precise schedules and standalone tasks.

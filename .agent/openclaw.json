@@ -1,7 +1,7 @@
 {
   "meta": {
     "lastTouchedVersion": "2026.1.30",
-    "lastTouchedAt": "2026-02-02T00:18:45.419Z"
+    "lastTouchedAt": "2026-02-02T00:24:58.156Z"
   },
   "wizard": {
     "lastRunAt": "2026-02-01T23:32:19.651Z",
@@ -15,17 +15,47 @@
         "provider": "google-antigravity",
         "mode": "oauth",
         "email": "abdulazizgamerx@gmail.com"
+      },
+      "google-antigravity:callsonlazox@gmail.com": {
+        "provider": "google-antigravity",
+        "mode": "oauth",
+        "email": "callsonlazox@gmail.com"
+      },
+      "google-antigravity:contactabdulazizhasan@gmail.com": {
+        "provider": "google-antigravity",
+        "mode": "oauth",
+        "email": "contactabdulazizhasan@gmail.com"
+      },
+      "google-antigravity:contactabdulazizhassan@gmail.com": {
+        "provider": "google-antigravity",
+        "mode": "oauth",
+        "email": "contactabdulazizhassan@gmail.com"
       }
+    },
+    "order": {
+      "google-antigravity": [
+        "google-antigravity:abdulazizgamerx@gmail.com",
+        "google-antigravity:callsonlazox@gmail.com",
+        "google-antigravity:contactabdulazizhasan@gmail.com",
+        "google-antigravity:contactabdulazizhassan@gmail.com"
+      ]
     }
   },
   "agents": {
     "defaults": {
       "model": {
-        "primary": "google-antigravity/gemini-3-pro-high"
+        "primary": "google-antigravity/gemini-3-pro-high",
+        "fallbacks": [
+          "google-antigravity/gemini-3-flash",
+          "google-antigravity/claude-opus-4-5-thinking",
+          "google-antigravity/claude-sonnet-4-5"
+        ]
       },
       "models": {
         "google-antigravity/claude-opus-4-5-thinking": {},
-        "google-antigravity/gemini-3-pro-high": {}
+        "google-antigravity/gemini-3-pro-high": {},
+        "google-antigravity/gemini-3-flash": {},
+        "google-antigravity/claude-sonnet-4-5": {}
       },
       "workspace": "/home/aziz/SENT",
       "maxConcurrent": 4,
