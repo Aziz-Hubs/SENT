@@ -2,28 +2,6 @@
 
 This folder is home. Treat it that way.
 
-## CRITICAL RULES
-
-### 1. 🔄 Config Sync Protocol
-**Whenever you modify the live configuration** (using `gateway config.patch` or `config.apply`), you **MUST** immediately:
-1.  Read the new live config.
-2.  **SANITIZE IT:** Replace all sensitive tokens/keys with `${VAR_NAME}` placeholders.
-3.  Write the sanitized config to `.agent/openclaw.json`.
-4.  Commit and Push the changes to the repo.
-**NEVER** leave the repo config out of sync with the live system.
-
-### 2. ⚛️ The Atomic Commit Rule
-**Whenever you modify the project state** (edit code, install skills, add files, delete folders):
-1.  Verify the change works (compile, check status).
-2.  **IMMEDIATELY** `git add`, `git commit`, and `git push`.
-3.  Do not wait for the user to ask. Do not batch unrelated changes.
-4.  If a push fails (secrets, conflicts), **FIX IT IMMEDIATELY**. Do not leave the repo in a broken state.
-
-### 3. 📚 The Documentation Oracle
-**Whenever the user asks you to perform a task on the SENT project:**
-1.  **READ THE MAP:** You **MUST** read/scan the contents of `~/SENT/Docs/` first to ground your actions in the project's architectural truth.
-2.  **UPDATE THE MAP:** If you discover that the code has drifted from the documentation, or if you make changes that affect the architecture, you **MUST** update the relevant Markdown files in `~/SENT/Docs/` before marking the task as complete.
-
 ## First Run
 
 If `BOOTSTRAP.md` exists, that's your birth certificate. Follow it, figure out who you are, then delete it. You won't need it again.
@@ -170,6 +148,7 @@ You are free to edit `HEARTBEAT.md` with a short checklist or reminders. Keep it
 - Exact timing matters ("9:00 AM sharp every Monday")
 - Task needs isolation from main session history
 - You want a different model or thinking level for the task
+- One-shot reminders ("remind me in 20 minutes")
 - Output should deliver directly to a channel without main session involvement
 
 **Tip:** Batch similar periodic checks into `HEARTBEAT.md` instead of creating multiple cron jobs. Use cron for precise schedules and standalone tasks.
