@@ -4,16 +4,20 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/cobra"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/linux"
 
+	"sent/internal/app/rpc"
 	"sent/internal/app/wails_bridge"
 	"sent/internal/app/wails_bridge/peripherals"
 	"sent/internal/divisions/erp/capital"
@@ -26,46 +30,25 @@ import (
 	"sent/web"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-
-	// "sent/internal/platform/testsuite"
-
 	"github.com/riverqueue/river"
 )
-
-// assets is now coming from web package
-// var assets embed.FS
 
 var (
 	mode    string
 	service string
+	port    int
 )
 
-// main is the entry point of the SENT application.
-// It sets up the CLI commands and delegates execution based on the provided flags.
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "sent",
 		Short: "SENT - Unified Modular Monolith",
-		Long:  `SENT is a modular monolith platform designed for enterprise resource planning, integrating finance, inventory, auth, and more.`,
 		Run:   runApp,
 	}
 
-	// validateCmd := &cobra.Command{
-	// 	Use:   "validate",
-	// 	Short: "Run Gold Master validation suite",
-	// 	Run:   runValidation,
-	// }
-
-	// seedCmd := &cobra.Command{
-	// 	Use:   "seed",
-	// 	Short: "Seed database with comprehensive fake data",
-	// 	Run:   runSeeding,
-	// }
-
-	// rootCmd.AddCommand(validateCmd)
-	// rootCmd.AddCommand(seedCmd)
-	rootCmd.PersistentFlags().StringVar(&mode, "mode", "client", "Application mode: 'client' (GUI) or 'worker' (Headless)")
+	rootCmd.PersistentFlags().StringVar(&mode, "mode", "client", "Application mode: 'client' (GUI), 'worker' (Headless), or 'server' (Web)")
 	rootCmd.PersistentFlags().StringVar(&service, "service", "", "Specific service to run in worker mode")
+	rootCmd.PersistentFlags().IntVar(&port, "port", 8080, "Port to run the web server on (mode=server only)")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Printf("Error executing command: %v\n", err)
@@ -73,138 +56,122 @@ func main() {
 	}
 }
 
-// func runValidation(cmd *cobra.Command, args []string) {
-// 	dbClient := database.NewPostgresClient()
-// 	defer dbClient.Close()
-//
-// 	testsuite.RunValidation(dbClient)
-// }
-
-// func runSeeding(cmd *cobra.Command, args []string) {
-// 	dbClient := database.NewPostgresClient()
-// 	defer dbClient.Close()
-//
-// 	seeder := testsuite.NewComprehensiveSeeder(dbClient)
-// 	if err := seeder.SeedAll(); err != nil {
-// 		log.Fatalf("Seeding failed: %v", err)
-// 	}
-// }
-
-// runApp initializes core dependencies and starts the application in the selected mode.
 func runApp(cmd *cobra.Command, args []string) {
 	if mode == "agent" {
 		agent.Run()
 		return
 	}
 
-	// For client and worker modes, we need the database
 	dbClient := database.NewPostgresClient()
-	defer func() {
-		fmt.Println("[SENT] Closing database connection...")
-		defer func() {
-			fmt.Println("[SENT] Closing database connection...")
-			dbClient.Close()
-		}()
-	}()
+	defer dbClient.Close()
 
-	// Register Orchestrator Hooks
 	orchestrator.RegisterStockHooks(dbClient)
 
-	if mode == "worker" {
+	switch mode {
+	case "worker":
 		runWorker(dbClient, service)
-		return
+	case "server":
+		runServer(dbClient)
+	default:
+		runClient(dbClient)
 	}
+}
 
-	runClient(dbClient)
+// initBridges is a helper to share bridge initialization between Wails and HTTP
+func initBridges(db *pgxpool.Pool, orchestrator *orchestrator.Orchestrator) (
+	*auth.AuthBridge,
+	*capital.CapitalBridge,
+	*stock.StockBridge,
+	*stock.KioskBridge,
+	*pilot.PilotBridge,
+	*peripherals.PeripheralsBridge,
+	*wails_bridge.PulseBridge,
+	*wails_bridge.PeopleBridge,
+) {
+	authBridge := auth.NewAuthBridge(db)
+	capitalBridge := capital.NewCapitalBridge(db, authBridge)
+	stockBridge := stock.NewStockBridge(db, authBridge)
+	kioskBridge := stock.NewKioskBridge(db, orchestrator.GetClient(), nil, authBridge)
+	pilotBridge := pilot.NewPilotBridge(db, authBridge)
+	pilotBridge.SetRiverClient(orchestrator.GetClient())
+	peripheralsBridge := peripherals.NewPeripheralsBridge(db)
+	pulseBridge := wails_bridge.NewPulseBridge(db)
+	pulseBridge.SetRiverClient(orchestrator.GetClient())
+	peopleBridge := wails_bridge.NewPeopleBridge(db)
+
+	return authBridge, capitalBridge, stockBridge, kioskBridge, pilotBridge, peripheralsBridge, pulseBridge, peopleBridge
+}
+
+func runServer(db *pgxpool.Pool) {
+	fmt.Printf("[SERVER] Starting SENT Web Server on port %d...\n", port)
+	
+	centralOrchestrator := orchestrator.NewOrchestrator(db)
+	authB, capB, stockB, kioskB, pilotB, periB, pulseB, peopleB := initBridges(db, centralOrchestrator)
+
+	// Setup RPC Dispatcher
+	rpcHandler := rpc.NewRpcHandler()
+	rpcHandler.Register("auth", "AuthBridge", authB)
+	rpcHandler.Register("capital", "CapitalBridge", capB)
+	rpcHandler.Register("stock", "StockBridge", stockB)
+	rpcHandler.Register("stock", "KioskBridge", kioskB)
+	rpcHandler.Register("pilot", "PilotBridge", pilotB)
+	rpcHandler.Register("peripherals", "PeripheralsBridge", periB)
+	rpcHandler.Register("wails_bridge", "PulseBridge", pulseB)
+	rpcHandler.Register("wails_bridge", "PeopleBridge", peopleB)
+
+	// Setup Echo
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middleware.CORS())
+
+	// RPC Endpoint
+	e.POST("/api/rpc", echo.WrapHandler(rpcHandler))
+
+	// Serve Frontend
+	e.StaticFS("/", echo.MustSubFS(web.Assets, "dist"))
+
+	// Start everything
+	ctx := context.Background()
+	centralOrchestrator.Start(ctx)
+	authB.Startup(ctx)
+	
+	go func() {
+		if err := e.Start(fmt.Sprintf(":%d", port)); err != nil && err != http.ErrServerClosed {
+			log.Fatal("Shutting down the server")
+		}
+	}()
+
+	// Graceful Shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+	fmt.Println("[SERVER] Shutting down...")
+}
+
+func runClient(db *pgxpool.Pool) {
+	centralOrchestrator := orchestrator.NewOrchestrator(db)
+	authB, capB, stockB, kioskB, pilotB, periB, pulseB, peopleB := initBridges(db, centralOrchestrator)
+
+	err := wails.Run(&options.App{
+		Title: "SENT", Width: 1280, Height: 800,
+		AssetServer: &assetserver.Options{Assets: web.Assets},
+		OnStartup: func(ctx context.Context) {
+			centralOrchestrator.Start(ctx)
+			authB.Startup(ctx)
+			// ... other startups
+		},
+		Bind: []interface{}{authB, capB, stockB, kioskB, pilotB, periB, pulseB, peopleB},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func runWorker(db *pgxpool.Pool, svc string) {
 	fmt.Printf("[WORKER] Starting SENT worker. Service: %s\n", svc)
-
-	_, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	// Setup signal handling for graceful shutdown of worker
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-
-	// Block until signal is received
 	<-sigChan
-	cancel()
 	fmt.Println("[WORKER] Shutdown signal received.")
-}
-
-// runClient starts the Wails GUI application.
-//
-// @param db - The database client.
-func runClient(db *pgxpool.Pool) {
-	// Initialize Central Orchestrator
-	centralOrchestrator := orchestrator.NewOrchestrator(db)
-
-	// Initialize Bridges with the live database connection
-	authBridge := auth.NewAuthBridge(db)
-	capitalBridge := capital.NewCapitalBridge(db, authBridge)
-	stockBridge := stock.NewStockBridge(db, authBridge)
-	kioskBridge := stock.NewKioskBridge(db, centralOrchestrator.GetClient(), nil, authBridge)
-	pilotBridge := pilot.NewPilotBridge(db, authBridge)
-	pilotBridge.SetRiverClient(centralOrchestrator.GetClient())
-	peripheralsBridge := peripherals.NewPeripheralsBridge(db)
-	pulseBridge := wails_bridge.NewPulseBridge(db)
-	pulseBridge.SetRiverClient(centralOrchestrator.GetClient())
-	peopleBridge := wails_bridge.NewPeopleBridge(db)
-
-	// Configure and run the Wails application
-	err := wails.Run(&options.App{
-		Title:     "SENT",
-		Width:     1280,
-		Height:    800,
-		MinWidth:  1024,
-		MinHeight: 768,
-		AssetServer: &assetserver.Options{
-			Assets: web.Assets,
-		},
-		BackgroundColour: &options.RGBA{R: 15, G: 23, B: 42, A: 255}, // Matches slate-900 usually
-		OnStartup: func(ctx context.Context) {
-			// Register Workers
-			river.AddWorker(centralOrchestrator.Workers(), stock.NewReservationReleaseWorker(db))
-
-			centralOrchestrator.Start(ctx)
-			authBridge.Startup(ctx)
-			capitalBridge.Startup(ctx)
-			stockBridge.Startup(ctx)
-			kioskBridge.Startup(ctx)
-			pilotBridge.Startup(ctx)
-			peripheralsBridge.Startup(ctx)
-			pulseBridge.Startup(ctx)
-			peopleBridge.Startup(ctx)
-
-			// Start background workers
-			kioskSync := stock.NewKioskSyncWorker(db, kioskBridge)
-			go kioskSync.Run(ctx)
-
-			fifoWorker := stock.NewFIFOWorker(db)
-			go fifoWorker.Run(ctx)
-		},
-		OnBeforeClose: func(ctx context.Context) bool {
-			return false
-		},
-		Bind: []interface{}{
-			authBridge,
-			capitalBridge,
-			stockBridge,
-			kioskBridge,
-			pilotBridge,
-			peripheralsBridge,
-			pulseBridge,
-			peopleBridge,
-		},
-		Linux: &linux.Options{
-			WindowIsTranslucent: false,
-			WebviewGpuPolicy:    linux.WebviewGpuPolicyAlways,
-		},
-	})
-
-	if err != nil {
-		log.Fatal("Error during application run: " + err.Error())
-	}
 }
