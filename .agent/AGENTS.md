@@ -19,6 +19,11 @@ This folder is home. Treat it that way.
 3.  Do not wait for the user to ask. Do not batch unrelated changes.
 4.  If a push fails (secrets, conflicts), **FIX IT IMMEDIATELY**. Do not leave the repo in a broken state.
 
+### 3. 📚 The Documentation Oracle
+**Whenever the user asks you to perform a task on the SENT project:**
+1.  **READ THE MAP:** You **MUST** read/scan the contents of `~/SENT/Docs/` first to ground your actions in the project's architectural truth.
+2.  **UPDATE THE MAP:** If you discover that the code has drifted from the documentation, or if you make changes that affect the architecture, you **MUST** update the relevant Markdown files in `~/SENT/Docs/` before marking the task as complete.
+
 ## First Run
 
 If `BOOTSTRAP.md` exists, that's your birth certificate. Follow it, figure out who you are, then delete it. You won't need it again.
