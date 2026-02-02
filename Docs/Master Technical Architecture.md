@@ -35,7 +35,7 @@ Standard web apps run logic in the browser and fetch data via HTTP (JSON over RE
 | **Styling**         | **TailwindCSS**       | Utility-first styling for rapid UI development.                                                    |
 | **Database**        | **PostgreSQL 16**     | Primary relational store. Hosted externally (Cloud/On-Prem) or locally via Docker.                 |
 | **Time-Series**     | **TimescaleDB**       | Extension enabled on Postgres for high-ingest telemetry (logs, metrics).                           |
-| **Data Access**     | **PGX & SQLc**        | Fast, type-safe SQL code generation defined by standard SQL queries.                               |
+| **Data Access**     | **PGX & SQLc**        | Fast, type-safe SQL code generation defined by standard SQL queries. Replaces Ent.                 |
 | **Migrations**      | **Atlas**             | Declarative schema migration management for Postgres.                                              |
 | **Auth**            | **Zitadel**           | OIDC Provider. Handles SSO, MFA, and Audit Trails.                                                 |
 

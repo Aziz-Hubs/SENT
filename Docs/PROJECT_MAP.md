@@ -14,6 +14,7 @@ graph TD
     Internal --> App[app]
     Internal --> Platform[platform]
     Internal --> Divisions[divisions]
+    Internal --> DB[db]
     
     Divisions --> ERP[erp]
     Divisions --> MSP[msp]
@@ -41,6 +42,7 @@ graph TD
         - **app/**: Application-specific logic (e.g., Wails bridge).
         - **platform/**: Shared infrastructure (Auth, Database, Orchestrator).
         - **divisions/**: Domain logic split into ERP and MSP.
+        - **db/**: SQLc generated code.
     - **wails.json**: Wails project configuration.
 
 - **frontend/**: The Vite/React frontend application.

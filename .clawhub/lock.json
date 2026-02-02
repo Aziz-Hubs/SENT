@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "skills": {
+    "postgres": {
+      "version": "1.1.0",
+      "installedAt": 1769992694246
+    },
+    "react-expert": {
+      "version": "0.1.0",
+      "installedAt": 1769992697442
+    }
+  }
+}

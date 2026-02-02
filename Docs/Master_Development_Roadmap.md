@@ -14,7 +14,7 @@
     - _Constraint:_ We cannot secure the network (SENTsec) until we can monitor it (SENTmsp).
 3.  **Dependency Logic:**
     - **Identity First:** Zitadel integration is Day 1.
-    - **Data Second:** Ent Schemas for all core entities (Users, Assets, Invoices) must be stabilized early.
+    - **Data Second:** SQLc + PGX schemas for all core entities (Users, Assets, Invoices) must be stabilized early.
 
 ---
 
@@ -29,7 +29,7 @@
 | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------- |
 | **Repo & Build**     | • Initialize Monorepo (Turborepo + Go Workspaces).<br>• Configure `golangci-lint` and `air` for hot-reloading.<br>• Set up **Wails v2** build targets for Windows (`.exe`) and macOS (`.app`). | _None_     |
 | **Identity Layer**   | • Deploy **Zitadel** (Self-Hosted) instance.<br>• Implement OIDC Authorization Code Flow in Wails.<br>• Create `pkg/auth` middleware for Go Chi router.                                        | _Critical_ |
-| **Data Layer**       | • Initialize **Ent** (Entity Framework) Schema.<br>• Set up **Atlas** for declarative migrations.<br>• Define `Tenant` and `User` schemas (Multi-tenancy root).                                | _Critical_ |
+| **Data Layer**       | • Initialize **SQLc** configuration.<br>• Set up **Atlas** for declarative migrations.<br>• Define `Tenant` and `User` schemas (Multi-tenancy root).                                           | _Critical_ |
 | **Frontend Core**    | • Scaffold React 19 + Vite frontend.<br>• Implement **TailwindCSS** and **ShadCN/UI**.<br>• Build "App Shell" using ShadCN components (Sidebar, Card, Button).                                 | _None_     |
 
 ### **Q2 2024: The Native Bridge**
@@ -53,7 +53,7 @@
 
 | Application / Module | Detailed Tasks & Library Implementation                                                                                                                                                                                                                                    | Dependency |
 | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------- |
-| **SENTcapital**      | • **Math:** Integrate `shopspring/decimal` for fixed-point arithmetic.<br>• **Schema:** Define `JournalEntry`, `Account`, `Ledger` Ent schemas.<br>• **Reporting:** Build Trial Balance and P&L generators.<br>• **Banking:** Implement CSV import for bank statements.    | _Ent_      |
+| **SENTcapital**      | • **Math:** Integrate `shopspring/decimal` for fixed-point arithmetic.<br>• **Schema:** Define `JournalEntry`, `Account`, `Ledger` SQL schemas.<br>• **Reporting:** Build Trial Balance and P&L generators.<br>• **Banking:** Implement CSV import for bank statements.    | _DB_       |
 | **SENTvault**        | • **Storage:** Integrate **Afero** filesystem abstraction.<br>• **Backend:** Configure Local Disk (Dev) and S3/MinIO (Prod) backends.<br>• **Viewer:** Implement PDF.js for in-app document viewing.<br>• **Link:** Attach "Receipt" files to SENTcapital journal entries. | _Auth_     |
 | **SENTbridge**       | • **Adapter:** Create `pkg/tax` interface.<br>• **Integration:** Build **JoFotara** (Jordan) and **ZATCA** (KSA) XML serializers.<br>• **Crypto:** Implement mTLS and Digital Signature logic for tax APIs.                                                                | _Capital_  |
 
@@ -79,7 +79,7 @@
 | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------- |
 | **SENTpeople**       | • **HRIS:** Employee Lifecycle (Hire/Fire) + ATS Pipeline.<br>• **Performance:** 360 Feedback cycles + Goal tracking.<br>• **Payroll:** Gross-to-Net engine + Benefits Admin.<br>• **Growth:** LMS integration & Workforce Analytics.                                                                     | _Capital_  |
 | **SENTpulse**        | • **Agent:** Build standalone `sent-agent` binary using `go-sysinfo`.<br>• **Ingest:** Deploy **TimescaleDB** for high-volume metrics (CPU/RAM).<br>• **Remote:** Integrated **Graphical RDP**, Terminal, and File Browser.<br>• **Control:** Remote Service/Process management and System Power actions. | _Core_     |
-| **SENTnexus**        | • **Graph:** Leverage Ent's Graph capabilities for Asset linking (Server->App).<br>• **Secrets:** Encrypted "Vault" fields for password storage (AES-GCM).<br>• **Sync:** "Auto-Discovery" worker that populates Nexus from Pulse data.                                                                   | _Pulse_    |
+| **SENTnexus**        | • **Graph:** Leverage Recursive CTEs for Asset linking (Server->App).<br>• **Secrets:** Encrypted "Vault" fields for password storage (AES-GCM).<br>• **Sync:** "Auto-Discovery" worker that populates Nexus from Pulse data.                                                               | _Pulse_    |
 
 ### **Q2 2025: Visibility & Control**
 
@@ -173,7 +173,7 @@
 ## **Tech Stack Summary**
 
 - **Runtime:** Wails v2 (Go + WebView2/WebKit)
-- **Backend:** Go 1.24+ (Chi, Ent, Atlas, Pion, Centrifugo, Watermill/River)
+- **Backend:** Go 1.24+ (Chi, SQLc, Atlas, Pion, Centrifugo, Watermill/River)
 - **Frontend:** React 19 (Vite, TailwindCSS, ShadCN/UI, Zustand, React Query)
 - **Database:** PostgreSQL 16 + TimescaleDB (Metrics) + DuckDB (BI)
 - **Specialty:**
