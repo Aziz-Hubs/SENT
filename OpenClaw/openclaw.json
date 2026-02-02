@@ -1,12 +1,12 @@
 {
   "meta": {
     "lastTouchedVersion": "2026.1.30",
-    "lastTouchedAt": "2026-02-02T00:24:58.156Z"
+    "lastTouchedAt": "2026-02-02T02:13:31.625Z"
   },
   "wizard": {
-    "lastRunAt": "2026-02-01T23:32:19.651Z",
+    "lastRunAt": "2026-02-02T02:13:31.619Z",
     "lastRunVersion": "2026.1.30",
-    "lastRunCommand": "onboard",
+    "lastRunCommand": "configure",
     "lastRunMode": "local"
   },
   "auth": {
@@ -30,6 +30,11 @@
         "provider": "google-antigravity",
         "mode": "oauth",
         "email": "contactabdulazizhassan@gmail.com"
+      },
+      "google-gemini-cli:callsonlazox@gmail.com": {
+        "provider": "google-gemini-cli",
+        "mode": "oauth",
+        "email": "callsonlazox@gmail.com"
       }
     },
     "order": {
@@ -44,10 +49,11 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "google-antigravity/gemini-3-pro-high",
+        "primary": "google-gemini-cli/gemini-3-pro-preview",
         "fallbacks": [
-          "google-antigravity/gemini-3-flash",
           "google-antigravity/claude-opus-4-5-thinking",
+          "google-antigravity/gemini-3-pro-high",
+          "google-antigravity/gemini-3-flash",
           "google-antigravity/claude-sonnet-4-5"
         ]
       },
@@ -55,7 +61,8 @@
         "google-antigravity/claude-opus-4-5-thinking": {},
         "google-antigravity/gemini-3-pro-high": {},
         "google-antigravity/gemini-3-flash": {},
-        "google-antigravity/claude-sonnet-4-5": {}
+        "google-antigravity/claude-sonnet-4-5": {},
+        "google-gemini-cli/gemini-3-pro-preview": {}
       },
       "workspace": "/home/aziz/SENT",
       "maxConcurrent": 4,
@@ -125,6 +132,9 @@
     "port": 18789,
     "mode": "local",
     "bind": "loopback",
+    "controlUi": {
+      "enabled": true
+    },
     "auth": {
       "mode": "token",
       "token": "${OPENCLAW_GATEWAY_TOKEN}"
@@ -153,6 +163,9 @@
         "enabled": true
       },
       "whatsapp": {
+        "enabled": true
+      },
+      "google-gemini-cli-auth": {
         "enabled": true
       }
     }
