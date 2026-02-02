@@ -15,7 +15,6 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
-	"github.com/wailsapp/wails/v2/pkg/options/linux"
 
 	"sent/internal/app/rpc"
 	"sent/internal/app/wails_bridge"
@@ -30,7 +29,6 @@ import (
 	"sent/web"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/riverqueue/river"
 )
 
 var (

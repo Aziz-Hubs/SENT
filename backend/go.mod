@@ -14,6 +14,7 @@ require (
 	github.com/johnfercher/maroto/v2 v2.3.3
 	github.com/jung-kurt/gofpdf/v2 v2.17.3
 	github.com/kbinani/screenshot v0.0.0-20250624051815-089614a94018
+	github.com/labstack/echo/v4 v4.13.3
 	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/minio/selfupdate v0.6.0
 	github.com/riverqueue/river v0.30.2
@@ -59,7 +60,6 @@ require (
 	github.com/johnfercher/go-tree v1.0.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
-	github.com/labstack/echo/v4 v4.13.3 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leaanthony/go-ansi-parser v1.6.1 // indirect
 	github.com/leaanthony/gosod v1.0.4 // indirect
@@ -131,6 +131,7 @@ require (
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
+	golang.org/x/time v0.8.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
