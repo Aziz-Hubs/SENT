@@ -1,9 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Package, AlertCircle } from "lucide-react";
+import { StockService } from "@/lib/api/services";
 
 export default function StockDashboard() {
+    const [inventory, setInventory] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const data = await StockService.GetInventory();
+                setInventory(data || []);
+            } catch (e) {
+                console.error("Failed to load inventory", e);
+            } finally {
+                setLoading(false);
+            }
+        };
+        load();
+    }, []);
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -20,7 +37,7 @@ export default function StockDashboard() {
                         <Package className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">1,204</div>
+                        <div className="text-2xl font-bold">{loading ? "..." : inventory.length}</div>
                     </CardContent>
                 </Card>
                 <Card>
