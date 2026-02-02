@@ -1,75 +1,49 @@
 # **SENT LLC - Master Technical Architecture**
 
-**Version:** 4.2 (Hybrid RPC Specification)
+**Version:** 5.0 (Fullstack Web Specification)
 
-**Architecture Style:** Unified Modular Monolith (Native Desktop & Hybrid Cloud)
+**Architecture Style:** Decoupled Fullstack Web Application
 
-**Repository Strategy:** Monorepo (Frontend/Backend Split)
+**Repository Strategy:** Monorepo (Next.js + Go API)
 
 **Target Launch:** Q3 2026
 
-## **1. Architectural Vision: "The Native Singularity"**
+## **1. Architectural Vision: "The Cloud Singularity"**
 
-The SENT ecosystem utilizes a **Unified Modular Monolith** architecture. It is designed to run as both a **Native Desktop Application** (via Wails v2) and a **Cloud-Hosted Web Application**.
+The SENT ecosystem is a **Web-First Enterprise Platform**. It leverages a high-performance Go backend and a modern Next.js 15 frontend to deliver a scalable, responsive experience across all devices.
 
-### **1.1 The "Unified Bridge" Pattern**
+### **1.1 The API Protocol**
 
-SENT uses a **Dual-Transport Architecture** to support both Native Desktop and Cloud Web clients from a single codebase.
+SENT utilizes a **Unified RPC Pattern** for frontend-to-backend communication.
 
-1.  **The Transport Layer:**
-    *   **Desktop:** Uses **Wails IPC** (Memory-mapped, zero latency) for offline-first performance.
-    *   **Web:** Uses **JSON-RPC over HTTP** (`POST /api/rpc`) to expose the exact same Go methods to the browser.
-2.  **The Frontend Client:**
-    *   A **"Magic Proxy"** in TypeScript automatically detects the environment.
-    *   If `window.runtime` exists -> Calls Wails.
-    *   If not -> Calls HTTP.
-    *   This ensures zero code duplication for API calls across 500+ methods.
+1.  **The Transport Layer:** Standard HTTP/REST (`POST /api/rpc`).
+2.  **The Frontend Client:** Next.js uses a **Server-Side and Client-Side Proxy** system to communicate with the Go API.
+3.  **The Backend logic:** The Go API acts as a "Headless Engine," exposing modules (ERP, MSP, SEC) via a centralized RPC dispatcher.
 
-## **2. Core Technology Stack (Universal Layers)**
+## **2. Core Technology Stack**
 
 | Layer               | Technology            | Implementation Detail                                                                              |
 | :------------------ | :-------------------- | :------------------------------------------------------------------------------------------------- |
-| **Desktop Runtime** | **Wails v2**          | Handles window management, native menus, and the JS-to-Go binding. Generates .exe, .app, and .deb. |
-| **Core Backend**    | **Go (Golang) 1.24+** | Handles business logic, database connections, and background routines. Located in `backend/`.      |
-| **Frontend UI**     | **React 19 + Vite**  | Compiled into static assets and embedded directly into the Go binary. Located in `frontend/`.      |
-| **Components**      | **ShadCN/UI**         | Re-usable component system based on Radix UI and Tailwind. Code is copied, not imported.           |
-| **Styling**         | **TailwindCSS**       | Utility-first styling for rapid UI development.                                                    |
-| **Database**        | **PostgreSQL 16**     | Primary relational store. Hosted externally (Cloud/On-Prem) or locally via Docker.                 |
-| **Time-Series**     | **TimescaleDB**       | Extension enabled on Postgres for high-ingest telemetry (logs, metrics).                           |
-| **Data Access**     | **PGX & SQLc**        | Fast, type-safe SQL code generation defined by standard SQL queries. Replaces Ent.                 |
-| **Migrations**      | **Atlas**             | Declarative schema migration management for Postgres.                                              |
+| **Frontend UI**     | **Next.js 15 (App Router)** | React Server Components (RSC) for performance, Client Components for interactivity.                |
+| **Core Backend**    | **Go (Golang) 1.24+** | High-concurrency API server using **Echo**.                                                       |
+| **Components**      | **ShadCN/UI**         | Based on Radix UI and Tailwind.                                                                    |
+| **Styling**         | **TailwindCSS**       | Utility-first styling.                                                                             |
+| **Database**        | **PostgreSQL 16**     | Primary relational store.                                                                          |
+| **Time-Series**     | **TimescaleDB**       | Extension enabled for telemetry (logs, metrics).                                                   |
+| **Data Access**     | **PGX & SQLc**        | Fast, type-safe SQL code generation.                                                               |
 | **Auth**            | **Zitadel**           | OIDC Provider. Handles SSO, MFA, and Audit Trails.                                                 |
 
-## **3. Workload Isolation Strategy (The "Noisy Neighbor" Fix)**
+## **3. Data Architecture**
 
-To prevent resource-heavy features (Video Conferencing, Log Analysis) from slowing down critical business operations (ERP Ledger), we employ a **Runtime Mode** strategy. The same binary is used, but initialized differently based on flags.
+### **3.1 The Unified Schema**
 
-### **3.1 Mode A: Desktop Client (User Facing)**
+All modules share a single database schema managed by SQLc.
 
-* **Command:** ./sent-app  
-* **Role:** Renders the UI, handles user input, lightweight local tasks.  
-* **Resource Priority:** High UI responsiveness.
+* **Tenancy:** Strict organization_id isolation at the query level.
+* **Audit Logs:** Global interceptors in the Go layer ensure every mutation is recorded in a TimescaleDB hypertable.
 
-### **3.2 Mode B: Isolated Worker (Server Side)**
+## **4. Deployment Pipeline**
 
-* **Command:** ./sent-app --mode=worker --service=meet  
-* **Role:** Runs headless (no UI). Dedicated to processing specific high-load queues.  
-
-## **4. Data Architecture (PostgreSQL + SQLc)**
-
-### **4.1 The Unified Schema**
-
-All applications share a single database schema managed by raw SQL migrations.
-
-* **Tenancy:** Every table includes organization_id for strict isolation, enforced reliably at the query level.
-* **Global Interceptor:** A centralized **MW Wrapper** (`pkg/database/postgres.go`) intercepts all mutations across all nine apps to generate immutable entries in the `AuditLog` hypertable automatically.
-* **Hypertables:** Tables for device_metrics and security_logs are converted to TimescaleDB hypertables for automatic partitioning.
-* **Encryption:** Sensitive fields (Passwords, PII, Payroll) utilize **AES-256-GCM** authenticated encryption with hardware-accelerated CPU instructions.
-
-## **5. Deployment Pipeline**
-
-### **5.1 Build Targets**
-
-1. **Windows:** `wails build -platform windows/amd64` -> SENT.exe + WebView2Loader.dll.  
-2. **macOS:** `wails build -platform darwin/universal` -> SENT.app.  
-3. **Linux/Server:** `go build -tags worker` -> sent-server (Headless binary).
+1.  **Frontend:** Deployed to Vercel or as a Dockerized Node.js app.
+2.  **Backend:** Compiled into a single static Go binary.
+3.  **Containerization:** Full `docker-compose` support for local development and cloud production.

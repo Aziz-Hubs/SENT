@@ -1,4 +1,4 @@
-# Project Structure Map
+# Project Structure Map (Web Edition)
 
 ```mermaid
 graph TD
@@ -8,8 +8,7 @@ graph TD
 
     Backend --> Main[main.go]
     Backend --> Internal[internal]
-    Backend --> WailsConfig[wails.json]
-    Backend --> BackendBuild[build]
+    Backend --> Docker[docker]
 
     Internal --> App[app]
     Internal --> Platform[platform]
@@ -17,41 +16,28 @@ graph TD
     Internal --> DB[db]
     
     App --> RPC[rpc]
-    App --> WailsBridge[wails_bridge]
-    
-    Divisions --> ERP[erp]
-    Divisions --> MSP[msp]
-    
-    ERP --> Stock[stock]
-    ERP --> People[people]
-    ERP --> Capital[capital]
+    App --> Bridge[bridge]
 
-    MSP --> Pulse[pulse]
-    MSP --> Pilot[pilot]
-
-    Frontend --> Src[src]
-    Frontend --> Dist[dist]
-    Frontend --> Components[components]
+    Frontend --> AppDir[app]
+    Frontend --> Components[src/components]
+    Frontend --> Lib[src/lib]
     
-    Src --> Pages[pages]
-    Src --> Lib[lib]
+    AppDir --> ERPRoutes[erp]
+    AppDir --> MSPRoutes[msp]
 ```
 
 ## Directory Description
 
-- **backend/**: The Go application code (Wails).
-    - **main.go**: Entry point for the application.
-    - **internal/**: Private application code.
-        - **app/**: Application-specific logic (e.g., Wails bridge).
-        - **platform/**: Shared infrastructure (Auth, Database, Orchestrator).
-        - **divisions/**: Domain logic split into ERP and MSP.
-        - **db/**: SQLc generated code.
-    - **wails.json**: Wails project configuration.
+- **backend/**: Pure Go API Server.
+    - **internal/**:
+        - **app/bridge/**: Domain bridges (Logic Layer).
+        - **app/rpc/**: Universal JSON-RPC Dispatcher.
+        - **divisions/**: ERP/MSP/SEC domain logic.
+        - **db/**: Generated SQLc code.
 
-- **frontend/**: The Vite/React frontend application.
-    - **src/**: Source code.
-        - **pages/**: Route components.
-        - **lib/**: Shared utilities.
-    - **wailsjs/**: Generated Go bindings for TypeScript.
+- **frontend/**: Next.js 15 Application.
+    - **src/app/**: App Router routes and pages.
+    - **src/components/**: ShadCN/UI components.
+    - **src/lib/**: Shared utilities and API client.
 
 - **Docs/**: Project documentation.
