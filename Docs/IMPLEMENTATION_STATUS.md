@@ -20,7 +20,7 @@ These modules exist in the codebase (`backend/internal/divisions` and `frontend/
 
 ### CORE Division
 - **Auth Layer** (`internal/platform/auth`) - OIDC/Zitadel integration.
-- **Unified Bridge** (`internal/app/rpc`, `src/lib/api`) - Supports Desktop & Web clients.
+- **Unified Bridge** (`internal/app/rpc`, `src/lib/api`) - Supports Desktop & Web clients. [Technical Guide](./Technical_Guide_RPC_Bridge.md)
 
 ## 🟡 Planned / Roadmap (Not in Codebase)
 
