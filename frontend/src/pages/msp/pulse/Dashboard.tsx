@@ -1,8 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wifi, Activity } from "lucide-react";
+import { Wifi } from "lucide-react";
+import { PulseService } from "@/lib/api/services";
 
 export default function PulseDashboard() {
+    const [devices, setDevices] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const data = await PulseService.GetDevices();
+                setDevices(data || []);
+            } catch (e) {
+                console.error("Failed to load devices", e);
+            } finally {
+                setLoading(false);
+            }
+        };
+        load();
+    }, []);
+
+    const onlineCount = devices.filter(d => d.status === 'online').length;
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -19,8 +39,8 @@ export default function PulseDashboard() {
                         <Wifi className="h-4 w-4 text-green-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">452</div>
-                        <p className="text-xs text-muted-foreground">98.2% Uptime</p>
+                        <div className="text-2xl font-bold">{loading ? "..." : onlineCount}</div>
+                        <p className="text-xs text-muted-foreground">Across your entire fleet</p>
                     </CardContent>
                 </Card>
             </div>

@@ -1,9 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Ticket, Clock } from "lucide-react";
+import { Ticket } from "lucide-react";
+import { PilotService } from "@/lib/api/services";
 
 export default function PilotDashboard() {
+    const [tickets, setTickets] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const data = await PilotService.GetTickets();
+                setTickets(data || []);
+            } catch (e) {
+                console.error("Failed to load tickets", e);
+            } finally {
+                setLoading(false);
+            }
+        };
+        load();
+    }, []);
+
+    const criticalCount = tickets.filter(t => t.priority === 'critical').length;
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -22,7 +42,7 @@ export default function PilotDashboard() {
                         <CardTitle className="text-sm font-medium">Critical Tickets</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold">3</div>
+                        <div className="text-3xl font-bold">{loading ? "..." : criticalCount}</div>
                         <p className="text-xs text-muted-foreground">Requires immediate attention</p>
                     </CardContent>
                 </Card>
@@ -31,7 +51,7 @@ export default function PilotDashboard() {
                         <CardTitle className="text-sm font-medium">Open Tickets</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold">14</div>
+                        <div className="text-3xl font-bold">{loading ? "..." : tickets.length}</div>
                     </CardContent>
                 </Card>
             </div>
