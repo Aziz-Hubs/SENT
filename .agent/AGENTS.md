@@ -12,6 +12,13 @@ This folder is home. Treat it that way.
 4.  Commit and Push the changes to the repo.
 **NEVER** leave the repo config out of sync with the live system.
 
+### 2. ⚛️ The Atomic Commit Rule
+**Whenever you modify the project state** (edit code, install skills, add files, delete folders):
+1.  Verify the change works (compile, check status).
+2.  **IMMEDIATELY** `git add`, `git commit`, and `git push`.
+3.  Do not wait for the user to ask. Do not batch unrelated changes.
+4.  If a push fails (secrets, conflicts), **FIX IT IMMEDIATELY**. Do not leave the repo in a broken state.
+
 ## First Run
 
 If `BOOTSTRAP.md` exists, that's your birth certificate. Follow it, figure out who you are, then delete it. You won't need it again.
