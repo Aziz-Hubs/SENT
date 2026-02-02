@@ -18,6 +18,10 @@ These modules exist in the codebase (`backend/internal/divisions` and `frontend/
 - **SENTstock** (`pkg/stock`, `pages/erp/stock`) - Inventory & POS.
 - **SENTcapital** (`pkg/capital`, `pages/erp/capital`) - Finance/Ledger.
 
+### CORE Division
+- **Auth Layer** (`internal/platform/auth`) - OIDC/Zitadel integration.
+- **Unified Bridge** (`internal/app/rpc`, `src/lib/api`) - Supports Desktop & Web clients.
+
 ## 🟡 Planned / Roadmap (Not in Codebase)
 
 These modules are described in the Architecture docs but are not yet present in the `MVP` branch.

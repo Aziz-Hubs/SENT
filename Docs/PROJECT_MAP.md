@@ -16,6 +16,9 @@ graph TD
     Internal --> Divisions[divisions]
     Internal --> DB[db]
     
+    App --> RPC[rpc]
+    App --> WailsBridge[wails_bridge]
+    
     Divisions --> ERP[erp]
     Divisions --> MSP[msp]
     
