@@ -1,0 +1,17 @@
+-- Migration: 003_add_device_details
+-- Description: Adds fields for detailed device inventory and status
+
+ALTER TABLE devices
+ADD COLUMN IF NOT EXISTS local_ip VARCHAR(45),
+ADD COLUMN IF NOT EXISTS mac_address VARCHAR(17),
+ADD COLUMN IF NOT EXISTS boot_time TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS current_user VARCHAR(255),
+ADD COLUMN IF NOT EXISTS os_info JSONB DEFAULT '{}',
+ADD COLUMN IF NOT EXISTS hardware JSONB DEFAULT '{}',
+ADD COLUMN IF NOT EXISTS network_interfaces JSONB DEFAULT '[]',
+ADD COLUMN IF NOT EXISTS storage_drives JSONB DEFAULT '[]',
+ADD COLUMN IF NOT EXISTS installed_software JSONB DEFAULT '[]',
+ADD COLUMN IF NOT EXISTS processes JSONB DEFAULT '[]',
+ADD COLUMN IF NOT EXISTS patches JSONB DEFAULT '[]',
+ADD COLUMN IF NOT EXISTS security JSONB DEFAULT '{}',
+ADD COLUMN IF NOT EXISTS audit_log JSONB DEFAULT '[]';

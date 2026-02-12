@@ -1,0 +1,619 @@
+syntax = "proto3";
+
+package sentpulse.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "sent-platform/pkg/proto/sentpulse/v1;sentpulsev1";
+
+// =============================================================================
+// DASHBOARD SERVICE - Frontend to Backend API
+// =============================================================================
+
+service DashboardService {
+  // Device operations
+  rpc ListDevices(ListDevicesRequest) returns (ListDevicesResponse);
+  rpc GetDevice(GetDeviceRequest) returns (Device);
+  rpc GetStats(GetStatsRequest) returns (Stats);
+  
+  // Alert operations
+  rpc ListAlerts(ListAlertsRequest) returns (ListAlertsResponse);
+  rpc AcknowledgeAlert(AcknowledgeAlertRequest) returns (AcknowledgeAlertResponse);
+  
+  // Script operations
+  rpc ListScripts(ListScriptsRequest) returns (ListScriptsResponse);
+
+  // Remote Actions
+  rpc RebootDevice(RebootDeviceRequest) returns (RebootDeviceResponse);
+  rpc ShutdownDevice(ShutdownDeviceRequest) returns (ShutdownDeviceResponse);
+  rpc RunScript(RunScriptRequest) returns (RunScriptResponse);
+
+  // Telemetry Fetching
+  rpc GetDeviceTelemetry(GetDeviceTelemetryRequest) returns (GetDeviceTelemetryResponse);
+
+  // Service Management
+  rpc ListServices(ListServicesRequest) returns (ListServicesResponse);
+  rpc StartService(ServiceActionRequest) returns (ServiceActionResponse);
+  rpc StopService(ServiceActionRequest) returns (ServiceActionResponse);
+  rpc RestartService(ServiceActionRequest) returns (ServiceActionResponse);
+
+  // Process Management
+  rpc ListProcesses(ListProcessesRequest) returns (ListProcessesResponse);
+  rpc KillProcess(KillProcessRequest) returns (KillProcessResponse);
+
+  // System Info
+  rpc GetEnvironmentVariables(GetEnvironmentVariablesRequest) returns (GetEnvironmentVariablesResponse);
+
+  // Patch Management
+  rpc ListPatches(ListPatchesRequest) returns (ListPatchesResponse);
+  rpc InstallPatches(InstallPatchesRequest) returns (InstallPatchesResponse);
+
+  // Settings
+  rpc GetPulseSettings(GetPulseSettingsRequest) returns (PulseSettings);
+  rpc UpdatePulseSettings(UpdatePulseSettingsRequest) returns (UpdatePulseSettingsResponse);
+
+  // File Explorer
+  rpc ListDirectory(ListDirectoryRequest) returns (ListDirectoryResponse);
+  rpc ReadFile(ReadFileRequest) returns (ReadFileResponse);
+}
+
+
+// =============================================================================
+// COMMON ENUMS
+// =============================================================================
+
+enum DeviceStatus {
+  DEVICE_STATUS_UNSPECIFIED = 0;
+  DEVICE_STATUS_ONLINE = 1;
+  DEVICE_STATUS_OFFLINE = 2;
+  DEVICE_STATUS_WARNING = 3;
+  DEVICE_STATUS_MAINTENANCE = 4;
+}
+
+enum DeviceType {
+  DEVICE_TYPE_UNSPECIFIED = 0;
+  DEVICE_TYPE_SERVER = 1;
+  DEVICE_TYPE_WORKSTATION = 2;
+  DEVICE_TYPE_NETWORK = 3;
+  DEVICE_TYPE_IOT = 4;
+}
+
+enum OS {
+  OS_UNSPECIFIED = 0;
+  OS_WINDOWS = 1;
+  OS_LINUX = 2;
+  OS_MACOS = 3;
+}
+
+enum AlertSeverity {
+  ALERT_SEVERITY_UNSPECIFIED = 0;
+  ALERT_SEVERITY_INFO = 1;
+  ALERT_SEVERITY_WARNING = 2;
+  ALERT_SEVERITY_CRITICAL = 3;
+}
+
+enum ScriptLanguage {
+  SCRIPT_LANGUAGE_UNSPECIFIED = 0;
+  SCRIPT_LANGUAGE_POWERSHELL = 1;
+  SCRIPT_LANGUAGE_BASH = 2;
+  SCRIPT_LANGUAGE_PYTHON = 3;
+}
+
+// =============================================================================
+// DEVICE MESSAGES
+// =============================================================================
+
+message Device {
+  string id = 1;
+  string name = 2;
+  DeviceType type = 3;
+  DeviceStatus status = 4;
+  OS os = 5;
+  OSInfo os_info = 6;
+  string ip = 7;
+  string local_ip = 15;
+  string mac_address = 16;
+  google.protobuf.Timestamp last_seen = 8;
+  google.protobuf.Timestamp uptime = 17;
+  string current_user = 18;
+  
+  // Resources
+  float cpu_usage = 9;
+  float memory_usage = 10;
+  float disk_usage = 11;
+  
+  // Remote Access
+  string rustdesk_id = 30;
+  string rustdesk_password = 31;
+
+  // Metadata
+  repeated string tags = 12;
+  string client = 13;
+  string site = 14;
+
+  // Detailed Info
+  HardwareInfo hardware = 19;
+  repeated NetworkInterface network_interfaces = 20;
+  repeated StorageDrive storage_drives = 21;
+  repeated InstalledSoftware installed_software = 22;
+  repeated DeviceProcess processes = 23;
+  repeated Patch patches = 24;
+  SecurityPosture security = 25;
+  repeated AuditLogEntry audit_log = 26;
+  repeated ServiceItem services = 27;
+}
+
+message OSInfo {
+  string name = 1; // e.g. "Windows 11 Pro"
+  string version = 2; // e.g. "10.0.22631"
+  string build = 3;
+  string architecture = 4; // e.g. "amd64"
+  string platform = 5; // e.g. "windows"
+}
+
+message HardwareInfo {
+  string manufacturer = 1;
+  string model = 2;
+  string serial_number = 3;
+  string bios_version = 4;
+  string processor_model = 5;
+  int32 processor_cores = 6;
+  uint64 ram_total_bytes = 7;
+  uint64 ram_used_bytes = 8;
+}
+
+message NetworkInterface {
+  string name = 1;
+  string mac_address = 2;
+  string ip_v4 = 3;
+  string ip_v6 = 4;
+  string status = 5; // "up", "down"
+}
+
+message StorageDrive {
+  string name = 1; // e.g. "C:" or "/dev/sda1"
+  string model = 2;
+  uint64 total_bytes = 3;
+  uint64 used_bytes = 4;
+  string smart_status = 5; // "ok", "fail", "warning"
+  string type = 6; // "SSD", "HDD", "NVMe"
+}
+
+message InstalledSoftware {
+  string name = 1;
+  string version = 2;
+  string publisher = 3;
+  google.protobuf.Timestamp install_date = 4;
+}
+
+message DeviceProcess {
+  int32 pid = 1;
+  string name = 2;
+  float cpu_percent = 3;
+  uint64 memory_bytes = 4;
+  string user = 5;
+  string status = 6;
+}
+
+message Patch {
+  string id = 1;
+  string kb_id = 2;
+  string title = 3;
+  string description = 4;
+  PatchSeverity severity = 5;
+  PatchCategory category = 6;
+  int64 size_bytes = 7;
+  google.protobuf.Timestamp release_date = 8;
+  google.protobuf.Timestamp install_date = 9;
+  PatchStatus status = 10;
+}
+
+message SecurityPosture {
+  AntivirusInfo antivirus = 1;
+  bool firewall_enabled = 2;
+  bool encryption_enabled = 3; // BitLocker/FileVault
+}
+
+message AntivirusInfo {
+  string name = 1;
+  string status = 2; // "active", "snoozed"
+  bool is_updated = 3;
+}
+
+message AuditLogEntry {
+  string id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  string user = 3;
+  string category = 4;
+  string details = 5;
+}
+
+message ListDevicesRequest {
+  string organization_id = 1;
+  optional string site_id = 2;
+  optional DeviceStatus status_filter = 3;
+  int32 page_size = 4;
+  string page_token = 5;
+}
+
+message ListDevicesResponse {
+  repeated Device devices = 1;
+  string next_page_token = 2;
+  int32 total_count = 3;
+}
+
+message GetDeviceRequest {
+  string device_id = 1;
+}
+
+// =============================================================================
+// STATS MESSAGES
+// =============================================================================
+
+message GetStatsRequest {
+  string organization_id = 1;
+}
+
+message Stats {
+  int32 total_devices = 1;
+  int32 online = 2;
+  int32 offline = 3;
+  int32 warning = 4;
+  int32 critical_alerts = 5;
+  int32 health_score = 6;
+}
+
+// =============================================================================
+// ALERT MESSAGES
+// =============================================================================
+
+message Alert {
+  string id = 1;
+  string device_id = 2;
+  string device_name = 3;
+  AlertSeverity severity = 4;
+  string title = 5;
+  string description = 6;
+  google.protobuf.Timestamp timestamp = 7;
+  bool acknowledged = 8;
+}
+
+message ListAlertsRequest {
+  string organization_id = 1;
+  optional bool unresolved_only = 2;
+  optional int32 limit = 3;
+  int32 page_size = 4;
+  string page_token = 5;
+}
+
+message ListAlertsResponse {
+  repeated Alert alerts = 1;
+  string next_page_token = 2;
+}
+
+message AcknowledgeAlertRequest {
+  string alert_id = 1;
+}
+
+message AcknowledgeAlertResponse {}
+
+// =============================================================================
+// SCRIPT MESSAGES
+// =============================================================================
+
+message Script {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  ScriptLanguage language = 4;
+  google.protobuf.Timestamp last_run = 5;
+  int32 success_rate = 6;
+  repeated string tags = 7;
+}
+
+message ListScriptsRequest {
+  string organization_id = 1;
+}
+
+message ListScriptsResponse {
+  repeated Script scripts = 1;
+}
+
+message RebootDeviceRequest {
+  string device_id = 1;
+}
+
+message RebootDeviceResponse {
+  string job_id = 1;
+}
+
+message ShutdownDeviceRequest {
+  string device_id = 1;
+}
+
+message ShutdownDeviceResponse {
+  string job_id = 1;
+}
+
+message RunScriptRequest {
+  string device_id = 1;
+  optional string script_id = 2;
+  string inline_script = 3;
+  optional ScriptLanguage language = 4;
+}
+
+message RunScriptResponse {
+  string job_id = 1;
+}
+
+message GetDeviceTelemetryRequest {
+  string device_id = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+}
+
+message GetDeviceTelemetryResponse {
+  repeated TelemetryPoint points = 1;
+}
+
+message TelemetryPoint {
+  google.protobuf.Timestamp time = 1;
+  float cpu_usage = 2;
+  float memory_usage = 3;
+  float disk_usage = 4;
+}
+
+
+// =============================================================================
+// AGENT SERVICE - Agent to Backend API
+// =============================================================================
+
+service AgentService {
+  rpc CheckIn(CheckInRequest) returns (CheckInResponse);
+  // Bidirectional streaming for live terminal
+  rpc StreamTerminal(stream TerminalOutput) returns (stream TerminalInput);
+
+  // Bidirectional streaming for file explorer
+  rpc StreamFileExplorer(stream FileExplorerMessage) returns (stream FileExplorerMessage);
+
+  // Update job status (e.g. script completion)
+  rpc UpdateJobStatus(UpdateJobStatusRequest) returns (UpdateJobStatusResponse);
+}
+
+message CheckInRequest {
+  string organization_id = 1;
+  Device device = 2; 
+}
+
+message CheckInResponse {
+  string status = 1;
+  repeated Job jobs = 2;
+  RustDeskConfig rustdesk_config = 3;
+  string device_id = 4;
+}
+
+message RustDeskConfig {
+  string id_server = 1;
+  string relay_server = 2;
+  string api_server = 3;
+  string public_key = 4;
+}
+
+message Job {
+  string id = 1;
+  string type = 2; // "shell", "powershell", "reboot", "shutdown"
+  string command = 3;
+}
+
+message UpdateJobStatusRequest {
+  string job_id = 1;
+  string status = 2; // "running", "success", "failed"
+  string result = 3;
+  int32 exit_code = 4;
+}
+
+message UpdateJobStatusResponse {}
+
+message TerminalInput {
+  string session_id = 1;
+  bytes data = 2;
+  TerminalResize resize = 3;
+}
+
+message TerminalResize {
+  uint32 rows = 1;
+  uint32 cols = 2;
+}
+
+message TerminalOutput {
+  string session_id = 1;
+  bytes data = 2;
+}
+
+// =============================================================================
+// SETTINGS MESSAGES
+// =============================================================================
+
+message GetPulseSettingsRequest {
+  string organization_id = 1;
+}
+
+message PulseSettings {
+  string organization_id = 1;
+  float cpu_threshold = 2;
+  float memory_threshold = 3;
+  float disk_threshold = 4;
+  int32 offline_threshold_minutes = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message UpdatePulseSettingsRequest {
+  PulseSettings settings = 1;
+}
+
+message UpdatePulseSettingsResponse {
+  PulseSettings settings = 1;
+}
+
+// =============================================================================
+// MISSING REQUEST/RESPONSE MESSAGES
+// =============================================================================
+
+message ListServicesRequest {
+  string device_id = 1;
+}
+
+message ListServicesResponse {
+  repeated ServiceItem services = 1;
+}
+
+message ServiceItem {
+  string name = 1;
+  string display_name = 2;
+  string status = 3; // "running", "stopped", "paused", "pending"
+  string start_type = 4; // "auto", "manual", "disabled"
+  string description = 5;
+}
+
+message ServiceActionRequest {
+  string device_id = 1;
+  string service_name = 2;
+}
+
+message ServiceActionResponse {
+  string job_id = 1;
+}
+
+message ListProcessesRequest {
+  string device_id = 1;
+}
+
+message ListProcessesResponse {
+  repeated DeviceProcess processes = 1;
+}
+
+message KillProcessRequest {
+  string device_id = 1;
+  int32 pid = 2;
+}
+
+message KillProcessResponse {
+  string job_id = 1;
+}
+
+message GetEnvironmentVariablesRequest {
+  string device_id = 1;
+}
+
+message GetEnvironmentVariablesResponse {
+  repeated EnvVar variables = 1;
+}
+
+message EnvVar {
+  string key = 1;
+  string value = 2;
+}
+
+// =============================================================================
+// PATCH MANAGEMENT ENUMS
+// =============================================================================
+
+enum PatchSeverity {
+  PATCH_SEVERITY_UNSPECIFIED = 0;
+  PATCH_SEVERITY_LOW = 1;
+  PATCH_SEVERITY_MODERATE = 2;
+  PATCH_SEVERITY_IMPORTANT = 3;
+  PATCH_SEVERITY_CRITICAL = 4;
+}
+
+enum PatchCategory {
+  PATCH_CATEGORY_UNSPECIFIED = 0;
+  PATCH_CATEGORY_SECURITY = 1;
+  PATCH_CATEGORY_CRITICAL = 2;
+  PATCH_CATEGORY_FEATURE = 3;
+  PATCH_CATEGORY_UPDATES = 4;
+  PATCH_CATEGORY_DRIVERS = 5;
+}
+
+enum PatchStatus {
+  PATCH_STATUS_UNSPECIFIED = 0;
+  PATCH_STATUS_NOT_INSTALLED = 1;
+  PATCH_STATUS_INSTALLED = 2;
+  PATCH_STATUS_FAILED = 3;
+  PATCH_STATUS_PENDING = 4;
+}
+
+// =============================================================================
+// PATCH MANAGEMENT REQUEST/RESPONSE MESSAGES
+// =============================================================================
+
+message ListPatchesRequest {
+  string device_id = 1;
+}
+
+message ListPatchesResponse {
+  repeated Patch patches = 1;
+  google.protobuf.Timestamp last_check = 2;
+}
+
+message InstallPatchesRequest {
+  string device_id = 1;
+  repeated string patch_ids = 2;   // List of patch IDs to install
+  bool reboot_if_required = 3;     // Auto-reboot after installation
+}
+
+message InstallPatchesResponse {
+  string job_id = 1;               // Job ID to track installation
+}
+// =============================================================================
+// FILE EXPLORER MESSAGES
+// =============================================================================
+
+message ListDirectoryRequest {
+  string device_id = 1;
+  string path = 2;
+}
+
+message ListDirectoryResponse {
+  repeated FileSystemEntry entries = 1;
+  string current_path = 2;
+  string parent_path = 3;
+}
+
+message FileSystemEntry {
+  string name = 1;
+  string path = 2;
+  int64 size_bytes = 3;
+  bool is_directory = 4;
+  google.protobuf.Timestamp mod_time = 5;
+  uint32 mode = 6;
+}
+
+message FileExplorerMessage {
+    string session_id = 1;
+    string request_id = 2;
+    
+    oneof payload {
+        ListDirectoryRequest list_req = 3;
+        ListDirectoryResponse list_resp = 4;
+        ReadFileRequest read_req = 5;
+        ReadFileResponse read_resp = 6;
+        FileError error = 10;
+    }
+}
+
+message ReadFileRequest {
+    string device_id = 1;
+    string path = 2;
+}
+
+message ReadFileResponse {
+    bytes content = 1;
+    int64 size_bytes = 2;
+    string mime_type = 3;
+}
+
+message FileError {
+    string message = 1;
+    int32 code = 2;
+}

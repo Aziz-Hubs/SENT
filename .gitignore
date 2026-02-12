@@ -1,0 +1,56 @@
+# =============================================================================
+# SENT Platform .gitignore
+# =============================================================================
+
+# --- Go ---
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# --- Node / Frontend ---
+node_modules/
+node_modules_old/
+.next/
+.turbo/
+out/
+dist/
+
+# --- Logs ---
+*.log
+*.err.log
+
+# --- Environment / Secrets ---
+.env
+.env.local
+.env.*.local
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Build artifacts ---
+bin/
+migrate.exe
+sqlc.exe
+sqlc.zip
+
+# --- Runtime data ---
+data/rustdesk-server/
+
+# --- Misc ---
+*.zip
+package-lock.json
+lint_errors.log

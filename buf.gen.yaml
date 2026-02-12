@@ -1,0 +1,30 @@
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: sent-platform/pkg/proto
+plugins:
+  # Go code generation
+  - remote: buf.build/protocolbuffers/go
+    out: pkg/proto
+    opt: paths=source_relative
+  
+  # ConnectRPC Go code generation
+  - remote: buf.build/connectrpc/go
+    out: pkg/proto
+    opt: paths=source_relative
+  
+  # TypeScript/ES code generation for frontend
+  - remote: buf.build/bufbuild/es:v1.10.0
+    out: frontend/packages/feature-sent-msp/src/gen
+    opt:
+      - target=ts
+      - import_extension=none
+  
+  # ConnectRPC TypeScript code generation
+  - remote: buf.build/connectrpc/es:v1.6.1
+    out: frontend/packages/feature-sent-msp/src/gen
+    opt:
+      - target=ts
+      - import_extension=none

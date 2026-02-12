@@ -1,0 +1,30 @@
+{
+    "name": "sent-frontend",
+    "version": "0.1.0",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "dev": "turbo run dev",
+        "build": "turbo run build",
+        "lint": "turbo run lint",
+        "type-check": "turbo run type-check",
+        "clean": "turbo run clean && rimraf node_modules",
+        "ui:add": "pnpm --filter=@sent/platform-ui dlx shadcn@latest add",
+        "ui:diff": "pnpm --filter=@sent/platform-ui dlx shadcn@latest diff",
+        "ui:init": "pnpm --filter=@sent/platform-ui dlx shadcn@latest init"
+    },
+    "devDependencies": {
+        "rimraf": "^5.0.10",
+        "turbo": "^2.3.0",
+        "typescript": "^5.7.0"
+    },
+    "engines": {
+        "node": ">=20"
+    },
+    "dependencies": {
+        "clsx": "^2.1.1"
+    }
+}

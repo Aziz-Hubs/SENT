@@ -1,0 +1,107 @@
+services:
+  sent-db:
+    restart: unless-stopped
+    image: postgres:17
+    container_name: sent-db
+    environment:
+      PGUSER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready
+        - -d
+        - zitadel
+        - -U
+        - postgres
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 20s
+    ports:
+      - "5433:5432"
+    volumes:
+      - 'sent-db-data:/var/lib/postgresql/data:rw'
+    networks:
+      - zitadel
+
+  zitadel:
+    restart: unless-stopped
+    image: ghcr.io/zitadel/zitadel:latest
+    container_name: zitadel
+    command: start-from-init --masterkey "MasterkeyNeedsToHave32Characters"
+    environment:
+      ZITADEL_EXTERNALDOMAIN: localhost
+      ZITADEL_EXTERNALSECURE: false
+      ZITADEL_TLS_ENABLED: false
+
+      # Database connection settings
+      ZITADEL_DATABASE_POSTGRES_HOST: sent-db
+      ZITADEL_DATABASE_POSTGRES_PORT: 5432
+      ZITADEL_DATABASE_POSTGRES_DATABASE: zitadel
+      ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME: postgres
+      ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD: postgres
+      ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE: disable
+      ZITADEL_DATABASE_POSTGRES_USER_USERNAME: zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_PASSWORD: zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE: disable
+
+      # Disable Login v2 - use built-in Login v1
+      ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_REQUIRED: false
+
+      # First instance configuration
+      ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORDCHANGEREQUIRED: false
+    healthcheck:
+      test:
+        - CMD
+        - /app/zitadel
+        - ready
+      interval: 10s
+      timeout: 60s
+      retries: 5
+      start_period: 10s
+    user: "0"
+    ports:
+      - "8080:8080"
+    networks:
+      - zitadel
+    depends_on:
+      sent-db:
+        condition: service_healthy
+
+  hbbs:
+    container_name: hbbs
+    restart: unless-stopped
+    image: rustdesk/rustdesk-server:latest
+    command: hbbs -r localhost:21117 -k _
+    volumes:
+      - ./data/rustdesk-server:/root
+    networks:
+      - zitadel
+    ports:
+      - "21115:21115"
+      - "21116:21116"
+      - "21116:21116/udp"
+      - "21118:21118"
+    depends_on:
+      - hbbr
+
+  hbbr:
+    container_name: hbbr
+    restart: unless-stopped
+    image: rustdesk/rustdesk-server:latest
+    command: hbbr -k _
+    volumes:
+      - ./data/rustdesk-server:/root
+    networks:
+      - zitadel
+    ports:
+      - "21117:21117"
+      - "21119:21119"
+
+networks:
+  zitadel:
+
+
+volumes:
+  sent-db-data:

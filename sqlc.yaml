@@ -1,0 +1,29 @@
+version: "2"
+sql:
+  - schema: "db/migrations/platform"
+    queries: "internal/core/db/platform/queries.sql"
+    engine: "postgresql"
+    gen:
+      go:
+        package: "platform"
+        out: "internal/core/db/platform/gen"
+        sql_package: "pgx/v5"
+
+  - schema: "db/migrations/tenant"
+    queries: "internal/core/db/tenant/queries.sql"
+    engine: "postgresql"
+    gen:
+      go:
+        package: "tenant"
+        out: "internal/core/db/tenant/gen"
+        sql_package: "pgx/v5"
+
+  - schema: "db/migrations/tenant"
+    queries: "internal/modules/sentmsp/sentpulse/store/queries.sql"
+    engine: "postgresql"
+    gen:
+      go:
+        package: "sentpulsedb"
+        out: "internal/modules/sentmsp/sentpulse/store/gen"
+        sql_package: "pgx/v5"
+

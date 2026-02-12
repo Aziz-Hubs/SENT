@@ -1,0 +1,19 @@
+Database:
+  Postgres:
+    Host: sent-db
+    Port: 5432
+    Database: zitadel
+    User:
+      Username: postgres
+      Password: password
+      SSL:
+        Mode: disable
+    Admin:
+      Username: postgres
+      Password: password
+      SSL:
+        Mode: disable
+
+ExternalDomain: localhost
+ExternalPort: 8080
+ExternalSecure: false
